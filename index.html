@@ -219,6 +219,9 @@ section.block { padding-block: 72px 8px; }
 .off .big { font-family: var(--f-display); font-size: var(--step-2); font-weight: 700; }
 .off p { color: var(--muted); font-size: .9375rem; }
 
+.why { display: grid; gap: 14px; max-width: 46em; border-left: 3px solid var(--gold); padding-left: 24px; }
+.why-quote { font-family: var(--f-display); font-size: var(--step-2); font-weight: 500; line-height: 1.35; text-wrap: pretty; }
+
 /* Contact */
 .contact { margin-top: 88px; background: var(--ink); color: var(--bg); }
 .contact .wrap { padding-block: 64px; display: grid; gap: 20px; }
@@ -257,9 +260,9 @@ img { max-width: 100%; }
     <div class="wrap">
       <div class="hero-grid">
         <div>
-          <div class="hello"><img class="avatar" src="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=240" alt="Alif Najmi's GitHub profile picture" width="72" height="72"><p><span class="dot" aria-hidden="true"></span><span class="eyebrow">Business Analyst · Shah Alam, Selangor</span></p></div>
+          <div class="hello"><img class="avatar" src="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=240" alt="Alif Najmi's GitHub profile picture" width="72" height="72"><p><span class="dot" aria-hidden="true"></span><span class="eyebrow">Business Analyst · Kuala Lumpur</span></p></div>
           <h1>I write the spec.<br><em>Then I build it.</em></h1>
-          <p class="lede">I'm <strong>Muhammad Alif Najmi</strong>, a Computer Science graduate from Universiti Teknologi PETRONAS and a business analyst at <strong>Axrail</strong>. I turn messy processes into requirements people agree on, then into apps that work.</p>
+          <p class="lede">I'm <strong>Muhammad Alif Najmi</strong>, a Computer Science graduate from Universiti Teknologi PETRONAS and a business analyst at <strong>Axrail</strong>. I turn messy processes into requirements people agree on, then into apps that work. I like the space where systems, data and the business meet, and I'm especially drawn to financial systems and regulation.</p>
           <div class="links">
             <a class="chip primary" href="https://github.com/7YMERA" target="_blank" rel="noopener">
               <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0a8 8 0 0 0-2.5 15.6c.4 0 .5-.2.5-.4v-1.5c-2.2.5-2.7-1-2.7-1-.4-.9-.9-1.2-.9-1.2-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.3 1.9.9 2.4.7 0-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-4 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8a7.5 7.5 0 0 1 4 0c1.5-1 2.2-.8 2.2-.8.4 1.1.2 1.9.1 2.1.5.6.8 1.3.8 2.1 0 3.1-1.9 3.7-3.6 3.9.3.3.5.8.5 1.5v2.2c0 .2.1.5.6.4A8 8 0 0 0 8 0z"/></svg>
@@ -287,7 +290,7 @@ img { max-width: 100%; }
             <div>
               <p class="eyebrow" style="margin-bottom:10px">Acceptance criteria</p>
               <ul class="ac">
-                <li><span><strong>Elicits requirements</strong> and writes specs for enterprise clients in financial services</span></li>
+                <li><span><strong>Elicits requirements</strong>, maps processes and writes functional specs for banking and insurance clients</span></li>
                 <li><span><strong>Builds full stack</strong> with Next.js, FastAPI and Supabase, tested in CI</span></li>
                 <li><span><strong>Ships low-code</strong> on Power Apps, SharePoint and Power Automate</span></li>
                 <li><span><strong>Designs secure cloud</strong> setups on AWS with VPC and IAM</span></li>
@@ -298,7 +301,7 @@ img { max-width: 100%; }
       </div>
 
       <div class="now" aria-label="What I'm doing now">
-        <div><span class="eyebrow">Working</span><p><strong>Business Analyst at Axrail</strong>, on generative-AI and data solutions for enterprise clients.</p></div>
+        <div><span class="eyebrow">Working</span><p><strong>Business Analyst at Axrail</strong>, in the Solution Architect team, on data and AI solutions for banks and insurers.</p></div>
         <div><span class="eyebrow">Building</span><p><strong>TaskMatch 2.0</strong> and <strong>MyLokalEvent 2.0</strong>, two uni projects rebuilt to production standard.</p></div>
         <div><span class="eyebrow">Learning</span><p><strong>Amazon Bedrock</strong> and foundation models. Certified Oct 2026.</p></div>
       </div>
@@ -382,12 +385,12 @@ img { max-width: 100%; }
             <div class="case-top">
               <div>
                 <h3>IT Asset Disposal app</h3>
-                <p class="origin">SLB internship · Chukai, Terengganu</p>
+                <p class="origin">SLB internship · Kemaman, Terengganu</p>
               </div>
               <span class="pill">Deployed internally</span>
             </div>
             <div class="case-cols">
-              <div><p>Replaced email-and-spreadsheet tracking with one searchable platform for SLB Malaysia. Built a three-tier approval flow (Requestor, IT Manager, Finance Controller) with automatic email notifications, on a data model normalised to 3NF.</p></div>
+              <div><p>Took a manual, Excel-based e-waste tracking process from concept to a working app for SLB Malaysia. Built a multi-level approval flow (Requestor → IT Manager → Finance Controller → Admin) that replaced email-chain approvals and made disposals traceable for compliance and sustainability reporting. Designed the data model as a 3NF entity-relationship diagram with role-based access.</p></div>
             </div>
             <ul class="tags" aria-label="Tech stack"><li>Power Apps</li><li>SharePoint</li><li>Power Automate</li><li>Agile / Scrum</li></ul>
           </article>
@@ -420,7 +423,7 @@ img { max-width: 100%; }
       <ol class="timeline">
         <li class="now-item"><span class="when">Oct 2026 – now</span><span class="rail"><i></i></span>
           <div class="what"><h3>Business Analyst</h3><span class="org">Axrail Sdn Bhd · Kuala Lumpur</span>
-          <p>Requirements and specifications for generative-AI and data solutions for enterprise clients in financial services.</p></div></li>
+          <p>Business analyst in the Solution Architect team, delivering data and AI solutions for banking and insurance clients. I gather requirements, map current processes, write functional documentation, and find the gaps and edge cases where AI meets existing systems.</p></div></li>
         <li><span class="when">Sept 2026</span><span class="rail"><i></i></span>
           <div class="what"><h3>Graduated: BSc Computer Science (Hons)</h3><span class="org">Universiti Teknologi PETRONAS</span>
           <p>Major in Enterprise Systems, minor in Corporate Management. MARA Young Talent Development Programme scholar.</p></div></li>
@@ -428,14 +431,14 @@ img { max-width: 100%; }
           <div class="what"><h3>Final Year Project: TaskMatch</h3><span class="org">UTP</span>
           <p>A skill-based recommendation system for student project teams. Now being rebuilt as TaskMatch 2.0.</p></div></li>
         <li><span class="when">Jan – Aug 2025</span><span class="rail"><i></i></span>
-          <div class="what"><h3>Digital IT Operations Intern</h3><span class="org">SLB (Schlumberger) · Chukai, Terengganu</span>
-          <p>Built the IT Asset Disposal app end to end with the in-house GoDigital team.</p></div></li>
+          <div class="what"><h3>Digital IT Operations Intern</h3><span class="org">SLB (Schlumberger) · Kemaman, Terengganu</span>
+          <p>Built the IT Asset Disposal app end to end, working daily with SLB's in-house GoDigital developers in Agile scrum. Also helped roll out E-TCard electronic check-in, ran a site-wide CCTV survey and assessed the disposal lifecycle's environmental, economic and social impact.</p></div></li>
         <li><span class="when">Jan – May 2024</span><span class="rail"><i></i></span>
           <div class="what"><h3>Head of Academic &amp; Welfare</h3><span class="org">UTP Computer &amp; Information Sciences Student Society</span>
           <p>Started a coding-competition committee and a tech speaker series, launched the society's website, and took 42 students to the Tesla Experience Centre.</p></div></li>
-        <li><span class="when">Sept 2023 – Jan 2024</span><span class="rail"><i></i></span>
-          <div class="what"><h3>Vice President</h3><span class="org">UTP Griffin Esports Club</span>
-          <p>Ran tournaments that brought in revenue and grew membership by 15%.</p></div></li>
+        <li><span class="when">May 2023 – Jan 2024</span><span class="rail"><i></i></span>
+          <div class="what"><h3>Secretary, then Vice President</h3><span class="org">UTP Griffin Esports Club</span>
+          <p>Started on records, minutes and committee coordination, then ran tournaments as VP that brought in revenue and grew membership by about 15%.</p></div></li>
         <li><span class="when">May 2022</span><span class="rail"><i></i></span>
           <div class="what"><h3>Started at UTP</h3><span class="org">Foundation in Computer Science</span></div></li>
         <li><span class="when">2021</span><span class="rail"><i></i></span>
@@ -462,9 +465,18 @@ img { max-width: 100%; }
         <h2>A few other things</h2>
       </div>
       <div class="off">
-        <div><span class="big">1st place</span><p>Mobile Legends tournament, 2023. Second place in 2025.</p></div>
-        <div><span class="big">4 languages</span><p>English (CEFR C1) and Malay, plus elementary French and Mandarin.</p></div>
+        <div><span class="big">1st place</span><p>Mobile Legends: Bang Bang at UTP SPORTTECH 2023. Second at UTP Super Sports and UTP Legends in 2025.</p></div>
+        <div><span class="big">5 languages</span><p>Malay, English and Indonesian, plus elementary Mandarin and French.</p></div>
         <div><span class="big">“Zooming Into AI”</span><p>Ran media and Instagram for DENDROBYTES, a student AI and coding outreach programme.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="why">
+    <div class="wrap">
+      <div class="why">
+        <span class="eyebrow">Why I do this</span>
+        <p class="why-quote">I want to help people and help lift Malaysia up. Right now it's baby steps, but every skill I pick up is a step towards that. And corruption has no place in this country.</p>
       </div>
     </div>
   </section>
