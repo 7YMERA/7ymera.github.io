@@ -28,6 +28,8 @@
   --gold: #a86d12;
   --gold-soft: #f6ead3;
   --glow: rgba(10, 108, 116, .10);
+  --bad: #b42318;
+  --bad-soft: #fde8e6;
   --shadow: 0 1px 2px rgba(15, 30, 36, .06), 0 10px 30px rgba(15, 30, 36, .07);
 
   --f-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
@@ -48,6 +50,7 @@
     --bg: #081114; --surface: #0f1b20; --sunk: #0b161a; --ink: #e6eff1; --muted: #93a7ae; --line: #1f3238;
     --accent: #4fc2c8; --accent-ink: #04211f; --accent-soft: #11313a; --gold: #e3b14e; --gold-soft: #33280f;
     --glow: rgba(79, 194, 200, .12);
+    --bad: #f2867a; --bad-soft: #3a1714;
     --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 30px rgba(0, 0, 0, .3);
     color-scheme: dark;
   }
@@ -56,6 +59,7 @@
   --bg: #081114; --surface: #0f1b20; --sunk: #0b161a; --ink: #e6eff1; --muted: #93a7ae; --line: #1f3238;
   --accent: #4fc2c8; --accent-ink: #04211f; --accent-soft: #11313a; --gold: #e3b14e; --gold-soft: #33280f;
   --glow: rgba(79, 194, 200, .12);
+  --bad: #f2867a; --bad-soft: #3a1714;
   --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 30px rgba(0, 0, 0, .3);
   color-scheme: dark;
 }
@@ -243,6 +247,53 @@ section.block { padding-block: 80px 8px; }
 .cmp-note { font-size: .9375rem; color: var(--muted); min-height: 3em; }
 .cmp-note::before { content: "What changed · "; font-family: var(--f-mono); font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; color: var(--gold); }
 
+
+/* SLB disposal walkthrough */
+.sim { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 16px; display: grid; gap: 14px; }
+.sim-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.sim-title { font-weight: 600; margin-top: 2px; }
+.sim-status { font-family: var(--f-mono); font-size: .75rem; padding: 4px 10px; border-radius: 999px; background: var(--sunk); color: var(--muted); border: 1px solid var(--line); white-space: nowrap; }
+.sim-status[data-tone="wait"] { background: var(--gold-soft); color: var(--gold); border-color: color-mix(in srgb, var(--gold) 35%, transparent); }
+.sim-status[data-tone="ok"] { background: var(--accent-soft); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+.sim-status[data-tone="bad"] { background: var(--bad-soft); color: var(--bad); border-color: color-mix(in srgb, var(--bad) 35%, transparent); }
+.sim-rail { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; counter-reset: s; }
+.sim-rail li { display: grid; gap: 6px; font-size: .6875rem; font-family: var(--f-mono); color: var(--muted); line-height: 1.25; }
+.sim-rail li::before { content: ""; height: 6px; border-radius: 3px; background: var(--line); transition: background .3s; }
+.sim-rail li.done::before { background: var(--accent); }
+.sim-rail li.cur { color: var(--ink); }
+.sim-rail li.cur::before { background: var(--gold); }
+.sim-rail li.bad::before { background: var(--bad); }
+.sim-items { width: 100%; border-collapse: collapse; font-size: .875rem; }
+.sim-items caption { text-align: left; margin-bottom: 6px; }
+.sim-items th { text-align: left; font: 500 .6875rem var(--f-mono); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.sim-items td { padding: 7px 8px; border-bottom: 1px solid var(--line); }
+.sim-items tr:last-child td { border-bottom: 0; }
+.sim-items .num { text-align: right; font-variant-numeric: tabular-nums; }
+.kind { font-family: var(--f-mono); font-size: .6875rem; padding: 2px 6px; border-radius: 5px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.kind.a { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
+.sim-act { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px; border-radius: 10px; background: var(--sunk); }
+.sim-who { display: grid; gap: 4px; font-size: .875rem; color: var(--muted); flex: 1 1 220px; min-width: 0; }
+.role { font: 600 .75rem var(--f-mono); color: var(--ink); text-transform: uppercase; letter-spacing: .06em; }
+.sim-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.sim-btns button { font: 600 .875rem var(--f-body); padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.sim-btns button.go-btn { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.sim-btns button.no-btn { color: var(--bad); }
+.sim-btns button:hover { filter: brightness(1.06); }
+.sim-log { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-family: var(--f-mono); font-size: .75rem; color: var(--muted); max-height: 7.5em; overflow-y: auto; }
+.sim-log li { display: flex; gap: 8px; }
+.sim-log li::before { content: "✉"; color: var(--gold); }
+.sim-log li.sys::before { content: "•"; }
+.sim-note::before { content: none; }
+.erd { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px; border: 1px dashed var(--line); border-radius: 10px; }
+.ent { display: grid; font: 600 .8125rem var(--f-mono); padding: 6px 10px; border-radius: 8px; background: var(--bg); border: 1px solid var(--line); }
+.ent small { font-weight: 400; font-size: .6875rem; color: var(--muted); }
+.ent.main { border-color: var(--accent); }
+.ent.stack { gap: 2px; }
+.ent.stack b { font-weight: 600; }
+.rel { font: .75rem var(--f-mono); color: var(--muted); }
+.muted-note { font-weight: 400; color: var(--muted); font-size: .875rem; }
+@media (max-width: 560px) { .sim-items th:nth-child(2), .sim-items td:nth-child(2) { display: none; } .sim-rail li { font-size: 0; } .sim-rail li.cur, .sim-rail li.bad { font-size: .6875rem; grid-column: span 1; white-space: nowrap; } }
+
 /* Phone-frame shot */
 .shot.phoneframe { display: flex; justify-content: center; padding: 22px 16px 0; height: 300px; }
 .shot.phoneframe img { width: 62%; max-width: 230px; border-radius: 22px 22px 0 0; border: 4px solid var(--ink); border-bottom: 0; align-self: flex-start; }
@@ -256,7 +307,7 @@ section.block { padding-block: 80px 8px; }
 .road li.cur { color: var(--ink); }
 
 /* Earlier work */
-.earlier { margin-top: 20px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.earlier { margin-top: 20px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
 @media (max-width: 720px) { .earlier { grid-template-columns: 1fr; } }
 .earlier article { border: 1px dashed var(--line); border-radius: var(--radius); padding: 20px 22px; display: grid; gap: 10px; align-content: start; }
 .earlier h3 { font-size: 1.1875rem; font-weight: 700; }
@@ -412,11 +463,12 @@ section.block { padding-block: 80px 8px; }
           <p>Each one starts from a real problem someone told me about. Filter by what you care about.</p>
         </div>
         <div class="filters" role="group" aria-label="Filter projects">
-          <button type="button" data-filter="all" aria-pressed="true">All<span class="count">5</span></button>
+          <button type="button" data-filter="all" aria-pressed="true">All<span class="count">6</span></button>
           <button type="button" data-filter="use" aria-pressed="false">Real users</button>
           <button type="button" data-filter="live" aria-pressed="false">Live demo</button>
           <button type="button" data-filter="civic" aria-pressed="false">For Malaysia</button>
           <button type="button" data-filter="uni" aria-pressed="false">Uni → rebuilt</button>
+          <button type="button" data-filter="work" aria-pressed="false">At work</button>
         </div>
       </div>
 
@@ -533,6 +585,61 @@ section.block { padding-block: 80px 8px; }
           </div>
         </article>
 
+        <!-- SLB IT Asset Disposal -->
+        <article class="card wide split" data-tags="work" id="p-slb">
+          <div class="shot">
+            <div class="sim" id="sim" aria-label="Interactive walkthrough of a disposal case">
+              <div class="sim-head">
+                <div>
+                  <span class="mono">Case 042 · Integrated base</span>
+                  <p class="sim-title">Q3 laptop refresh: end-of-life devices</p>
+                </div>
+                <span class="sim-status" id="sim-status" data-tone="draft">Draft</span>
+              </div>
+              <ol class="sim-rail" id="sim-rail" aria-label="Case stages">
+                <li>Draft</li><li>IT Manager</li><li>Finance</li><li>Approved</li><li>QUEST &amp; IBase</li><li>Disposed</li>
+              </ol>
+              <table class="sim-items">
+                <caption class="eyebrow">Items in this case</caption>
+                <thead><tr><th scope="col">Item</th><th scope="col">Model</th><th scope="col">Type</th><th scope="col" class="num">Qty</th></tr></thead>
+                <tbody>
+                  <tr><td>Laptop</td><td>Latitude 5480</td><td><span class="kind a">Asset</span></td><td class="num">1</td></tr>
+                  <tr><td>Desktop</td><td>iMac Pro 27</td><td><span class="kind a">Asset</span></td><td class="num">1</td></tr>
+                  <tr><td>Cable lock</td><td>N17 Keyed</td><td><span class="kind">Non-asset</span></td><td class="num">12</td></tr>
+                  <tr><td>Mouse</td><td>WM514 Wireless</td><td><span class="kind">Non-asset</span></td><td class="num">8</td></tr>
+                </tbody>
+              </table>
+              <div class="sim-act">
+                <p class="sim-who"><span class="role" id="sim-role">Requestor</span><span id="sim-hint">Items are listed and the ESM records flagged. Ready to send.</span></p>
+                <div class="sim-btns" id="sim-btns"></div>
+              </div>
+              <ol class="sim-log" id="sim-log" aria-live="polite" aria-label="Activity log"></ol>
+            </div>
+            <p class="cmp-note sim-note">A recreation with sample items, so you can click through the flow. The real app runs inside SLB.</p>
+          </div>
+          <div class="body">
+            <div class="top-row">
+              <div>
+                <h3>IT Asset Disposal</h3>
+                <p class="one">SLB internship, 2025. Turned an e-waste process run on email chains and Excel into one app.</p>
+              </div>
+              <span class="pill use">Deployed internally</span>
+            </div>
+            <p class="quote">Before: items logged one by one in a spreadsheet, then approved through a chain of emails to the IT Manager and Finance Controller.</p>
+            <ul class="hl">
+              <li><strong>Two-level approval in the app</strong>: IT Manager, then Finance Controller, with rejected cases sent back to edit and resubmit</li>
+              <li><strong>Approvers set by location</strong>: pick a base and the right approvers fill in, so nobody emails the wrong person</li>
+              <li><strong>Automatic emails</strong> at every step through Power Automate, plus a watchlist so colleagues can work on a case together</li>
+              <li><strong>Built for scale</strong>: 3NF data model across 10 SharePoint lists, and local collections to get past Power Apps delegation limits</li>
+            </ul>
+            <div class="erd" aria-label="Data model: a location has many cases; a case has many items, watchlist entries and QUEST and IBase numbers">
+              <span class="ent">Location<small>approvers</small></span><span class="rel">1 → *</span><span class="ent main">Case<small>status, requestor</small></span><span class="rel">1 → *</span><span class="ent stack"><b>Item</b><b>Watchlist</b><b>QUEST / IBase</b></span>
+            </div>
+            <ul class="tags" aria-label="Tech stack"><li>Power Apps</li><li>Power Fx</li><li>SharePoint</li><li>Power Automate</li><li>Agile / Scrum</li></ul>
+            <div class="go"><span class="muted-note">Prototype handed over to SLB's GoDigital team to refine and publish.</span></div>
+          </div>
+        </article>
+
         <!-- KakiLima -->
         <article class="card" data-tags="civic" id="p-kakilima">
           <div class="shot"><img class="zoom" src="assets/kaki.webp" alt="KakiLima home page: Streets that are safe to walk. Trains worth waiting for." width="640" height="400" loading="lazy"></div>
@@ -578,12 +685,6 @@ section.block { padding-block: 80px 8px; }
       <p class="toast" id="filter-empty" hidden>Nothing matches that filter.</p>
 
       <div class="earlier">
-        <article>
-          <span class="eyebrow">SLB internship · 2025</span>
-          <h3>IT Asset Disposal app</h3>
-          <p>Took a manual, Excel-based e-waste process to a working app for SLB Malaysia, with a four-step approval chain (Requestor → IT Manager → Finance Controller → Admin) and a 3NF data model.</p>
-          <ul class="tags"><li>Power Apps</li><li>SharePoint</li><li>Power Automate</li></ul>
-        </article>
         <article>
           <span class="eyebrow">TEB3033 · 2026</span>
           <h3>Secure cloud on AWS</h3>
@@ -754,6 +855,55 @@ section.block { padding-block: 80px 8px; }
     }
   });
 
+  // SLB disposal walkthrough
+  (function () {
+    var rail = document.querySelectorAll('#sim-rail li'), statusEl = document.getElementById('sim-status');
+    var roleEl = document.getElementById('sim-role'), hintEl = document.getElementById('sim-hint');
+    var btns = document.getElementById('sim-btns'), log = document.getElementById('sim-log');
+    var rejectedAt = 0;
+    var S = {
+      draft:    { step: 0, status: 'Draft', tone: 'draft', role: 'Requestor', hint: 'Items are listed and their ESM records flagged. Ready to send.',
+                  acts: [['Submit to IT Manager', 'pend1', 'go', 'Email to IT Manager: case 042 needs your approval']] },
+      pend1:    { step: 1, status: 'Pending 1st level approval', tone: 'wait', role: 'IT Manager', hint: 'Set by the base the case belongs to. Reviews the items and their condition.',
+                  acts: [['Approve', 'pend2', 'go', 'Email to Finance Controller: case 042 approved by IT Manager'], ['Reject', 'rejected', 'no', 'Email to requestor: case 042 sent back with notes']] },
+      pend2:    { step: 2, status: 'Pending 2nd level approval', tone: 'wait', role: 'Finance Controller', hint: 'Final sign-off before anything leaves the base.',
+                  acts: [['Approve', 'approved', 'go', 'Email to everyone on the case: case 042 approved'], ['Reject', 'rejected', 'no', 'Email to requestor: case 042 sent back with notes']] },
+      rejected: { step: -1, status: 'Rejected', tone: 'bad', role: 'Requestor', hint: 'The list unlocks for edits. Fix it and send it back through approval.',
+                  acts: [['Edit and resubmit', 'pend1', 'go', 'Email to IT Manager: case 042 resubmitted']] },
+      approved: { step: 3, status: 'Approved', tone: 'ok', role: 'Requestor', hint: 'Disposal can go ahead. Log the QUEST risk report and the IBase manpower request.',
+                  acts: [['Add QUEST & IBase numbers', 'recorded', 'go', '•QUEST and IBase numbers saved to the case']] },
+      recorded: { step: 4, status: 'Disposal in progress', tone: 'wait', role: 'Requestor', hint: 'Drives are destroyed with photo proof, then items go to the facility team.',
+                  acts: [['Confirm disposed', 'disposed', 'go', '•Case 042 closed as disposed']] },
+      disposed: { step: 6, status: 'Disposed', tone: 'ok', role: 'Done', hint: 'Closed, with every step time-stamped for the audit trail.',
+                  acts: [['Start again', 'draft', '', '']] }
+    };
+    function addLog(msg) {
+      if (!msg) return;
+      var li = document.createElement('li');
+      if (msg.charAt(0) === '•') { li.className = 'sys'; msg = msg.slice(1); }
+      li.textContent = msg; log.insertBefore(li, log.firstChild);
+    }
+    function go(key, from) {
+      var s = S[key];
+      if (key === 'rejected') rejectedAt = S[from].step;
+      if (key === 'draft') log.innerHTML = '';
+      var cur = s.step === -1 ? rejectedAt : s.step;
+      rail.forEach(function (li, i) {
+        li.className = i < cur ? 'done' : i === cur ? (s.step === -1 ? 'bad' : 'cur') : '';
+      });
+      statusEl.textContent = s.status; statusEl.setAttribute('data-tone', s.tone);
+      roleEl.textContent = s.role; hintEl.textContent = s.hint;
+      btns.innerHTML = '';
+      s.acts.forEach(function (a) {
+        var b = document.createElement('button'); b.type = 'button'; b.textContent = a[0];
+        if (a[2]) b.className = a[2] + '-btn';
+        b.addEventListener('click', function () { addLog(a[3]); go(a[1], key); });
+        btns.appendChild(b);
+      });
+    }
+    go('draft');
+  })();
+
   // Card spotlight
   document.querySelectorAll('.card').forEach(function (c) {
     c.addEventListener('pointermove', function (e) {
@@ -798,7 +948,7 @@ section.block { padding-block: 80px 8px; }
   // Quick jump (Ctrl+K)
   var items = [
     ['SMK Subang dashboard', '#p-smk', 'project'], ['TaskMatch v2', '#p-taskmatch', 'project'],
-    ['MyLokalEvent v2', '#p-mle', 'project'], ['KakiLima', '#p-kakilima', 'project'], ['JumaatFinder', '#p-jumaat', 'project'],
+    ['MyLokalEvent v2', '#p-mle', 'project'], ['KakiLima', '#p-kakilima', 'project'], ['JumaatFinder', '#p-jumaat', 'project'], ['IT Asset Disposal (SLB)', '#p-slb', 'project'],
     ['Try TaskMatch demo', 'https://taskmatch-umber.vercel.app', 'live'], ['Visit MyLokalEvent', 'https://mylokalevent.vercel.app', 'live'],
     ['Journey', '#journey', 'section'], ['Toolkit', '#toolkit', 'section'], ['Why I do this', '#why', 'section'], ['Contact', '#contact', 'section'],
     ['GitHub', 'https://github.com/7YMERA', 'link'], ['LinkedIn', 'https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin', 'link']
