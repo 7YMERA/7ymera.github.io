@@ -248,42 +248,7 @@ section.block { padding-block: 80px 8px; }
 .cmp-note::before { content: "What changed · "; font-family: var(--f-mono); font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; color: var(--gold); }
 
 
-/* SLB disposal walkthrough */
-.sim { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 16px; display: grid; gap: 14px; }
-.sim-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
-.sim-title { font-weight: 600; margin-top: 2px; }
-.sim-status { font-family: var(--f-mono); font-size: .75rem; padding: 4px 10px; border-radius: 999px; background: var(--sunk); color: var(--muted); border: 1px solid var(--line); white-space: nowrap; }
-.sim-status[data-tone="wait"] { background: var(--gold-soft); color: var(--gold); border-color: color-mix(in srgb, var(--gold) 35%, transparent); }
-.sim-status[data-tone="ok"] { background: var(--accent-soft); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
-.sim-status[data-tone="bad"] { background: var(--bad-soft); color: var(--bad); border-color: color-mix(in srgb, var(--bad) 35%, transparent); }
-.sim-rail { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; counter-reset: s; }
-.sim-rail li { display: grid; gap: 6px; font-size: .6875rem; font-family: var(--f-mono); color: var(--muted); line-height: 1.25; }
-.sim-rail li::before { content: ""; height: 6px; border-radius: 3px; background: var(--line); transition: background .3s; }
-.sim-rail li.done::before { background: var(--accent); }
-.sim-rail li.cur { color: var(--ink); }
-.sim-rail li.cur::before { background: var(--gold); }
-.sim-rail li.bad::before { background: var(--bad); }
-.sim-items { width: 100%; border-collapse: collapse; font-size: .875rem; }
-.sim-items caption { text-align: left; margin-bottom: 6px; }
-.sim-items th { text-align: left; font: 500 .6875rem var(--f-mono); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; padding: 6px 8px; border-bottom: 1px solid var(--line); }
-.sim-items td { padding: 7px 8px; border-bottom: 1px solid var(--line); }
-.sim-items tr:last-child td { border-bottom: 0; }
-.sim-items .num { text-align: right; font-variant-numeric: tabular-nums; }
-.kind { font-family: var(--f-mono); font-size: .6875rem; padding: 2px 6px; border-radius: 5px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
-.kind.a { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
-.sim-act { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px; border-radius: 10px; background: var(--sunk); }
-.sim-who { display: grid; gap: 4px; font-size: .875rem; color: var(--muted); flex: 1 1 220px; min-width: 0; }
-.role { font: 600 .75rem var(--f-mono); color: var(--ink); text-transform: uppercase; letter-spacing: .06em; }
-.sim-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-.sim-btns button { font: 600 .875rem var(--f-body); padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
-.sim-btns button.go-btn { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-.sim-btns button.no-btn { color: var(--bad); }
-.sim-btns button:hover { filter: brightness(1.06); }
-.sim-log { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-family: var(--f-mono); font-size: .75rem; color: var(--muted); max-height: 7.5em; overflow-y: auto; }
-.sim-log li { display: flex; gap: 8px; }
-.sim-log li::before { content: "✉"; color: var(--gold); }
-.sim-log li.sys::before { content: "•"; }
-.sim-note::before { content: none; }
+/* SLB card */
 .erd { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px; border: 1px dashed var(--line); border-radius: 10px; }
 .ent { display: grid; font: 600 .8125rem var(--f-mono); padding: 6px 10px; border-radius: 8px; background: var(--bg); border: 1px solid var(--line); }
 .ent small { font-weight: 400; font-size: .6875rem; color: var(--muted); }
@@ -292,7 +257,6 @@ section.block { padding-block: 80px 8px; }
 .ent.stack b { font-weight: 600; }
 .rel { font: .75rem var(--f-mono); color: var(--muted); }
 .muted-note { font-weight: 400; color: var(--muted); font-size: .875rem; }
-@media (max-width: 560px) { .sim-items th:nth-child(2), .sim-items td:nth-child(2) { display: none; } .sim-rail li { font-size: 0; } .sim-rail li.cur, .sim-rail li.bad { font-size: .6875rem; grid-column: span 1; white-space: nowrap; } }
 
 /* Phone-frame shot */
 .shot.phoneframe { display: flex; justify-content: center; padding: 22px 16px 0; height: 300px; }
@@ -588,34 +552,21 @@ section.block { padding-block: 80px 8px; }
         <!-- SLB IT Asset Disposal -->
         <article class="card wide split" data-tags="work" id="p-slb">
           <div class="shot">
-            <div class="sim" id="sim" aria-label="Interactive walkthrough of a disposal case">
-              <div class="sim-head">
-                <div>
-                  <span class="mono">Case 042 · Integrated base</span>
-                  <p class="sim-title">Q3 laptop refresh: end-of-life devices</p>
-                </div>
-                <span class="sim-status" id="sim-status" data-tone="draft">Draft</span>
+            <div class="cmp" data-cmp>
+              <div class="cmp-tabs" role="tablist" aria-label="Disposal process before and after the app">
+                <button type="button" role="tab" aria-selected="true" data-v1="assets/slb-track-v1.webp" data-v2="assets/slb-track-v2.webp" data-what="case tracking" data-note="From a long Excel sheet per device type to one list of cases, colour-coded by status, with every item and its approver in one place.">Tracking</button>
+                <button type="button" role="tab" aria-selected="false" data-v1="assets/slb-approve-v1.webp" data-v2="assets/slb-approve-v2.webp" data-what="approval" data-note="From approvals buried in reply-all email threads to an approver screen with the full item list and two buttons.">Approvals</button>
+                <button type="button" role="tab" aria-selected="false" data-v1="assets/slb-items-v1.webp" data-v2="assets/slb-items-v2.webp" data-what="adding items" data-note="From peeled-off asset tags pasted into a sheet to a form with dropdowns for item, brand and model, and a prompt to update ESM.">Adding items</button>
               </div>
-              <ol class="sim-rail" id="sim-rail" aria-label="Case stages">
-                <li>Draft</li><li>IT Manager</li><li>Finance</li><li>Approved</li><li>QUEST &amp; IBase</li><li>Disposed</li>
-              </ol>
-              <table class="sim-items">
-                <caption class="eyebrow">Items in this case</caption>
-                <thead><tr><th scope="col">Item</th><th scope="col">Model</th><th scope="col">Type</th><th scope="col" class="num">Qty</th></tr></thead>
-                <tbody>
-                  <tr><td>Laptop</td><td>Latitude 5480</td><td><span class="kind a">Asset</span></td><td class="num">1</td></tr>
-                  <tr><td>Desktop</td><td>iMac Pro 27</td><td><span class="kind a">Asset</span></td><td class="num">1</td></tr>
-                  <tr><td>Cable lock</td><td>N17 Keyed</td><td><span class="kind">Non-asset</span></td><td class="num">12</td></tr>
-                  <tr><td>Mouse</td><td>WM514 Wireless</td><td><span class="kind">Non-asset</span></td><td class="num">8</td></tr>
-                </tbody>
-              </table>
-              <div class="sim-act">
-                <p class="sim-who"><span class="role" id="sim-role">Requestor</span><span id="sim-hint">Items are listed and the ESM records flagged. Ready to send.</span></p>
-                <div class="sim-btns" id="sim-btns"></div>
+              <div class="ba">
+                <img class="after" src="assets/slb-track-v2.webp" alt="IT Asset Disposal app: list of cases colour-coded by status" width="1200" height="750" loading="lazy">
+                <img class="before" src="assets/slb-track-v1.webp" alt="The old Excel disposal sheet" width="1200" height="750" loading="lazy">
+                <span class="tag l">Before · Excel &amp; email</span><span class="tag r">After · the app</span>
+                <span class="handle" aria-hidden="true"></span>
+                <input type="range" min="0" max="100" value="50" aria-label="Drag to compare the Excel and email case tracking with the app">
               </div>
-              <ol class="sim-log" id="sim-log" aria-live="polite" aria-label="Activity log"></ol>
+              <p class="cmp-note">From a long Excel sheet per device type to one list of cases, colour-coded by status, with every item and its approver in one place.</p>
             </div>
-            <p class="cmp-note sim-note">A recreation with sample items, so you can click through the flow. The real app runs inside SLB.</p>
           </div>
           <div class="body">
             <div class="top-row">
@@ -854,55 +805,6 @@ section.block { padding-block: 80px 8px; }
       io.observe(ba);
     }
   });
-
-  // SLB disposal walkthrough
-  (function () {
-    var rail = document.querySelectorAll('#sim-rail li'), statusEl = document.getElementById('sim-status');
-    var roleEl = document.getElementById('sim-role'), hintEl = document.getElementById('sim-hint');
-    var btns = document.getElementById('sim-btns'), log = document.getElementById('sim-log');
-    var rejectedAt = 0;
-    var S = {
-      draft:    { step: 0, status: 'Draft', tone: 'draft', role: 'Requestor', hint: 'Items are listed and their ESM records flagged. Ready to send.',
-                  acts: [['Submit to IT Manager', 'pend1', 'go', 'Email to IT Manager: case 042 needs your approval']] },
-      pend1:    { step: 1, status: 'Pending 1st level approval', tone: 'wait', role: 'IT Manager', hint: 'Set by the base the case belongs to. Reviews the items and their condition.',
-                  acts: [['Approve', 'pend2', 'go', 'Email to Finance Controller: case 042 approved by IT Manager'], ['Reject', 'rejected', 'no', 'Email to requestor: case 042 sent back with notes']] },
-      pend2:    { step: 2, status: 'Pending 2nd level approval', tone: 'wait', role: 'Finance Controller', hint: 'Final sign-off before anything leaves the base.',
-                  acts: [['Approve', 'approved', 'go', 'Email to everyone on the case: case 042 approved'], ['Reject', 'rejected', 'no', 'Email to requestor: case 042 sent back with notes']] },
-      rejected: { step: -1, status: 'Rejected', tone: 'bad', role: 'Requestor', hint: 'The list unlocks for edits. Fix it and send it back through approval.',
-                  acts: [['Edit and resubmit', 'pend1', 'go', 'Email to IT Manager: case 042 resubmitted']] },
-      approved: { step: 3, status: 'Approved', tone: 'ok', role: 'Requestor', hint: 'Disposal can go ahead. Log the QUEST risk report and the IBase manpower request.',
-                  acts: [['Add QUEST & IBase numbers', 'recorded', 'go', '•QUEST and IBase numbers saved to the case']] },
-      recorded: { step: 4, status: 'Disposal in progress', tone: 'wait', role: 'Requestor', hint: 'Drives are destroyed with photo proof, then items go to the facility team.',
-                  acts: [['Confirm disposed', 'disposed', 'go', '•Case 042 closed as disposed']] },
-      disposed: { step: 6, status: 'Disposed', tone: 'ok', role: 'Done', hint: 'Closed, with every step time-stamped for the audit trail.',
-                  acts: [['Start again', 'draft', '', '']] }
-    };
-    function addLog(msg) {
-      if (!msg) return;
-      var li = document.createElement('li');
-      if (msg.charAt(0) === '•') { li.className = 'sys'; msg = msg.slice(1); }
-      li.textContent = msg; log.insertBefore(li, log.firstChild);
-    }
-    function go(key, from) {
-      var s = S[key];
-      if (key === 'rejected') rejectedAt = S[from].step;
-      if (key === 'draft') log.innerHTML = '';
-      var cur = s.step === -1 ? rejectedAt : s.step;
-      rail.forEach(function (li, i) {
-        li.className = i < cur ? 'done' : i === cur ? (s.step === -1 ? 'bad' : 'cur') : '';
-      });
-      statusEl.textContent = s.status; statusEl.setAttribute('data-tone', s.tone);
-      roleEl.textContent = s.role; hintEl.textContent = s.hint;
-      btns.innerHTML = '';
-      s.acts.forEach(function (a) {
-        var b = document.createElement('button'); b.type = 'button'; b.textContent = a[0];
-        if (a[2]) b.className = a[2] + '-btn';
-        b.addEventListener('click', function () { addLog(a[3]); go(a[1], key); });
-        btns.appendChild(b);
-      });
-    }
-    go('draft');
-  })();
 
   // Card spotlight
   document.querySelectorAll('.card').forEach(function (c) {
