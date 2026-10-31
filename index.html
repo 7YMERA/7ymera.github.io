@@ -227,6 +227,22 @@ section.block { padding-block: 80px 8px; }
 .ba input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: ew-resize; margin: 0; }
 .ba:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: -4px; }
 
+
+/* Split cards: comparer beside details */
+.split { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); }
+.split .shot { border-bottom: 0; border-right: 1px solid var(--line); padding: 20px; }
+.split.flip .shot { order: 2; border-right: 0; border-left: 1px solid var(--line); }
+@media (max-width: 900px) { .split { grid-template-columns: 1fr; } .split .shot, .split.flip .shot { order: 0; border: 0; border-bottom: 1px solid var(--line); } }
+.cmp { display: grid; gap: 12px; }
+.cmp-tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; justify-self: start; }
+.cmp-tabs button { font: 500 .875rem var(--f-body); padding: 6px 12px; border-radius: 8px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.cmp-tabs button:hover { color: var(--ink); }
+.cmp-tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); }
+.cmp .ba { border-radius: 10px; border: 1px solid var(--line); box-shadow: var(--shadow); }
+.cmp .ba.sweep { transition: none; }
+.cmp-note { font-size: .9375rem; color: var(--muted); min-height: 3em; }
+.cmp-note::before { content: "What changed · "; font-family: var(--f-mono); font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; color: var(--gold); }
+
 /* Phone-frame shot */
 .shot.phoneframe { display: flex; justify-content: center; padding: 22px 16px 0; height: 300px; }
 .shot.phoneframe img { width: 62%; max-width: 230px; border-radius: 22px 22px 0 0; border: 4px solid var(--ink); border-bottom: 0; align-self: flex-start; }
@@ -432,14 +448,22 @@ section.block { padding-block: 80px 8px; }
         </article>
 
         <!-- TaskMatch -->
-        <article class="card" data-tags="live uni" id="p-taskmatch">
+        <article class="card wide split" data-tags="live uni" id="p-taskmatch">
           <div class="shot">
-            <div class="ba" id="ba">
-              <img src="assets/tm-after.webp" alt="TaskMatch v2 dashboard after the redesign" width="1200" height="750" loading="lazy">
-              <img class="before" src="assets/tm-before.webp" alt="Original TaskMatch dashboard from the final year project" width="1200" height="750" loading="lazy">
-              <span class="tag l">FYP</span><span class="tag r">v2</span>
-              <span class="handle" aria-hidden="true"></span>
-              <input type="range" id="ba-range" min="0" max="100" value="50" aria-label="Drag to compare the original dashboard with the v2 redesign">
+            <div class="cmp" data-cmp>
+              <div class="cmp-tabs" role="tablist" aria-label="TaskMatch screens to compare">
+                <button type="button" role="tab" aria-selected="true" data-v1="assets/tm-landing-v1.webp" data-v2="assets/tm-landing-v2.webp" data-what="landing page" data-note="From a student-project splash page to a product page that shows a real match and opens a demo in one click.">Landing page</button>
+                <button type="button" role="tab" aria-selected="false" data-v1="assets/tm-dashboard-v1.webp" data-v2="assets/tm-dashboard-v2.webp" data-what="dashboard" data-note="From totals to answers: trends, what needs attention today, and whether work is going to the right people.">Dashboard</button>
+                <button type="button" role="tab" aria-selected="false" data-v1="assets/tm-tasks-v1.webp" data-v2="assets/tm-tasks-v2.webp" data-what="task list" data-note="From one long list to list, board and calendar views, with saved filters and quick search.">Tasks</button>
+              </div>
+              <div class="ba">
+                <img class="after" src="assets/tm-landing-v2.webp" alt="TaskMatch v2 landing page" width="1200" height="750" loading="lazy">
+                <img class="before" src="assets/tm-landing-v1.webp" alt="TaskMatch final year project landing page" width="1200" height="750" loading="lazy">
+                <span class="tag l">v1 · FYP</span><span class="tag r">v2 · now</span>
+                <span class="handle" aria-hidden="true"></span>
+                <input type="range" min="0" max="100" value="50" aria-label="Drag to compare the final year project landing page with v2">
+              </div>
+              <p class="cmp-note">From a student-project splash page to a product page that shows a real match and opens a demo in one click.</p>
             </div>
           </div>
           <div class="body">
@@ -466,8 +490,24 @@ section.block { padding-block: 80px 8px; }
         </article>
 
         <!-- MyLokalEvent -->
-        <article class="card" data-tags="live civic uni" id="p-mle">
-          <div class="shot"><img class="zoom" src="assets/mle.webp" alt="MyLokalEvent home page in Bahasa Melayu listing fishing events" width="1200" height="750" loading="lazy"></div>
+        <article class="card wide split flip" data-tags="live civic uni" id="p-mle">
+          <div class="shot">
+            <div class="cmp" data-cmp>
+              <div class="cmp-tabs" role="tablist" aria-label="MyLokalEvent screens to compare">
+                <button type="button" role="tab" aria-selected="true" data-v1="assets/mle-home-v1.webp" data-v2="assets/mle-home-v2.webp" data-what="first page" data-note="From a blue banner over empty image placeholders to a bilingual intro that says who it's for and how it works.">First impression</button>
+                <button type="button" role="tab" aria-selected="false" data-v1="assets/mle-events-v1.webp" data-v2="assets/mle-events-v2.webp" data-what="event list" data-note="From grey placeholder cards to a list you can scan: category, price, organiser and place up front, no login needed.">Event list</button>
+                <button type="button" role="tab" aria-selected="false" data-v1="assets/mle-signin-v1.webp" data-v2="assets/mle-signin-v2.webp" data-what="sign-in page" data-note="Same job, calmer page: bigger fields, plainer words, and the demo-account dropdown gone from production.">Sign in</button>
+              </div>
+              <div class="ba">
+                <img class="after" src="assets/mle-home-v2.webp" alt="MyLokalEvent v2 intro page in Bahasa Melayu" width="1200" height="750" loading="lazy">
+                <img class="before" src="assets/mle-home-v1.webp" alt="MyLokalEvent coursework home page" width="1200" height="750" loading="lazy">
+                <span class="tag l">v1 · coursework</span><span class="tag r">v2 · now</span>
+                <span class="handle" aria-hidden="true"></span>
+                <input type="range" min="0" max="100" value="50" aria-label="Drag to compare the coursework first page with v2">
+              </div>
+              <p class="cmp-note">From a blue banner over empty image placeholders to a bilingual intro that says who it's for and how it works.</p>
+            </div>
+          </div>
           <div class="body">
             <div class="top-row">
               <div>
@@ -672,9 +712,47 @@ section.block { padding-block: 80px 8px; }
     }, 2200);
   }
 
-  // Before/after slider
-  var ba = document.getElementById('ba'), range = document.getElementById('ba-range');
-  range.addEventListener('input', function () { ba.style.setProperty('--pos', range.value + '%'); });
+  // Before/after comparers
+  var calmMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('[data-cmp]').forEach(function (cmp) {
+    var ba = cmp.querySelector('.ba'), range = ba.querySelector('input'), note = cmp.querySelector('.cmp-note');
+    var after = ba.querySelector('img.after'), before = ba.querySelector('img.before');
+    var v1Label = ba.querySelector('.tag.l').textContent.split(' · ')[1];
+    function set(v) { range.value = v; ba.style.setProperty('--pos', v + '%'); }
+    var touched = false;
+    range.addEventListener('input', function () { touched = true; set(range.value); });
+    var tabs = cmp.querySelectorAll('[role="tab"]');
+    tabs.forEach(function (tab) {
+      new Image().src = tab.dataset.v1; new Image().src = tab.dataset.v2;
+      tab.addEventListener('click', function () {
+        tabs.forEach(function (x) { x.setAttribute('aria-selected', String(x === tab)); });
+        var what = tab.dataset.what;
+        before.src = tab.dataset.v1; before.alt = v1Label + ' ' + what;
+        after.src = tab.dataset.v2; after.alt = 'v2 ' + what;
+        range.setAttribute('aria-label', 'Drag to compare the ' + v1Label + ' ' + what + ' with v2');
+        note.textContent = tab.dataset.note;
+        touched = true; set(50);
+      });
+    });
+    // One sweep when it first scrolls into view, so both versions get seen
+    if (!calmMotion && 'IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        if (!entries[0].isIntersecting) return;
+        io.disconnect();
+        var t0 = null, from = 50;
+        function step(ts) {
+          if (touched) return;
+          if (t0 === null) t0 = ts;
+          var k = Math.min((ts - t0) / 1800, 1);
+          var v = from + Math.sin(k * Math.PI * 2) * 35 * (1 - k);
+          set(Math.round(v * 10) / 10);
+          if (k < 1) requestAnimationFrame(step); else set(50);
+        }
+        requestAnimationFrame(step);
+      }, { threshold: .6 });
+      io.observe(ba);
+    }
+  });
 
   // Card spotlight
   document.querySelectorAll('.card').forEach(function (c) {
