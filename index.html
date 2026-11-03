@@ -100,37 +100,30 @@
     <div class="wrap">
       <div class="me-grid">
         <figure class="me-photo">
-          <div class="stack" id="stack" tabindex="0" role="group" aria-roledescription="photo stack" aria-label="Photos of me. Swipe, use the buttons, or press the arrow keys to see the next one.">
+          <div class="stack" id="stack" tabindex="0" role="group" aria-roledescription="photo stack" aria-label="Photos of me. Swipe or press the arrow keys to see the next one.">
             <div class="ph">
               <img src="assets/me/mirror.webp" alt="Alif taking a mirror selfie in his graduation gown" draggable="false" loading="eager">
-              <span class="verdict nope" aria-hidden="true">Next</span><span class="verdict like" aria-hidden="true">♥</span>
               <span class="stamp">Graduation day · 2 Nov 2026</span>
             </div>
             <div class="ph">
               <img src="assets/me/walk-out.webp" alt="Alif holding a bouquet outside the UTP hall" draggable="false" loading="lazy">
-              <span class="verdict nope" aria-hidden="true">Next</span><span class="verdict like" aria-hidden="true">♥</span>
               <span class="stamp">Walking out, flowers in hand</span>
             </div>
             <div class="ph" style="--pos: left center">
               <img src="assets/me/in-line.webp" alt="Alif in the line of graduates waiting to go on stage" draggable="false" loading="lazy">
-              <span class="verdict nope" aria-hidden="true">Next</span><span class="verdict like" aria-hidden="true">♥</span>
               <span class="stamp">Waiting for my name</span>
             </div>
             <div class="ph">
               <img src="assets/me/by-the-hall.webp" alt="Alif in his gown outside the hall" draggable="false" loading="lazy">
-              <span class="verdict nope" aria-hidden="true">Next</span><span class="verdict like" aria-hidden="true">♥</span>
               <span class="stamp">Outside the hall</span>
             </div>
             <div class="ph">
               <img src="assets/me/golden-hour.webp" alt="Alif in the late afternoon sun after the ceremony" draggable="false" loading="lazy">
-              <span class="verdict nope" aria-hidden="true">Next</span><span class="verdict like" aria-hidden="true">♥</span>
               <span class="stamp">Golden hour</span>
             </div>
           </div>
           <div class="swipe-bar">
-            <button type="button" class="sw nope-btn" id="sw-nope" aria-label="Next photo">✕</button>
-            <span class="sw-hint" id="sw-hint" aria-live="polite">Swipe me →</span>
-            <button type="button" class="sw like-btn" id="sw-like" aria-label="Like and show the next photo">♥</button>
+            <button type="button" class="sw-hint" id="sw-next" aria-label="Show the next photo">Swipe →</button>
           </div>
         </figure>
         <div class="me-text">
@@ -550,7 +543,7 @@
   (function () {
     var stack = document.getElementById('stack'); if (!stack) return;
     var cards = Array.prototype.slice.call(stack.querySelectorAll('.ph'));
-    var hint = document.getElementById('sw-hint'), likes = 0, busy = false;
+    var busy = false;
     var calmMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
     var poses = ['rotate(-1.5deg)', 'translateY(12px) scale(.96) rotate(3deg)', 'translateY(22px) scale(.92) rotate(-4deg)'];
     function layout() {
@@ -565,14 +558,12 @@
     function fly(dir) {
       if (busy) return; busy = true;
       var c = cards[0];
-      if (dir > 0) { likes++; hint.textContent = likes === 1 ? 'Thanks ♥' : likes + ' likes ♥'; }
-      else hint.textContent = (cards.length - 1 >= 1 ? 'Next one' : '');
       c.style.transition = calmMotion ? 'none' : 'transform .35s ease, opacity .35s ease';
       c.style.transform = 'translateX(' + (dir * 130) + '%) rotate(' + (dir * 22) + 'deg)';
       c.style.opacity = '0';
       setTimeout(function () {
         cards.push(cards.shift());
-        c.style.transition = 'none'; c.style.setProperty('--nope', 0); c.style.setProperty('--like', 0);
+        c.style.transition = 'none';
         layout();
         void c.offsetWidth; c.style.transition = '';
         busy = false;
@@ -588,13 +579,11 @@
       if (!dragging) return;
       dx = e.clientX - startX;
       card.style.transform = 'translateX(' + dx + 'px) rotate(' + (dx / 18) + 'deg)';
-      card.style.setProperty('--like', Math.max(0, Math.min(1, dx / 90)));
-      card.style.setProperty('--nope', Math.max(0, Math.min(1, -dx / 90)));
     });
     function end() {
       if (!dragging) return; dragging = false; card.style.transition = '';
       if (Math.abs(dx) > 90) fly(dx > 0 ? 1 : -1);
-      else { card.style.setProperty('--like', 0); card.style.setProperty('--nope', 0); layout(); }
+      else layout();
     }
     stack.addEventListener('pointerup', end);
     stack.addEventListener('pointercancel', end);
@@ -602,8 +591,7 @@
       if (e.key === 'ArrowRight') { e.preventDefault(); fly(1); }
       if (e.key === 'ArrowLeft') { e.preventDefault(); fly(-1); }
     });
-    document.getElementById('sw-like').addEventListener('click', function () { fly(1); });
-    document.getElementById('sw-nope').addEventListener('click', function () { fly(-1); });
+    document.getElementById('sw-next').addEventListener('click', function () { fly(-1); });
     layout();
   })();
 

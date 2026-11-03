@@ -327,20 +327,14 @@ section.block { padding-block: 80px 8px; }
 .me-photo { position: relative; max-width: 400px; justify-self: center; width: 100%; margin: 0; display: grid; gap: 18px; }
 .stack { position: relative; width: 100%; max-width: 100%; aspect-ratio: 3 / 4; touch-action: pan-y; outline: none; user-select: none; -webkit-user-select: none; }
 .stack:focus-visible { outline: 2px solid var(--accent); outline-offset: 8px; border-radius: var(--radius); }
-.ph { position: absolute; inset: 0; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); background: var(--sunk); transition: transform .35s ease, opacity .35s ease; will-change: transform; --like: 0; --nope: 0; }
+.ph { position: absolute; inset: 0; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); background: var(--sunk); transition: transform .35s ease, opacity .35s ease; will-change: transform; }
 .ph.top { cursor: grab; }
 .ph.top:active { cursor: grabbing; }
 .ph img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--pos, center); pointer-events: none; -webkit-user-drag: none; }
 .ph .stamp { position: absolute; left: 12px; bottom: 14px; font-family: var(--f-mono); font-size: .75rem; background: var(--gold); color: var(--bg); padding: 6px 10px; border-radius: 8px; transform: rotate(-3deg); box-shadow: var(--shadow); }
-.verdict { position: absolute; top: 18px; font: 800 1.375rem var(--f-display); padding: 4px 12px; border: 3px solid currentColor; border-radius: 10px; pointer-events: none; text-transform: uppercase; letter-spacing: .04em; background: rgba(0, 0, 0, .25); }
-.verdict.like { left: 16px; color: #ff5c8a; opacity: var(--like); transform: rotate(-12deg); }
-.verdict.nope { right: 16px; color: #ffffff; opacity: var(--nope); transform: rotate(12deg); }
 .swipe-bar { display: flex; align-items: center; justify-content: center; gap: 18px; }
-.sw { width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow); font-size: 1.375rem; cursor: pointer; display: grid; place-items: center; transition: transform .15s; color: var(--muted); }
-.sw:hover { transform: scale(1.08); }
-.sw:active { transform: scale(.94); }
-.like-btn { color: #e0386b; }
-.sw-hint { font-family: var(--f-mono); font-size: .75rem; color: var(--muted); min-width: 7.5rem; text-align: center; }
+.sw-hint { font-family: var(--f-mono); font-size: .8125rem; color: var(--muted); background: none; border: 0; padding: 6px 10px; border-radius: 8px; cursor: pointer; letter-spacing: .04em; }
+.sw-hint:hover { color: var(--ink); }
 .me-text { display: grid; gap: 18px; min-width: 0; }
 .me-text h2 { font-size: var(--step-3); font-weight: 800; letter-spacing: -.02em; }
 .me-text p { color: var(--muted); font-size: var(--step-1); max-width: 34em; }
