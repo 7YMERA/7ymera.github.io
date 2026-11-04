@@ -50,7 +50,7 @@
         <div>
           <div class="hello">
             <img class="avatar" src="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=160" alt="Alif's GitHub avatar" width="56" height="56">
-            <span class="live"><span class="pulse" aria-hidden="true"></span>Now building <b>MyLokalEvent v2</b></span>
+            <span class="live"><span class="pulse" aria-hidden="true"></span><span id="now-line">Now building <b>MyLokalEvent v2</b></span></span>
           </div>
           <h1>I write the spec.<span class="l2">Then I build it.</span></h1>
           <p class="for" aria-live="off">For <span class="word" id="for-word">a school's 150 teachers</span><span class="caret" aria-hidden="true"></span></p>
@@ -65,6 +65,9 @@
             <button class="chip" type="button" data-copy="malifhisamudin@gmail.com">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
               malifhisamudin@gmail.com <span class="sub">copy</span></button>
+            <a class="chip" href="assets/Muhammad-Alif-Najmi-CV.pdf" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 12v6m-3-3 3 3 3-3"/></svg>
+              CV <span class="sub">PDF</span></a>
             <a class="chip" href="https://skillsprofile.skillbuilder.aws/user/alifnajmi" target="_blank" rel="noopener">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="m8.5 14-1.5 8 5-3 5 3-1.5-8"/></svg>
               AWS badges</a>
@@ -148,10 +151,17 @@
             <dt>Studied</dt><dd>Computer Science, UTP (2022–2026)</dd>
             <dt>Speaks</dt><dd>Malay, English, Indonesian, a bit of Mandarin and French</dd>
           </dl>
-          <a class="note-card" href="notes/convocation-2026.html">
-            <img src="assets/me/walk-out.webp" alt="" width="96" height="96" loading="lazy">
-            <div><span>Latest note · 3 Nov 2026</span><b>Four years, one walk across the stage</b></div>
-          </a>
+<div class="notes-list">
+            <span class="eyebrow">Notes</span>
+            <a class="note-card" href="notes/slb-power-apps.html">
+              <img src="assets/slb-track-v2.webp" alt="" width="96" height="96" loading="lazy">
+              <div><span>Latest · 4 Nov 2026</span><b>From reply-all to Power Apps</b></div>
+            </a>
+            <a class="note-card" href="notes/convocation-2026.html">
+              <img src="assets/me/walk-out.webp" alt="" width="96" height="96" loading="lazy">
+              <div><span>3 Nov 2026</span><b>Four years, one walk across the stage</b></div>
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -326,12 +336,12 @@
               <span class="ent">Location<small>approvers</small></span><span class="rel">1 → *</span><span class="ent main">Case<small>status, requestor</small></span><span class="rel">1 → *</span><span class="ent stack"><b>Item</b><b>Watchlist</b><b>QUEST / IBase</b></span>
             </div>
             <ul class="tags" aria-label="Tech stack"><li>Power Apps</li><li>Power Fx</li><li>SharePoint</li><li>Power Automate</li><li>Agile / Scrum</li></ul>
-            <div class="go"><a href="https://github.com/7YMERA/it-asset-disposal-app-v1" target="_blank" rel="noopener">Source &amp; case study →</a><span class="muted-note">Prototype handed over to SLB's GoDigital team to refine and publish.</span></div>
+            <div class="go"><a href="notes/slb-power-apps.html">Read the story →</a><a href="https://github.com/7YMERA/it-asset-disposal-app-v1" target="_blank" rel="noopener">Source &amp; case study →</a><span class="muted-note">Prototype handed over to SLB's GoDigital team to refine and publish.</span></div>
           </div>
         </article>
 
         <!-- KakiLima -->
-        <article class="card" data-tags="civic" id="p-kakilima">
+        <article class="card" data-tags="live civic" id="p-kakilima">
           <div class="shot"><img class="zoom" src="assets/kaki.webp" alt="KakiLima home page: Streets that are safe to walk. Trains worth waiting for." width="640" height="400" loading="lazy"></div>
           <div class="body">
             <div class="top-row">
@@ -339,7 +349,7 @@
                 <h3>KakiLima</h3>
                 <p class="one">A community hub for safer streets, walkable sidewalks and better public transport.</p>
               </div>
-              <span class="pill">Community project</span>
+              <span class="pill live">Live</span>
             </div>
             <ul class="hl">
               <li><strong>Every official complaint channel</strong> in one place, so a pothole report lands on the right desk</li>
@@ -347,7 +357,7 @@
               <li><strong>Accessible first</strong>: text size and high-contrast controls, 44px tap targets, a typeface made for low vision</li>
             </ul>
             <ul class="tags" aria-label="Tech stack"><li>Next.js</li><li>Tailwind v4</li><li>i18n</li><li>a11y</li></ul>
-            <div class="go"><a href="https://github.com/7YMERA/kakilima" target="_blank" rel="noopener">Repo →</a></div>
+            <div class="go"><a class="btn" href="https://kakilima-iota.vercel.app" target="_blank" rel="noopener">Visit the site</a><a href="https://github.com/7YMERA/kakilima" target="_blank" rel="noopener">Repo →</a></div>
           </div>
         </article>
 
@@ -465,6 +475,7 @@
         <button class="chip" type="button" data-copy="malifhisamudin@gmail.com">malifhisamudin@gmail.com <span class="sub">copy</span></button>
         <a class="chip" href="https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin" target="_blank" rel="noopener">LinkedIn</a>
         <a class="chip" href="https://github.com/7YMERA" target="_blank" rel="noopener">GitHub</a>
+        <a class="chip" href="assets/Muhammad-Alif-Najmi-CV.pdf" target="_blank" rel="noopener">Download CV <span class="sub">PDF</span></a>
       </div>
       <p class="toast" id="toast-foot" role="status" aria-live="polite"></p>
       <div class="foot"><span>© 2026 Muhammad Alif Najmi</span><span>Built by hand · hosted on GitHub Pages</span></div>
@@ -491,6 +502,31 @@
     root.setAttribute('data-theme', next);
     try { localStorage.setItem('theme', next); } catch (e) {}
   });
+
+  // Rotating "now" line
+  (function () {
+    var el = document.getElementById('now-line'); if (!el) return;
+    var lines = [
+      ['Now building', 'MyLokalEvent v2'],
+      ['By day, a', 'business analyst at Axrail'],
+      ['On the side,', 'evaluating AI models'],
+      ['Freshly', 'graduated from UTP'],
+      ['New note:', 'From reply-all to Power Apps']
+    ];
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var i = 0;
+    el.style.transition = 'opacity .3s';
+    setInterval(function () {
+      el.style.opacity = '0';
+      setTimeout(function () {
+        i = (i + 1) % lines.length;
+        el.innerHTML = '';
+        el.appendChild(document.createTextNode(lines[i][0] + ' '));
+        var b = document.createElement('b'); b.textContent = lines[i][1]; el.appendChild(b);
+        el.style.opacity = '1';
+      }, 300);
+    }, 3200);
+  })();
 
   // Rotating "for ..." line
   var words = ["a school's 150 teachers", 'teams that need the right person', 'fishing communities', 'Friday prayers in KL', 'safer streets', 'banks, insurers, logistics, telcos and SMEs'];
@@ -650,9 +686,9 @@
   var items = [
     ['SMK Subang dashboard', '#p-smk', 'project'], ['TaskMatch v2', '#p-taskmatch', 'project'],
     ['MyLokalEvent v2', '#p-mle', 'project'], ['KakiLima', '#p-kakilima', 'project'], ['JumaatFinder', '#p-jumaat', 'project'], ['IT Asset Disposal (SLB)', '#p-slb', 'project'],
-    ['Try TaskMatch demo', 'https://taskmatch-umber.vercel.app', 'live'], ['Visit MyLokalEvent', 'https://mylokalevent.vercel.app', 'live'],
-    ['This is me', '#me', 'section'], ['Note: Four years, one walk across the stage', 'notes/convocation-2026.html', 'note'], ['Journey', '#journey', 'section'], ['Toolkit', '#toolkit', 'section'], ['Why I do this', '#why', 'section'], ['Contact', '#contact', 'section'],
-    ['IT Asset Disposal source', 'https://github.com/7YMERA/it-asset-disposal-app-v1', 'link'], ['GitHub', 'https://github.com/7YMERA', 'link'], ['LinkedIn', 'https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin', 'link']
+    ['Try TaskMatch demo', 'https://taskmatch-umber.vercel.app', 'live'], ['Visit MyLokalEvent', 'https://mylokalevent.vercel.app', 'live'], ['Visit KakiLima', 'https://kakilima-iota.vercel.app', 'live'],
+    ['This is me', '#me', 'section'], ['Note: From reply-all to Power Apps', 'notes/slb-power-apps.html', 'note'], ['Note: Four years, one walk across the stage', 'notes/convocation-2026.html', 'note'], ['Journey', '#journey', 'section'], ['Toolkit', '#toolkit', 'section'], ['Why I do this', '#why', 'section'], ['Contact', '#contact', 'section'],
+    ['IT Asset Disposal source', 'https://github.com/7YMERA/it-asset-disposal-app-v1', 'link'], ['CV (PDF)', 'assets/Muhammad-Alif-Najmi-CV.pdf', 'link'], ['GitHub', 'https://github.com/7YMERA', 'link'], ['LinkedIn', 'https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin', 'link']
   ];
   var qj = document.getElementById('qj'), qi = document.getElementById('qj-input'), ql = document.getElementById('qj-list'), sel = 0, last = null;
   function render() {

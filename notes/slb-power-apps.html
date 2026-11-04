@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>From reply-all to Power Apps · Alif Najmi</title>
+<meta name="description" content="How I replaced an Excel and email-chain e-waste process at SLB with a Power Apps app during my internship.">
+<meta property="og:title" content="From reply-all to Power Apps">
+<meta property="og:description" content="What I learned building an IT asset disposal app at SLB as an intern.">
+<meta property="og:image" content="https://7ymera.github.io/assets/og-slb.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Before and after: an Excel disposal sheet and the Power Apps case list">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://7ymera.github.io/notes/slb-power-apps.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a6c74">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230f1e24'/%3E%3Ctext x='32' y='42' font-family='Arial,sans-serif' font-weight='700' font-size='26' text-anchor='middle' fill='%23f4f7f7'%3EAN%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge">AN</span>Alif Najmi</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="../#me">Me</a>
+      <a href="../#work">Work</a>
+      <a href="../#journey">Journey</a>
+      <a href="../#contact">Contact</a>
+    </nav>
+    <button class="icon-btn k-btn" id="theme-btn" type="button" aria-label="Switch light or dark theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="post">
+    <div class="post-head">
+      <a class="back" href="../#me">← Back to Alif</a>
+      <span class="eyebrow">Notes · Internship</span>
+      <h1>From reply-all to Power Apps</h1>
+      <p class="meta">4 November 2026 · 5 min read</p>
+    </div>
+
+    <div class="post-body">
+      <p>In January 2025 I started an eight-month internship in Digital IT Operations at SLB's base in Kemaman, Terengganu. Most days were what you'd expect: laptop setups, printers, Windows 11 upgrades, access points in a warehouse. But one process kept catching my eye, and it became the project I'm proudest of from my degree.</p>
+
+      <h2>How e-waste used to leave the base</h2>
+      <p>When IT equipment reached end of life, someone logged every laptop, monitor, cable lock and keyboard by hand in a spreadsheet, one tab per device type. The list was then emailed to the IT Manager for approval. Their reply was forwarded to the Finance Controller for a second approval, in the same thread. Only then could the risk report, the manpower requests and the actual disposal start.</p>
+
+      <figure>
+        <img src="../assets/slb-track-v1.webp" alt="The Excel disposal sheet, with asset and serial numbers blurred" width="1200" height="750" loading="lazy">
+        <figcaption>The disposal sheet. Asset and serial numbers blurred.</figcaption>
+      </figure>
+
+      <p>It worked, but it didn't scale. The data lived in spreadsheets, inboxes and shared drives. If you wanted to know where a request stood, you scrolled through a reply-all chain. Nobody was told when something changed. And when an auditor asked for the record, it had to be stitched together from three places.</p>
+
+      <figure>
+        <img src="../assets/slb-approve-v1.webp" alt="An approval email thread, with names and contact details blurred" width="1200" height="750" loading="lazy">
+        <figcaption>"This is approved." The whole approval, buried in a thread. Names blurred.</figcaption>
+      </figure>
+
+      <h2>Starting on paper</h2>
+      <p>Before touching Power Apps I mapped the existing process step by step, then sketched the screens on paper and talked them through with SLB's in-house GoDigital developers. That session gave the app its four roles: requestor, IT Manager, Finance Controller and admin. I also drew the data model and normalised it to third normal form, so each fact lives in one place.</p>
+
+      <div class="pair">
+        <figure>
+          <img src="../assets/notes/slb/sketch.webp" alt="A hand-drawn sketch of the app's screens" width="1000" height="734" loading="lazy">
+          <figcaption>The first sketch.</figcaption>
+        </figure>
+        <figure>
+          <img src="../assets/notes/slb/erd.webp" alt="An early entity-relationship diagram for the app" width="1000" height="774" loading="lazy">
+          <figcaption>The first data model.</figcaption>
+        </figure>
+      </div>
+
+      <h2>What I built</h2>
+      <p>The app runs on Power Apps, with SharePoint lists as the database and Power Automate sending the emails. A requestor picks their base, adds items, and saves a case. The approvers for that base fill in automatically, so nobody has to remember who signs off where.</p>
+
+      <figure>
+        <img src="../assets/notes/slb/login.webp" alt="The app's login screen with Requestor, Approver and Admin buttons" width="1200" height="675" loading="lazy">
+        <figcaption>Pick your role. Most people only ever see Requestor.</figcaption>
+      </figure>
+
+      <p>From there a case moves through clear states: draft, waiting for the IT Manager, waiting for the Finance Controller, approved, disposed. Each approver sees only the cases waiting for them, with two buttons. If either one rejects it, the case turns red and goes back to the requestor to fix and resubmit.</p>
+
+      <div class="pair">
+        <figure>
+          <img src="../assets/slb-approve-v2.webp" alt="The approver screen with the item list and Approve and Reject buttons" width="1200" height="750" loading="lazy">
+          <figcaption>The approver's view.</figcaption>
+        </figure>
+        <figure>
+          <img src="../assets/notes/slb/rejected.webp" alt="A rejected case shown in red in the requestor's list" width="1200" height="675" loading="lazy">
+          <figcaption>Rejected cases come back in red.</figcaption>
+        </figure>
+      </div>
+
+      <p>A few smaller things made a big difference: dropdowns for item, brand and model so the data stays clean, a watchlist so colleagues can work on a case together, and a confirmation before anything that can't be undone.</p>
+
+      <h2>What was hard</h2>
+      <ul>
+        <li><strong>Power Fx.</strong> It's formula-based, not a normal programming language, and most logic lives on button presses. The first two months were slow.</li>
+        <li><strong>Delegation limits.</strong> Power Apps can't always push a filter down to SharePoint, so it quietly looks at only the first few hundred rows. Cases could have gone missing as the lists grew. I loaded each case's data into local collections and filtered there instead.</li>
+        <li><strong>Showing everyone their own slice.</strong> Requestors, approvers and watchlist members all look at the same lists, so every screen filters by who's logged in.</li>
+      </ul>
+      <p>Weekly check-ins with the GoDigital developers got me through most of it, and ChatGPT helped a lot with debugging expressions.</p>
+
+      <h2>What I took away</h2>
+      <ul>
+        <li><strong>Understand the process before you build.</strong> The weeks I spent mapping the old flow mattered more than any formula.</li>
+        <li><strong>Low-code is still engineering.</strong> Data modelling, access rules and performance limits all still apply.</li>
+        <li><strong>Make state visible.</strong> Most of the pain in the old process was not knowing where things stood. Colour-coding cases by status fixed more than any feature.</li>
+      </ul>
+      <p>Looking back, this is also where I worked out what I like doing: sitting between the people who use a process and the system that runs it. That's more or less my job now as a business analyst.</p>
+
+      <figure>
+        <img src="../assets/slb-track-v2.webp" alt="The app's case list, colour-coded by status" width="1200" height="750" loading="lazy">
+        <figcaption>Every case in one place, coloured by where it is.</figcaption>
+      </figure>
+
+      <p>The prototype was handed over to the GoDigital team to refine and publish after I left. The source and a full write-up are on <a href="https://github.com/7YMERA/it-asset-disposal-app-v1" target="_blank" rel="noopener">GitHub</a>.</p>
+    </div>
+
+    <div class="post-foot">
+      <a class="back" href="convocation-2026.html">← Four years, one walk across the stage</a>
+      <a class="back" href="../#p-slb">See the project →</a>
+    </div>
+  </article>
+</main>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  try { var saved = localStorage.getItem('theme'); if (saved) root.setAttribute('data-theme', saved); } catch (e) {}
+  document.getElementById('theme-btn').addEventListener('click', function () {
+    var cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
