@@ -367,3 +367,11 @@ section.block { padding-block: 80px 8px; }
 .post-foot { max-width: 46rem; margin: 48px auto 0; padding-top: 20px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 #me { overflow-x: clip; }
 .notes-list { display: grid; gap: 10px; }
+.split-chip { cursor: default; padding-right: 5px; }
+.split-chip:hover { transform: none; }
+.split-chip a { text-decoration: none; color: inherit; font-weight: 600; font-size: .875rem; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); }
+.split-chip a:hover { border-color: var(--accent); color: var(--accent); }
+.split-chip a:last-child { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.split-chip a:last-child:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.contact .split-chip a { background: transparent; color: var(--bg); border-color: color-mix(in srgb, var(--bg) 35%, transparent); }
+.contact .split-chip a:last-child { background: var(--bg); color: var(--ink); }

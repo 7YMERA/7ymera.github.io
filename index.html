@@ -65,9 +65,12 @@
             <button class="chip" type="button" data-copy="malifhisamudin@gmail.com">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
               malifhisamudin@gmail.com <span class="sub">copy</span></button>
-            <a class="chip" href="assets/Muhammad-Alif-Najmi-CV.pdf" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 12v6m-3-3 3 3 3-3"/></svg>
-              CV <span class="sub">PDF</span></a>
+            <span class="chip split-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
+              CV
+              <a href="assets/Muhammad-Alif-Najmi-CV.pdf" target="_blank" rel="noopener">View</a>
+              <a href="assets/Muhammad-Alif-Najmi-CV.pdf" download="Muhammad-Alif-Najmi-CV.pdf" aria-label="Download CV as PDF">Download</a>
+            </span>
             <a class="chip" href="https://skillsprofile.skillbuilder.aws/user/alifnajmi" target="_blank" rel="noopener">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="m8.5 14-1.5 8 5-3 5 3-1.5-8"/></svg>
               AWS badges</a>
@@ -475,7 +478,10 @@
         <button class="chip" type="button" data-copy="malifhisamudin@gmail.com">malifhisamudin@gmail.com <span class="sub">copy</span></button>
         <a class="chip" href="https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin" target="_blank" rel="noopener">LinkedIn</a>
         <a class="chip" href="https://github.com/7YMERA" target="_blank" rel="noopener">GitHub</a>
-        <a class="chip" href="assets/Muhammad-Alif-Najmi-CV.pdf" target="_blank" rel="noopener">Download CV <span class="sub">PDF</span></a>
+        <span class="chip split-chip">CV
+          <a href="assets/Muhammad-Alif-Najmi-CV.pdf" target="_blank" rel="noopener">View</a>
+          <a href="assets/Muhammad-Alif-Najmi-CV.pdf" download="Muhammad-Alif-Najmi-CV.pdf" aria-label="Download CV as PDF">Download</a>
+        </span>
       </div>
       <p class="toast" id="toast-foot" role="status" aria-live="polite"></p>
       <div class="foot"><span>© 2026 Muhammad Alif Najmi</span><span>Built by hand · hosted on GitHub Pages</span></div>
@@ -688,7 +694,7 @@
     ['MyLokalEvent v2', '#p-mle', 'project'], ['KakiLima', '#p-kakilima', 'project'], ['JumaatFinder', '#p-jumaat', 'project'], ['IT Asset Disposal (SLB)', '#p-slb', 'project'],
     ['Try TaskMatch demo', 'https://taskmatch-umber.vercel.app', 'live'], ['Visit MyLokalEvent', 'https://mylokalevent.vercel.app', 'live'], ['Visit KakiLima', 'https://kakilima-iota.vercel.app', 'live'],
     ['This is me', '#me', 'section'], ['Note: From reply-all to Power Apps', 'notes/slb-power-apps.html', 'note'], ['Note: Four years, one walk across the stage', 'notes/convocation-2026.html', 'note'], ['Journey', '#journey', 'section'], ['Toolkit', '#toolkit', 'section'], ['Why I do this', '#why', 'section'], ['Contact', '#contact', 'section'],
-    ['IT Asset Disposal source', 'https://github.com/7YMERA/it-asset-disposal-app-v1', 'link'], ['CV (PDF)', 'assets/Muhammad-Alif-Najmi-CV.pdf', 'link'], ['GitHub', 'https://github.com/7YMERA', 'link'], ['LinkedIn', 'https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin', 'link']
+    ['IT Asset Disposal source', 'https://github.com/7YMERA/it-asset-disposal-app-v1', 'link'], ['View CV', 'assets/Muhammad-Alif-Najmi-CV.pdf', 'link'], ['GitHub', 'https://github.com/7YMERA', 'link'], ['LinkedIn', 'https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin', 'link']
   ];
   var qj = document.getElementById('qj'), qi = document.getElementById('qj-input'), ql = document.getElementById('qj-list'), sel = 0, last = null;
   function render() {
