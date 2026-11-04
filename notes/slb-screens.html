@@ -3,152 +3,136 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>IT Asset Disposal screens · Alif Najmi</title>
-<meta name="description" content="Every screen of the IT Asset Disposal Power App I built during my SLB internship, in the order a case moves through it.">
-<meta property="og:title" content="IT Asset Disposal: every screen">
-<meta property="og:description" content="The Power Apps app I built at SLB, screen by screen.">
+<title>Try the IT Asset Disposal app · Alif Najmi</title>
+<meta name="description" content="Click through the IT Asset Disposal Power App I built at SLB, screen by screen, in the order a case moves through it.">
+<meta property="og:title" content="Click through the IT Asset Disposal app">
+<meta property="og:description" content="All 26 screens of the Power App I built at SLB, step by step.">
 <meta property="og:image" content="https://7ymera.github.io/assets/og-slb.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Before and after: an Excel disposal sheet and the Power Apps case list">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://7ymera.github.io/notes/slb-screens.html">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a6c74">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230f1e24'/%3E%3Ctext x='32' y='42' font-family='Arial,sans-serif' font-weight='700' font-size='26' text-anchor='middle' fill='%23f4f7f7'%3EAN%3C/text%3E%3C/svg%3E">
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
 <style>
-/* Layout: a case file. One column of chapters (who is using the app), each a grid of screens with step numbers, because the screens really are a sequence. Click any screen to open it large. */
-:root {
-  --bg: #f2f3f8;
-  --surface: #ffffff;
-  --ink: #0d1030;
-  --muted: #565b7a;
-  --line: #d9dbea;
-  --brand: #0014dc;          /* the app's own blue, from its Power Fx: RGBA(0, 20, 220, 1) */
-  --brand-ink: #ffffff;
-  --draft: #c8f3f8; --wait: #ffcc66; --bad: #ff6666; --ok: #8fd98f; --done: #c9ccd3;
-  --f-body: "Open Sans", "Segoe UI", system-ui, sans-serif;
-  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0a0c1f; --surface: #12152e; --ink: #e9eaf6; --muted: #9ea2c4; --line: #262a4d;
-    --brand: #5d6bff; --brand-ink: #ffffff; color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0a0c1f; --surface: #12152e; --ink: #e9eaf6; --muted: #9ea2c4; --line: #262a4d;
-  --brand: #5d6bff; --brand-ink: #ffffff; color-scheme: dark;
-}
-* { box-sizing: border-box; }
-[hidden] { display: none !important; }
-html, body { margin: 0; }
-img { max-width: 100%; }
-.backlink { display: inline-block; color: var(--brand-ink); opacity: .85; font-weight: 600; text-decoration: none; font-size: 14px; }
-.backlink:hover { opacity: 1; }
-body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
-.wrap { max-width: 1180px; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-h1, h2 { margin: 0; text-wrap: balance; letter-spacing: -.01em; }
-p { margin: 0; }
-.mono { font-family: var(--f-mono); font-size: 12px; letter-spacing: .04em; }
-
-header.top { background: var(--brand); color: var(--brand-ink); }
-header.top .wrap { padding-block: 40px 32px; display: grid; gap: 14px; }
-header.top .mono { opacity: .8; text-transform: uppercase; }
-header.top h1 { font-size: clamp(30px, 5vw, 52px); font-weight: 800; line-height: 1.05; }
-header.top p { max-width: 62ch; opacity: .9; font-size: 16px; }
-.legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
-.legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 4px 10px 4px 6px; border-radius: 999px; background: rgba(255, 255, 255, .14); }
-.legend i { width: 14px; height: 14px; border-radius: 4px; }
-
-nav.chapters { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
-body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
-nav.chapters .wrap { display: flex; gap: 4px; overflow-x: auto; padding-block: 8px; scrollbar-width: none; }
-nav.chapters a { flex: none; text-decoration: none; color: var(--muted); font-weight: 600; font-size: 13px; padding: 6px 12px; border-radius: 8px; }
-nav.chapters a:hover { color: var(--ink); background: var(--bg); }
-
-section.ch { padding-block: 44px 8px; }
-.ch-head { display: grid; gap: 6px; margin-bottom: 20px; max-width: 70ch; }
-.ch-head .mono { color: var(--brand); text-transform: uppercase; font-weight: 500; }
-.ch-head h2 { font-size: 26px; font-weight: 800; }
-.ch-head p { color: var(--muted); }
-
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 20px; }
-figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
-figure button { all: unset; cursor: zoom-in; display: block; position: relative; }
-figure button:focus-visible { outline: 3px solid var(--brand); outline-offset: -3px; }
-figure img { display: block; width: 100%; height: auto; aspect-ratio: 1253 / 705; object-fit: cover; border-bottom: 1px solid var(--line); background: var(--bg); }
-.step { position: absolute; top: 10px; left: 10px; font-family: var(--f-mono); font-size: 12px; font-weight: 500; background: var(--brand); color: var(--brand-ink); padding: 2px 8px; border-radius: 6px; }
-figcaption { padding: 12px 14px 14px; display: grid; gap: 4px; }
-figcaption b { font-size: 15px; }
-figcaption span { color: var(--muted); font-size: 14px; }
-.status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #1c1f33; padding: 2px 8px; border-radius: 5px; justify-self: start; }
-
-footer { padding-block: 48px; color: var(--muted); font-size: 13px; }
-footer .wrap { display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 20px; }
-footer a { color: var(--brand); }
-
-.lb { position: fixed; inset: 0; z-index: 20; background: rgba(5, 6, 20, .92); display: grid; grid-template-rows: 1fr auto; padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); gap: 12px; }
-.lb img { width: 100%; height: 100%; object-fit: contain; min-height: 0; }
-.lb-bar { display: flex; align-items: center; gap: 12px; color: #fff; flex-wrap: wrap; }
-.lb-bar p { flex: 1 1 260px; min-width: 0; font-size: 14px; }
-.lb-bar p b { display: block; font-size: 16px; }
-.lb-bar button { font: 600 14px var(--f-body); background: rgba(255, 255, 255, .12); color: #fff; border: 1px solid rgba(255, 255, 255, .25); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
-.lb-bar button:hover { background: rgba(255, 255, 255, .22); }
+.tour { padding-block: 40px 64px; }
+.tour-head { display: grid; gap: 10px; max-width: 46rem; margin-bottom: 26px; }
+.tour-head h1 { font-size: var(--step-4); font-weight: 800; letter-spacing: -.03em; line-height: 1.02; }
+.tour-head p { color: var(--muted); font-size: var(--step-1); }
+.chapters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.chapters button { font: 500 .875rem var(--f-body); padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); cursor: pointer; }
+.chapters button:hover { color: var(--ink); border-color: var(--accent); }
+.chapters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.player { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
+@media (max-width: 900px) { .player { grid-template-columns: 1fr; } }
+.device { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+.device-bar { display: flex; align-items: center; gap: 6px; padding: 9px 12px; border-bottom: 1px solid var(--line); background: var(--sunk); }
+.device-bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.device-bar span { margin-left: 8px; font-family: var(--f-mono); font-size: .75rem; color: var(--muted); }
+.screen { position: relative; background: #ffffff; aspect-ratio: 1253 / 705; touch-action: pan-y; user-select: none; }
+.screen img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; transition: opacity .2s; }
+.screen button { position: absolute; top: 0; bottom: 0; width: 22%; border: 0; background: transparent; cursor: pointer; color: transparent; }
+.screen button:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+.screen .prev { left: 0; cursor: w-resize; } .screen .next { right: 0; cursor: e-resize; }
+.side { display: grid; gap: 14px; align-content: start; }
+.count { font-family: var(--f-mono); font-size: .8125rem; color: var(--muted); }
+.count b { color: var(--ink); font-size: 1.5rem; font-family: var(--f-display); font-weight: 800; }
+.who { display: inline-flex; font-family: var(--f-mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.side h2 { font-size: var(--step-2); font-weight: 700; letter-spacing: -.015em; }
+.side p { color: var(--muted); }
+.state { justify-self: start; font-size: .75rem; font-weight: 700; padding: 3px 9px; border-radius: 6px; color: #1c1f33; }
+.progress { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--gold); transition: width .25s; }
+.nav-btns { display: flex; gap: 10px; }
+.nav-btns button { flex: 1; font: 600 .9375rem var(--f-body); padding: 11px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.nav-btns button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.nav-btns button:disabled { opacity: .4; cursor: default; }
+.hint { font-size: .8125rem; color: var(--muted); }
+.strip { display: flex; gap: 8px; overflow-x: auto; padding: 14px 2px 6px; margin-top: 18px; scrollbar-width: thin; }
+.strip button { flex: none; width: 112px; padding: 0; border: 2px solid transparent; border-radius: 8px; overflow: hidden; background: var(--sunk); cursor: pointer; opacity: .6; transition: opacity .15s, border-color .15s; }
+.strip button:hover { opacity: 1; }
+.strip button[aria-current="true"] { opacity: 1; border-color: var(--accent); }
+.strip img { display: block; width: 100%; aspect-ratio: 1253 / 705; object-fit: cover; }
+.tour-foot { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; font-size: .9375rem; color: var(--muted); }
+.tour-foot a { font-weight: 600; text-decoration: none; }
 </style>
 </head>
 <body>
-
-
 <header class="top">
   <div class="wrap">
-    <a class="backlink" href="../#p-slb">← Back to the portfolio</a>
-    <span class="mono">SLB internship · Jan – Aug 2025 · Power Apps</span>
-    <h1>IT Asset Disposal</h1>
-    <p>Every screen of the app, in the order a case moves through it: a requestor builds a disposal case, two approvers sign it off, and the requestor records the paperwork and confirms the items are gone.</p>
-    <div class="legend" aria-label="Case card colours">
-      <span><i style="background: var(--draft)"></i>Draft</span>
-      <span><i style="background: var(--wait)"></i>Pending approval</span>
-      <span><i style="background: var(--bad)"></i>Rejected</span>
-      <span><i style="background: var(--ok)"></i>Approved</span>
-      <span><i style="background: var(--done)"></i>Disposed</span>
-    </div>
+    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge">AN</span>Alif Najmi</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="../#me">Me</a>
+      <a href="../#work">Work</a>
+      <a href="../#journey">Journey</a>
+      <a href="../#contact">Contact</a>
+    </nav>
+    <button class="icon-btn k-btn" id="theme-btn" type="button" aria-label="Switch light or dark theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
   </div>
 </header>
 
-<nav class="chapters" aria-label="Chapters">
-  <div class="wrap">
-    <a href="#start">Getting in</a>
-    <a href="#build">Building a case</a>
-    <a href="#approve">Approvals</a>
-    <a href="#finish">Closing a case</a>
-    <a href="#extras">Watchlist &amp; forms</a>
-    <a href="#admin">Admin</a>
+<main class="wrap tour">
+  <div class="tour-head">
+    <a class="back" href="../#p-slb">← Back to the portfolio</a>
+    <span class="eyebrow">SLB internship · Power Apps · 2025</span>
+    <h1>Click through the app</h1>
+    <p>The IT Asset Disposal app, one screen at a time, in the order a disposal case moves through it. Use the buttons, tap the sides of the screen, swipe, or press the arrow keys.</p>
   </div>
-</nav>
 
-<main id="gallery"></main>
+  <div class="chapters" id="chapters" role="group" aria-label="Jump to a part of the flow"></div>
 
-<footer>
-  <div class="wrap">
-    <p>Screenshots from my internship report, taken in Power Apps Studio during development, so some show test cases and test data. Admin lists are blurred because they hold colleagues' details.</p>
-    <p>Read the story: <a href="slb-power-apps.html">From reply-all to Power Apps</a> · Source and case study: <a href="https://github.com/7YMERA/it-asset-disposal-app-v1" target="_blank" rel="noopener">github.com/7YMERA/it-asset-disposal-app-v1</a></p>
+  <div class="player">
+    <div class="device">
+      <div class="device-bar"><i></i><i></i><i></i><span>Power Apps · IT Asset Disposal</span></div>
+      <div class="screen" id="screen">
+        <img id="shot" alt="">
+        <button type="button" class="prev" id="tap-prev" aria-label="Previous screen">Previous</button>
+        <button type="button" class="next" id="tap-next" aria-label="Next screen">Next</button>
+      </div>
+    </div>
+    <div class="side" aria-live="polite">
+      <p class="count"><b id="n">01</b> / <span id="total">26</span></p>
+      <div class="progress" aria-hidden="true"><i id="bar"></i></div>
+      <span class="who" id="who"></span>
+      <h2 id="title"></h2>
+      <span class="state" id="state" hidden></span>
+      <p id="text"></p>
+      <div class="nav-btns">
+        <button type="button" id="prev">← Back</button>
+        <button type="button" class="primary" id="next">Next →</button>
+      </div>
+      <p class="hint">Screens are from development, so some show test data. Colleagues' details are blurred.</p>
+    </div>
   </div>
-</footer>
 
-<div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Screen preview">
-  <img id="lb-img" alt="">
-  <div class="lb-bar">
-    <button type="button" id="lb-prev" aria-label="Previous screen">← Prev</button>
-    <p id="lb-cap"></p>
-    <button type="button" id="lb-next" aria-label="Next screen">Next →</button>
-    <button type="button" id="lb-close">Close</button>
+  <div class="strip" id="strip" aria-label="All screens"></div>
+
+  <div class="tour-foot">
+    <a href="slb-power-apps.html">Read the story behind it →</a>
+    <a href="https://github.com/7YMERA/it-asset-disposal-app-v1" target="_blank" rel="noopener">Source and case study on GitHub →</a>
   </div>
-</div>
+</main>
 
 <script>
 (function () {
-  var S = { draft: 'Draft', wait: 'Pending', bad: 'Rejected', ok: 'Approved', done: 'Disposed' };
+  var root = document.documentElement;
+  try { var saved = localStorage.getItem('theme'); if (saved) root.setAttribute('data-theme', saved); } catch (e) {}
+  document.getElementById('theme-btn').addEventListener('click', function () {
+    var cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+  });
+
+  var STATE = { draft: ['Draft', '#c8f3f8'], wait: ['Pending approval', '#ffcc66'], bad: ['Rejected', '#ff8080'], ok: ['Approved', '#8fd98f'], done: ['Disposed', '#c9ccd3'] };
   var chapters = [
     { id: 'start', role: 'Everyone', title: 'Getting in', text: 'Everyone who opens the app is recorded as a requestor. Approvers and admins get extra buttons.', shots: [
       ['022-000', 'Pick your role', 'The login screen. I had all three roles for testing; most users only see Requestor.'],
@@ -189,55 +173,55 @@ footer a { color: var(--brand); }
       ['061-056', 'Set locations & approvers', 'Each base with its 1st and 2nd approver. The list is blurred.']
     ]}
   ];
+  var steps = [];
+  chapters.forEach(function (c, ci) { c.shots.forEach(function (s) { steps.push({ ch: ci, src: '../assets/slb-screens/' + s[0] + '.webp', title: s[1], text: s[2], st: s[3], who: c.role }); }); });
+  var $ = function (id) { return document.getElementById(id); };
+  var cur = 0, chBtns = [], thumbs = [];
+  $('total').textContent = steps.length;
 
-  var main = document.getElementById('gallery'), flat = [], n = 0;
-  chapters.forEach(function (c) {
-    var sec = document.createElement('section'); sec.className = 'ch'; sec.id = c.id;
-    sec.innerHTML = '<div class="wrap"><div class="ch-head"><span class="mono"></span><h2></h2><p></p></div><div class="grid"></div></div>';
-    sec.querySelector('.mono').textContent = c.role;
-    sec.querySelector('h2').textContent = c.title;
-    sec.querySelector('.ch-head p').textContent = c.text;
-    var grid = sec.querySelector('.grid');
-    c.shots.forEach(function (s) {
-      n++; var idx = flat.length; flat.push({ src: '../assets/slb-screens/' + s[0] + '.webp', title: s[1], text: s[2], n: n });
-      var fig = document.createElement('figure');
-      fig.innerHTML = '<button type="button"><img loading="lazy" width="1253" height="705"><span class="step"></span></button><figcaption><b></b><span></span></figcaption>';
-      var img = fig.querySelector('img'); img.src = '../assets/slb-screens/' + s[0] + '.webp'; img.alt = s[1] + ': ' + s[2];
-      fig.querySelector('.step').textContent = String(n).padStart(2, '0');
-      fig.querySelector('b').textContent = s[1];
-      fig.querySelector('figcaption span').textContent = s[2];
-      if (s[3]) {
-        var st = document.createElement('i'); st.className = 'status'; st.textContent = S[s[3]];
-        st.style.background = 'var(--' + s[3] + ')'; fig.querySelector('figcaption').prepend(st);
-      }
-      fig.querySelector('button').setAttribute('aria-label', 'Open screen ' + n + ': ' + s[1]);
-      fig.querySelector('button').addEventListener('click', function () { open(idx); });
-      grid.appendChild(fig);
-    });
-    main.appendChild(sec);
+  chapters.forEach(function (c, ci) {
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = c.title;
+    b.addEventListener('click', function () { show(steps.findIndex(function (s) { return s.ch === ci; })); });
+    $('chapters').appendChild(b); chBtns.push(b);
+  });
+  steps.forEach(function (s, i) {
+    var b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', 'Screen ' + (i + 1) + ': ' + s.title);
+    var im = document.createElement('img'); im.src = s.src; im.alt = ''; im.loading = 'lazy'; b.appendChild(im);
+    b.addEventListener('click', function () { show(i); });
+    $('strip').appendChild(b); thumbs.push(b);
   });
 
-  var lb = document.getElementById('lb'), lbImg = document.getElementById('lb-img'), lbCap = document.getElementById('lb-cap'), cur = 0, back = null;
   function show(i) {
-    cur = (i + flat.length) % flat.length; var s = flat[cur];
-    lbImg.src = s.src; lbImg.alt = s.title;
-    lbCap.innerHTML = '<b></b>'; lbCap.firstChild.textContent = String(s.n).padStart(2, '0') + ' · ' + s.title;
-    lbCap.appendChild(document.createTextNode(s.text));
+    cur = Math.max(0, Math.min(steps.length - 1, i));
+    var s = steps[cur];
+    $('shot').src = s.src; $('shot').alt = s.title + ': ' + s.text;
+    $('n').textContent = String(cur + 1).padStart(2, '0');
+    $('bar').style.width = ((cur + 1) / steps.length * 100) + '%';
+    $('who').textContent = s.who; $('title').textContent = s.title; $('text').textContent = s.text;
+    var st = $('state');
+    if (s.st) { st.hidden = false; st.textContent = STATE[s.st][0]; st.style.background = STATE[s.st][1]; } else st.hidden = true;
+    $('prev').disabled = cur === 0;
+    $('next').textContent = cur === steps.length - 1 ? 'Start again ↺' : 'Next →';
+    chBtns.forEach(function (b, ci) { b.setAttribute('aria-pressed', String(ci === s.ch)); });
+    thumbs.forEach(function (b, ti) { b.setAttribute('aria-current', String(ti === cur)); });
+    var st2 = $('strip'), th = thumbs[cur]; st2.scrollTo({ left: th.offsetLeft - st2.clientWidth / 2 + th.clientWidth / 2, behavior: 'smooth' });
+    var nx = steps[cur + 1]; if (nx) new Image().src = nx.src;
   }
-  function open(i) { back = document.activeElement; show(i); lb.hidden = false; document.getElementById('lb-close').focus(); }
-  function close() { lb.hidden = true; if (back) back.focus(); }
-  document.getElementById('lb-prev').addEventListener('click', function () { show(cur - 1); });
-  document.getElementById('lb-next').addEventListener('click', function () { show(cur + 1); });
-  document.getElementById('lb-close').addEventListener('click', close);
-  lb.addEventListener('click', function (e) { if (e.target === lb || e.target === lbImg) close(); });
+  function next() { show(cur === steps.length - 1 ? 0 : cur + 1); }
+  function prev() { show(cur - 1); }
+  $('next').addEventListener('click', next); $('prev').addEventListener('click', prev);
+  var swiped = false;
+  $('tap-next').addEventListener('click', function () { if (swiped) { swiped = false; return; } next(); });
+  $('tap-prev').addEventListener('click', function () { if (swiped) { swiped = false; return; } prev(); });
   document.addEventListener('keydown', function (e) {
-    if (lb.hidden) return;
-    if (e.key === 'Escape') close();
-    if (e.key === 'ArrowRight') show(cur + 1);
-    if (e.key === 'ArrowLeft') show(cur - 1);
+    if (e.target.closest && e.target.closest('input, textarea')) return;
+    if (e.key === 'ArrowRight') next(); if (e.key === 'ArrowLeft') prev();
   });
+  var sx = null;
+  $('screen').addEventListener('pointerdown', function (e) { sx = e.clientX; });
+  $('screen').addEventListener('pointerup', function (e) { if (sx === null) return; var dx = e.clientX - sx; sx = null; if (Math.abs(dx) > 50) { swiped = true; setTimeout(function () { swiped = false; }, 400); dx < 0 ? next() : prev(); } });
+  show(0);
 })();
 </script>
-
 </body>
 </html>
