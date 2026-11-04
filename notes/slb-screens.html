@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IT Asset Disposal screens · Alif Najmi</title>
+<meta name="description" content="Every screen of the IT Asset Disposal Power App I built during my SLB internship, in the order a case moves through it.">
+<meta property="og:title" content="IT Asset Disposal: every screen">
+<meta property="og:description" content="The Power Apps app I built at SLB, screen by screen.">
+<meta property="og:image" content="https://7ymera.github.io/assets/og-slb.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230f1e24'/%3E%3Ctext x='32' y='42' font-family='Arial,sans-serif' font-weight='700' font-size='26' text-anchor='middle' fill='%23f4f7f7'%3EAN%3C/text%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a case file. One column of chapters (who is using the app), each a grid of screens with step numbers, because the screens really are a sequence. Click any screen to open it large. */
+:root {
+  --bg: #f2f3f8;
+  --surface: #ffffff;
+  --ink: #0d1030;
+  --muted: #565b7a;
+  --line: #d9dbea;
+  --brand: #0014dc;          /* the app's own blue, from its Power Fx: RGBA(0, 20, 220, 1) */
+  --brand-ink: #ffffff;
+  --draft: #c8f3f8; --wait: #ffcc66; --bad: #ff6666; --ok: #8fd98f; --done: #c9ccd3;
+  --f-body: "Open Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a0c1f; --surface: #12152e; --ink: #e9eaf6; --muted: #9ea2c4; --line: #262a4d;
+    --brand: #5d6bff; --brand-ink: #ffffff; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a0c1f; --surface: #12152e; --ink: #e9eaf6; --muted: #9ea2c4; --line: #262a4d;
+  --brand: #5d6bff; --brand-ink: #ffffff; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+img { max-width: 100%; }
+.backlink { display: inline-block; color: var(--brand-ink); opacity: .85; font-weight: 600; text-decoration: none; font-size: 14px; }
+.backlink:hover { opacity: 1; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1180px; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2 { margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+p { margin: 0; }
+.mono { font-family: var(--f-mono); font-size: 12px; letter-spacing: .04em; }
+
+header.top { background: var(--brand); color: var(--brand-ink); }
+header.top .wrap { padding-block: 40px 32px; display: grid; gap: 14px; }
+header.top .mono { opacity: .8; text-transform: uppercase; }
+header.top h1 { font-size: clamp(30px, 5vw, 52px); font-weight: 800; line-height: 1.05; }
+header.top p { max-width: 62ch; opacity: .9; font-size: 16px; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 4px 10px 4px 6px; border-radius: 999px; background: rgba(255, 255, 255, .14); }
+.legend i { width: 14px; height: 14px; border-radius: 4px; }
+
+nav.chapters { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+nav.chapters .wrap { display: flex; gap: 4px; overflow-x: auto; padding-block: 8px; scrollbar-width: none; }
+nav.chapters a { flex: none; text-decoration: none; color: var(--muted); font-weight: 600; font-size: 13px; padding: 6px 12px; border-radius: 8px; }
+nav.chapters a:hover { color: var(--ink); background: var(--bg); }
+
+section.ch { padding-block: 44px 8px; }
+.ch-head { display: grid; gap: 6px; margin-bottom: 20px; max-width: 70ch; }
+.ch-head .mono { color: var(--brand); text-transform: uppercase; font-weight: 500; }
+.ch-head h2 { font-size: 26px; font-weight: 800; }
+.ch-head p { color: var(--muted); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 20px; }
+figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+figure button { all: unset; cursor: zoom-in; display: block; position: relative; }
+figure button:focus-visible { outline: 3px solid var(--brand); outline-offset: -3px; }
+figure img { display: block; width: 100%; height: auto; aspect-ratio: 1253 / 705; object-fit: cover; border-bottom: 1px solid var(--line); background: var(--bg); }
+.step { position: absolute; top: 10px; left: 10px; font-family: var(--f-mono); font-size: 12px; font-weight: 500; background: var(--brand); color: var(--brand-ink); padding: 2px 8px; border-radius: 6px; }
+figcaption { padding: 12px 14px 14px; display: grid; gap: 4px; }
+figcaption b { font-size: 15px; }
+figcaption span { color: var(--muted); font-size: 14px; }
+.status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #1c1f33; padding: 2px 8px; border-radius: 5px; justify-self: start; }
+
+footer { padding-block: 48px; color: var(--muted); font-size: 13px; }
+footer .wrap { display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 20px; }
+footer a { color: var(--brand); }
+
+.lb { position: fixed; inset: 0; z-index: 20; background: rgba(5, 6, 20, .92); display: grid; grid-template-rows: 1fr auto; padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); gap: 12px; }
+.lb img { width: 100%; height: 100%; object-fit: contain; min-height: 0; }
+.lb-bar { display: flex; align-items: center; gap: 12px; color: #fff; flex-wrap: wrap; }
+.lb-bar p { flex: 1 1 260px; min-width: 0; font-size: 14px; }
+.lb-bar p b { display: block; font-size: 16px; }
+.lb-bar button { font: 600 14px var(--f-body); background: rgba(255, 255, 255, .12); color: #fff; border: 1px solid rgba(255, 255, 255, .25); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+.lb-bar button:hover { background: rgba(255, 255, 255, .22); }
+</style>
+</head>
+<body>
+
+
+<header class="top">
+  <div class="wrap">
+    <a class="backlink" href="../#p-slb">← Back to the portfolio</a>
+    <span class="mono">SLB internship · Jan – Aug 2025 · Power Apps</span>
+    <h1>IT Asset Disposal</h1>
+    <p>Every screen of the app, in the order a case moves through it: a requestor builds a disposal case, two approvers sign it off, and the requestor records the paperwork and confirms the items are gone.</p>
+    <div class="legend" aria-label="Case card colours">
+      <span><i style="background: var(--draft)"></i>Draft</span>
+      <span><i style="background: var(--wait)"></i>Pending approval</span>
+      <span><i style="background: var(--bad)"></i>Rejected</span>
+      <span><i style="background: var(--ok)"></i>Approved</span>
+      <span><i style="background: var(--done)"></i>Disposed</span>
+    </div>
+  </div>
+</header>
+
+<nav class="chapters" aria-label="Chapters">
+  <div class="wrap">
+    <a href="#start">Getting in</a>
+    <a href="#build">Building a case</a>
+    <a href="#approve">Approvals</a>
+    <a href="#finish">Closing a case</a>
+    <a href="#extras">Watchlist &amp; forms</a>
+    <a href="#admin">Admin</a>
+  </div>
+</nav>
+
+<main id="gallery"></main>
+
+<footer>
+  <div class="wrap">
+    <p>Screenshots from my internship report, taken in Power Apps Studio during development, so some show test cases and test data. Admin lists are blurred because they hold colleagues' details.</p>
+    <p>Read the story: <a href="slb-power-apps.html">From reply-all to Power Apps</a> · Source and case study: <a href="https://github.com/7YMERA/it-asset-disposal-app-v1" target="_blank" rel="noopener">github.com/7YMERA/it-asset-disposal-app-v1</a></p>
+  </div>
+</footer>
+
+<div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Screen preview">
+  <img id="lb-img" alt="">
+  <div class="lb-bar">
+    <button type="button" id="lb-prev" aria-label="Previous screen">← Prev</button>
+    <p id="lb-cap"></p>
+    <button type="button" id="lb-next" aria-label="Next screen">Next →</button>
+    <button type="button" id="lb-close">Close</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var S = { draft: 'Draft', wait: 'Pending', bad: 'Rejected', ok: 'Approved', done: 'Disposed' };
+  var chapters = [
+    { id: 'start', role: 'Everyone', title: 'Getting in', text: 'Everyone who opens the app is recorded as a requestor. Approvers and admins get extra buttons.', shots: [
+      ['022-000', 'Pick your role', 'The login screen. I had all three roles for testing; most users only see Requestor.'],
+      ['041-029', 'My cases', 'View Request: every case you raised, coloured by status, with filters along the top.']
+    ]},
+    { id: 'build', role: 'Requestor', title: 'Building a case', text: 'Pick your base, add assets and non-assets, save, then send it for approval. Approvers fill in from the base you picked.', shots: [
+      ['037-021', 'Add items', 'Choose Asset or Non Asset, then item, brand and model from dropdowns. Deleting an item asks first.'],
+      ['038-022', 'Leaving early', 'Exiting before saving warns you that the list will be lost.'],
+      ['038-023', 'Case saved', 'The new case number appears, with a pointer to edit it from View Request.', 'draft'],
+      ['039-024', 'Open a draft', 'The case with its assets and non-assets, ready to edit or submit.', 'draft'],
+      ['039-025', 'Edit the list', 'Add or remove items. The ESM checkbox reminds you to mark devices as pending disposal there too.', 'draft'],
+      ['041-028', 'Submit for approval', 'One last check, because a submitted case is locked unless it comes back rejected.']
+    ]},
+    { id: 'approve', role: 'IT Manager · Finance Controller', title: 'Approvals', text: 'Each approver only sees cases waiting for them. Approve sends it on; reject sends it back to the requestor.', shots: [
+      ['044-033', '1st approver queue', 'The IT Manager sees the case, its items and totals, and two buttons.', 'wait'],
+      ['045-034', 'Approve at 1st level', 'Confirming moves the case to the Finance Controller.', 'wait'],
+      ['047-036', 'Sent back', 'A rejected case turns red for the requestor and unlocks for editing.', 'bad'],
+      ['049-038', '2nd approver queue', 'The Finance Controller gives final sign-off.', 'wait'],
+      ['049-039', 'Approve for disposal', 'Once approved here, the items can be disposed of.', 'wait'],
+      ['050-040', 'Approved', 'The case turns green in every queue.', 'ok']
+    ]},
+    { id: 'finish', role: 'Requestor', title: 'Closing a case', text: 'With approval in hand, the requestor links the QUEST risk report and IBase manpower request, then confirms disposal.', shots: [
+      ['050-041', 'Who approved it', 'The approver’s name, email and photo are shown on the case.', 'ok'],
+      ['054-045', 'Add QUEST & IBase', 'A new button appears on approved cases for the paperwork numbers.', 'ok'],
+      ['054-046', 'Record the numbers', 'Numbers are saved to their own SharePoint lists, linked by case number.', 'ok'],
+      ['055-048', 'Confirm disposal', 'One tap once the items are gone, with a confirmation first.', 'ok'],
+      ['056-049', 'Disposed', 'The case closes and turns grey. Every step is time-stamped for audit.', 'done']
+    ]},
+    { id: 'extras', role: 'Requestor', title: 'Watchlist & forms', text: 'Colleagues can work on a case together, and the forms guide people to valid data.', shots: [
+      ['069-064', 'Add to watchlist', 'Add a colleague while creating a case so they can view, edit or submit it.'],
+      ['070-066', 'Watchlist from a case', 'The same option on an existing case.'],
+      ['073-071', 'Item dropdowns', 'Items, brands and models come from SLB’s IT asset list, split into assets and non-assets.'],
+      ['074-074', 'Safe deletes', 'Removing an item from a saved case asks before it goes.'],
+      ['077-077', 'Contact us', 'Questions and bug reports go straight to the development team.']
+    ]},
+    { id: 'admin', role: 'Admin', title: 'Admin', text: 'Admins manage who can do what and which approvers belong to each base.', shots: [
+      ['061-055', 'Set admins', 'Add or remove admins. The list is blurred.'],
+      ['061-056', 'Set locations & approvers', 'Each base with its 1st and 2nd approver. The list is blurred.']
+    ]}
+  ];
+
+  var main = document.getElementById('gallery'), flat = [], n = 0;
+  chapters.forEach(function (c) {
+    var sec = document.createElement('section'); sec.className = 'ch'; sec.id = c.id;
+    sec.innerHTML = '<div class="wrap"><div class="ch-head"><span class="mono"></span><h2></h2><p></p></div><div class="grid"></div></div>';
+    sec.querySelector('.mono').textContent = c.role;
+    sec.querySelector('h2').textContent = c.title;
+    sec.querySelector('.ch-head p').textContent = c.text;
+    var grid = sec.querySelector('.grid');
+    c.shots.forEach(function (s) {
+      n++; var idx = flat.length; flat.push({ src: '../assets/slb-screens/' + s[0] + '.webp', title: s[1], text: s[2], n: n });
+      var fig = document.createElement('figure');
+      fig.innerHTML = '<button type="button"><img loading="lazy" width="1253" height="705"><span class="step"></span></button><figcaption><b></b><span></span></figcaption>';
+      var img = fig.querySelector('img'); img.src = '../assets/slb-screens/' + s[0] + '.webp'; img.alt = s[1] + ': ' + s[2];
+      fig.querySelector('.step').textContent = String(n).padStart(2, '0');
+      fig.querySelector('b').textContent = s[1];
+      fig.querySelector('figcaption span').textContent = s[2];
+      if (s[3]) {
+        var st = document.createElement('i'); st.className = 'status'; st.textContent = S[s[3]];
+        st.style.background = 'var(--' + s[3] + ')'; fig.querySelector('figcaption').prepend(st);
+      }
+      fig.querySelector('button').setAttribute('aria-label', 'Open screen ' + n + ': ' + s[1]);
+      fig.querySelector('button').addEventListener('click', function () { open(idx); });
+      grid.appendChild(fig);
+    });
+    main.appendChild(sec);
+  });
+
+  var lb = document.getElementById('lb'), lbImg = document.getElementById('lb-img'), lbCap = document.getElementById('lb-cap'), cur = 0, back = null;
+  function show(i) {
+    cur = (i + flat.length) % flat.length; var s = flat[cur];
+    lbImg.src = s.src; lbImg.alt = s.title;
+    lbCap.innerHTML = '<b></b>'; lbCap.firstChild.textContent = String(s.n).padStart(2, '0') + ' · ' + s.title;
+    lbCap.appendChild(document.createTextNode(s.text));
+  }
+  function open(i) { back = document.activeElement; show(i); lb.hidden = false; document.getElementById('lb-close').focus(); }
+  function close() { lb.hidden = true; if (back) back.focus(); }
+  document.getElementById('lb-prev').addEventListener('click', function () { show(cur - 1); });
+  document.getElementById('lb-next').addEventListener('click', function () { show(cur + 1); });
+  document.getElementById('lb-close').addEventListener('click', close);
+  lb.addEventListener('click', function (e) { if (e.target === lb || e.target === lbImg) close(); });
+  document.addEventListener('keydown', function (e) {
+    if (lb.hidden) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowRight') show(cur + 1);
+    if (e.key === 'ArrowLeft') show(cur - 1);
+  });
+})();
+</script>
+
+</body>
+</html>
