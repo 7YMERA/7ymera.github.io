@@ -506,9 +506,9 @@ section.block { padding-block: 80px 8px; }
 .me-grid.solo { grid-template-columns: minmax(0, 1fr); max-width: 760px; }
 
 /* Curtain intro: two tilted columns of photos part as you scroll */
-.curtain { position: relative; height: 128vh; height: 128svh; --p: 0; }
+.curtain { position: relative; height: 165vh; height: 165svh; --p: 0; }
 .cur-stage { position: sticky; top: calc(61px + env(safe-area-inset-top, 0px)); height: calc(100vh - 61px); height: calc(100svh - 61px); overflow: hidden; display: grid; place-items: center; }
-.cur-stage::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(var(--line) 1px, transparent 1.2px); background-size: 22px 22px; opacity: .6; }
+.cur-frame::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(var(--line) 1px, transparent 1.2px); background-size: 22px 22px; opacity: .6; }
 .cur-col { position: absolute; top: 50%; display: grid; gap: 0; width: clamp(110px, min(15vw, 21vh), 200px); will-change: transform; }
 .cur-col.left { right: calc(50% + clamp(150px, 18vw, 260px)); transform: translate3d(0, -50%, 0) rotate(-7deg); }
 .cur-col.right { left: calc(50% + clamp(150px, 18vw, 260px)); transform: translate3d(0, -50%, 0) rotate(7deg); }
@@ -528,8 +528,9 @@ section.block { padding-block: 80px 8px; }
 .cur-cta:hover { border-color: var(--accent); }
 @media (max-width: 760px) {
   .cur-col { width: 26vw; }
-  .cur-col.left { right: auto; left: -13vw; }
-  .cur-col.right { left: auto; right: -13vw; }
+  .cur-col.left { right: auto; left: -8vw; }
+  .cur-col.right { left: auto; right: -8vw; }
+  .cur-frame { --fx: 10px; --fy: 14px; }
   .cur-center { max-width: 17.5rem; gap: 12px; }
   .cur-name { font-size: 2.5rem; }
   .cur-sub { font-size: 1rem; }
@@ -542,3 +543,11 @@ section.block { padding-block: 80px 8px; }
 
 .cur-stage > .aurora { z-index: 0; }
 .cur-col, .cur-center { z-index: 1; }
+
+/* The intro starts as a framed card and expands to fill the screen as you scroll */
+.cur-frame { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; background: var(--surface);
+  --fx: clamp(16px, 8vw, 140px); --fy: clamp(16px, 7vh, 90px);
+  clip-path: inset(var(--fy) var(--fx) round 28px); will-change: clip-path; }
+:root:not([data-theme="light"]) .cur-frame { background: color-mix(in srgb, var(--surface) 70%, var(--bg)); }
+.cur-stage { background: var(--bg); }
+@media (prefers-reduced-motion: reduce) { .cur-frame { clip-path: none; } }

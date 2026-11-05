@@ -15,13 +15,21 @@
       // Move the two photo columns and fade the title with transforms and
       // opacity only, written straight to the three elements, so the
       // browser never has to recalculate styles for the rest of the page.
+      var frame = document.getElementById('cur-frame');
       var colL = cur.querySelector('.cur-col.left'), colR = cur.querySelector('.cur-col.right'), mid = cur.querySelector('.cur-center');
       var busy = false, lastP = -1;
       var tick = function () {
         busy = false;
-        var r = cur.getBoundingClientRect(), range = r.height - innerHeight * .25;
+        var r = cur.getBoundingClientRect(), range = r.height - innerHeight * .3;
         var p = Math.max(0, Math.min(1, -r.top / (range || 1)));
         if (Math.abs(p - lastP) < .001) return; lastP = p;
+        // First third of the scroll: the framed card grows to full screen.
+        // After that: the photo columns part.
+        var g = Math.min(1, p / .35), q = Math.max(0, (p - .3) / .7);
+        var small = innerWidth < 760;
+        var fx = (small ? 10 : Math.min(140, Math.max(16, innerWidth * .08))) * (1 - g), fy = (small ? 14 : Math.min(90, Math.max(16, innerHeight * .07))) * (1 - g);
+        frame.style.clipPath = 'inset(' + fy.toFixed(1) + 'px ' + fx.toFixed(1) + 'px round ' + (28 * (1 - g)).toFixed(1) + 'px)';
+        p = q;
         var dx = p * innerWidth * .48, s = 1 + p * .25;
         colL.style.transform = 'translate3d(' + (-dx) + 'px, -50%, 0) rotate(' + (-7 - p * 10) + 'deg) scale(' + s + ')';
         colR.style.transform = 'translate3d(' + dx + 'px, -50%, 0) rotate(' + (7 + p * 10) + 'deg) scale(' + s + ')';
