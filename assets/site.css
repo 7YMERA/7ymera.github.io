@@ -396,3 +396,14 @@ section.block { padding-block: 80px 8px; }
 @media (max-width: 600px) { .try-cta { grid-template-columns: minmax(0, 1fr) auto; } .try-thumbs { grid-column: 1 / -1; } }
 .slb-cta { margin-top: 16px; }
 .slb-cta .try-thumbs img { width: 84px; }
+
+/* Curved reel (port of 21st.dev Tilted Grid Hero) */
+.reel { position: relative; overflow: hidden; height: clamp(220px, 30vw, 380px); margin-top: 24px; }
+.reel-band { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .5s; }
+.reel-slice { position: absolute; top: 0; overflow: hidden; background: var(--sunk); }
+.reel-slice.first { border-radius: 10px 0 0 10px; }
+.reel-slice.last { border-radius: 0 10px 10px 0; }
+.reel-slice img { position: absolute; top: 0; max-width: none; object-fit: cover; object-position: top center; }
+.reel-wrap { position: relative; }
+.reel-label { position: relative; z-index: 2; display: flex; justify-content: center; margin-top: -8px; }
+.reel-label span { font-family: var(--f-mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
