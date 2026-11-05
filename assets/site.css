@@ -407,3 +407,23 @@ section.block { padding-block: 80px 8px; }
 .reel-wrap { position: relative; }
 .reel-label { position: relative; z-index: 2; display: flex; justify-content: center; margin-top: -8px; }
 .reel-label span { font-family: var(--f-mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+/* Aurora backdrop (port of Aceternity's Aurora Background via 21st.dev), in the site's teal and gold */
+:root { --au-a: #0a6c74; --au-b: #4fc2c8; --au-c: #a8e0dd; --au-d: #e3b14e; --au-e: #2b8f97; --au-veil: #f3f6f6; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --au-veil: #081114; } }
+:root[data-theme="dark"] { --au-veil: #081114; }
+.aurora { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.aurora::before, .aurora::after {
+  content: ""; position: absolute; inset: -10px;
+  --veil: repeating-linear-gradient(100deg, var(--au-veil) 0%, var(--au-veil) 7%, transparent 10%, transparent 12%, var(--au-veil) 16%);
+  --lights: repeating-linear-gradient(100deg, var(--au-a) 10%, var(--au-c) 15%, var(--au-b) 20%, var(--au-d) 25%, var(--au-e) 30%);
+  background-image: var(--veil), var(--lights);
+  background-size: 300%, 200%; background-position: 50% 50%, 50% 50%;
+  filter: blur(12px); opacity: .45;
+  -webkit-mask-image: radial-gradient(ellipse at 100% 0%, #000 10%, transparent 70%);
+  mask-image: radial-gradient(ellipse at 100% 0%, #000 10%, transparent 70%);
+}
+.aurora::after { background-size: 200%, 100%; mix-blend-mode: difference; animation: aurora 60s linear infinite; opacity: .35; }
+@keyframes aurora { from { background-position: 50% 50%, 50% 50%; } to { background-position: 350% 50%, 350% 50%; } }
+@media (prefers-reduced-motion: reduce) { .aurora::after { animation: none; } }
+.hero > .wrap { position: relative; z-index: 1; }
