@@ -68,6 +68,19 @@
     document.querySelectorAll('.reel, .marquee, .hero').forEach(function (el) { vis.observe(el); });
   }
 
+  // Dock: can be tucked away; the choice is remembered on this device.
+  var dock = document.getElementById('dock'), show = document.getElementById('dock-show');
+  if (dock && show) {
+    function setHidden(h) {
+      dock.classList.toggle('tucked', h); show.hidden = !h;
+      try { localStorage.setItem('dockHidden', h ? '1' : '0'); } catch (e) {}
+    }
+    var start = false; try { start = localStorage.getItem('dockHidden') === '1'; } catch (e) {}
+    setHidden(start);
+    document.getElementById('dock-hide').addEventListener('click', function () { setHidden(true); show.focus(); });
+    show.addEventListener('click', function () { setHidden(false); });
+  }
+
   // Dock: highlight the section you're in.
   var links = document.querySelectorAll('.dock a[href^="#"]');
   if (links.length && 'IntersectionObserver' in window) {

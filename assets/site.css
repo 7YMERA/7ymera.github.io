@@ -485,3 +485,14 @@ section.block { padding-block: 80px 8px; }
 .reel { cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 .reel.held { cursor: grabbing; }
 .reel-hint { text-align: center; font-family: var(--f-mono); font-size: .75rem; letter-spacing: .06em; color: var(--muted); margin-top: -4px; }
+
+/* Dock hide / show */
+.dock-show { display: none; }
+@media (max-width: 760px) {
+  .dock { transition: transform .25s ease, opacity .25s ease; }
+  .dock.tucked { transform: translate(-50%, calc(100% + 24px)); opacity: 0; pointer-events: none; }
+  .dock-hide { display: grid; place-items: center; width: 30px; border: 0; border-left: 1px solid var(--line); margin-left: 2px; padding: 0 0 0 4px; background: none; color: var(--muted); cursor: pointer; }
+  .dock-hide svg, .dock-show svg { width: 18px; height: 18px; }
+  .dock-show { display: grid; place-items: center; position: fixed; z-index: 15; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 88%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: var(--shadow); color: var(--ink); cursor: pointer; }
+  .dock-show[hidden] { display: none; }
+}
