@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rebuilding my FYP properly · Alif Najmi</title>
+<meta name="description" content="What I changed when I rebuilt TaskMatch, my final year project, to production standard, and what I would do differently.">
+<meta property="og:title" content="Rebuilding my FYP properly">
+<meta property="og:description" content="TaskMatch, from final year project to v2: what changed and what I would do differently.">
+<meta property="og:image" content="https://7ymera.github.io/assets/og-taskmatch.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="TaskMatch dashboard, final year project version next to v2">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://7ymera.github.io/notes/taskmatch-v2.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a6c74">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230f1e24'/%3E%3Ctext x='32' y='42' font-family='Arial,sans-serif' font-weight='700' font-size='26' text-anchor='middle' fill='%23f4f7f7'%3EAN%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge">AN</span>Alif Najmi</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="../#me">Me</a>
+      <a href="../#work">Work</a>
+      <a href="../#journey">Journey</a>
+      <a href="../#contact">Contact</a>
+    </nav>
+    <button class="icon-btn k-btn" id="theme-btn" type="button" aria-label="Switch light or dark theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="post">
+    <div class="post-head">
+      <a class="back" href="../#me">← Back to Alif</a>
+      <span class="eyebrow">Notes · Projects</span>
+      <h1>Rebuilding my FYP properly</h1>
+      <p class="meta">5 November 2026 · 5 min read</p>
+    </div>
+
+    <div class="post-body">
+      <p>TaskMatch was my final year project at UTP. The idea is simple: when a team lead hands out work, match each task to people by the skills it needs, not by whoever happens to be free. Cap how much any one person carries. And pair strong people with learners, so skills spread across the team instead of sitting with one person.</p>
+
+      <p>It worked, and it was well received. But looking at it after submission, it was very much a student project. So I rebuilt it.</p>
+
+      <figure class="shot">
+        <img src="../assets/tm-dashboard-v1.webp" alt="The original TaskMatch dashboard from the final year project" width="1200" height="750">
+        <figcaption>The FYP dashboard: totals, and a lot of colours.</figcaption>
+      </figure>
+
+      <h2>What was wrong with v1</h2>
+      <ul>
+        <li><strong>Security was an afterthought.</strong> A database key was written straight into the code, most tables had no access rules, and several endpoints answered anyone who asked. Worse, a user's role was stored somewhere they could edit themselves, so any student could quietly make themselves a team lead.</li>
+        <li><strong>No design system.</strong> Six bright colours, one dark theme, and a light mode that showed white text on white on half the pages.</li>
+        <li><strong>The dashboard showed totals, not answers.</strong> It told you how many tasks existed. It didn't tell a lead what needed them today.</li>
+        <li><strong>The matcher was a black box.</strong> It ranked people, but couldn't say why.</li>
+      </ul>
+
+      <h2>What changed in v2</h2>
+      <p>I worked through it in phases, each one a pull request with before and after screenshots, the way I'd want a team to hand work over at my job.</p>
+      <ul>
+        <li><strong>Locked down first.</strong> Every endpoint needs a verified login, every table has row-level security, roles live where only admins can change them, and there's an audit trail of who did what.</li>
+        <li><strong>One design system.</strong> Neutral colours with a single accent, and light and dark modes that both actually work.</li>
+        <li><strong>A dashboard that answers questions:</strong> trends, what needs attention today, and whether work is going to the right people.</li>
+        <li><strong>Real team features:</strong> workspaces and projects, board and calendar views, notifications and approvals, Ctrl+K search, and import from GitHub and Jira.</li>
+      </ul>
+
+      <figure class="shot">
+        <img src="../assets/tm-dashboard-v2.webp" alt="The TaskMatch v2 dashboard with trends and a needs-attention list" width="1200" height="750" loading="lazy">
+        <figcaption>The same data in v2.</figcaption>
+      </figure>
+
+      <h2>The part I'm proudest of: a score you can argue with</h2>
+      <p>In v2 everyone gets a fit score out of 100 for a piece of work, and the app always shows how it got there:</p>
+      <ul>
+        <li><strong>Skills (45):</strong> do they meet each required skill at the right level?</li>
+        <li><strong>Proven experience (20):</strong> have they actually used those skills on finished work, not just ticked them on a profile? Older work counts for less.</li>
+        <li><strong>Availability (20):</strong> room on their plate, by task count and by hours.</li>
+        <li><strong>Track record (15):</strong> finished on time, and how well. New people get a neutral middle score so they aren't buried.</li>
+      </ul>
+      <p>Two rules keep it honest. People who meet every required skill always come first. And anyone missing a required skill is capped at 54, so being free and reliable can't make someone look like a good fit for work they can't do. When someone doesn't fully fit, the app names a mentor who has the missing skill.</p>
+
+      <figure class="shot">
+        <img src="../assets/notes/tm/find.webp" alt="Find a match: three people ranked by fit score, with the score broken into skills, experience, availability and track record" width="1200" height="833" loading="lazy">
+        <figcaption>Find a match, with the breakdown open. Demo data.</figcaption>
+      </figure>
+
+      <p>The weights aren't fixed either. TaskMatch compares its predictions with how assignments actually turned out, and a lead can re-tune the weights from that evidence.</p>
+
+      <h2>How I built it</h2>
+      <p>I built v2 with two AI coding assistants, Claude and Kiro, and acted as the product owner: I wrote what each phase had to do, reviewed every change, and kept a running log so either assistant could pick up where the other left off. It felt a lot like my day job, just with very fast developers.</p>
+
+      <h2>What I'd do differently</h2>
+      <ul>
+        <li><strong>Security on day one, not phase one.</strong> Retrofitting access rules onto an app that already works is slower and riskier than starting with them. A demo password even slipped into the public history once and had to be changed.</li>
+        <li><strong>Pick the design system before the first screen.</strong> Restyling every page afterwards was the most tedious part of the rebuild.</li>
+        <li><strong>Write the spec before the code.</strong> The phases that started with a written page of what "done" meant went smoothly. The ones that didn't got reworked.</li>
+        <li><strong>Make the logic explainable from the start.</strong> The fit score made the matcher trustworthy overnight. If I'd built it that way in the FYP, it would have been a better project too.</li>
+      </ul>
+
+      <figure class="shot">
+        <img src="../assets/tm-landing-v2.webp" alt="The TaskMatch v2 landing page" width="1200" height="750" loading="lazy">
+        <figcaption>TaskMatch today.</figcaption>
+      </figure>
+
+      <p>Everything is on <a href="https://github.com/7YMERA/taskmatch-v2" target="_blank" rel="noopener">GitHub</a>, with a write-up and before/after screenshots for every release on the wiki.</p>
+
+      <a class="try-cta" href="https://taskmatch-umber.vercel.app" target="_blank" rel="noopener">
+        <span class="try-thumbs" aria-hidden="true"><img src="../assets/tm-landing-v2.webp" alt=""><img src="../assets/tm-dashboard-v2.webp" alt=""><img src="../assets/tm-tasks-v2.webp" alt=""></span>
+        <span class="try-text"><span class="eyebrow">Live demo · no login</span><b>Try TaskMatch yourself</b><span>Opens a demo team as a team lead, in one click.</span></span>
+        <span class="try-go" aria-hidden="true">→</span>
+      </a>
+    </div>
+
+    <div class="post-foot">
+      <a class="back" href="slb-power-apps.html">← From reply-all to Power Apps</a>
+      <a class="back" href="../#p-taskmatch">See the project →</a>
+    </div>
+  </article>
+</main>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  try { var saved = localStorage.getItem('theme'); if (saved) root.setAttribute('data-theme', saved); } catch (e) {}
+  document.getElementById('theme-btn').addEventListener('click', function () {
+    var cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
