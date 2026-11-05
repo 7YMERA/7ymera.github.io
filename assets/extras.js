@@ -12,15 +12,24 @@
     var hero = document.querySelector('.hero');
     cta.addEventListener('click', function () { (hero || cur.nextElementSibling).scrollIntoView({ behavior: calm ? 'auto' : 'smooth' }); });
     if (!calm) {
-      var busy = false;
+      // Move the two photo columns and fade the title with transforms and
+      // opacity only, written straight to the three elements, so the
+      // browser never has to recalculate styles for the rest of the page.
+      var colL = cur.querySelector('.cur-col.left'), colR = cur.querySelector('.cur-col.right'), mid = cur.querySelector('.cur-center');
+      var busy = false, lastP = -1;
       var tick = function () {
         busy = false;
         var r = cur.getBoundingClientRect(), range = r.height - innerHeight * .25;
         var p = Math.max(0, Math.min(1, -r.top / (range || 1)));
-        cur.style.setProperty('--p', p.toFixed(3));
+        if (Math.abs(p - lastP) < .001) return; lastP = p;
+        var dx = p * innerWidth * .48, s = 1 + p * .25;
+        colL.style.transform = 'translate3d(' + (-dx) + 'px, -50%, 0) rotate(' + (-7 - p * 10) + 'deg) scale(' + s + ')';
+        colR.style.transform = 'translate3d(' + dx + 'px, -50%, 0) rotate(' + (7 + p * 10) + 'deg) scale(' + s + ')';
+        mid.style.opacity = Math.max(0, 1 - p * 1.6);
+        mid.style.transform = 'translate3d(0, ' + (-p * 40) + 'px, 0) scale(' + (1 - p * .06) + ')';
       };
       addEventListener('scroll', function () { if (!busy) { busy = true; requestAnimationFrame(tick); } }, { passive: true });
-      addEventListener('resize', tick); tick();
+      addEventListener('resize', function () { lastP = -1; tick(); }); tick();
     }
   }
 
