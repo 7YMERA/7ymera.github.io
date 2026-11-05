@@ -94,7 +94,7 @@
     var vis = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) { e.target.classList.toggle('offscreen', !e.isIntersecting); });
     });
-    document.querySelectorAll('.reel, .marquee, .hero').forEach(function (el) { vis.observe(el); });
+    document.querySelectorAll('.reel, .marquee, .curtain').forEach(function (el) { vis.observe(el); });
   }
 
   // Dock: can be tucked away; the choice is remembered on this device.
