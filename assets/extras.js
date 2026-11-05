@@ -4,6 +4,26 @@
 (function () {
   var calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // Curtain intro: --p goes 0 -> 1 as you scroll through it; the photo
+  // columns part and grow, and the name fades.
+  var cur = document.getElementById('curtain');
+  if (cur) {
+    var cta = document.getElementById('cur-cta');
+    var hero = document.querySelector('.hero');
+    cta.addEventListener('click', function () { (hero || cur.nextElementSibling).scrollIntoView({ behavior: calm ? 'auto' : 'smooth' }); });
+    if (!calm) {
+      var busy = false;
+      var tick = function () {
+        busy = false;
+        var r = cur.getBoundingClientRect(), range = r.height - innerHeight * .25;
+        var p = Math.max(0, Math.min(1, -r.top / (range || 1)));
+        cur.style.setProperty('--p', p.toFixed(3));
+      };
+      addEventListener('scroll', function () { if (!busy) { busy = true; requestAnimationFrame(tick); } }, { passive: true });
+      addEventListener('resize', tick); tick();
+    }
+  }
+
   // Number ticker: counts up the first time each number scrolls into view.
   var nums = document.querySelectorAll('[data-count]');
   if (!calm && 'IntersectionObserver' in window) {

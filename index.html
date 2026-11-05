@@ -44,21 +44,39 @@
 </header>
 
 <main id="top">
+  <section class="curtain" id="curtain" aria-label="Intro">
+    <div class="cur-stage">
+      <div class="cur-col left" aria-hidden="false">
+          <figure class="cur-card" style="--k:0"><img src="assets/me/mirror.webp" alt="Mirror selfie in my graduation gown" loading="eager" draggable="false"></figure>
+          <figure class="cur-card" style="--k:1"><img src="assets/me/in-line.webp" alt="Waiting in line for my name" loading="eager" draggable="false"></figure>
+          <figure class="cur-card" style="--k:2"><img src="assets/me/golden-hour.webp" alt="Golden hour after the ceremony" loading="lazy" draggable="false"></figure>
+          <figure class="cur-card" style="--k:3"><img src="assets/me/scroll-tube.webp" alt="The scroll tube" loading="lazy" draggable="false"></figure>
+      </div>
+      <div class="cur-center">
+        <p class="cur-eyebrow">Portfolio · Kuala Lumpur</p>
+        <h1 class="cur-name">Alif Najmi.</h1>
+        <span class="cur-rule" aria-hidden="true"></span>
+        <p class="cur-sub">Business analyst who builds what he specifies. Computer Science graduate, UTP, class of 2026.</p>
+        <ul class="cur-facts">
+          <li>BA at Axrail</li><li>AI model evaluator</li><li>5 apps built</li>
+        </ul>
+        <button type="button" class="cur-cta" id="cur-cta"><span class="dot" aria-hidden="true"></span>Scroll down or click to unveil</button>
+      </div>
+      <div class="cur-col right">
+          <figure class="cur-card" style="--k:0"><img src="assets/me/walk-out.webp" alt="Walking out of the hall with flowers" loading="eager" draggable="false"></figure>
+          <figure class="cur-card" style="--k:1"><img src="assets/me/on-stage-card.webp" alt="On stage, receiving my scroll" loading="eager" draggable="false"></figure>
+          <figure class="cur-card" style="--k:2"><img src="assets/me/by-the-hall.webp" alt="Outside the hall" loading="lazy" draggable="false"></figure>
+          <figure class="cur-card" style="--k:3"><img src="assets/me/on-stage.webp" alt="The stage, with my name on the screen" loading="lazy" draggable="false" style="object-position:62% 30%"></figure>
+      </div>
+    </div>
+  </section>
+
   <section class="hero">
     <div class="aurora" aria-hidden="true"></div>
     <div class="wrap">
       <div class="hero-grid">
         <div>
-          <div class="hello">
-            <div class="id-capsule">
-              <span class="ring"><img src="assets/me/headshot.webp" alt="Alif Najmi" width="120" height="120"><i class="online" aria-hidden="true"></i></span>
-              <span class="id-text">
-                <b>Alif Najmi <svg class="tick" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 1.5 14.6 4l3.5-.4.9 3.4 3 1.9-1.3 3.2 1.3 3.3-3 1.8-.9 3.4-3.5-.4L12 22.5 9.4 20l-3.5.4-.9-3.4-3-1.8 1.3-3.3L2 8.9l3-1.9.9-3.4 3.5.4z"/><path fill="none" stroke="var(--bg)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="m8 12.2 2.6 2.6L16 9.4"/></svg></b>
-                <span class="live"><span class="pulse" aria-hidden="true"></span><span id="now-line">Now building <b>MyLokalEvent v2</b></span></span>
-              </span>
-            </div>
-          </div>
-          <h1 class="reveal" aria-label="I write the spec. Then I build it."><span aria-hidden="true"><span class="w" style="--i:0">I</span> <span class="w" style="--i:1">write</span> <span class="w" style="--i:2">the</span> <span class="w" style="--i:3">spec.</span></span><span class="l2" aria-hidden="true"><span class="w" style="--i:4">Then</span> <span class="w" style="--i:5">I</span> <span class="w" style="--i:6">build</span> <span class="w" style="--i:7">it.</span></span></h1>
+          <h2 class="reveal hero-title" aria-label="I write the spec. Then I build it."><span aria-hidden="true"><span class="w" style="--i:0">I</span> <span class="w" style="--i:1">write</span> <span class="w" style="--i:2">the</span> <span class="w" style="--i:3">spec.</span></span><span class="l2" aria-hidden="true"><span class="w" style="--i:4">Then</span> <span class="w" style="--i:5">I</span> <span class="w" style="--i:6">build</span> <span class="w" style="--i:7">it.</span></span></h2>
           <p class="for" aria-live="off">For <span class="word" id="for-word">a school's 150 teachers</span><span class="caret" aria-hidden="true"></span></p>
           <p class="lede">I'm <strong>Muhammad Alif Najmi</strong>, a business analyst at <strong>Axrail</strong> in Kuala Lumpur and a Computer Science graduate from UTP. By day I write requirements for banks, insurers, logistics and telco companies, and SMEs. After hours I ship apps people in Malaysia actually use.</p>
           <div class="links">
@@ -116,38 +134,7 @@
 
   <section class="block" id="me">
     <div class="wrap">
-      <div class="me-grid">
-        <figure class="me-photo">
-          <div class="stack" id="stack" tabindex="0" role="group" aria-roledescription="photo stack" aria-label="Photos of me. Swipe or press the arrow keys to see the next one.">
-            <div class="ph">
-              <img src="assets/me/mirror.webp" alt="Alif taking a mirror selfie in his graduation gown" draggable="false" loading="eager">
-              <span class="stamp">Graduation day · 2 Nov 2026</span>
-            </div>
-            <div class="ph" style="--pos: center top">
-              <img src="assets/me/on-stage-card.webp" alt="Alif on stage receiving his scroll at the UTP convocation" draggable="false" loading="lazy">
-              <span class="stamp">The moment · on stage</span>
-            </div>
-            <div class="ph">
-              <img src="assets/me/walk-out.webp" alt="Alif holding a bouquet outside the UTP hall" draggable="false" loading="lazy">
-              <span class="stamp">Walking out, flowers in hand</span>
-            </div>
-            <div class="ph" style="--pos: left center">
-              <img src="assets/me/in-line.webp" alt="Alif in the line of graduates waiting to go on stage" draggable="false" loading="lazy">
-              <span class="stamp">Waiting for my name</span>
-            </div>
-            <div class="ph">
-              <img src="assets/me/by-the-hall.webp" alt="Alif in his gown outside the hall" draggable="false" loading="lazy">
-              <span class="stamp">Outside the hall</span>
-            </div>
-            <div class="ph">
-              <img src="assets/me/golden-hour.webp" alt="Alif in the late afternoon sun after the ceremony" draggable="false" loading="lazy">
-              <span class="stamp">Golden hour</span>
-            </div>
-          </div>
-          <div class="swipe-bar">
-            <button type="button" class="sw-hint" id="sw-next" aria-label="Show the next photo">Swipe →</button>
-          </div>
-        </figure>
+      <div class="me-grid solo">
         <div class="me-text">
           <span class="eyebrow">This is me</span>
           <h2>Hi, I'm Alif.</h2>
