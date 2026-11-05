@@ -399,8 +399,12 @@ section.block { padding-block: 80px 8px; }
 
 /* Curved reel (port of 21st.dev Tilted Grid Hero) */
 .reel { position: relative; overflow: hidden; height: clamp(220px, 30vw, 380px); margin-top: 24px; }
-.reel-band { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .5s; }
-.reel-slice { position: absolute; top: 0; overflow: hidden; background: var(--sunk); }
+.reel-band { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .5s; transform: translateZ(0); }
+.reel::before, .reel::after { content: ""; position: absolute; top: 0; bottom: 0; width: calc(var(--reel-fade, 10%) + 2%); z-index: 2; pointer-events: none; }
+.reel::before { left: 0; background: linear-gradient(90deg, var(--bg) 15%, transparent); }
+.reel::after { right: 0; background: linear-gradient(-90deg, var(--bg) 15%, transparent); }
+.reel-tile { will-change: transform; }
+.reel-slice { position: absolute; top: 0; overflow: hidden; background: var(--sunk); backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 .reel-slice.first { border-radius: 10px 0 0 10px; }
 .reel-slice.last { border-radius: 0 10px 10px 0; }
 .reel-slice img { position: absolute; top: 0; max-width: none; object-fit: cover; object-position: top center; }

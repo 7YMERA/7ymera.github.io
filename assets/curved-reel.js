@@ -63,10 +63,12 @@
         '@media(prefers-reduced-motion:reduce){.' + tileCls + '{animation-play-state:paused}}';
 
       var share = o.aspect / SLICES, duration = L.columns * o.speed;
-      var mask = 'linear-gradient(90deg,transparent,#000 ' + o.fade + '%,#000 ' + (100 - o.fade) + '%,transparent)';
       band.style.perspective = (+(r * CAMERA).toFixed(3)) + 'cqw';
       band.style.perspectiveOrigin = '50% ' + o.axis + '%';
-      band.style.maskImage = band.style.webkitMaskImage = mask;
+      // The fade is drawn by two overlays (see .reel::before/::after in CSS)
+      // instead of a mask: a mask over a 3D scene makes Safari repaint it
+      // every frame, which shows as flicker near the edges.
+      el.style.setProperty('--reel-fade', o.fade + '%');
       band.innerHTML = '';
 
       for (var t = 0; t < L.columns; t++) {
@@ -91,8 +93,16 @@
             img.style.cssText = 'left:' + u(-k * share) + ';width:' + u(o.aspect) + ';height:' + u(1) + ';';
             s.appendChild(img); tile.appendChild(s); imgs.push(img);
           }
-          function setSrc(n) { var src = images[n % images.length]; imgs.forEach(function (i) { if (i.getAttribute('src') !== src) i.src = src; }); }
-          setSrc(first);
+          // Decode the next image before swapping, so a strip never flashes
+          // empty for a frame while it loads.
+          function setSrc(n) {
+            var src = images[n % images.length];
+            if (imgs[0].getAttribute('src') === src) return;
+            var pre = new Image(); pre.src = src;
+            var swap = function () { imgs.forEach(function (i) { i.src = src; }); };
+            (pre.decode ? pre.decode() : Promise.resolve()).then(swap, swap);
+          }
+          imgs.forEach(function (i) { i.src = images[first % images.length]; });
           tile.addEventListener('animationiteration', function (e) {
             var lap = Math.round(e.elapsedTime / duration);
             setSrc(lap * L.columns + first);
