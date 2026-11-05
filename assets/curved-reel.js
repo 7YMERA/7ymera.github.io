@@ -7,6 +7,7 @@
  * Usage: <div class="reel" data-reel='["a.webp","b.webp"]'></div>
  * Optional data-speed, data-tile, data-aspect, data-gap, data-axis,
  * data-curve, data-fade (same meaning as the original props).
+ * Press and hold to stop it; drag to spin it; let go and it carries on.
  */
 (function () {
   var SLICES = 16, CAMERA = 1.6, MAX_WIDTH = 55;
@@ -112,6 +113,41 @@
       }
       band.style.opacity = '1';
     }
+
+    // Hold to stop, drag to spin it by hand, let go and it carries on.
+    // Every tile runs the same looping animation, so scrubbing just moves
+    // all their clocks together.
+    var held = null;
+    function anims() {
+      return Array.prototype.concat.apply([], Array.prototype.map.call(band.children, function (c) {
+        return c.getAnimations ? c.getAnimations() : [];
+      }));
+    }
+    el.addEventListener('pointerdown', function (e) {
+      if (e.button > 0 || !band.firstElementChild || !el.getAnimations) return;
+      var list = anims(); if (!list.length) return;
+      list.forEach(function (a) { a.pause(); });
+      var tw = band.firstElementChild.getBoundingClientRect().width || 200;
+      held = { x: e.clientX, list: list, msPerPx: o.speed * 1000 / tw, moved: false };
+      el.classList.add('held');
+      try { el.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+    el.addEventListener('pointermove', function (e) {
+      if (!held) return;
+      var dx = e.clientX - held.x; held.x = e.clientX;
+      if (Math.abs(dx) > 0) held.moved = true;
+      // Dragging left pushes the row along its own direction.
+      var dt = -dx * held.msPerPx;
+      held.list.forEach(function (a) { a.currentTime = (a.currentTime || 0) + dt; });
+    });
+    function release() {
+      if (!held) return;
+      if (!reduce) held.list.forEach(function (a) { a.play(); });
+      held = null; el.classList.remove('held');
+    }
+    el.addEventListener('pointerup', release);
+    el.addEventListener('pointercancel', release);
+    el.addEventListener('lostpointercapture', release);
 
     var ro = new ResizeObserver(function (entries) {
       var b = entries[0].contentRect; render(b.width, b.height);
