@@ -416,7 +416,7 @@ section.block { padding-block: 80px 8px; }
 :root { --au-a: #0a6c74; --au-b: #4fc2c8; --au-c: #a8e0dd; --au-d: #e3b14e; --au-e: #2b8f97; --au-veil: #f3f6f6; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --au-veil: #081114; } }
 :root[data-theme="dark"] { --au-veil: #081114; }
-.aurora { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.aurora { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; -webkit-mask-image: radial-gradient(ellipse at 100% 0%, #000 10%, transparent 70%); mask-image: radial-gradient(ellipse at 100% 0%, #000 10%, transparent 70%); }
 .aurora::before, .aurora::after {
   content: ""; position: absolute; inset: -10px;
   --veil: repeating-linear-gradient(100deg, var(--au-veil) 0%, var(--au-veil) 7%, transparent 10%, transparent 12%, var(--au-veil) 16%);
@@ -424,11 +424,12 @@ section.block { padding-block: 80px 8px; }
   background-image: var(--veil), var(--lights);
   background-size: 300%, 200%; background-position: 50% 50%, 50% 50%;
   filter: blur(12px); opacity: .45;
-  -webkit-mask-image: radial-gradient(ellipse at 100% 0%, #000 10%, transparent 70%);
-  mask-image: radial-gradient(ellipse at 100% 0%, #000 10%, transparent 70%);
 }
-.aurora::after { background-size: 200%, 100%; mix-blend-mode: difference; animation: aurora 60s linear infinite; opacity: .35; }
-@keyframes aurora { from { background-position: 50% 50%, 50% 50%; } to { background-position: 350% 50%, 350% 50%; } }
+/* The drifting layer is wide and slides sideways with a transform, which the
+   GPU can move without repainting; animating background-position made the
+   browser re-blur the whole area every frame. */
+.aurora::after { inset: -10px auto -10px -10px; width: calc(300% + 20px); background-size: 66.67%, 33.34%; mix-blend-mode: difference; opacity: .35; will-change: transform; animation: aurora 60s linear infinite; }
+@keyframes aurora { from { transform: translateX(0); } to { transform: translateX(-66.67%); } }
 @media (prefers-reduced-motion: reduce) { .aurora::after { animation: none; } }
 .hero > .wrap { position: relative; z-index: 1; }
 
@@ -476,3 +477,6 @@ section.block { padding-block: 80px 8px; }
   .dock a.on { color: var(--accent); background: var(--accent-soft); }
   .contact .wrap { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
 }
+
+/* Paused while off-screen (set by extras.js) */
+.offscreen .reel-tile, .marquee.offscreen .mq-track, .hero.offscreen .aurora::after { animation-play-state: paused !important; }

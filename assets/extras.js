@@ -60,6 +60,14 @@
     });
   });
 
+  // Pause the looping animations while they're off-screen, to save battery.
+  if ('IntersectionObserver' in window) {
+    var vis = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { e.target.classList.toggle('offscreen', !e.isIntersecting); });
+    });
+    document.querySelectorAll('.reel, .marquee, .hero').forEach(function (el) { vis.observe(el); });
+  }
+
   // Dock: highlight the section you're in.
   var links = document.querySelectorAll('.dock a[href^="#"]');
   if (links.length && 'IntersectionObserver' in window) {
