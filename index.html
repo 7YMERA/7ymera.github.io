@@ -53,7 +53,7 @@
             <img class="avatar" src="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=160" alt="Alif's GitHub avatar" width="56" height="56">
             <span class="live"><span class="pulse" aria-hidden="true"></span><span id="now-line">Now building <b>MyLokalEvent v2</b></span></span>
           </div>
-          <h1>I write the spec.<span class="l2">Then I build it.</span></h1>
+          <h1 class="reveal" aria-label="I write the spec. Then I build it."><span aria-hidden="true"><span class="w" style="--i:0">I</span> <span class="w" style="--i:1">write</span> <span class="w" style="--i:2">the</span> <span class="w" style="--i:3">spec.</span></span><span class="l2" aria-hidden="true"><span class="w" style="--i:4">Then</span> <span class="w" style="--i:5">I</span> <span class="w" style="--i:6">build</span> <span class="w" style="--i:7">it.</span></span></h1>
           <p class="for" aria-live="off">For <span class="word" id="for-word">a school's 150 teachers</span><span class="caret" aria-hidden="true"></span></p>
           <p class="lede">I'm <strong>Muhammad Alif Najmi</strong>, a business analyst at <strong>Axrail</strong> in Kuala Lumpur and a Computer Science graduate from UTP. By day I write requirements for banks, insurers, logistics and telco companies, and SMEs. After hours I ship apps people in Malaysia actually use.</p>
           <div class="links">
@@ -100,10 +100,10 @@
       </div>
 
       <div class="nums" aria-label="By the numbers">
-        <div><span class="n">5</span><p>apps built in 2026, all on GitHub</p></div>
-        <div><span class="n">~150</span><p>teachers on the SMK Subang dashboard</p></div>
-        <div><span class="n">565</span><p>official masjid &amp; surau mapped in JumaatFinder</p></div>
-        <div><span class="n">4</span><p>languages on KakiLima: EN, BM, 中文, தமிழ்</p></div>
+        <div><span class="n" data-count="5">5</span><p>apps built in 2026, all on GitHub</p></div>
+        <div><span class="n" data-count="150" data-prefix="~">~150</span><p>teachers on the SMK Subang dashboard</p></div>
+        <div><span class="n" data-count="565">565</span><p>official masjid &amp; surau mapped in JumaatFinder</p></div>
+        <div><span class="n" data-count="4">4</span><p>languages on KakiLima: EN, BM, 中文, தமிழ்</p></div>
       </div>
     </div>
   </section>
@@ -417,7 +417,8 @@
         </div>
         <div class="legend"><span><i></i>Work and study</span><span><i class="d"></i>Side projects</span></div>
       </div>
-      <ol class="timeline">
+      <ol class="timeline" id="timeline">
+        <span class="beam" aria-hidden="true"><i></i></span>
         <li class="now-item"><span class="when">Oct 2026 – now</span><span class="rail"><i></i></span>
           <div class="what"><h3>Business Analyst</h3><span class="org">Axrail · Kuala Lumpur</span>
           <p>In the Solution Architect team, delivering data and AI solutions for banking, insurance, logistics, telecommunications and SME clients. I gather requirements, map current processes, write functional documentation, and find the gaps where AI meets existing systems.</p></div></li>
@@ -453,6 +454,10 @@
   <section class="block" id="toolkit">
     <div class="wrap">
       <div class="sec-head"><div><span class="eyebrow">Toolkit</span><h2>What I work with</h2></div></div>
+      <div class="marquee" aria-label="Tools I work with">
+        <ul class="mq-track"><li><i style="background:#742774"></i>Power Apps</li><li><i style="background:#0066ff"></i>Power Automate</li><li><i style="background:#038387"></i>SharePoint</li><li><i style="background:currentColor"></i>Next.js</li><li><i style="background:#58c4dc"></i>React</li><li><i style="background:#3178c6"></i>TypeScript</li><li><i style="background:#3776ab"></i>Python</li><li><i style="background:#009688"></i>FastAPI</li><li><i style="background:#3ecf8e"></i>Supabase</li><li><i style="background:#4169e1"></i>PostgreSQL</li><li><i style="background:#38bdf8"></i>Tailwind</li><li><i style="background:currentColor"></i>Vercel</li><li><i style="background:#ff9900"></i>AWS</li><li><i style="background:#01a88d"></i>Amazon Bedrock</li><li><i style="background:#f2c811"></i>Power BI</li><li><i style="background:#2088ff"></i>GitHub Actions</li><li><i style="background:#4285f4"></i>Google Apps Script</li><li><i style="background:#d97757"></i>Claude</li></ul>
+        <ul class="mq-track" aria-hidden="true"><li><i style="background:#742774"></i>Power Apps</li><li><i style="background:#0066ff"></i>Power Automate</li><li><i style="background:#038387"></i>SharePoint</li><li><i style="background:currentColor"></i>Next.js</li><li><i style="background:#58c4dc"></i>React</li><li><i style="background:#3178c6"></i>TypeScript</li><li><i style="background:#3776ab"></i>Python</li><li><i style="background:#009688"></i>FastAPI</li><li><i style="background:#3ecf8e"></i>Supabase</li><li><i style="background:#4169e1"></i>PostgreSQL</li><li><i style="background:#38bdf8"></i>Tailwind</li><li><i style="background:currentColor"></i>Vercel</li><li><i style="background:#ff9900"></i>AWS</li><li><i style="background:#01a88d"></i>Amazon Bedrock</li><li><i style="background:#f2c811"></i>Power BI</li><li><i style="background:#2088ff"></i>GitHub Actions</li><li><i style="background:#4285f4"></i>Google Apps Script</li><li><i style="background:#d97757"></i>Claude</li></ul>
+      </div>
       <div class="kit">
         <div><h3>Business analysis</h3><ul class="tags"><li>Requirements elicitation</li><li>FRD / FSD</li><li>Process mapping</li><li>Gap &amp; issue tracking</li><li>AI use-case discovery</li></ul></div>
         <div><h3>Data</h3><ul class="tags"><li>SQL</li><li>PostgreSQL</li><li>Row-level security</li><li>Data modelling (3NF)</li><li>Power BI</li><li>Google Apps Script</li></ul></div>
@@ -499,6 +504,13 @@
   </section>
 </main>
 
+<nav class="dock" aria-label="Quick links">
+  <a href="#me" aria-label="Me"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span>Me</span></a>
+  <a href="#work" aria-label="Work"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Work</span></a>
+  <a href="notes/slb-power-apps.html" aria-label="Notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg><span>Notes</span></a>
+  <a href="#journey" aria-label="Journey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h5a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h5"/></svg><span>Journey</span></a>
+  <a href="#contact" aria-label="Contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg><span>Contact</span></a>
+</nav>
 <div class="qj" id="qj" hidden role="dialog" aria-modal="true" aria-label="Quick jump">
   <div class="qj-box">
     <input id="qj-input" type="text" placeholder="Jump to a project or section…" autocomplete="off" aria-label="Search sections and projects">
@@ -739,5 +751,6 @@
 })();
 </script>
 <script src="assets/curved-reel.js" defer></script>
+<script src="assets/extras.js" defer></script>
 </body>
 </html>
