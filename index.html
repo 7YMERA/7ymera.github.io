@@ -170,10 +170,13 @@
     </div>
   </section>
 
-  <div class="reel-wrap">
-    <div class="reel" aria-hidden="true" data-reel='["assets/smk.webp", "assets/tm-dashboard-v2.webp", "assets/mle-events-v2.webp", "assets/slb-track-v2.webp", "assets/kaki.webp", "assets/tm-landing-v2.webp", "assets/mle-home-v2.webp", "assets/slb-screens/022-000.webp", "assets/tm-tasks-v2.webp", "assets/slb-approve-v2.webp"]' data-tile="54" data-speed="3.5" data-axis="50" data-curve="70" data-fade="10"></div>
-    <p class="reel-hint">Press and hold to pause</p>
-  </div>
+  <section class="deck" id="deck" aria-label="Project showcase" data-aspect="1.6" data-deck='[{"src": "assets/smk.webp", "alt": "SMK Subang data dashboard", "title": "SMK Subang data dashboard", "sub": "In use at a real school"}, {"src": "assets/tm-dashboard-v2.webp", "alt": "TaskMatch v2 dashboard", "title": "TaskMatch v2", "sub": "Skill-based task matching, live demo"}, {"src": "assets/slb-track-v2.webp", "alt": "IT Asset Disposal app case list", "title": "IT Asset Disposal", "sub": "Power Apps, SLB internship"}, {"src": "assets/mle-events-v2.webp", "alt": "MyLokalEvent v2 event list", "title": "MyLokalEvent v2", "sub": "Local events in Malaysia, in progress"}, {"src": "assets/kaki.webp", "alt": "KakiLima home page", "title": "KakiLima", "sub": "Safer streets, in four languages"}, {"src": "assets/tm-landing-v2.webp", "alt": "TaskMatch v2 landing page", "title": "TaskMatch v2", "sub": "The landing page"}, {"src": "assets/mle-home-v2.webp", "alt": "MyLokalEvent v2 intro page", "title": "MyLokalEvent v2", "sub": "Bilingual from day one"}]'>
+    <div class="deck-stage" tabindex="0">
+      <div class="deck-head"><span class="eyebrow">Keep scrolling</span><h2>The work, one screen at a time</h2></div>
+      <div class="deck-scene" aria-hidden="true"></div>
+      <div class="deck-cap" aria-live="polite"><span class="deck-count"></span><span class="deck-title"></span><span class="deck-sub"></span></div>
+    </div>
+  </section>
 
   <section class="block" id="work">
     <div class="wrap">
@@ -755,7 +758,7 @@
   });
 })();
 </script>
-<script src="assets/curved-reel.js?v=20261106a" defer></script>
+<script src="assets/tumble-deck.js?v=20261106a" defer></script>
 <script src="assets/extras.js?v=20261106a" defer></script>
 </body>
 </html>

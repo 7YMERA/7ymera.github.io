@@ -554,3 +554,21 @@ section.block { padding-block: 80px 8px; }
 
 .me-portrait { margin: 0; max-width: 360px; justify-self: center; width: 100%; }
 .me-portrait img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; border-radius: var(--radius); box-shadow: var(--shadow); transform: rotate(-1.5deg); }
+
+/* Tumble deck (plain-JS port of 21st.dev Tumble Deck Showcase) */
+.deck { position: relative; height: calc(var(--dk-n, 7) * 48vh + 100vh); }
+.deck-stage { position: sticky; top: calc(61px + env(safe-area-inset-top, 0px)); height: calc(100vh - 61px); height: calc(100svh - 61px); overflow: hidden; outline: none; cursor: pointer; }
+.deck-stage:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
+.deck-scene { position: absolute; inset: 0; transform-style: preserve-3d; }
+.deck-card { position: absolute; left: 50%; top: var(--dk-top); width: var(--dk-w); height: var(--dk-h); margin-left: calc(var(--dk-w) / -2); transform-origin: 50% 100%; transform-style: preserve-3d; will-change: transform; border-radius: 6px; overflow: hidden; background: var(--sunk); box-shadow: 0 0 0 1px var(--line), 0 18px 40px rgba(0, 0, 0, .18); }
+.deck-card img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; pointer-events: none; user-select: none; }
+.deck-card::after { content: ""; position: absolute; inset: 0; background: #000; opacity: var(--shade, 0); pointer-events: none; }
+.deck-head { position: absolute; left: 0; right: 0; top: 28px; z-index: 2; text-align: center; display: grid; gap: 6px; padding-inline: max(16px, env(safe-area-inset-left, 0px)); pointer-events: none; }
+.deck-head h2 { font-size: var(--step-3); font-weight: 800; letter-spacing: -.02em; }
+.deck-cap { position: absolute; left: 0; right: 0; bottom: 28px; z-index: 2; text-align: center; display: grid; gap: 4px; padding-inline: 16px; pointer-events: none; }
+.deck-title { font-family: var(--f-display); font-weight: 700; font-size: var(--step-2); }
+.deck-sub { color: var(--muted); font-size: .9375rem; }
+.deck-count { font-family: var(--f-mono); font-size: .75rem; color: var(--muted); letter-spacing: .08em; }
+@media (prefers-reduced-motion: reduce) { .deck { height: calc(var(--dk-n, 7) * 30vh + 100vh); } }
+.deck-cap { bottom: 22px; }
+@media (max-width: 760px) { .deck-cap { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); } .deck-head { top: 18px; } }
