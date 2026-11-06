@@ -48,14 +48,15 @@
       entries.forEach(function (e) {
         if (!e.isIntersecting) return;
         io.unobserve(e.target);
-        var el = e.target, to = +el.dataset.count, pre = el.dataset.prefix || '', t0 = null;
+        var el = e.target, to = +el.dataset.count, pre = el.dataset.prefix || '', suf = el.dataset.suffix || '', t0 = null;
+        var fmt = function (v) { return pre + v.toLocaleString('en-US') + suf; };
         function step(ts) {
           if (t0 === null) t0 = ts;
-          var k = Math.min((ts - t0) / 1400, 1), ease = 1 - Math.pow(1 - k, 3);
-          el.textContent = pre + Math.round(to * ease);
+          var k = Math.min((ts - t0) / (to > 999 ? 2200 : 1400), 1), ease = 1 - Math.pow(1 - k, 3);
+          el.textContent = fmt(Math.round(to * ease));
           if (k < 1) requestAnimationFrame(step);
         }
-        el.textContent = pre + '0';
+        el.textContent = fmt(0);
         requestAnimationFrame(step);
       });
     }, { threshold: .6 });
