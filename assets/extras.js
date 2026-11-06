@@ -156,7 +156,8 @@
 })();
 
 /* This is me: circular photo carousel. Photos and text change together;
- * it moves on by itself while visible, and stops on hover, focus or touch. */
+ * it moves on by itself every 5 seconds while visible. Any manual move
+ * (arrows, dots, swipe, keys) pauses it for 20 seconds, then it carries on. */
 (function () {
   var root = document.getElementById('me-show'); if (!root) return;
   var calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -185,29 +186,32 @@
     if (user) root.classList.add('anim');
   }
   if (!calm) root.classList.add('anim'); else root.classList.add('still');
-  root.querySelectorAll('.ms-btn').forEach(function (b) { b.addEventListener('click', function () { show(cur + +b.dataset.dir, !calm); }); });
+  root.querySelectorAll('.ms-btn').forEach(function (b) { b.addEventListener('click', function () { act(cur + +b.dataset.dir); }); });
   dots.forEach(function (d, k) {
-    d.addEventListener('click', function () { show(k, !calm); });
+    d.addEventListener('click', function () { act(k); });
     // The bar filling up is the timer: when it finishes, move on.
     d.querySelector('i').addEventListener('animationend', function () { if (d.classList.contains('on')) show(cur + 1, true); });
   });
-  photos.forEach(function (p, k) { p.addEventListener('click', function () { if (p.classList.contains('prev')) show(cur - 1, !calm); else if (p.classList.contains('next')) show(cur + 1, !calm); }); });
+  photos.forEach(function (p, k) { p.addEventListener('click', function () { if (p.classList.contains('prev')) act(cur - 1); else if (p.classList.contains('next')) act(cur + 1); }); });
   root.addEventListener('keydown', function (e) {
     if (e.target.closest('.ms-dots')) return;
-    if (e.key === 'ArrowRight') { e.preventDefault(); show(cur + 1, !calm); }
-    if (e.key === 'ArrowLeft') { e.preventDefault(); show(cur - 1, !calm); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); act(cur + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); act(cur - 1); }
   });
   // Swipe on the photos.
   var x0 = null, box = root.querySelector('.ms-photos');
   box.addEventListener('pointerdown', function (e) { x0 = e.clientX; });
-  box.addEventListener('pointerup', function (e) { if (x0 === null) return; var dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 40) show(cur + (dx < 0 ? 1 : -1), !calm); });
+  box.addEventListener('pointerup', function (e) { if (x0 === null) return; var dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 40) act(cur + (dx < 0 ? 1 : -1)); });
   // Pause while you're reading, and while it's off-screen.
-  var hover = false, focus = false, away = true;
-  function sync() { root.classList.toggle('paused', hover || focus || away); }
-  root.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') { hover = true; sync(); } });
-  root.addEventListener('pointerleave', function () { hover = false; sync(); });
-  root.addEventListener('focusin', function () { focus = true; sync(); });
-  root.addEventListener('focusout', function () { focus = false; sync(); });
+  // Pause while it's off-screen, and for 20 seconds after you move it yourself.
+  var held = false, away = true, holdT = null;
+  function sync() { root.classList.toggle('paused', held || away); }
+  function act(i) {
+    show(i, !calm);
+    held = true; sync();
+    clearTimeout(holdT);
+    holdT = setTimeout(function () { held = false; sync(); }, 20000);
+  }
   if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { away = !es[0].isIntersecting; sync(); }, { threshold: .35 }).observe(root);
   else away = false;
   sync(); show(0, false);

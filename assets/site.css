@@ -603,7 +603,7 @@ section.block { padding-block: 80px 8px; }
 .ms-dots { display: flex; gap: 6px; margin-left: 10px; }
 .ms-dots button { width: 28px; height: 20px; padding: 0; border: 0; background: none; cursor: pointer; display: grid; align-items: center; }
 .ms-dots i { display: block; height: 4px; border-radius: 4px; background: var(--line); overflow: hidden; position: relative; }
-.ms-dots button.on i::after { content: ""; position: absolute; inset: 0; background: var(--accent); transform-origin: left; animation: ms-fill 7s linear forwards; }
+.ms-dots button.on i::after { content: ""; position: absolute; inset: 0; background: var(--accent); transform-origin: left; animation: ms-fill 5s linear forwards; }
 .me-show.paused .ms-dots button.on i::after { animation-play-state: paused; }
 .me-show.still .ms-dots button.on i::after { animation: none; }
 @keyframes ms-fill { from { transform: scaleX(0); } }
