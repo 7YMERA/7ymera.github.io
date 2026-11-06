@@ -777,3 +777,20 @@ section.block { padding-block: 80px 8px; }
 .cur-stage { background: transparent; -webkit-mask-image: linear-gradient(#000 72%, transparent 100%); mask-image: linear-gradient(#000 72%, transparent 100%); }
 .post-body pre { margin: 0; padding: 16px 18px; border-radius: 14px; background: var(--ink); color: var(--bg); overflow-x: auto; font: .875rem/1.55 var(--f-mono); }
 .post-body :not(pre) > code { font-family: var(--f-mono); font-size: .875em; padding: 1px 6px; border-radius: 6px; background: var(--accent-soft); }
+
+/* What I studied at UTP */
+.uni { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.uni-card { position: relative; display: grid; align-content: start; gap: 10px; padding: 22px; border-radius: 20px; background: color-mix(in srgb, var(--surface) 90%, transparent); border: 1px solid var(--line); overflow: hidden; transition: transform .25s, border-color .25s; }
+.uni-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+.uni-card.wide { grid-column: span 2; }
+.uni-k { font-family: var(--f-mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.uni-card h3 { margin: 0 0 4px; font-family: var(--f-display); font-size: 1.25rem; line-height: 1.2; }
+.uni-langs { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.uni-langs li { display: inline-flex; align-items: center; gap: 9px; padding: 10px 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg); font: 600 1rem var(--f-display); }
+.uni-langs i { width: 10px; height: 10px; border-radius: 3px; }
+.uni-card.maths { background: linear-gradient(135deg, var(--gold-soft), color-mix(in srgb, var(--surface) 90%, transparent) 70%); }
+.uni-stamp { position: absolute; right: 16px; bottom: 18px; font: 700 .8125rem var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); border: 2px solid var(--gold); border-radius: 8px; padding: 5px 10px; transform: rotate(-9deg); opacity: .9; }
+@media (max-width: 900px) { .uni { grid-template-columns: repeat(2, minmax(0, 1fr)); } .uni-card.wide { grid-column: 1 / -1; } }
+@media (max-width: 600px) { .uni { grid-template-columns: 1fr; } .uni-card.maths { padding-bottom: 64px; } }
+.uni-note { margin: 4px 0 0; color: var(--muted); font-size: .9375rem; max-width: 26em; padding-right: 8px; }
+@media (min-width: 601px) { .uni-card.maths { padding-bottom: 70px; } }
