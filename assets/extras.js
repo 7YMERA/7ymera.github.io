@@ -133,3 +133,83 @@
     Object.keys(map).forEach(function (id) { so.observe(document.getElementById(id)); });
   }
 })();
+
+/* This is me: circular photo carousel. Photos and text change together;
+ * it moves on by itself while visible, and stops on hover, focus or touch. */
+(function () {
+  var root = document.getElementById('me-show'); if (!root) return;
+  var calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var photos = root.querySelectorAll('.ms-photo'), slides = root.querySelectorAll('.ms-slide');
+  var dots = root.querySelectorAll('.ms-dots button'), n = photos.length, cur = 0;
+  // Split each quote into words so they can blur in one after another.
+  slides.forEach(function (s) {
+    var q = s.querySelector('.ms-quote'); if (!q) return;
+    var words = q.textContent.trim().split(/\s+/);
+    q.setAttribute('aria-label', q.textContent.trim());
+    q.innerHTML = words.map(function (w, i) { return '<span class="w" aria-hidden="true" style="--i:' + i + '">' + w + '</span>'; }).join(' ');
+  });
+  function show(i, user) {
+    cur = (i + n) % n;
+    photos.forEach(function (p, k) {
+      p.classList.toggle('on', k === cur);
+      p.classList.toggle('prev', k === (cur - 1 + n) % n);
+      p.classList.toggle('next', k === (cur + 1) % n);
+    });
+    slides.forEach(function (s, k) { s.hidden = k !== cur; s.classList.toggle('on', k === cur); });
+    dots.forEach(function (d, k) {
+      d.classList.toggle('on', k === cur);
+      if (k === cur) d.setAttribute('aria-current', 'true'); else d.removeAttribute('aria-current');
+      var bar = d.querySelector('i'); bar.style.display = 'none'; bar.offsetWidth; bar.style.display = '';
+    });
+    if (user) root.classList.add('anim');
+  }
+  if (!calm) root.classList.add('anim'); else root.classList.add('still');
+  root.querySelectorAll('.ms-btn').forEach(function (b) { b.addEventListener('click', function () { show(cur + +b.dataset.dir, !calm); }); });
+  dots.forEach(function (d, k) {
+    d.addEventListener('click', function () { show(k, !calm); });
+    // The bar filling up is the timer: when it finishes, move on.
+    d.querySelector('i').addEventListener('animationend', function () { if (d.classList.contains('on')) show(cur + 1, true); });
+  });
+  photos.forEach(function (p, k) { p.addEventListener('click', function () { if (p.classList.contains('prev')) show(cur - 1, !calm); else if (p.classList.contains('next')) show(cur + 1, !calm); }); });
+  root.addEventListener('keydown', function (e) {
+    if (e.target.closest('.ms-dots')) return;
+    if (e.key === 'ArrowRight') { e.preventDefault(); show(cur + 1, !calm); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); show(cur - 1, !calm); }
+  });
+  // Swipe on the photos.
+  var x0 = null, box = root.querySelector('.ms-photos');
+  box.addEventListener('pointerdown', function (e) { x0 = e.clientX; });
+  box.addEventListener('pointerup', function (e) { if (x0 === null) return; var dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 40) show(cur + (dx < 0 ? 1 : -1), !calm); });
+  // Pause while you're reading, and while it's off-screen.
+  var hover = false, focus = false, away = true;
+  function sync() { root.classList.toggle('paused', hover || focus || away); }
+  root.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') { hover = true; sync(); } });
+  root.addEventListener('pointerleave', function () { hover = false; sync(); });
+  root.addEventListener('focusin', function () { focus = true; sync(); });
+  root.addEventListener('focusout', function () { focus = false; sync(); });
+  if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { away = !es[0].isIntersecting; sync(); }, { threshold: .35 }).observe(root);
+  else away = false;
+  sync(); show(0, false);
+})();
+
+/* Showcase switch: flip between the tumble deck and the spinning reel.
+ * The choice is remembered on this device. */
+(function () {
+  var deck = document.getElementById('deck'), reel = document.getElementById('reel-wrap');
+  if (!deck || !reel) return;
+  var btns = document.querySelectorAll('.vswitch button');
+  function set(view, jump) {
+    deck.hidden = view !== 'deck'; reel.hidden = view !== 'reel';
+    btns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.view === view)); });
+    try { localStorage.setItem('showcase', view); } catch (e) {}
+    if (jump) {
+      var shown = view === 'deck' ? deck : reel;
+      scrollTo({ top: scrollY + shown.getBoundingClientRect().top - 60, behavior: 'auto' });
+      var b = shown.querySelector('.vswitch button[data-view="' + view + '"]'); if (b) b.focus({ preventScroll: true });
+    }
+    dispatchEvent(new Event('scroll'));
+  }
+  var start = 'deck'; try { if (localStorage.getItem('showcase') === 'reel') start = 'reel'; } catch (e) {}
+  set(start, false);
+  btns.forEach(function (b) { b.addEventListener('click', function (e) { e.stopPropagation(); if (b.getAttribute('aria-pressed') !== 'true') set(b.dataset.view, true); }); });
+})();

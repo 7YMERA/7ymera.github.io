@@ -65,7 +65,7 @@
       var W = stage.clientWidth, H = stage.clientHeight;
       var wFrac = W < 520 ? 0.82 : 0.6;
       var h = Math.max(60, Math.min((W * wFrac) / aspect, H * 0.36, 520));
-      var top = H * 0.46 - 0.62 * h;
+      var top = H * 0.5 - 0.62 * h;
       geo = { h: h, gap: 0.24 * h };
       scene.style.perspective = (6 * h) + 'px';
       scene.style.perspectiveOrigin = '50% ' + (top - 1.66 * h) + 'px';
