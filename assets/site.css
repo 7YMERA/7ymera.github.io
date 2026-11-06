@@ -863,3 +863,7 @@ section.block { padding-block: 80px 8px; }
 .st-branches::before { top: -18px; height: 32px; }
 @media (max-width: 900px) { .st-branches::before { top: -18px; height: calc(100% + 18px - 30px); } }
 .st-root .badge { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font: 700 .8125rem var(--f-display); }
+/* Logo: the GitHub profile picture */
+.badge.av { padding: 0; overflow: hidden; background: var(--sunk); }
+.badge.av img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.st-root .badge.av { border: 2px solid var(--bg); }
