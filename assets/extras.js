@@ -238,3 +238,11 @@
   set(start, false, true);
   btns.forEach(function (b) { b.addEventListener('click', function (e) { e.stopPropagation(); if (b.getAttribute('aria-pressed') !== 'true') set(b.dataset.view, true); }); });
 })();
+
+/* Skill tree: every branch open on wide screens; on phones only the first,
+ * so the section stays short and you tap to open the rest. */
+(function () {
+  var br = document.querySelectorAll('.st-branch'); if (!br.length) return;
+  if (matchMedia('(max-width: 900px)').matches) br.forEach(function (d, i) { d.open = i === 0; });
+  else br.forEach(function (d) { d.addEventListener('toggle', function () { if (!d.open && innerWidth > 900) d.open = true; }); });
+})();
