@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Where can I solat Jumaat from here? · Alif Najmi</title>
+<meta name="description" content="Building JumaatFinder: official masjid and surau data, prayer times and a leave-by time for Friday prayers.">
+<meta property="og:title" content="Where can I solat Jumaat from here?">
+<meta property="og:description" content="Finding the nearest place for Friday prayers, from official data.">
+<meta property="og:image" content="https://7ymera.github.io/assets/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Alif Najmi">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://7ymera.github.io/notes/jumaatfinder.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a6c74">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230f1e24'/%3E%3Ctext x='32' y='42' font-family='Arial,sans-serif' font-weight='700' font-size='26' text-anchor='middle' fill='%23f4f7f7'%3EAN%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/site.css?v=20261106f">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge">AN</span>Alif Najmi</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="../#me">Me</a>
+      <a href="../#work">Work</a>
+      <a href="../#journey">Journey</a>
+      <a href="../#contact">Contact</a>
+    </nav>
+    <button class="icon-btn k-btn" id="theme-btn" type="button" aria-label="Switch light or dark theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="post">
+    <div class="post-head">
+      <a class="back" href="../#me">← Back to Alif</a>
+      <span class="eyebrow">Notes · Side project</span>
+      <h1>Where can I solat Jumaat from here?</h1>
+      <p class="meta">6 November 2026 · 4 min read</p>
+    </div>
+
+    <div class="post-body">
+      <p>On a Friday at Mid Valley, the question is always the same: where's the nearest place for Jumaat, and when do I need to leave? It doesn't have to be a full masjid; plenty of surau in the Klang Valley hold Jumaat too. But unless you already know, you end up walking further than you need to. JumaatFinder answers both questions at once.</p>
+
+      <figure class="shot" style="max-width:340px;margin-inline:auto">
+        <img src="../assets/jumaat.webp" alt="JumaatFinder showing a countdown to Zuhr and a list of nearby masjid and surau" width="390" height="680" loading="lazy">
+        <figcaption>A countdown to azan, and every nearby place with a "leave by" time.</figcaption>
+      </figure>
+
+      <h2>What it does</h2>
+      <ul>
+        <li><strong>Counts down to this Friday's Zuhr</strong>, using JAKIM times for the zone your GPS puts you in.</li>
+        <li><strong>Lists masjid and surau within 3 km</strong>, sorted by distance, with walking time.</li>
+        <li><strong>Tells you when to leave</strong> for each one: walking time plus a buffer you choose, shown as On track, Leave now, or Too late on foot.</li>
+        <li><strong>Opens directions</strong> in Google Maps or Waze, and adds a weekly Friday reminder to your calendar.</li>
+        <li><strong>Works without GPS</strong>: pick Mid Valley, The Gardens, Bangsar South, KL Sentral or KLCC.</li>
+      </ul>
+
+      <h2>Official data, not guesses</h2>
+      <p>OpenStreetMap knows where buildings are, but not which surau are approved for Jumaat. So I went to the source: the JAIS e-Masjid portal, which lists every official masjid in Selangor and the surau approved for Jumaat. I scraped both lists and geocoded every address, politely, one request per second.</p>
+      <figure>
+        <div class="diagram"><svg class="dg" viewBox="0 0 920 350" role="img"><title>How JumaatFinder gets its data</title><desc>Once: official JAIS listings are scraped, geocoded with OpenStreetMap Nominatim and built into official.js. In the browser: your location or a preset, JAKIM prayer times, nearby places from OpenStreetMap and the official list feed the app, which shares votes and reports through a small database.</desc><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ahd"/></marker></defs><rect class="grp" x="15" y="18" width="895" height="112" rx="14"/><text class="gl" x="29" y="38">Built once, about an hour</text><rect class="grp" x="15" y="166" width="895" height="176" rx="14"/><text class="gl" x="29" y="186">In the browser, every Friday</text><path class="ed" d="M200 82H248" marker-end="url(#ah)"/><path class="ed" d="M430 82H478" marker-end="url(#ah)"/><path class="ed" d="M670 82H718" marker-end="url(#ah)"/><path class="ed" d="M810 112V150H440V208" marker-end="url(#ah)"/><text class="el" x="625" y="144" text-anchor="middle">bundled with the app</text><path class="ed" d="M210 223H298" marker-end="url(#ah)"/><path class="ed" d="M210 299H250V280H298" marker-end="url(#ah)"/><path class="ed" d="M668 213H582" marker-end="url(#ah)"/><path class="ed" d="M582 290H668" marker-end="url(#ah)"/><text class="el" x="625" y="282" text-anchor="middle">votes · reports</text><g class="n ext"><rect x="30" y="52" width="170" height="60" rx="10"/><text class="t" x="115.0" y="78.0" text-anchor="middle">JAIS e-Masjid</text><text class="s" x="115.0" y="94.0" text-anchor="middle">official listings</text></g><g class="n "><rect x="250" y="52" width="180" height="60" rx="10"/><text class="t" x="340.0" y="78.0" text-anchor="middle">Scrape</text><text class="s" x="340.0" y="94.0" text-anchor="middle">452 masjid · 113 surau</text></g><g class="n "><rect x="480" y="52" width="190" height="60" rx="10"/><text class="t" x="575.0" y="78.0" text-anchor="middle">Geocode</text><text class="s" x="575.0" y="94.0" text-anchor="middle">Nominatim · 1 per second</text></g><g class="n main"><rect x="720" y="52" width="180" height="60" rx="10"/><text class="t" x="810.0" y="78.0" text-anchor="middle">official.js</text><text class="s" x="810.0" y="94.0" text-anchor="middle">with pin precision</text></g><g class="n "><rect x="30" y="196" width="180" height="54" rx="10"/><text class="t" x="120.0" y="219.0" text-anchor="middle">Your location</text><text class="s" x="120.0" y="235.0" text-anchor="middle">or a preset place</text></g><g class="n ext"><rect x="30" y="272" width="180" height="54" rx="10"/><text class="t" x="120.0" y="295.0" text-anchor="middle">JAKIM times</text><text class="s" x="120.0" y="311.0" text-anchor="middle">waktusolat.app</text></g><g class="n main"><rect x="300" y="210" width="280" height="100" rx="10"/><text class="t" x="440.0" y="248.0" text-anchor="middle">JumaatFinder</text><text class="s" x="440.0" y="264.0" text-anchor="middle">nearby list · walking time</text><text class="s" x="440.0" y="280.0" text-anchor="middle">leave-by time · countdown</text></g><g class="n ext"><rect x="670" y="186" width="230" height="54" rx="10"/><text class="t" x="785.0" y="209.0" text-anchor="middle">OpenStreetMap</text><text class="s" x="785.0" y="225.0" text-anchor="middle">masjid &amp; surau within 3 km</text></g><g class="n db"><path d="M670 274v48a115.0 8 0 0 0 230 0v-48a115.0 8 0 0 0 -230 0a115.0 8 0 0 0 230 0"/><text class="t" x="785.0" y="298.0" text-anchor="middle">Shared reports</text><text class="s" x="785.0" y="314.0" text-anchor="middle">Postgres · 20 per hour</text></g></svg></div>
+        <figcaption>The official list is built once; everything else happens on your phone. <span class="scroll-hint">Swipe sideways to see all of it.</span></figcaption>
+      </figure>
+      <p>That gave <strong>452 official masjid</strong> (344 with their capacity) and <strong>113 approved surau</strong>, 565 places in all. Not every address geocodes cleanly, so each pin records how it was found: the place itself, the street, or only the postcode. About half the masjid only matched to a postcode, which can cover several kilometres, so those don't get a walking time at all. A wrong "5 minutes away" is worse than no number.</p>
+
+      <h2>Help from everyone, carefully</h2>
+      <p>The people at the surau know things no dataset does, like "hall full by 1:05pm, overflow at car park L2". So anyone can mark whether a surau holds Jumaat, post a crowd report, or fix a pin that's in the wrong place.</p>
+      <ul>
+        <li>A surau shows as confirmed once more people say yes than no.</li>
+        <li>A pin only moves once two people agree on where it should be.</li>
+        <li>Crowd reports disappear after 35 days.</li>
+        <li>Each person can send 20 reports an hour, and IP addresses are only kept as salted hashes.</li>
+      </ul>
+
+      <h2>What's next</h2>
+      <p>Kuala Lumpur's list comes from a different authority (JAWI), so it isn't in yet, and the JAIS portal doesn't list every approved surau. Verified khutbah start times would be the next thing worth adding.</p>
+      <p>The code is on <a href="https://github.com/7YMERA/jumaat-finder-app" target="_blank" rel="noopener">GitHub</a>.</p>
+    </div>
+
+    <div class="post-foot">
+      <a class="back" href="kakilima.html">← Accessible first, in four languages</a>
+      <a class="back" href="index.html">All notes →</a>
+    </div>
+  </article>
+</main>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  try { var saved = localStorage.getItem('theme'); if (saved) root.setAttribute('data-theme', saved); } catch (e) {}
+  document.getElementById('theme-btn').addEventListener('click', function () {
+    var cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>

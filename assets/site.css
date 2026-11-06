@@ -665,3 +665,28 @@ section.block { padding-block: 80px 8px; }
 .table-wrap { overflow-x: auto; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0 !important; }
 .chips li { font-size: .875rem; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); }
+/* Notes: flow and sequence diagrams (inline SVG, themed) */
+.dg { display: block; width: 100%; min-width: 640px; height: auto; font-family: var(--f-body, sans-serif); }
+.dg .n rect, .dg .n path { fill: var(--bg); stroke: var(--line); stroke-width: 1.4; }
+.dg .n.main rect { stroke: var(--accent); }
+.dg .n.db path { fill: var(--accent-soft); stroke: var(--accent); }
+.dg .n.ext rect { fill: var(--gold-soft); stroke: var(--gold); stroke-dasharray: 0; }
+.dg .n.soft rect { fill: var(--accent-soft); stroke: transparent; }
+.dg .t { fill: var(--ink); font-size: 13px; font-weight: 600; }
+.dg .s { fill: var(--muted); font-size: 11.5px; font-family: var(--f-mono); }
+.dg .grp { fill: none; stroke: var(--line); stroke-width: 1.4; stroke-dasharray: 6 5; }
+.dg .gl { fill: var(--muted); font: 500 11px var(--f-mono); letter-spacing: .06em; text-transform: uppercase; }
+.dg .ed { fill: none; stroke: var(--muted); stroke-width: 1.5; }
+.dg .ed.da { stroke-dasharray: 5 4; }
+.dg .ahd { fill: var(--muted); }
+.dg .el, .dg .ml { fill: var(--muted); font-size: 11.5px; }
+.dg .ml { fill: var(--ink); }
+.dg .life { stroke: var(--line); stroke-width: 1.4; stroke-dasharray: 4 4; }
+.diagram { overflow-x: auto; -webkit-overflow-scrolling: touch; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+.post-body .phones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: start; }
+.post-body .phones img { aspect-ratio: 520 / 1125; object-fit: cover; object-position: top; border-radius: 14px; border: 1px solid var(--line); }
+@media (max-width: 560px) { .post-body .phones { gap: 8px; } }
+.notes-index { max-width: 46rem; margin: 32px auto 0; display: grid; gap: 12px; }
+.note-card .note-sub { display: block; margin-top: 4px; }
+.notes-all { font-weight: 600; text-decoration: none; justify-self: start; padding: 4px 2px; }
+@media (max-width: 560px) { .post-body td:first-child { white-space: normal; } .post-body th, .post-body td { padding: 8px 6px; } }
