@@ -771,3 +771,7 @@ section.block { padding-block: 80px 8px; }
   .nb-row::-webkit-scrollbar { display: none; }
   .nb-card { flex: 0 0 min(80%, 320px); scroll-snap-align: start; }
 }
+/* Let the curtain dissolve into the page instead of ending in a hard line:
+ * the stage is see-through and its bottom fades out, so the site aurora
+ * carries on underneath into the next section. */
+.cur-stage { background: transparent; -webkit-mask-image: linear-gradient(#000 72%, transparent 100%); mask-image: linear-gradient(#000 72%, transparent 100%); }
