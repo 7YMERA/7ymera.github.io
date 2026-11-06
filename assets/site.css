@@ -626,3 +626,12 @@ section.block { padding-block: 80px 8px; }
 .reel-head { display: grid; gap: 6px; text-align: center; padding: 48px 16px 8px; }
 .reel-head h2 { font-size: var(--step-3); font-weight: 800; letter-spacing: -.02em; }
 .deck[hidden], .reel-wrap[hidden] { display: none; }
+/* Desktop: heading on the left, caption on the right, one row at the top,
+ * so the deck gets the rest of the screen. */
+@media (min-width: 900px) {
+  .deck-head, .deck-cap { top: 26px; bottom: auto; padding-inline: max(24px, calc((100% - var(--col)) / 2 + 16px)); }
+  .deck-head { text-align: left; justify-items: start; right: auto; max-width: 62%; }
+  .deck-head h2 { font-size: var(--step-2); }
+  .deck-head .vswitch { justify-self: start; }
+  .deck-cap { text-align: right; justify-items: end; left: auto; }
+}

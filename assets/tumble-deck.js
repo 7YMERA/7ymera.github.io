@@ -36,7 +36,7 @@
     var aspect = +(root.dataset.aspect || 1.6), depth = 4;
     var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     var stage = root.querySelector('.deck-stage'), scene = root.querySelector('.deck-scene');
-    var title = root.querySelector('.deck-title'), sub = root.querySelector('.deck-sub'), count = root.querySelector('.deck-count');
+    var head = root.querySelector('.deck-head'), title = root.querySelector('.deck-title'), sub = root.querySelector('.deck-sub'), count = root.querySelector('.deck-count');
     var els = cards.map(function (c, k) {
       var el = document.createElement('div'); el.className = 'deck-card';
       var img = document.createElement('img'); img.src = c.src; img.alt = c.alt || ''; img.draggable = false; img.decoding = 'async';
@@ -63,9 +63,18 @@
     }
     function fit() {
       var W = stage.clientWidth, H = stage.clientHeight;
-      var wFrac = W < 520 ? 0.82 : 0.6;
-      var h = Math.max(60, Math.min((W * wFrac) / aspect, H * 0.36, 520));
-      var top = H * 0.5 - 0.62 * h;
+      var wFrac = W < 520 ? 0.82 : 0.6, h, top;
+      if (W >= 900) {
+        // Desktop: the heading row sits at the top, so the deck can use the
+        // rest. The back cards rise ~0.27h above the front card and the
+        // fallen ones reach ~0.55h below it.
+        var headEnd = Math.max(head ? head.offsetTop + head.offsetHeight : 0, count ? count.parentNode.offsetTop + count.parentNode.offsetHeight : 0) + 18;
+        h = Math.max(60, Math.min((W * 0.72) / aspect, (H - headEnd - 24) / 1.82, 680));
+        top = headEnd + 0.27 * h;
+      } else {
+        h = Math.max(60, Math.min((W * wFrac) / aspect, H * 0.36, 520));
+        top = H * 0.5 - 0.62 * h;
+      }
       geo = { h: h, gap: 0.24 * h };
       scene.style.perspective = (6 * h) + 'px';
       scene.style.perspectiveOrigin = '50% ' + (top - 1.66 * h) + 'px';
