@@ -794,3 +794,4 @@ section.block { padding-block: 80px 8px; }
 @media (max-width: 600px) { .uni { grid-template-columns: 1fr; } .uni-card.maths { padding-bottom: 64px; } }
 .uni-note { margin: 4px 0 0; color: var(--muted); font-size: .9375rem; max-width: 26em; padding-right: 8px; }
 @media (min-width: 601px) { .uni-card.maths { padding-bottom: 70px; } }
+.uni-card.proj { background: linear-gradient(135deg, var(--accent-soft), color-mix(in srgb, var(--surface) 90%, transparent) 70%); }
