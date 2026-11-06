@@ -795,3 +795,15 @@ section.block { padding-block: 80px 8px; }
 .uni-note { margin: 4px 0 0; color: var(--muted); font-size: .9375rem; max-width: 26em; padding-right: 8px; }
 @media (min-width: 601px) { .uni-card.maths { padding-bottom: 70px; } }
 .uni-card.proj { background: linear-gradient(135deg, var(--accent-soft), color-mix(in srgb, var(--surface) 90%, transparent) 70%); }
+.uni-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.uni-list li { display: grid; gap: 2px; padding: 9px 0; border-top: 1px solid var(--line); }
+.uni-list li:first-child { border-top: 0; padding-top: 2px; }
+.uni-list b { font-weight: 600; font-size: .9688rem; }
+.uni-list span { color: var(--muted); font-size: .875rem; line-height: 1.45; }
+.uni-list a { font-weight: 600; }
+.uni-card.cols .uni-list { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
+.uni-card.cols .uni-list li:nth-child(2) { border-top: 0; padding-top: 2px; }
+.uni-card.full { grid-column: 1 / -1; }
+@media (max-width: 600px) { .uni-card.cols .uni-list { grid-template-columns: 1fr; } .uni-card.cols .uni-list li:nth-child(2) { border-top: 1px solid var(--line); padding-top: 9px; } }
+.uni-card.maths .uni-stamp { top: 18px; bottom: auto; }
+.uni-card.maths { padding-bottom: 22px; }
