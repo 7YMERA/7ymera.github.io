@@ -775,3 +775,5 @@ section.block { padding-block: 80px 8px; }
  * the stage is see-through and its bottom fades out, so the site aurora
  * carries on underneath into the next section. */
 .cur-stage { background: transparent; -webkit-mask-image: linear-gradient(#000 72%, transparent 100%); mask-image: linear-gradient(#000 72%, transparent 100%); }
+.post-body pre { margin: 0; padding: 16px 18px; border-radius: 14px; background: var(--ink); color: var(--bg); overflow-x: auto; font: .875rem/1.55 var(--f-mono); }
+.post-body :not(pre) > code { font-family: var(--f-mono); font-size: .875em; padding: 1px 6px; border-radius: 6px; background: var(--accent-soft); }
