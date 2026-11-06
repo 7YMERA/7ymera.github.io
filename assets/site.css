@@ -414,7 +414,7 @@ section.block { padding-block: 80px 8px; }
 
 /* Aurora backdrop: a pre-rendered, pre-blurred image that drifts sideways.
    Drawing the blur and colour blending live made scrolling stutter. */
-:root { --au-img: url("aurora-light.webp"); --au-o: .9; }
+:root { --au-img: url("aurora-light-2.webp"); --au-o: .9; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --au-img: url("aurora-dark.webp"); --au-o: 1; } }
 :root[data-theme="dark"] { --au-img: url("aurora-dark.webp"); --au-o: 1; }
 .aurora { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
