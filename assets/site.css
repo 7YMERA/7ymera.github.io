@@ -942,3 +942,27 @@ section.block { padding-block: 80px 8px; }
 .kt-panel[hidden] { display: none; }
 .kt-intro { color: var(--muted); max-width: 40rem; margin: 0 0 8px; }
 @media (max-width: 480px) { .kt-tabs button { padding: 8px 12px; font-size: .875rem; } }
+/* The switch as two big choice cards, so it reads as something to press */
+.kt-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 0; border: 0; background: none; border-radius: 0; margin: 0 0 28px; width: 100%; }
+.kt-tabs button { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; text-align: left; white-space: normal; padding: 16px 18px; border-radius: 18px; border: 1.5px solid var(--line); background: color-mix(in srgb, var(--surface) 88%, transparent); color: var(--ink); font-weight: 400; transition: border-color .2s, transform .2s, box-shadow .2s, background .2s; }
+.kt-tabs button:hover { border-color: var(--accent); transform: translateY(-2px); color: var(--ink); }
+.kt-tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); box-shadow: var(--shadow); transform: none; }
+.kt-ic { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+.kt-tabs button[aria-selected="true"] .kt-ic { background: color-mix(in srgb, var(--bg) 16%, transparent); color: var(--bg); }
+.kt-ic svg { width: 22px; height: 22px; }
+.kt-txt b { display: block; font: 700 1.0625rem/1.2 var(--f-display); }
+.kt-txt small { display: block; margin-top: 3px; font-size: .8125rem; line-height: 1.35; opacity: .75; }
+.kt-go { font: 600 .75rem var(--f-mono); white-space: nowrap; }
+.kt-go .kt-on { display: none; opacity: .7; }
+.kt-tabs button[aria-selected="true"] .kt-on { display: inline; }
+.kt-tabs button[aria-selected="true"] .kt-off { display: none; }
+.kt-off { color: var(--accent); }
+/* a gentle nudge on the card you haven't opened yet */
+.kt-tabs button[aria-selected="false"] .kt-off { animation: ktNudge 2.4s ease-in-out infinite; display: inline-block; }
+@keyframes ktNudge { 0%, 60%, 100% { transform: translateX(0); } 30% { transform: translateX(4px); } }
+@media (prefers-reduced-motion: reduce) { .kt-tabs button[aria-selected="false"] .kt-off { animation: none; } }
+@media (max-width: 640px) {
+  .kt-tabs { grid-template-columns: 1fr; gap: 8px; }
+  .kt-tabs button { padding: 12px 14px; gap: 12px; }
+  .kt-ic { width: 38px; height: 38px; }
+}
