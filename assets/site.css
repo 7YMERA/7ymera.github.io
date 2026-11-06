@@ -929,3 +929,7 @@ section.block { padding-block: 80px 8px; }
 .nb-read:hover { border-color: var(--accent); }
 .nb-cf .cf-stage { height: calc(var(--cf-size) * .9 + 40px); }
 @media (max-width: 600px) { .cf-stamp { top: 32px; right: 10px; font-size: .5625rem; padding: 3px 6px; } .uc-ic { width: 32%; } }
+/* Reel edges: no fade at all. The reel is full width, so tiles simply run off
+ * the edge of the screen. (Background-coloured strips stopped matching once
+ * the aurora went behind the page, and a mask costs too much on a 3D scene.) */
+.reel::before, .reel::after { display: none; }
