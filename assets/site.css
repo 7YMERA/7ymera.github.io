@@ -635,3 +635,33 @@ section.block { padding-block: 80px 8px; }
   .deck-head .vswitch { justify-self: start; }
   .deck-cap { text-align: right; justify-items: end; left: auto; }
 }
+
+/* Notes: diagrams */
+.erd-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+.erd-svg { display: block; width: 100%; min-width: 720px; height: auto; font-family: var(--f-mono); }
+.erd-svg .e rect { fill: var(--bg); stroke: var(--line); stroke-width: 1.2; }
+.erd-svg .e.main rect { stroke: var(--accent); stroke-width: 2; }
+.erd-svg .e .hd { fill: var(--accent-soft); }
+.erd-svg .e .t { fill: var(--ink); font-size: 13px; font-weight: 600; letter-spacing: .04em; }
+.erd-svg .e .f { fill: var(--ink); font-size: 12px; }
+.erd-svg .e .k { fill: var(--accent); font-size: 10.5px; font-weight: 600; }
+.erd-svg .e .n { fill: var(--muted); font-size: 10.5px; }
+.erd-svg .sep { stroke: var(--line); stroke-width: 1; }
+.erd-svg .l { fill: none; stroke: var(--muted); stroke-width: 1.4; }
+.erd-svg .c { fill: var(--gold); font-size: 12px; font-weight: 600; }
+.erd-svg .lb { fill: var(--muted); font-size: 11px; font-style: italic; }
+.scroll-hint { font-family: var(--f-mono); font-size: .75rem; color: var(--muted); }
+@media (min-width: 760px) { .scroll-hint { display: none; } }
+.chart-link { display: block; position: relative; }
+.chart-link::after { content: "Open full size ↗"; position: absolute; right: 10px; bottom: 10px; font: 600 .75rem var(--f-mono); background: var(--ink); color: var(--bg); padding: 6px 10px; border-radius: 8px; opacity: .9; }
+.post-body figure.tall img { max-height: 900px; object-fit: cover; object-position: top; }
+.post-body .trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: start; }
+.post-body .trio img { aspect-ratio: 3 / 4; object-fit: cover; }
+@media (max-width: 560px) { .post-body .trio { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.post-body table { border-collapse: collapse; width: 100%; font-size: .9375rem; }
+.post-body th, .post-body td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.post-body th { font-family: var(--f-mono); font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 500; }
+.post-body td:first-child { font-weight: 600; white-space: nowrap; }
+.table-wrap { overflow-x: auto; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0 !important; }
+.chips li { font-size: .875rem; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); }

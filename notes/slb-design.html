@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nine charts before one screen · Alif Najmi</title>
+<meta name="description" content="The flowcharts, ERDs and data model behind the IT Asset Disposal app I built at SLB.">
+<meta property="og:title" content="Nine charts before one screen">
+<meta property="og:description" content="The flowcharts, ERDs and data model behind my SLB internship app.">
+<meta property="og:image" content="https://7ymera.github.io/assets/og-slb.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Before and after: an Excel disposal sheet and the Power Apps case list">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://7ymera.github.io/notes/slb-design.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a6c74">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230f1e24'/%3E%3Ctext x='32' y='42' font-family='Arial,sans-serif' font-weight='700' font-size='26' text-anchor='middle' fill='%23f4f7f7'%3EAN%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/site.css?v=20261106e">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge">AN</span>Alif Najmi</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="../#me">Me</a>
+      <a href="../#work">Work</a>
+      <a href="../#journey">Journey</a>
+      <a href="../#contact">Contact</a>
+    </nav>
+    <button class="icon-btn k-btn" id="theme-btn" type="button" aria-label="Switch light or dark theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="post">
+    <div class="post-head">
+      <a class="back" href="../#me">← Back to Alif</a>
+      <span class="eyebrow">Notes · Internship · Design</span>
+      <h1>Nine charts before one screen</h1>
+      <p class="meta">6 November 2026 · 6 min read</p>
+    </div>
+
+    <div class="post-body">
+      <p>Before I built a single screen of the <a href="slb-power-apps.html">IT Asset Disposal app</a> at SLB, I drew the whole thing out. Who does what, which emails go where, what gets saved, and how the data fits together. It ended up as one draw.io file with nine pages, kept in the order I made them. This note walks through how they changed.</p>
+
+      <h2>What we were actually disposing of</h2>
+      <p>Disposal sounds abstract until you see it: switches, access points, chargers and hard drives piling up in a storeroom, waiting for two approvals that lived in an email thread.</p>
+      <div class="trio">
+        <figure><img src="../assets/notes/slb/disposal/01-junkyard.webp" alt="Boxes of old IT equipment on a warehouse floor" width="675" height="900" loading="lazy"></figure>
+        <figure><img src="../assets/notes/slb/disposal/04-storeroom.webp" alt="Old desktops and boxes stacked in a storeroom" width="730" height="900" loading="lazy"></figure>
+        <figure><img src="../assets/notes/slb/disposal/09-hard-drives.webp" alt="A box of removed hard drives" width="704" height="900" loading="lazy"></figure>
+      </div>
+      <p>Each laptop has its own asset tag and serial number. A cable lock doesn't; you just count them. That one difference shaped the whole data model later on.</p>
+
+      <h2>1. The first flow: four lanes and one "third party"</h2>
+      <p>The first version came over from LucidChart. It had four lanes: the requestor, the system, an admin, and a single "third party" approver. The whole approval was one cycle, repeated for the Finance Controller. The notes in the margin are me reminding myself to focus on manual input first.</p>
+      <figure class="shot">
+        <a class="chart-link" href="../assets/notes/slb/charts/mvp-flow-full.webp" target="_blank" rel="noopener"><img src="../assets/notes/slb/charts/mvp-flow.webp" alt="The first swimlane flowchart with Requestor, System, Admin and Third Party lanes" width="1600" height="1107" loading="lazy"></a>
+        <figcaption>Page 2, the MVP flow. Asset or non-asset is already the first big decision.</figcaption>
+      </figure>
+
+      <h2>2. Giving everyone their own lane</h2>
+      <p>The single "third party" was really two different people with two different jobs. The IT Manager and the Finance Controller got their own lanes, every email was spelled out with who gets it as TO and who as CC, and a home page appeared with Create, View My Requests and Help.</p>
+      <figure class="shot tall">
+        <a class="chart-link" href="../assets/notes/slb/charts/home-function-flow-full.webp" target="_blank" rel="noopener"><img src="../assets/notes/slb/charts/home-function-flow.webp" alt="A five-lane flowchart with a home page, IT Manager and Finance Controller lanes and an admin lane" width="1400" height="2129" loading="lazy"></a>
+        <figcaption>Page 5. The dotted lines split it into stages: submit, IT Manager, Finance Controller, then the QUEST and IBase numbers.</figcaption>
+      </figure>
+
+      <h2>3. The final flow, and admin on its own</h2>
+      <p>The final version pulled the admin work out into its own chart. Admins can view, add, edit and remove four things: other admins, locations, requestors and approvers. The main flow also got a "Confirm submission" step, warning that the list can't change once it's submitted.</p>
+      <div class="pair">
+        <figure class="shot tall">
+          <a class="chart-link" href="../assets/notes/slb/charts/final-flow-full.webp" target="_blank" rel="noopener"><img src="../assets/notes/slb/charts/final-flow.webp" alt="The final four-lane flowchart from request to disposal" width="1200" height="2371" loading="lazy"></a>
+          <figcaption>Page 7, the final flow.</figcaption>
+        </figure>
+        <figure class="shot tall">
+          <img src="../assets/notes/slb/charts/final-admin-access.webp" alt="The admin flowchart: view, add, edit and delete admins, locations, requestors and approvers" width="800" height="1705" loading="lazy">
+          <figcaption>Page 7, admin access.</figcaption>
+        </figure>
+      </div>
+
+      <h2>4. From a ten-table ERD to five lists</h2>
+      <p>The team's first ERD tried to model everything: users, requests, approvals, dismantling, documents, certificates and reports. It was a good map of the whole disposal process, but most of it wasn't the app's job.</p>
+      <figure class="shot">
+        <img src="../assets/notes/slb/charts/erd-team-draft.webp" alt="A wide ERD with User, Location, Disposal Request, Approval, Asset, Non-Asset, Dismantling, Document, Certificate and Report tables" width="1200" height="1031" loading="lazy">
+        <figcaption>Page 6, the team draft. The pink tables (dismantling, documents, certificates, reports) never made it into the app.</figcaption>
+      </figure>
+      <p>I cut it down and normalised it to third normal form: each fact stored once, and tables pointing at each other by ID.</p>
+      <figure class="shot">
+        <img src="../assets/notes/slb/charts/erd-normalised.webp" alt="The normalised ERD with Approver, Case, Requestor, Location and Item" width="1100" height="1001" loading="lazy">
+        <figcaption>Page 8, normalised: Case, Requestor, Location, Item and Approver.</figcaption>
+      </figure>
+
+      <h2>5. The data model that shipped</h2>
+      <p>Building it in SharePoint lists changed it one more time. This is what the app actually runs on.</p>
+      <figure>
+        <div class="erd-wrap"><svg class="erd-svg" viewBox="0 0 1056 580" role="img" aria-labelledby="erd-title erd-desc"><title id="erd-title">Final data model of the IT Asset Disposal app</title><desc id="erd-desc">Five SharePoint lists. A location has many cases; a case contains many items, is shared with many watchlist entries, and can have one QUEST and one IBase number. Items are picked from the IT asset list.</desc><path class="l" d="M256 103.0H378.0V85.0H420"/><text class="c" x="266" y="119.0" text-anchor="middle">1</text><text class="c" x="410" y="79.0" text-anchor="middle">N</text><text class="lb" x="328.0" y="93.0" text-anchor="middle">approvers come from</text><path class="l" d="M656 63.0H728.0V85.0H800"/><text class="c" x="666" y="57.0" text-anchor="middle">1</text><text class="c" x="790" y="79.0" text-anchor="middle">N</text><text class="lb" x="728.0" y="53.0" text-anchor="middle">contains</text><path class="l" d="M538.0 316V400"/><text class="c" x="550.0" y="332" text-anchor="middle">1</text><text class="c" x="550.0" y="394" text-anchor="middle">N</text><text class="lb" x="586.0" y="362.0" text-anchor="middle">shared with</text><path class="l" d="M918.0 400V272"/><text class="c" x="930.0" y="394" text-anchor="middle">1</text><text class="c" x="930.0" y="288" text-anchor="middle">N</text><text class="lb" x="980.0" y="340.0" text-anchor="middle">items picked from</text><path class="l" d="M420 151.0H348.0V373.0H256"/><text class="c" x="272" y="389.0" text-anchor="middle">0..1</text><text class="c" x="410" y="145.0" text-anchor="middle">1</text><text class="lb" x="310" y="365.0" text-anchor="middle">risk report</text><path class="l" d="M420 151.0H348.0V483.0H256"/><text class="c" x="272" y="499.0" text-anchor="middle">0..1</text><text class="c" x="410" y="145.0" text-anchor="middle"></text><text class="lb" x="310" y="475.0" text-anchor="middle">manpower</text><g class="e"><rect x="20" y="60" width="236" height="186" rx="10"/><path class="hd" d="M20 92V70a10 10 0 0 1 10-10h216a10 10 0 0 1 10 10V92Z"/><text class="t" x="34" y="81">LOCATION</text><text class="f" x="34" y="107">LocationID</text><text class="k" x="244" y="107" text-anchor="end">PK</text><line class="sep" x1="28" y1="114" x2="248" y2="114"/><text class="f" x="34" y="129">Name</text><line class="sep" x1="28" y1="136" x2="248" y2="136"/><text class="f" x="34" y="151">Country</text><line class="sep" x1="28" y1="158" x2="248" y2="158"/><text class="f" x="34" y="173">FirstApproverName</text><line class="sep" x1="28" y1="180" x2="248" y2="180"/><text class="f" x="34" y="195">FirstApproverEmail</text><line class="sep" x1="28" y1="202" x2="248" y2="202"/><text class="f" x="34" y="217">SecondApproverName</text><line class="sep" x1="28" y1="224" x2="248" y2="224"/><text class="f" x="34" y="239">SecondApproverEmail</text></g><g class="e main"><rect x="420" y="20" width="236" height="296" rx="10"/><path class="hd" d="M420 52V30a10 10 0 0 1 10-10h216a10 10 0 0 1 10 10V52Z"/><text class="t" x="434" y="41">CASE</text><text class="f" x="434" y="67">ID</text><text class="k" x="644" y="67" text-anchor="end">PK</text><line class="sep" x1="428" y1="74" x2="648" y2="74"/><text class="f" x="434" y="89">LocationID</text><text class="k" x="644" y="89" text-anchor="end">FK</text><line class="sep" x1="428" y1="96" x2="648" y2="96"/><text class="f" x="434" y="111">Location</text><line class="sep" x1="428" y1="118" x2="648" y2="118"/><text class="f" x="434" y="133">requestorName</text><line class="sep" x1="428" y1="140" x2="648" y2="140"/><text class="f" x="434" y="155">RequestorEmail</text><line class="sep" x1="428" y1="162" x2="648" y2="162"/><text class="f" x="434" y="177">FirstApproverName</text><text class="n" x="644" y="177" text-anchor="end">copied</text><line class="sep" x1="428" y1="184" x2="648" y2="184"/><text class="f" x="434" y="199">FirstApproverEmail</text><text class="n" x="644" y="199" text-anchor="end">copied</text><line class="sep" x1="428" y1="206" x2="648" y2="206"/><text class="f" x="434" y="221">SecondApproverName</text><text class="n" x="644" y="221" text-anchor="end">copied</text><line class="sep" x1="428" y1="228" x2="648" y2="228"/><text class="f" x="434" y="243">SecondApproverEmail</text><text class="n" x="644" y="243" text-anchor="end">copied</text><line class="sep" x1="428" y1="250" x2="648" y2="250"/><text class="f" x="434" y="265">Status</text><line class="sep" x1="428" y1="272" x2="648" y2="272"/><text class="f" x="434" y="287">Year</text><line class="sep" x1="428" y1="294" x2="648" y2="294"/><text class="f" x="434" y="309">UID</text></g><g class="e"><rect x="800" y="20" width="236" height="252" rx="10"/><path class="hd" d="M800 52V30a10 10 0 0 1 10-10h216a10 10 0 0 1 10 10V52Z"/><text class="t" x="814" y="41">ITEM</text><text class="f" x="814" y="67">ID</text><text class="k" x="1024" y="67" text-anchor="end">PK</text><line class="sep" x1="808" y1="74" x2="1028" y2="74"/><text class="f" x="814" y="89">caseNo</text><text class="k" x="1024" y="89" text-anchor="end">FK</text><line class="sep" x1="808" y1="96" x2="1028" y2="96"/><text class="f" x="814" y="111">assetType</text><text class="n" x="1024" y="111" text-anchor="end">Asset / Non Asset</text><line class="sep" x1="808" y1="118" x2="1028" y2="118"/><text class="f" x="814" y="133">Items</text><line class="sep" x1="808" y1="140" x2="1028" y2="140"/><text class="f" x="814" y="155">assetBrand</text><line class="sep" x1="808" y1="162" x2="1028" y2="162"/><text class="f" x="814" y="177">assetModel</text><line class="sep" x1="808" y1="184" x2="1028" y2="184"/><text class="f" x="814" y="199">SerialNum</text><line class="sep" x1="808" y1="206" x2="1028" y2="206"/><text class="f" x="814" y="221">AssetTag</text><line class="sep" x1="808" y1="228" x2="1028" y2="228"/><text class="f" x="814" y="243">Quantity</text><line class="sep" x1="808" y1="250" x2="1028" y2="250"/><text class="f" x="814" y="265">UID</text></g><g class="e"><rect x="420" y="400" width="236" height="164" rx="10"/><path class="hd" d="M420 432V410a10 10 0 0 1 10-10h216a10 10 0 0 1 10 10V432Z"/><text class="t" x="434" y="421">WATCHLIST</text><text class="f" x="434" y="447">ID</text><text class="k" x="644" y="447" text-anchor="end">PK</text><line class="sep" x1="428" y1="454" x2="648" y2="454"/><text class="f" x="434" y="469">caseID</text><text class="k" x="644" y="469" text-anchor="end">FK</text><line class="sep" x1="428" y1="476" x2="648" y2="476"/><text class="f" x="434" y="491">WatchlistName</text><line class="sep" x1="428" y1="498" x2="648" y2="498"/><text class="f" x="434" y="513">WatchlistEmail</text><line class="sep" x1="428" y1="520" x2="648" y2="520"/><text class="f" x="434" y="535">AddedBy</text><line class="sep" x1="428" y1="542" x2="648" y2="542"/><text class="f" x="434" y="557">UID</text></g><g class="e"><rect x="800" y="400" width="236" height="142" rx="10"/><path class="hd" d="M800 432V410a10 10 0 0 1 10-10h216a10 10 0 0 1 10 10V432Z"/><text class="t" x="814" y="421">IT ASSET LIST</text><text class="f" x="814" y="447">ID</text><text class="k" x="1024" y="447" text-anchor="end">PK</text><line class="sep" x1="808" y1="454" x2="1028" y2="454"/><text class="f" x="814" y="469">AssetType</text><line class="sep" x1="808" y1="476" x2="1028" y2="476"/><text class="f" x="814" y="491">ItemType</text><line class="sep" x1="808" y1="498" x2="1028" y2="498"/><text class="f" x="814" y="513">Manufacturer</text><line class="sep" x1="808" y1="520" x2="1028" y2="520"/><text class="f" x="814" y="535">Model</text></g><g class="e"><rect x="20" y="330" width="236" height="76" rx="10"/><path class="hd" d="M20 362V340a10 10 0 0 1 10-10h216a10 10 0 0 1 10 10V362Z"/><text class="t" x="34" y="351">QUEST NUMBER</text><text class="f" x="34" y="377">caseNo</text><text class="k" x="244" y="377" text-anchor="end">FK</text><line class="sep" x1="28" y1="384" x2="248" y2="384"/><text class="f" x="34" y="399">risk report no.</text></g><g class="e"><rect x="20" y="440" width="236" height="76" rx="10"/><path class="hd" d="M20 472V450a10 10 0 0 1 10-10h216a10 10 0 0 1 10 10V472Z"/><text class="t" x="34" y="461">IBASE NUMBER</text><text class="f" x="34" y="487">caseNo</text><text class="k" x="244" y="487" text-anchor="end">FK</text><line class="sep" x1="28" y1="494" x2="248" y2="494"/><text class="f" x="34" y="509">manpower request no.</text></g></svg></div>
+        <figcaption class="scroll-hint">Swipe sideways to see the whole diagram.</figcaption>
+      </figure>
+      <p>One thing in there looks like it breaks the rules: the approvers' names and emails are copied from the location onto each case. That's on purpose. If a base gets a new IT Manager next month, the cases already waiting keep the approver they were submitted to, instead of suddenly landing on someone who's never seen them.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>List</th><th>What it holds</th></tr></thead>
+          <tbody>
+            <tr><td>Case</td><td>One row per disposal case: base, requestor, both approvers and status</td></tr>
+            <tr><td>Item</td><td>Each item in a case. Assets have a tag and serial number; non-assets have a quantity</td></tr>
+            <tr><td>Location</td><td>Each base, with its 1st and 2nd level approvers</td></tr>
+            <tr><td>Watchlist</td><td>Colleagues added to a case so they can view, edit or submit it</td></tr>
+            <tr><td>IT Asset List</td><td>The catalogue of device types, brands and models behind the dropdowns</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>What never made it</h2>
+      <p>Two ideas sit in every version of the charts: scanning a barcode to pull an asset's details from the internal asset system, and marking it as disposed in the hardware ESM afterwards. Both needed access to SLB systems outside an intern project's scope, so items were typed in by hand. If anyone picks the app up again, that's where I'd start.</p>
+
+      <figure>
+        <img src="../assets/notes/slb/disposal/10-smashing-drives.webp" alt="A worker in orange coveralls breaking hard drives with a hammer, face blurred" width="581" height="900" loading="lazy" style="max-width:360px;margin-inline:auto">
+        <figcaption style="text-align:center">And at the very end of the flow: hard drives, by hammer.</figcaption>
+      </figure>
+
+      <p>The draw.io file, the data model and sample data are all in the <a href="https://github.com/7YMERA/it-asset-disposal-app-v1/tree/main/docs" target="_blank" rel="noopener">repo's docs</a>.</p>
+
+      <a class="try-cta" href="slb-screens.html">
+        <span class="try-thumbs" aria-hidden="true"><img src="../assets/slb-screens/022-000.webp" alt=""><img src="../assets/slb-screens/044-033.webp" alt=""><img src="../assets/slb-screens/056-049.webp" alt=""></span>
+        <span class="try-text"><span class="eyebrow">26 screens · about 2 minutes</span><b>See how the charts turned out</b><span>Click through one disposal case from draft to disposed.</span></span>
+        <span class="try-go" aria-hidden="true">→</span>
+      </a>
+    </div>
+
+    <div class="post-foot">
+      <a class="back" href="slb-power-apps.html">← From reply-all to Power Apps</a>
+      <a class="back" href="taskmatch-v2.html">Rebuilding my FYP properly →</a>
+    </div>
+  </article>
+</main>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  try { var saved = localStorage.getItem('theme'); if (saved) root.setAttribute('data-theme', saved); } catch (e) {}
+  document.getElementById('theme-btn').addEventListener('click', function () {
+    var cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
