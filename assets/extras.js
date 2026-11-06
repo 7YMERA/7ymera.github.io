@@ -7,6 +7,26 @@
   // Curtain intro: --p goes 0 -> 1 as you scroll through it; the photo
   // columns part and grow, and the name fades.
   var cur = document.getElementById('curtain');
+  // Split the name into letters so they can rise in one after another.
+  var nm = document.getElementById('cur-name');
+  if (nm && !calm) {
+    var txt = nm.textContent, i = 0;
+    nm.innerHTML = txt.split('').map(function (c) {
+      if (c === ' ') return '<span class="sp" aria-hidden="true"> </span>';
+      return '<span class="ch' + (c === '.' ? ' dot' : '') + '" aria-hidden="true" style="--i:' + (i++) + '">' + c + '</span>';
+    }).join('');
+  }
+  // A soft spotlight follows the cursor around the curtain (mouse only).
+  var spot = document.getElementById('cur-spot'), fr = document.getElementById('cur-frame');
+  if (spot && fr && !calm && matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    var sx = 0, sy = 0, sq = false;
+    fr.addEventListener('pointermove', function (e) {
+      var r = fr.getBoundingClientRect(); sx = e.clientX - r.left; sy = e.clientY - r.top;
+      fr.classList.add('lit');
+      if (!sq) { sq = true; requestAnimationFrame(function () { sq = false; spot.style.transform = 'translate3d(' + sx + 'px,' + sy + 'px,0)'; }); }
+    });
+    fr.addEventListener('pointerleave', function () { fr.classList.remove('lit'); });
+  }
   if (cur) {
     var cta = document.getElementById('cur-cta');
     var hero = document.querySelector('.hero');
@@ -31,8 +51,8 @@
         frame.style.clipPath = 'inset(' + fy.toFixed(1) + 'px ' + fx.toFixed(1) + 'px round ' + (28 * (1 - g)).toFixed(1) + 'px)';
         p = q;
         var dx = p * innerWidth * .48, s = 1 + p * .25;
-        colL.style.transform = 'translate3d(' + (-dx) + 'px, -50%, 0) rotate(' + (-7 - p * 10) + 'deg) scale(' + s + ')';
-        colR.style.transform = 'translate3d(' + dx + 'px, -50%, 0) rotate(' + (7 + p * 10) + 'deg) scale(' + s + ')';
+        colL.style.transform = 'translate3d(' + (-dx) + 'px, 0, 0) rotate(' + (-7 - p * 10) + 'deg) scale(' + s + ')';
+        colR.style.transform = 'translate3d(' + dx + 'px, 0, 0) rotate(' + (7 + p * 10) + 'deg) scale(' + s + ')';
         mid.style.opacity = Math.max(0, 1 - p * 1.6);
         mid.style.transform = 'translate3d(0, ' + (-p * 40) + 'px, 0) scale(' + (1 - p * .06) + ')';
       };
