@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A whole company in 49 tables · Alif Najmi</title>
+<meta name="description" content="A university database that models a company from the CEO down, rebuilt in SQLite so you can run the queries in your browser.">
+<meta property="og:title" content="A whole company in 49 tables">
+<meta property="og:description" content="A company database from the CEO down, with a live SQL playground.">
+<meta property="og:image" content="https://7ymera.github.io/assets/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Alif Najmi">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://7ymera.github.io/notes/database.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a6c74">
+<link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=64">
+<link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=180">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/site.css?v=20261106z3">
+</head>
+<body>
+<div class="sky" aria-hidden="true"></div>
+
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge av"><img src="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=96" alt="" width="32" height="32" decoding="async"></span>Alif Najmi</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="../#me">Me</a>
+      <a href="../#work">Work</a>
+      <a href="../#journey">Journey</a>
+      <a href="../#contact">Contact</a>
+    </nav>
+    <button class="icon-btn k-btn" id="theme-btn" type="button" aria-label="Switch light or dark theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="post">
+    <div class="post-head">
+      <a class="back" href="../#me">← Back to Alif</a>
+      <span class="eyebrow">Notes · Coursework</span>
+      <h1>A whole company in 49 tables</h1>
+      <p class="meta">6 November 2026 · 4 min read</p>
+    </div>
+
+    <div class="post-body">
+      <p>For Data &amp; Information Management, the brief was to design a relational database for an organisation and build it in Oracle SQL. This one models a whole company from the CEO down: every executive, department, project, product and client.</p>
+
+      <ul class="chips"><li>22 entity tables</li><li>27 link tables</li><li>83 foreign keys</li><li>640 rows of test data</li></ul>
+
+      <h2>How the company is organised</h2>
+      <p>Everyone starts as a row in <code>Employee</code>. A CEO, CFO, COO or CTO is an employee with extra details in their own table, and each department hangs off the executive who runs it.</p>
+      <figure>
+        <div class="diagram"><svg class="dg" viewBox="0 0 1000 440" role="img"><title>How the company database is organised</title><desc>Employee is the base table. CEO, CFO, COO, CTO, Executive Assistant and Customer Service each extend it. The CFO runs Finance and Treasury, the COO runs Human Resource, PMO and Project, and the CTO runs IT and Computer Engineering.</desc><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ahd"/></marker></defs><path class="ed" d="M500 68V100H95V128" marker-end="url(#ah)"/><path class="ed" d="M500 100H260V128" marker-end="url(#ah)"/><path class="ed" d="M500 100H425V128" marker-end="url(#ah)"/><path class="ed" d="M500 100H590V128" marker-end="url(#ah)"/><path class="ed" d="M500 100H755V128" marker-end="url(#ah)"/><path class="ed" d="M500 100H920V128" marker-end="url(#ah)"/><path class="ed" d="M195 180V248H185" marker-end="url(#ah)"/><path class="ed" d="M195 248V308H185" marker-end="url(#ah)"/><path class="ed" d="M360 180V248H350" marker-end="url(#ah)"/><path class="ed" d="M360 248V308H350" marker-end="url(#ah)"/><path class="ed" d="M360 308V368H350" marker-end="url(#ah)"/><path class="ed" d="M525 180V248H515" marker-end="url(#ah)"/><path class="ed" d="M525 248V308H515" marker-end="url(#ah)"/><g class="n db"><path d="M420 24v36a80.0 8 0 0 0 160 0v-36a80.0 8 0 0 0 -160 0a80.0 8 0 0 0 160 0"/><text class="t" x="500.0" y="42.0" text-anchor="middle">Employee</text><text class="s" x="500.0" y="58.0" text-anchor="middle">everyone starts here</text></g><g class="n main"><rect x="20" y="130" width="150" height="50" rx="10"/><text class="t" x="95.0" y="159.0" text-anchor="middle">CEO</text></g><g class="n main"><rect x="185" y="130" width="150" height="50" rx="10"/><text class="t" x="260.0" y="159.0" text-anchor="middle">CFO</text></g><g class="n main"><rect x="350" y="130" width="150" height="50" rx="10"/><text class="t" x="425.0" y="159.0" text-anchor="middle">COO</text></g><g class="n main"><rect x="515" y="130" width="150" height="50" rx="10"/><text class="t" x="590.0" y="159.0" text-anchor="middle">CTO</text></g><g class="n "><rect x="680" y="130" width="150" height="50" rx="10"/><text class="t" x="755.0" y="151.0" text-anchor="middle">Executive</text><text class="t" x="755.0" y="167.0" text-anchor="middle">Assistant</text></g><g class="n "><rect x="845" y="130" width="150" height="50" rx="10"/><text class="t" x="920.0" y="151.0" text-anchor="middle">Customer</text><text class="t" x="920.0" y="167.0" text-anchor="middle">Service</text></g><g class="n soft"><rect x="185" y="226" width="150" height="44" rx="10"/><text class="t" x="260.0" y="252.0" text-anchor="middle">Finance</text></g><g class="n soft"><rect x="185" y="286" width="150" height="44" rx="10"/><text class="t" x="260.0" y="312.0" text-anchor="middle">Treasury</text></g><g class="n soft"><rect x="350" y="226" width="150" height="44" rx="10"/><text class="t" x="425.0" y="252.0" text-anchor="middle">Human Resource</text></g><g class="n soft"><rect x="350" y="286" width="150" height="44" rx="10"/><text class="t" x="425.0" y="312.0" text-anchor="middle">PMO</text></g><g class="n soft"><rect x="350" y="346" width="150" height="44" rx="10"/><text class="t" x="425.0" y="372.0" text-anchor="middle">Project</text></g><g class="n soft"><rect x="515" y="226" width="150" height="44" rx="10"/><text class="t" x="590.0" y="252.0" text-anchor="middle">IT</text></g><g class="n soft"><rect x="515" y="286" width="150" height="44" rx="10"/><text class="t" x="590.0" y="304.0" text-anchor="middle">Computer</text><text class="t" x="590.0" y="320.0" text-anchor="middle">Engineering</text></g></svg></div>
+        <figcaption>From Employee down to the departments. <span class="scroll-hint">Swipe sideways to see all of it.</span></figcaption>
+      </figure>
+
+      <h2>Projects tie it all together</h2>
+      <p><code>Project</code> is the busiest table: it points at eleven others. And whenever two things relate many-to-many, like which client deals with which department, the relationship gets its own link table. There are 27 of those, such as <code>CTO Project</code> and <code>Finance Sale</code>.</p>
+      <figure>
+        <div class="diagram"><svg class="dg" viewBox="0 0 1000 400" role="img"><title>Project ties eleven tables together</title><desc>Project points to Client, Sale, Marketing, Finance, Treasury, PMO, COO, Customer Service and Executive Assistant, and Product and Service point back to it.</desc><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ahd"/></marker></defs><path class="ed" d="M500 72L500 166" marker-end="url(#ah)"/><path class="ed" d="M690 83L563 181" marker-end="url(#ah)"/><path class="ed" d="M834 139L572 192" marker-end="url(#ah)"/><path class="ed" d="M865 218L573 199" marker-end="url(#ah)"/><path class="ed" d="M773 288L570 207" marker-end="url(#ah)"/><path class="ed" d="M594 323L545 223" marker-end="url(#ah)"/><path class="ed" d="M405 323L454 223" marker-end="url(#ah)"/><path class="ed" d="M226 288L429 207" marker-end="url(#ah)"/><path class="ed" d="M134 218L426 199" marker-end="url(#ah)"/><path class="ed" d="M165 139L427 192" marker-end="url(#ah)"/><path class="ed" d="M309 83L436 181" marker-end="url(#ah)"/><g class="n db"><path d="M430 178v40a70.0 8 0 0 0 140 0v-40a70.0 8 0 0 0 -140 0a70.0 8 0 0 0 140 0"/><text class="t" x="500.0" y="198.0" text-anchor="middle">Project</text><text class="s" x="500.0" y="214.0" text-anchor="middle">the hub</text></g><g class="n soft"><rect x="435" y="26" width="130" height="44" rx="10"/><text class="t" x="500.0" y="52.0" text-anchor="middle">Client</text></g><g class="n soft"><rect x="651" y="50" width="130" height="44" rx="10"/><text class="t" x="716.0" y="76.0" text-anchor="middle">Sale</text></g><g class="n soft"><rect x="799" y="114" width="130" height="44" rx="10"/><text class="t" x="864.0" y="140.0" text-anchor="middle">Marketing</text></g><g class="n soft"><rect x="831" y="197" width="130" height="44" rx="10"/><text class="t" x="896.0" y="223.0" text-anchor="middle">Finance</text></g><g class="n soft"><rect x="737" y="274" width="130" height="44" rx="10"/><text class="t" x="802.0" y="300.0" text-anchor="middle">Treasury</text></g><g class="n soft"><rect x="548" y="320" width="130" height="44" rx="10"/><text class="t" x="613.0" y="346.0" text-anchor="middle">PMO</text></g><g class="n soft"><rect x="322" y="320" width="130" height="44" rx="10"/><text class="t" x="387.0" y="346.0" text-anchor="middle">COO</text></g><g class="n soft"><rect x="133" y="274" width="130" height="44" rx="10"/><text class="t" x="198.0" y="292.0" text-anchor="middle">Customer</text><text class="t" x="198.0" y="308.0" text-anchor="middle">Service</text></g><g class="n soft"><rect x="39" y="197" width="130" height="44" rx="10"/><text class="t" x="104.0" y="215.0" text-anchor="middle">Executive</text><text class="t" x="104.0" y="231.0" text-anchor="middle">Assistant</text></g><g class="n soft"><rect x="71" y="114" width="130" height="44" rx="10"/><text class="t" x="136.0" y="140.0" text-anchor="middle">Product</text></g><g class="n soft"><rect x="219" y="50" width="130" height="44" rx="10"/><text class="t" x="284.0" y="76.0" text-anchor="middle">Service</text></g></svg></div>
+        <figcaption>Project and the tables around it. <span class="scroll-hint">Swipe sideways to see all of it.</span></figcaption>
+      </figure>
+
+      <h2>Try it yourself</h2>
+      <p>This is the real schema and data, rebuilt in SQLite and running in your browser. Pick one of the original queries, open a table, or write your own and press Run (or Ctrl+Enter). Nothing leaves this page, and reloading puts everything back.</p>
+      <div class="dbp" id="dbp" data-db="../assets/db/company.sqlite">
+        <div class="dbp-presets"><button type="button" data-q="q0"><small>Warm-up</small>How many people in each part of the company</button>
+<button type="button" data-q="q1"><small>Original join 1</small>Which IT services each IT-specialist CTO provides</button>
+<button type="button" data-q="q2"><small>Original join 2</small>IT CTOs who finished their maintenance, with project budgets</button>
+<button type="button" data-q="q3"><small>Original join 3</small>Finance people over 25 on five-year financing, with salary, sales and stock</button>
+<button type="button" data-q="q4"><small>Original join 4</small>Eight tables deep: projects for single clients with cheap logistics</button>
+<button type="button" data-q="q5"><small>Original view</small>A view of every project the COOs run through the PMO</button></div>
+        <div class="dbp-edit">
+          <textarea id="dbp-sql" spellcheck="false" aria-label="SQL query">-- Loading the database…</textarea>
+          <div class="dbp-bar"><button type="button" id="dbp-run" disabled>Run <span aria-hidden="true">▶</span></button><span id="dbp-status" aria-live="polite">Scroll here to load the database.</span></div>
+        </div>
+        <div class="dbp-out" id="dbp-out"></div>
+        <details class="dbp-tables"><summary>Browse a table</summary><div><button type="button" data-table="Employee">Employee</button><button type="button" data-table="CEO">CEO</button><button type="button" data-table="CFO">CFO</button><button type="button" data-table="COO">COO</button><button type="button" data-table="CTO">CTO</button><button type="button" data-table="Finance">Finance</button><button type="button" data-table="Treasury">Treasury</button><button type="button" data-table="HumanResource">HumanResource</button><button type="button" data-table="PMO">PMO</button><button type="button" data-table="Project">Project</button><button type="button" data-table="IT">IT</button><button type="button" data-table="ComputerEngineering">ComputerEngineering</button><button type="button" data-table="ExecutiveAssistant">ExecutiveAssistant</button><button type="button" data-table="CustomerService">CustomerService</button><button type="button" data-table="Client">Client</button><button type="button" data-table="Sale">Sale</button><button type="button" data-table="Marketing">Marketing</button><button type="button" data-table="Inventory">Inventory</button><button type="button" data-table="Product">Product</button><button type="button" data-table="Logistic">Logistic</button><button type="button" data-table="Salary">Salary</button><button type="button" data-table="Service">Service</button></div></details>
+        <template id="q0">SELECT &quot;E_department&quot; AS department, count(*) AS people
+FROM &quot;Employee&quot;
+GROUP BY 1
+ORDER BY 2 DESC;</template>
+<template id="q1">SELECT CTO.&quot;CTO_specialization&quot;, IT.&quot;IT_service_name&quot;
+FROM &quot;CTO&quot; CTO, &quot;IT&quot; IT
+WHERE CTO.&quot;CTO_ID&quot; = IT.&quot;CTO_ID&quot;;</template>
+<template id="q2">SELECT CTO.&quot;CTO_experience&quot;, IT.&quot;IT_availability_percentage&quot;, proj.&quot;Pro_budget&quot;, serv.&quot;S_duration&quot;
+FROM &quot;CTO&quot; CTO
+INNER JOIN &quot;IT&quot; IT ON IT.&quot;CTO_ID&quot; = CTO.&quot;CTO_ID&quot;
+INNER JOIN &quot;CTO Project&quot; CTProj ON CTProj.&quot;CTO_ID&quot; = CTO.&quot;CTO_ID&quot;
+INNER JOIN &quot;Project&quot; proj ON proj.&quot;Pro_ID&quot; = CTProj.&quot;Pro_ID&quot;
+INNER JOIN &quot;Service&quot; serv ON serv.&quot;Pro_ID&quot; = proj.&quot;Pro_ID&quot;
+WHERE &quot;CTO_specialization&quot; = &#x27;Information Technology&#x27; AND &quot;IT_maintenance_status&quot; = &#x27;Complete&#x27;
+GROUP BY CTO.&quot;CTO_experience&quot;, IT.&quot;IT_availability_percentage&quot;, serv.&quot;S_duration&quot;, proj.&quot;Pro_budget&quot;
+ORDER BY &quot;Pro_budget&quot;;</template>
+<template id="q3">SELECT emp.&quot;E_name&quot;, emp.&quot;E_age&quot;, CFO.&quot;CFO_skills&quot;, CFO.&quot;CFO_total_current_assetRM&quot;, fin.&quot;F_profit_percentage&quot;, fin.&quot;F_financing_period&quot;, sal.&quot;Sal_payment_method&quot;, sal.&quot;Sal_bonusRM&quot;, sale.&quot;Sale_total_saleRM&quot;, sale.&quot;Sale_targetRM&quot;, inv.&quot;Inv_item_name&quot;, inv.&quot;Inv_item_availability_units&quot;
+FROM &quot;Employee&quot; emp
+INNER JOIN &quot;CFO&quot; CFO ON CFO.&quot;E_ID&quot; = emp.&quot;E_ID&quot;
+INNER JOIN &quot;Finance&quot; fin ON fin.&quot;CFO_ID&quot; = CFO.&quot;CFO_ID&quot;
+INNER JOIN &quot;Salary&quot; sal ON sal.&quot;F_ID&quot; = fin.&quot;F_ID&quot;
+INNER JOIN &quot;Finance Sale&quot; fisal ON fisal.&quot;F_ID&quot; = fin.&quot;F_ID&quot;
+INNER JOIN &quot;Sale&quot; sale ON sale.&quot;Sale_ID&quot; = fisal.&quot;Sale_ID&quot;
+INNER JOIN &quot;Inventory&quot; inv ON inv.&quot;Sale_ID&quot; = sale.&quot;Sale_ID&quot;
+WHERE &quot;F_financing_period&quot; = &#x27;5 years&#x27; AND &quot;Inv_damaged_items_count&quot; &lt; 9 AND &quot;E_age&quot; &gt; 25;</template>
+<template id="q4">SELECT emp.&quot;E_name&quot;, CFO.&quot;CFO_specialization&quot;, fin.&quot;F_total_expenseRM&quot;, proj.&quot;Pro_due_date&quot;, prod.&quot;P_total_available&quot;,  inv.&quot;Inv_location&quot;, log.&quot;L_total_weight_kg&quot;, cli.&quot;Client_name&quot;
+FROM &quot;Employee&quot; emp
+INNER JOIN &quot;CFO&quot; CFO ON CFO.&quot;E_ID&quot; = emp.&quot;E_ID&quot;
+INNER JOIN &quot;Finance&quot; fin ON fin.&quot;CFO_ID&quot; = CFO.&quot;CFO_ID&quot;
+INNER JOIN &quot;Project&quot; proj ON proj.&quot;F_ID&quot; = fin.&quot;F_ID&quot;
+INNER JOIN &quot;Product&quot; prod ON prod.&quot;Pro_ID&quot; = proj.&quot;Pro_ID&quot;
+INNER JOIN &quot;Inventory&quot; inv ON inv.&quot;Inv_ID&quot; = prod.&quot;Inv_ID&quot;
+INNER JOIN &quot;Logistic&quot; log ON log.&quot;L_ID&quot; = prod.&quot;L_ID&quot;
+INNER JOIN &quot;Client&quot; cli ON cli.&quot;Client_ID&quot; = proj.&quot;Client_ID&quot;
+WHERE &quot;Client_marital_status&quot; = &#x27;Single&#x27; AND &quot;L_cost_RM&quot; &lt; 5500 AND &quot;F_financing_period&quot; = &#x27;5 years&#x27; AND &quot;E_gender&quot; = &#x27;Female&#x27;
+ORDER BY &quot;P_total_available&quot; DESC;</template>
+<template id="q5">DROP VIEW IF EXISTS &quot;COO project&quot;;
+
+CREATE VIEW &quot;COO project&quot;
+AS SELECT emp.&quot;E_ID&quot;, COO.&quot;COO_ID&quot;, proj.&quot;Pro_ID&quot;
+FROM &quot;Employee&quot; emp
+JOIN &quot;COO&quot; COO ON COO.&quot;E_ID&quot; = emp.&quot;E_ID&quot;
+JOIN &quot;Project&quot; proj ON proj.&quot;COO_ID&quot; = COO.&quot;COO_ID&quot;
+WHERE &quot;COO_specialization&quot; = &#x27;PMO&#x27;;
+
+SELECT * FROM &quot;COO project&quot;;</template>
+      </div>
+
+      <h2>Bringing it back</h2>
+      <p>The original was written for Oracle, so rebuilding it meant turning Oracle's <code>INSERT ALL … SELECT * FROM dual</code> blocks into plain inserts and its <code>TO_DATE</code> calls into ordinary dates. All 640 rows loaded, and every original join returns the same kind of answer it did then. The people in it were always made up (there's a John Wick in Finance), but I swapped the phone numbers, emails and house numbers for obviously fake ones anyway.</p>
+
+      <h2>What it taught me</h2>
+      <ul>
+        <li><strong>Keys first, then everything else.</strong> Once every table knew exactly what it pointed at, an eight-table join was just following the arrows.</li>
+        <li><strong>Test data is part of the design.</strong> A query only proves something if there are rows that pass the filter and rows that don't.</li>
+        <li><strong>Many-to-many deserves its own table.</strong> Link tables felt like overkill at first, and then they were the reason every question had an answer.</li>
+      </ul>
+      <p>It's also where the SQL in everything since started: the <a href="slb-design.html">SLB data model</a>, and the Postgres behind <a href="taskmatch-v2.html">TaskMatch</a> and <a href="smk-dashboard.html">the SMK dashboard</a>.</p>
+    </div>
+
+    <div class="post-foot">
+      <a class="back" href="aws-two-departments.html">← One VPC, two departments, $56</a>
+      <a class="back" href="index.html">All notes →</a>
+    </div>
+  </article>
+</main>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  try { var saved = localStorage.getItem('theme'); if (saved) root.setAttribute('data-theme', saved); } catch (e) {}
+  document.getElementById('theme-btn').addEventListener('click', function () {
+    var cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+  });
+})();
+</script>
+<script src="../assets/db-playground.js?v=20261106z3" defer></script>
+</body>
+</html>

@@ -966,3 +966,31 @@ section.block { padding-block: 80px 8px; }
   .kt-tabs button { padding: 12px 14px; gap: 12px; }
   .kt-ic { width: 38px; height: 38px; }
 }
+
+/* SQL playground */
+.dbp { display: grid; gap: 12px; padding: 16px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); }
+.dbp-presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
+.dbp-presets button { text-align: left; display: grid; gap: 2px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 500 .875rem/1.35 var(--f-body, inherit); cursor: pointer; transition: border-color .2s; }
+.dbp-presets button small { font: 600 .6875rem var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.dbp-presets button:hover { border-color: var(--accent); }
+.dbp-presets button.on { border-color: var(--accent); background: var(--accent-soft); }
+.dbp-edit { border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--ink); }
+.dbp-edit textarea { display: block; width: 100%; min-height: 190px; resize: vertical; border: 0; padding: 14px 16px; background: transparent; color: var(--bg); font: .8125rem/1.6 var(--f-mono); tab-size: 2; }
+.dbp-edit textarea:focus { outline: none; }
+.dbp-bar { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-top: 1px solid color-mix(in srgb, var(--bg) 18%, transparent); }
+.dbp-bar button { border: 0; border-radius: 999px; padding: 8px 16px; background: var(--accent); color: var(--accent-ink); font: 700 .875rem var(--f-body, inherit); cursor: pointer; }
+.dbp-bar button:disabled { opacity: .5; cursor: wait; }
+#dbp-status { font: .75rem var(--f-mono); color: color-mix(in srgb, var(--bg) 70%, transparent); }
+#dbp-status.bad { color: #fca5a5; }
+.dbp-table { overflow: auto; max-height: 420px; border-radius: 12px; border: 1px solid var(--line); }
+.dbp-table table { font-size: .8125rem; white-space: nowrap; }
+.dbp-table th { position: sticky; top: 0; background: var(--surface); z-index: 1; }
+.dbp-table td:first-child { font-weight: 400; }
+.dbp-table i { color: var(--muted); }
+.dbp-empty { color: var(--muted); font-size: .875rem; margin: 0; }
+.dbp-tables summary { cursor: pointer; font-weight: 600; font-size: .9375rem; }
+.dbp-tables div { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.dbp-tables button { font: .75rem var(--f-mono); padding: 5px 9px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.dbp-tables button:hover { border-color: var(--accent); }
+.post-body > *, .dbp, .dbp > *, .dbp-out { min-width: 0; max-width: 100%; }
+.post-body .chips { display: flex; flex-wrap: wrap; gap: 8px; }
