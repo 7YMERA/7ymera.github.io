@@ -933,3 +933,12 @@ section.block { padding-block: 80px 8px; }
  * the edge of the screen. (Background-coloured strips stopped matching once
  * the aurora went behind the page, and a mask costs too much on a 3D scene.) */
 .reel::before, .reel::after { display: none; }
+
+/* What I know: Skill tree | UTP switch */
+.kt-tabs { display: inline-flex; gap: 4px; padding: 4px; margin: 0 0 24px; border-radius: 999px; border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 88%, transparent); max-width: 100%; }
+.kt-tabs button { border: 0; background: none; color: var(--muted); font: 600 .9375rem var(--f-body, inherit); padding: 9px 18px; border-radius: 999px; cursor: pointer; transition: background .2s, color .2s; white-space: nowrap; }
+.kt-tabs button:hover { color: var(--ink); }
+.kt-tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); }
+.kt-panel[hidden] { display: none; }
+.kt-intro { color: var(--muted); max-width: 40rem; margin: 0 0 8px; }
+@media (max-width: 480px) { .kt-tabs button { padding: 8px 12px; font-size: .875rem; } }

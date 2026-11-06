@@ -250,3 +250,29 @@
   if (matchMedia('(max-width: 900px)').matches) br.forEach(function (d, i) { d.open = i === 0; });
   else br.forEach(function (d) { d.addEventListener('toggle', function () { if (!d.open && innerWidth > 900) d.open = true; }); });
 })();
+
+/* What I know: switch between the skill tree and UTP. Links to #studied
+ * (from quick jump or elsewhere) open the UTP tab. */
+(function () {
+  var tabs = document.querySelectorAll('.kt-tabs [role="tab"]'); if (!tabs.length) return;
+  function pick(id, focus) {
+    tabs.forEach(function (t) {
+      var on = t.getAttribute('aria-controls') === id;
+      t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+      if (on && focus) t.focus();
+    });
+    // A coverflow measures itself; give it a nudge now it's visible.
+    dispatchEvent(new Event('resize'));
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { pick(t.getAttribute('aria-controls')); });
+    t.addEventListener('keydown', function (e) {
+      var k = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0; if (!k) return;
+      e.preventDefault(); var n = tabs[(i + k + tabs.length) % tabs.length]; pick(n.getAttribute('aria-controls'), true);
+    });
+  });
+  function fromHash() { if (location.hash === '#studied') { pick('studied'); document.getElementById('toolkit').scrollIntoView(); } }
+  pick('kt-skills'); fromHash();
+  addEventListener('hashchange', fromHash);
+})();
