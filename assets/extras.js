@@ -219,10 +219,10 @@
   var deck = document.getElementById('deck'), reel = document.getElementById('reel-wrap');
   if (!deck || !reel) return;
   var btns = document.querySelectorAll('.vswitch button');
-  function set(view, jump) {
+  function set(view, jump, initial) {
     deck.hidden = view !== 'deck'; reel.hidden = view !== 'reel';
     btns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.view === view)); });
-    try { localStorage.setItem('showcase', view); } catch (e) {}
+    if (!initial) { try { localStorage.setItem('showcaseView', view); } catch (e) {} }
     if (jump) {
       var shown = view === 'deck' ? deck : reel;
       scrollTo({ top: scrollY + shown.getBoundingClientRect().top - 60, behavior: 'auto' });
@@ -230,7 +230,11 @@
     }
     dispatchEvent(new Event('scroll'));
   }
-  var start = 'deck'; try { if (localStorage.getItem('showcase') === 'reel') start = 'reel'; } catch (e) {}
-  set(start, false);
+  // Default: Spin on wide screens, Tumble on phones. A choice made with the
+  // switch is remembered and wins over the default.
+  var start = matchMedia('(min-width: 900px)').matches ? 'reel' : 'deck', saved = null;
+  try { saved = localStorage.getItem('showcaseView'); } catch (e) {}
+  if (saved === 'reel' || saved === 'deck') start = saved;
+  set(start, false, true);
   btns.forEach(function (b) { b.addEventListener('click', function (e) { e.stopPropagation(); if (b.getAttribute('aria-pressed') !== 'true') set(b.dataset.view, true); }); });
 })();
