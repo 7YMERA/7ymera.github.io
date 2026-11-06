@@ -31,6 +31,8 @@
       var size = small ? Math.min(220, w * 0.56) : Math.min(300, w * 0.28);
       var gap = small ? size * 0.42 : size * 0.62;
       root.style.setProperty('--cf-size', size + 'px');
+      // Space by the covers' real width (the notes covers are wider than tall).
+      var iw = items[0].offsetWidth || size; gap = gap * iw / size; size = iw;
       items.forEach(function (el, i) {
         // Loop round, so there are always covers on both sides.
         var d = ((i - cur) % n + n + Math.floor(n / 2)) % n - Math.floor(n / 2);
