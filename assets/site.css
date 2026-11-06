@@ -551,3 +551,6 @@ section.block { padding-block: 80px 8px; }
 :root:not([data-theme="light"]) .cur-frame { background: color-mix(in srgb, var(--surface) 70%, var(--bg)); }
 .cur-stage { background: var(--bg); }
 @media (prefers-reduced-motion: reduce) { .cur-frame { clip-path: none; } }
+
+.me-portrait { margin: 0; max-width: 360px; justify-self: center; width: 100%; }
+.me-portrait img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; border-radius: var(--radius); box-shadow: var(--shadow); transform: rotate(-1.5deg); }
