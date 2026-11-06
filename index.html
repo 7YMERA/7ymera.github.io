@@ -20,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=20261106s">
+<link rel="stylesheet" href="assets/site.css?v=20261106t">
 </head>
 <body>
 <div class="sky" aria-hidden="true"></div>
@@ -220,19 +220,66 @@
             <div><span class="eyebrow">Notes</span><h3>How I build things, written down</h3></div>
             <a class="nb-all" href="notes/">All 9 notes <span aria-hidden="true">→</span></a>
           </div>
-          <div class="nb-row">
-          <a class="nb-card" href="notes/slb-design.html">
-            <span class="nb-img"><img src="assets/notes/slb/cover.webp" alt="" width="1200" height="750" loading="lazy"></span>
-            <span class="nb-body"><span class="nb-meta"><span class="nb-tag">Internship</span>6 Nov 2026</span><b>Nine charts before one screen</b><span class="nb-sub">The flowcharts, ERDs and data model behind the SLB app.</span><span class="nb-go">Read the note →</span></span>
-          </a>
-          <a class="nb-card" href="notes/smk-dashboard.html">
-            <span class="nb-img"><img src="assets/smk.webp" alt="" width="1200" height="750" loading="lazy"></span>
-            <span class="nb-body"><span class="nb-meta"><span class="nb-tag">Side project</span>6 Nov 2026</span><b>A dashboard 150 teachers actually open</b><span class="nb-sub">Replacing a school's spreadsheet, with privacy at every layer.</span><span class="nb-go">Read the note →</span></span>
-          </a>
-          <a class="nb-card" href="notes/mylokalevent-v2.html">
-            <span class="nb-img"><img src="assets/mle-home-v2.webp" alt="" width="1200" height="750" loading="lazy"></span>
-            <span class="nb-body"><span class="nb-meta"><span class="nb-tag">Rebuild</span>6 Nov 2026</span><b>From coursework to something people could trust</b><span class="nb-sub">Security, payments, a design system and BM first.</span><span class="nb-go">Read the note →</span></span>
-          </a>
+          <div class="cf nb-cf" data-cf tabindex="0" aria-roledescription="carousel" aria-label="Notes">
+            <div class="cf-stage">
+            <div class="cf-item" role="group" aria-label="Nine charts before one screen"><img class="nb-cover" src="assets/notes/slb/cover.webp" alt="" loading="lazy" draggable="false"></div>
+            <div class="cf-item" role="group" aria-label="A dashboard 150 teachers actually open"><img class="nb-cover" src="assets/smk.webp" alt="" loading="lazy" draggable="false"></div>
+            <div class="cf-item" role="group" aria-label="From coursework to something people could trust"><img class="nb-cover" src="assets/mle-home-v2.webp" alt="" loading="lazy" draggable="false"></div>
+            <div class="cf-item" role="group" aria-label="Accessible first, in four languages"><img class="nb-cover" src="assets/kaki.webp" alt="" loading="lazy" draggable="false"></div>
+            <div class="cf-item" role="group" aria-label="Where can I solat Jumaat from here?"><img class="nb-cover" src="assets/jumaat.webp" alt="" loading="lazy" draggable="false"></div>
+            <div class="cf-item" role="group" aria-label="One VPC, two departments, $56"><img class="nb-cover" src="assets/notes/aws/cover.webp" alt="" loading="lazy" draggable="false"></div>
+            <div class="cf-item" role="group" aria-label="Rebuilding my FYP properly"><img class="nb-cover" src="assets/tm-dashboard-v2.webp" alt="" loading="lazy" draggable="false"></div>
+            <div class="cf-item" role="group" aria-label="From reply-all to Power Apps"><img class="nb-cover" src="assets/slb-track-v2.webp" alt="" loading="lazy" draggable="false"></div>
+            <div class="cf-item" role="group" aria-label="Four years, one walk across the stage"><img class="nb-cover" src="assets/me/walk-out.webp" alt="" loading="lazy" draggable="false"></div>
+            </div>
+            <div class="cf-nav"><button class="cf-btn" type="button" data-dir="-1" aria-label="Previous note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><div class="cf-dots"></div><button class="cf-btn" type="button" data-dir="1" aria-label="Next note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></div>
+            <div class="cf-details" aria-live="polite">
+            <div class="cf-detail nb-detail">
+              <span class="nb-meta"><span class="nb-tag">Internship</span>6 Nov 2026</span>
+              <b>Nine charts before one screen</b><span class="nb-sub">The flowcharts, ERDs and data model behind the SLB app.</span>
+              <a class="nb-read" href="notes/slb-design.html">Read the note <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="cf-detail nb-detail" hidden>
+              <span class="nb-meta"><span class="nb-tag">Side project</span>6 Nov 2026</span>
+              <b>A dashboard 150 teachers actually open</b><span class="nb-sub">Replacing a school's spreadsheet, with privacy at every layer.</span>
+              <a class="nb-read" href="notes/smk-dashboard.html">Read the note <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="cf-detail nb-detail" hidden>
+              <span class="nb-meta"><span class="nb-tag">Rebuild</span>6 Nov 2026</span>
+              <b>From coursework to something people could trust</b><span class="nb-sub">Security, payments, a design system and BM first.</span>
+              <a class="nb-read" href="notes/mylokalevent-v2.html">Read the note <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="cf-detail nb-detail" hidden>
+              <span class="nb-meta"><span class="nb-tag">Side project</span>6 Nov 2026</span>
+              <b>Accessible first, in four languages</b><span class="nb-sub">Text size, high contrast and one set of tokens for every theme.</span>
+              <a class="nb-read" href="notes/kakilima.html">Read the note <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="cf-detail nb-detail" hidden>
+              <span class="nb-meta"><span class="nb-tag">Side project</span>6 Nov 2026</span>
+              <b>Where can I solat Jumaat from here?</b><span class="nb-sub">565 official places, prayer times and a leave-by time.</span>
+              <a class="nb-read" href="notes/jumaatfinder.html">Read the note <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="cf-detail nb-detail" hidden>
+              <span class="nb-meta"><span class="nb-tag">Coursework</span>6 Nov 2026</span>
+              <b>One VPC, two departments, $56</b><span class="nb-sub">Where my AWS started: three layers of isolation in a $100 credit.</span>
+              <a class="nb-read" href="notes/aws-two-departments.html">Read the note <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="cf-detail nb-detail" hidden>
+              <span class="nb-meta"><span class="nb-tag">Rebuild</span>5 Nov 2026</span>
+              <b>Rebuilding my FYP properly</b><span class="nb-sub">TaskMatch, from final year project to production standard.</span>
+              <a class="nb-read" href="notes/taskmatch-v2.html">Read the note <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="cf-detail nb-detail" hidden>
+              <span class="nb-meta"><span class="nb-tag">Internship</span>4 Nov 2026</span>
+              <b>From reply-all to Power Apps</b><span class="nb-sub">Replacing an Excel and email-chain process at SLB.</span>
+              <a class="nb-read" href="notes/slb-power-apps.html">Read the note <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="cf-detail nb-detail" hidden>
+              <span class="nb-meta"><span class="nb-tag">Life</span>3 Nov 2026</span>
+              <b>Four years, one walk across the stage</b><span class="nb-sub">Graduating from UTP.</span>
+              <a class="nb-read" href="notes/convocation-2026.html">Read the note <span aria-hidden="true">→</span></a>
+            </div>
+            </div>
           </div>
         </div>
       </div>
@@ -584,49 +631,93 @@
   <section class="block" id="studied">
     <div class="wrap">
       <div class="sec-head"><div><span class="eyebrow">Four years at UTP</span><h2>What UTP put me through</h2><p>42 subjects across nine semesters, after a foundation year. Some of it was hell on earth. All of it stuck, and it's why I can talk to the engineers and the business in the same meeting.</p></div></div>
-      <div class="uni">
-        <article class="uni-card full">
-          <span class="uni-k">01 · Languages</span>
-          <h3>Code, in more flavours than I needed</h3>
-          <ul class="uni-langs"><li><i style="background:#00599c"></i>C++<small>Programming, OOP</small></li><li><i style="background:#e76f00"></i>Java<small>Algorithms</small></li><li><i style="background:#276dc3"></i>R<small>Data Science</small></li><li><i style="background:#3776ab"></i>Python<small>AI</small></li><li><i style="background:#e16737"></i>MATLAB</li><li><i style="background:#e34f26"></i>HTML &amp; CSS</li><li><i style="background:#d4a72c"></i>JavaScript</li><li><i style="background:#4169e1"></i>SQL</li><li><i style="background:#00979d"></i>Arduino<small>Embedded Systems</small></li></ul>
-        </article>
-        <article class="uni-card">
-          <span class="uni-k">02 · Programming</span>
-          <h3>From hello world to enterprise systems</h3>
-          <ul class="uni-list"><li><b>Structured Programming</b><span>C++ from the ground up.</span></li><li><b>Object Oriented Programming</b><span>C++. A Notepad app in a team of four: open and save, fonts and colours, undo and redo, and a word count, designed in UML first.</span></li><li><b>Algorithm &amp; Data Structure</b><span>Java. Classes and inheritance, binary trees and their traversals, and the Big-O of each.</span></li><li><b>Software Engineering &amp; HCI</b><span>Feasibility studies, use cases, and activity and class diagrams: an ATM with multi-factor authentication, and an air-quality system watching 500 sensors.</span></li><li><b>Enterprise Systems Development</b><span>The proposal for <a href="notes/mylokalevent-v2.html">MyLokalEvent</a>: architecture, ERD, roles and an approval workflow.</span></li></ul>
-        </article>
-        <article class="uni-card">
-          <span class="uni-k">03 · Computer systems</span>
-          <h3>How a computer actually works</h3>
-          <ul class="uni-list"><li><b>Computer Systems</b><span>What the CPU, memory and RAM are really doing, worked through by hand: CPU scheduling (SJF, SRT), page replacement (FIFO vs LRU) and device management.</span></li><li><b>Data Communication &amp; Network</b><span>Cisco Packet Tracer, subnetting, and building networks end to end.</span></li><li><b>Embedded System</b><span>Arduino in TinkerCAD: a two-wheel robot driven through an L293 motor driver, reading switches with bit masks and setting speed with PWM.</span></li><li><b>Computer Security</b><span>Encryption from classical ciphers to modern ones, coded by hand, and STRIDE threat models for MySejahtera and a digital bank, with a risk register.</span></li><li><b>Distributed &amp; Parallel Computing</b><span>A <a href="notes/aws-two-departments.html">secure two-department AWS design</a>, and my Cloud Foundations badge.</span></li></ul>
-        </article>
-        <article class="uni-card maths">
-          <span class="uni-k">04 · Maths</span>
-          <h3>The hell-on-earth part</h3>
-          <ul class="uni-list"><li><b>Engineering Mathematics</b></li><li><b>Discrete Mathematics</b><span>Logic, sets, graphs, and yes, the pigeonhole principle. Years later, still remember it.</span></li><li><b>Statistics &amp; Empirical Method</b><span>Probability, sampling, confidence intervals, hypothesis tests and ANOVA, every tutorial by hand.</span></li><li><b>Modelling &amp; Simulation</b></li></ul>
-          <span class="uni-stamp" aria-hidden="true">Survived</span>
-        </article>
-        <article class="uni-card">
-          <span class="uni-k">05 · Data &amp; AI</span>
-          <h3>Turning data into decisions</h3>
-          <ul class="uni-list"><li><b>Data &amp; Information Management</b><span>The fun one. SQL from scratch for two whole organisations, a company modelled from the CEO down and a tuition centre: about 50 tables, 389 rows of test data, joins across up to eight tables, and views.</span></li><li><b>Artificial Intelligence</b><span>Agents, search and knowledge representation, and A* path-finding for a puzzle game in Python.</span></li><li><b>Data Science</b><span>R. Regression models, reading the summary properly, and predicting from them.</span></li><li><b>Business Intelligence</b><span>A Power BI sales dashboard for a global distributor, built with CRISP-DM and DAX, with hidden issues and recommendations. <a href="assets/uni/bi-dashboard.webp" target="_blank" rel="noopener">See the dashboard ↗</a></span></li><li><b>Strategic Business Analytics</b></li></ul>
-        </article>
-        <article class="uni-card wide cols">
-          <span class="uni-k">06 · Business &amp; people</span>
-          <h3>Why the business side makes sense to me</h3>
-          <ul class="uni-list"><li><b>Strategic Management</b></li><li><b>Management &amp; Organisational Behaviour</b><span>Group research on communication and how it makes or breaks a team.</span></li><li><b>Human Resource Management</b><span>A strategic HR consultancy proposal for a century-old London members' club: workforce planning, hiring, training, performance, retention and succession for its modernisation.</span></li><li><b>IT Audit &amp; Risk Management</b><span>The audit risk model, IS audit reports, a Malaysia vs Singapore look at real IT audit failures, and a COSO-based risk audit of a spot on campus.</span></li><li><b>Entrepreneurship</b></li><li><b>Technopreneurship Team Project</b></li><li><b>E-Marketing</b></li><li><b>Corporate Communication</b></li><li><b>Professional Communication Skills</b><span>A persuasive talk on the hidden dangers of smoking and vaping among young people.</span></li></ul>
-        </article>
-        <article class="uni-card proj">
-          <span class="uni-k">07 · The big ones</span>
-          <h3>Where it all got real</h3>
-          <ul class="uni-list"><li><b>Industrial Training at SLB</b><span>Eight months in Digital IT Operations, where I built the <a href="notes/slb-power-apps.html">IT Asset Disposal app</a>.</span></li><li><b>Industrial Project</b><span>The IT Asset Disposal app again, written up as a project. The <a href="notes/slb-design.html">charts and data model</a> are from it.</span></li><li><b>Final Year Project I &amp; II</b><span><a href="notes/taskmatch-v2.html">TaskMatch</a>, which I have since rebuilt properly.</span></li><li><b>Community Engagement Project</b></li></ul>
-        </article>
-        <article class="uni-card wide">
-          <span class="uni-k">08 · Side subjects</span>
-          <h3>The ones that rounded me out</h3>
-          <ul class="tags"><li>Health, Safety &amp; Environment</li><li>Intro to the Oil &amp; Gas Industry &amp; Sustainable Development</li><li>Scientific Inquiry</li><li>Academic Writing</li><li>Basic French Communication</li><li>Groom-Me</li><li>Integrity &amp; Anti-Corruption</li><li>Penghayatan Etika &amp; Peradaban</li><li>Falsafah dan Isu Semasa</li></ul>
+      <div class="cf uni-cf" data-cf data-start="3" tabindex="0" aria-roledescription="carousel" aria-label="Subjects I studied, by group">
+        <div class="cf-stage">
+          <div class="cf-item" role="group" aria-label="Languages"><div class="uni-cover" style="--g1:#0f172a;--g2:#2563eb">
+            <span class="uc-k">01 · Languages</span>
+            <svg class="uc-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M14 5l-4 14"/></svg>
+            <span class="uc-t">Languages</span><span class="uc-n">9 languages</span>
+          </div></div>
+          <div class="cf-item" role="group" aria-label="Programming"><div class="uni-cover" style="--g1:#064e57;--g2:#14b8a6">
+            <span class="uc-k">02 · Programming</span>
+            <svg class="uc-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M12 15h5"/></svg>
+            <span class="uc-t">Programming</span><span class="uc-n">5 subjects</span>
+          </div></div>
+          <div class="cf-item" role="group" aria-label="Computer systems"><div class="uni-cover" style="--g1:#1e1b4b;--g2:#7c3aed">
+            <span class="uc-k">03 · Computer systems</span>
+            <svg class="uc-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg>
+            <span class="uc-t">Computer systems</span><span class="uc-n">5 subjects</span>
+          </div></div>
+          <div class="cf-item" role="group" aria-label="Maths"><div class="uni-cover" style="--g1:#7c4a03;--g2:#f59e0b">
+            <span class="uc-k">04 · Maths</span>
+            <svg class="uc-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h8M8 2v8M14 17h6M16 5l4 4M20 5l-4 4M4 18l4-4M4 14l4 4"/></svg>
+            <span class="uc-t">Maths</span><span class="uc-n">4 subjects</span><span class="cf-stamp">Survived</span>
+          </div></div>
+          <div class="cf-item" role="group" aria-label="Data &amp; AI"><div class="uni-cover" style="--g1:#831843;--g2:#ec4899">
+            <span class="uc-k">05 · Data &amp; AI</span>
+            <svg class="uc-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-7"/></svg>
+            <span class="uc-t">Data &amp; AI</span><span class="uc-n">5 subjects</span>
+          </div></div>
+          <div class="cf-item" role="group" aria-label="Business &amp; people"><div class="uni-cover" style="--g1:#14532d;--g2:#22c55e">
+            <span class="uc-k">06 · Business &amp; people</span>
+            <svg class="uc-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h16v11H4z"/><path d="M9 8V5h6v3"/><path d="M4 13h16"/></svg>
+            <span class="uc-t">Business &amp; people</span><span class="uc-n">9 subjects</span>
+          </div></div>
+          <div class="cf-item" role="group" aria-label="The big ones"><div class="uni-cover" style="--g1:#7c2d12;--g2:#f97316">
+            <span class="uc-k">07 · The big ones</span>
+            <svg class="uc-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.3L12 16.5 6.5 19.5l1-6.3L3 8.9 9 8z"/></svg>
+            <span class="uc-t">The big ones</span><span class="uc-n">4 subjects</span>
+          </div></div>
+          <div class="cf-item" role="group" aria-label="Side subjects"><div class="uni-cover" style="--g1:#334155;--g2:#94a3b8">
+            <span class="uc-k">08 · Side subjects</span>
+            <svg class="uc-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+            <span class="uc-t">Side subjects</span><span class="uc-n">9 subjects</span>
+          </div></div>
+        </div>
+        <div class="cf-nav"><button class="cf-btn" type="button" data-dir="-1" aria-label="Previous group"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><div class="cf-dots"></div><button class="cf-btn" type="button" data-dir="1" aria-label="Next group"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></div>
+        <div class="cf-details" aria-live="polite">
+          <div class="cf-detail">
+            <span class="uni-k">01 · Languages</span>
+            <h3>Code, in more flavours than I needed</h3>
+            <ul class="uni-langs"><li><i style="background:#00599c"></i>C++<small>Programming, OOP</small></li><li><i style="background:#e76f00"></i>Java<small>Algorithms</small></li><li><i style="background:#276dc3"></i>R<small>Data Science</small></li><li><i style="background:#3776ab"></i>Python<small>AI</small></li><li><i style="background:#e16737"></i>MATLAB</li><li><i style="background:#e34f26"></i>HTML &amp; CSS</li><li><i style="background:#d4a72c"></i>JavaScript</li><li><i style="background:#4169e1"></i>SQL</li><li><i style="background:#00979d"></i>Arduino<small>Embedded Systems</small></li></ul>
+          </div>
+          <div class="cf-detail" hidden>
+            <span class="uni-k">02 · Programming</span>
+            <h3>From hello world to enterprise systems</h3>
+            <ul class="uni-list"><li><b>Structured Programming</b><span>C++ from the ground up.</span></li><li><b>Object Oriented Programming</b><span>C++. A Notepad app in a team of four: open and save, fonts and colours, undo and redo, and a word count, designed in UML first.</span></li><li><b>Algorithm &amp; Data Structure</b><span>Java. Classes and inheritance, binary trees and their traversals, and the Big-O of each.</span></li><li><b>Software Engineering &amp; HCI</b><span>Feasibility studies, use cases, and activity and class diagrams: an ATM with multi-factor authentication, and an air-quality system watching 500 sensors.</span></li><li><b>Enterprise Systems Development</b><span>The proposal for <a href="notes/mylokalevent-v2.html">MyLokalEvent</a>: architecture, ERD, roles and an approval workflow.</span></li></ul>
+          </div>
+          <div class="cf-detail" hidden>
+            <span class="uni-k">03 · Computer systems</span>
+            <h3>How a computer actually works</h3>
+            <ul class="uni-list"><li><b>Computer Systems</b><span>What the CPU, memory and RAM are really doing, worked through by hand: CPU scheduling (SJF, SRT), page replacement (FIFO vs LRU) and device management.</span></li><li><b>Data Communication &amp; Network</b><span>Cisco Packet Tracer, subnetting, and building networks end to end.</span></li><li><b>Embedded System</b><span>Arduino in TinkerCAD: a two-wheel robot driven through an L293 motor driver, reading switches with bit masks and setting speed with PWM.</span></li><li><b>Computer Security</b><span>Encryption from classical ciphers to modern ones, coded by hand, and STRIDE threat models for MySejahtera and a digital bank, with a risk register.</span></li><li><b>Distributed &amp; Parallel Computing</b><span>A <a href="notes/aws-two-departments.html">secure two-department AWS design</a>, and my Cloud Foundations badge.</span></li></ul>
+          </div>
+          <div class="cf-detail" hidden>
+            <span class="uni-k">04 · Maths</span>
+            <h3>The hell-on-earth part</h3>
+            <ul class="uni-list"><li><b>Engineering Mathematics</b></li><li><b>Discrete Mathematics</b><span>Logic, sets, graphs, and yes, the pigeonhole principle. Years later, still remember it.</span></li><li><b>Statistics &amp; Empirical Method</b><span>Probability, sampling, confidence intervals, hypothesis tests and ANOVA, every tutorial by hand.</span></li><li><b>Modelling &amp; Simulation</b></li></ul>
+          </div>
+          <div class="cf-detail" hidden>
+            <span class="uni-k">05 · Data &amp; AI</span>
+            <h3>Turning data into decisions</h3>
+            <ul class="uni-list"><li><b>Data &amp; Information Management</b><span>The fun one. SQL from scratch for two whole organisations, a company modelled from the CEO down and a tuition centre: about 50 tables, 389 rows of test data, joins across up to eight tables, and views.</span></li><li><b>Artificial Intelligence</b><span>Agents, search and knowledge representation, and A* path-finding for a puzzle game in Python.</span></li><li><b>Data Science</b><span>R. Regression models, reading the summary properly, and predicting from them.</span></li><li><b>Business Intelligence</b><span>A Power BI sales dashboard for a global distributor, built with CRISP-DM and DAX, with hidden issues and recommendations. <a href="assets/uni/bi-dashboard.webp" target="_blank" rel="noopener">See the dashboard ↗</a></span></li><li><b>Strategic Business Analytics</b></li></ul>
+          </div>
+          <div class="cf-detail cols" hidden>
+            <span class="uni-k">06 · Business &amp; people</span>
+            <h3>Why the business side makes sense to me</h3>
+            <ul class="uni-list"><li><b>Strategic Management</b></li><li><b>Management &amp; Organisational Behaviour</b><span>Group research on communication and how it makes or breaks a team.</span></li><li><b>Human Resource Management</b><span>A strategic HR consultancy proposal for a century-old London members' club: workforce planning, hiring, training, performance, retention and succession for its modernisation.</span></li><li><b>IT Audit &amp; Risk Management</b><span>The audit risk model, IS audit reports, a Malaysia vs Singapore look at real IT audit failures, and a COSO-based risk audit of a spot on campus.</span></li><li><b>Entrepreneurship</b></li><li><b>Technopreneurship Team Project</b></li><li><b>E-Marketing</b></li><li><b>Corporate Communication</b></li><li><b>Professional Communication Skills</b><span>A persuasive talk on the hidden dangers of smoking and vaping among young people.</span></li></ul>
+          </div>
+          <div class="cf-detail" hidden>
+            <span class="uni-k">07 · The big ones</span>
+            <h3>Where it all got real</h3>
+            <ul class="uni-list"><li><b>Industrial Training at SLB</b><span>Eight months in Digital IT Operations, where I built the <a href="notes/slb-power-apps.html">IT Asset Disposal app</a>.</span></li><li><b>Industrial Project</b><span>The IT Asset Disposal app again, written up as a project. The <a href="notes/slb-design.html">charts and data model</a> are from it.</span></li><li><b>Final Year Project I &amp; II</b><span><a href="notes/taskmatch-v2.html">TaskMatch</a>, which I have since rebuilt properly.</span></li><li><b>Community Engagement Project</b></li></ul>
+          </div>
+          <div class="cf-detail" hidden>
+            <span class="uni-k">08 · Side subjects</span>
+            <h3>The ones that rounded me out</h3>
+            <ul class="tags"><li>Health, Safety &amp; Environment</li><li>Intro to the Oil &amp; Gas Industry &amp; Sustainable Development</li><li>Scientific Inquiry</li><li>Academic Writing</li><li>Basic French Communication</li><li>Groom-Me</li><li>Integrity &amp; Anti-Corruption</li><li>Penghayatan Etika &amp; Peradaban</li><li>Falsafah dan Isu Semasa</li></ul>
           <p class="uni-note">Safety, ethics, writing, a bit of French and how the oil and gas world works. Not the flashy part of a CS degree, but every one of them came in handy somewhere.</p>
-        </article>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -908,8 +999,9 @@
   });
 })();
 </script>
-<script src="assets/tumble-deck.js?v=20261106s" defer></script>
-<script src="assets/curved-reel.js?v=20261106s" defer></script>
-<script src="assets/extras.js?v=20261106s" defer></script>
+<script src="assets/tumble-deck.js?v=20261106t" defer></script>
+<script src="assets/curved-reel.js?v=20261106t" defer></script>
+<script src="assets/coverflow.js?v=20261106t" defer></script>
+<script src="assets/extras.js?v=20261106t" defer></script>
 </body>
 </html>
