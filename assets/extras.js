@@ -310,3 +310,20 @@
   pick('kt-skills'); fromHash();
   addEventListener('hashchange', fromHash);
 })();
+
+/* REQ-001 card: flip between the photos and the user story. */
+(function () {
+  var card = document.getElementById('me-card'); if (!card) return;
+  var front = card.querySelector('.flip-face.front'), back = card.querySelector('.flip-face.back');
+  card.querySelectorAll('[data-flip]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var on = !card.classList.contains('flipped');
+      card.classList.toggle('flipped', on);
+      // the hidden side is out of the accessibility tree and the tab order
+      front.toggleAttribute('inert', on); back.toggleAttribute('inert', !on);
+      front.setAttribute('aria-hidden', String(on)); back.setAttribute('aria-hidden', String(!on));
+      setTimeout(function () { (on ? back : front).querySelector('[data-flip]').focus({ preventScroll: true }); }, 50);
+    });
+  });
+  back.setAttribute('inert', '');
+})();

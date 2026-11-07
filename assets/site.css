@@ -1242,3 +1242,42 @@ section.block { padding-block: 80px 8px; }
 .fd[data-entered] .fd-front { transition-delay: 0s, .42s, .42s; }
 @media (prefers-reduced-motion: reduce) { .fd *, .fd *::before, .fd *::after { transition-duration: 0s !important; transition-delay: 0s !important; animation: none !important; } .fd-tilt { transform: none; } }
 :root[data-theme="dark"] .fd { --ink: #141416; }
+
+/* REQ-001, bigger and two-sided: photos on the front, the user story on the back */
+.hero .hero-grid { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 48px; }
+.me-card.flip { transform: none; perspective: 1600px; }
+.flip-inner { position: relative; display: grid; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.2, .8, .2, 1); }
+.me-card.flipped .flip-inner { transform: rotateY(180deg); }
+.flip-face { grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden; transform: rotate(.4deg); }
+.flip-face.back { transform: rotateY(180deg) rotate(-.4deg); display: grid; grid-template-rows: auto 1fr; }
+.flip-face.back .spec-body { align-content: center; gap: 22px; padding: 28px 26px; }
+.flip-face.back .story { font-size: 1.25rem; line-height: 1.6; }
+.flip-face.back .ac li { font-size: 1rem; }
+.flip-face .spec-head { gap: 10px; }
+.flip-face.back .spec-head .status { margin-left: auto; }
+.flip-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--ink); color: var(--bg); font: 600 .8125rem var(--f-body, inherit); cursor: pointer; transition: background .2s, transform .2s; }
+.flip-btn:hover { background: var(--accent); color: var(--accent-ink); }
+.flip-btn span { display: inline-block; transition: transform .4s; }
+.flip-btn:hover span { transform: rotate(180deg); }
+.flip-face.front .flip-btn { margin-left: auto; }
+/* front: room for the tucked side photos, so nothing is cut at the card edge */
+.me-card .spec-body { padding: 26px 24px 24px; }
+.me-card .me-show { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 32px; }
+.me-card .ms-photos { max-width: 250px; margin-inline: 34px 10px; }
+.me-card .ms-photo.prev { transform: translateX(-13%) translateY(-4%) scale(.88) rotateY(12deg); }
+.me-card .ms-photo.next { transform: translateX(13%) translateY(-4%) scale(.88) rotateY(-12deg); }
+.me-card .ms-slide h3 { font-size: 1.75rem; }
+.me-card .ms-quote { font-size: 1.0625rem; }
+.me-card .ms-slides { min-height: 13.5em; }
+@media (max-width: 900px) { .hero .hero-grid { grid-template-columns: 1fr; } }
+@media (max-width: 560px) {
+  .me-card .me-show { grid-template-columns: 1fr; }
+  .me-card .ms-photos { max-width: 210px; margin-inline: auto; }
+  .flip-face.back .story { font-size: 1.0625rem; }
+  .flip-face.back .spec-body { padding: 20px 18px; }
+}
+@media (prefers-reduced-motion: reduce) { .flip-inner { transition: none; } }
+/* inside the card: one clean photo, the others cross-fade in place */
+.me-card .ms-photo.prev, .me-card .ms-photo.next { opacity: 0; transform: scale(.94); }
+.me-card .ms-photos { margin-inline: 0; max-width: 270px; }
+.me-card .ms-copy { padding-left: 4px; }

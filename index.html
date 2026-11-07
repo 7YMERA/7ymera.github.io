@@ -20,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=20261107k">
+<link rel="stylesheet" href="assets/site.css?v=20261107l">
 </head>
 <body>
 <div class="sky" aria-hidden="true"></div>
@@ -185,11 +185,13 @@
           </div>
           <p class="toast" id="toast-hero" role="status" aria-live="polite"></p>
         </div>
-        <aside class="spec me-card" aria-label="About me">
-          <div class="spec-head">
-            <span class="mono">REQ-001 · Hire Alif</span>
-            <span class="status">In production</span>
-          </div>
+        <aside class="me-card flip" id="me-card" aria-label="About me">
+          <div class="flip-inner">
+            <div class="spec flip-face front">
+              <div class="spec-head">
+                <span class="mono">REQ-001 · Hire Alif</span>
+                <button type="button" class="flip-btn" data-flip aria-controls="me-card" aria-label="Flip to see why to hire me">Why hire me <span aria-hidden="true">↻</span></button>
+              </div>
           <div class="spec-body">
           <div class="me-show" id="me-show" role="region" aria-roledescription="carousel" aria-label="About Alif" tabindex="0">
             <div class="ms-photos">
@@ -237,6 +239,27 @@
               </div>
             </div>
           </div>
+          </div>
+            </div>
+            <div class="spec flip-face back" aria-hidden="true">
+              <div class="spec-head">
+                <span class="mono">REQ-001 · Hire Alif</span>
+                <span class="status">In production</span>
+                <button type="button" class="flip-btn" data-flip aria-controls="me-card" aria-label="Flip back to the photos">Photos <span aria-hidden="true">↻</span></button>
+              </div>
+              <div class="spec-body">
+                <p class="story"><b>As a</b> team that needs software that fits the business,<br><b>I want</b> one person who can write the spec and ship the build,<br><b>so that</b> nothing gets lost in between.</p>
+                <div>
+                  <p class="eyebrow" style="margin-bottom:12px">Acceptance criteria</p>
+                  <ul class="ac">
+                    <li><span><strong>Elicits requirements</strong>, maps processes and writes functional specs for banking, insurance, logistics, telecommunications and SME clients</span></li>
+                    <li><span><strong>Ships to real users</strong>: a school dashboard in use today, plus live demos</span></li>
+                    <li><span><strong>Builds full stack</strong> with Next.js, Supabase and FastAPI, tested in CI</span></li>
+                    <li><span><strong>Designs for privacy</strong>: row-level security, audit logs, PDPA in mind</span></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         </aside>
       </div>
@@ -846,9 +869,9 @@
   });
 })();
 </script>
-<script src="assets/curved-reel.js?v=20261107k" defer></script>
-<script src="assets/folders.js?v=20261107k" defer></script>
-<script src="assets/coverflow.js?v=20261107k" defer></script>
-<script src="assets/extras.js?v=20261107k" defer></script>
+<script src="assets/curved-reel.js?v=20261107l" defer></script>
+<script src="assets/folders.js?v=20261107l" defer></script>
+<script src="assets/coverflow.js?v=20261107l" defer></script>
+<script src="assets/extras.js?v=20261107l" defer></script>
 </body>
 </html>
