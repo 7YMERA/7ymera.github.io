@@ -54,18 +54,17 @@
     // while it's on screen; the last stretch holds the finished headline.
     function range() { return cur.offsetHeight - innerHeight; }
     function apply(p) {
-      var g = Math.min(1, p / .3), q = clamp((p - .25) / .75);
-      var small = innerWidth < 760;
-      var fx = (small ? 10 : Math.min(140, Math.max(16, innerWidth * .08))) * (1 - g), fy = (small ? 14 : Math.min(90, Math.max(16, innerHeight * .07))) * (1 - g);
-      frame.style.clipPath = 'inset(' + fy.toFixed(1) + 'px ' + fx.toFixed(1) + 'px)';
+      var q = p;
+      // (No clip: the photo columns run to the screen edges, so nothing gets cut mid-air.)
       var c = ease(clamp(q / .5)), dx = c * innerWidth * .55, sc = 1 + c * .25;
       colL.style.transform = 'translate3d(' + (-dx) + 'px, 0, 0) rotate(' + (-7 - c * 10) + 'deg) scale(' + sc + ')';
       colR.style.transform = 'translate3d(' + dx + 'px, 0, 0) rotate(' + (7 + c * 10) + 'deg) scale(' + sc + ')';
-      mid.style.opacity = Math.max(0, 1 - q * 3.4);
+      mid.style.opacity = Math.max(0, 1 - q * 4.5);
       mid.style.transform = 'translate3d(0, ' + (-q * 60) + 'px, 0) scale(' + (1 - q * .08) + ')';
       if (reel) {
         var m = ease(clamp((q - .3) / .4));
-        reel.style.opacity = (.3 + .7 * clamp((q - .22) / .3)).toFixed(3);
+        // Hidden while the name is on screen, so it never shows through the text.
+        reel.style.opacity = clamp((q - .2) / .24).toFixed(3);
         reel.style.transform = 'translate3d(0, ' + (m * endY).toFixed(1) + 'px, 0) scale(' + (1 - .15 * m).toFixed(3) + ')';
       }
       if (ch) {
