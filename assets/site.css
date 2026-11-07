@@ -1160,3 +1160,16 @@ section.block { padding-block: 80px 8px; }
 .cur-col.left.outer .cur-track { animation-name: curDown; animation-duration: 75s; }
 .cur-col.right.outer .cur-track { animation-name: curUp; animation-duration: 75s; }
 @media (max-width: 760px) { .cur-col.outer { display: none; } }
+/* Outer columns: spec on the left, built on the right */
+.cur-col.outer { opacity: .9; }
+.cur-card.doc, .cur-card.req { aspect-ratio: 4 / 3; position: relative; }
+.cur-card.doc { background: #fff; }
+.cur-card.doc img { object-fit: contain; padding: 8px; background: #fff; }
+.cur-col.right.outer .cur-card.doc img { object-fit: cover; object-position: top; padding: 0; }
+.doc-tag { position: absolute; left: 8px; bottom: 8px; font: 600 .625rem var(--f-mono); letter-spacing: .06em; text-transform: uppercase; padding: 3px 7px; border-radius: 6px; background: var(--ink); color: var(--bg); }
+.cur-col.left.outer .doc-tag { background: var(--gold); color: #fff; }
+.cur-col.right.outer .doc-tag { background: var(--accent); color: #fff; }
+.cur-card.req { display: grid; align-content: center; gap: 6px; padding: 14px 16px; background: color-mix(in srgb, var(--surface) 94%, transparent); border: 1px solid var(--line); }
+.rq-code { font: 600 .6875rem var(--f-mono); color: var(--accent); letter-spacing: .04em; }
+.cur-card.req b { font: 800 1rem/1.2 var(--f-display); color: var(--ink); }
+.rq-line { font-size: .75rem; line-height: 1.4; color: var(--muted); }
