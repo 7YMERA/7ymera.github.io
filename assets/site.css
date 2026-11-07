@@ -994,3 +994,4 @@ section.block { padding-block: 80px 8px; }
 .dbp-tables button:hover { border-color: var(--accent); }
 .post-body > *, .dbp, .dbp > *, .dbp-out { min-width: 0; max-width: 100%; }
 .post-body .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.dbp-tables button.v { border-color: var(--accent); color: var(--accent); }

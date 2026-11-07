@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jom Al-Quran: 56 tables, back from Oracle · Alif Najmi</title>
+<meta name="description" content="A university database for a Quran-class business, ported from Oracle to SQLite with a live SQL playground and a critical review.">
+<meta property="og:title" content="Jom Al-Quran: 56 tables, back from Oracle">
+<meta property="og:description" content="A tuition business database, rebuilt and runnable in the browser.">
+<meta property="og:image" content="https://7ymera.github.io/assets/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Alif Najmi">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://7ymera.github.io/notes/jom-al-quran.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a6c74">
+<link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=64">
+<link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=180">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/site.css?v=20261107a">
+</head>
+<body>
+<div class="sky" aria-hidden="true"></div>
+
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge av"><img src="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=96" alt="" width="32" height="32" decoding="async"></span>Alif Najmi</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="../#me">Me</a>
+      <a href="../#work">Work</a>
+      <a href="../#journey">Journey</a>
+      <a href="../#contact">Contact</a>
+    </nav>
+    <button class="icon-btn k-btn" id="theme-btn" type="button" aria-label="Switch light or dark theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="post">
+    <div class="post-head">
+      <a class="back" href="../#me">← Back to Alif</a>
+      <span class="eyebrow">Notes · Coursework</span>
+      <h1>Jom Al-Quran: 56 tables, back from Oracle</h1>
+      <p class="meta">7 November 2026 · 4 min read</p>
+    </div>
+
+    <div class="post-body">
+      <p>The other database from my UTP days models <strong>Jom Al-Quran</strong>, a business running Quran and Arabic classes: students and their guardians, teachers and their schedules, courses, invoices, payments, and the websites and social media behind it all. It was a group assignment, built in Oracle like <a href="database.html">the company one</a>.</p>
+
+      <ul class="chips"><li>56 tables</li><li>1,459 rows</li><li>80 foreign keys</li><li>0 broken links</li></ul>
+
+      <h2>Bringing it back</h2>
+      <p>The original lived in a Word report: Oracle SQL and screenshots, runnable only on a lab machine. I had an AI coding agent port it to SQLite, repair the three typos that stopped it loading (two split inserts, 120 missing semicolons and two malformed foreign keys), check every relationship, and wrap it in tests. Every table, column and row is otherwise exactly as we submitted it.</p>
+      <p>For this page, the names, IC numbers, emails and phone numbers are all replaced with obviously fake ones. Each original maps to the same fake value everywhere, so every join still lines up.</p>
+
+      <h2>Try it yourself</h2>
+      <p>The report's five queries are below, including one that walks through thirteen tables to get from a guardian to their payment. Run them, open any table (or one of the views, in teal), or write your own. It all runs in your browser.</p>
+      <div class="dbp" id="dbp" data-db="../assets/db/jom-al-quran.sqlite">
+        <div class="dbp-presets"><button type="button" data-q="j0"><small>Warm-up</small>How many students, teachers and clients there are</button>
+<button type="button" data-q="j01"><small>Original query 1</small>Which websites each digital platform drives</button>
+<button type="button" data-q="j02"><small>Original query 2</small>Staff positions and their transactions</button>
+<button type="button" data-q="j03"><small>Original query 3</small>Ten tables deep: full-time teachers, their students and schedules</button>
+<button type="button" data-q="j04"><small>Original query 4</small>Thirteen tables deep: the guardian billing chain</button>
+<button type="button" data-q="j05"><small>Original view</small>The view: monthly transactions of female staff</button></div>
+        <div class="dbp-edit">
+          <textarea id="dbp-sql" spellcheck="false" aria-label="SQL query">-- Loading the database…</textarea>
+          <div class="dbp-bar"><button type="button" id="dbp-run" disabled>Run <span aria-hidden="true">▶</span></button><span id="dbp-status" aria-live="polite">Scroll here to load the database.</span></div>
+        </div>
+        <div class="dbp-out" id="dbp-out"></div>
+        <details class="dbp-tables"><summary>Browse a table (20 main tables and 6 views)</summary><div><button type="button" data-table="Attendance">Attendance</button><button type="button" data-table="Bank">Bank</button><button type="button" data-table="Client">Client</button><button type="button" data-table="Course">Course</button><button type="button" data-table="Digital_Platforms">Digital_Platforms</button><button type="button" data-table="EmergencyContacts">EmergencyContacts</button><button type="button" data-table="Employee">Employee</button><button type="button" data-table="Guardian">Guardian</button><button type="button" data-table="Invoice">Invoice</button><button type="button" data-table="Location">Location</button><button type="button" data-table="Payment">Payment</button><button type="button" data-table="Salary">Salary</button><button type="button" data-table="Schedule">Schedule</button><button type="button" data-table="Social_Media">Social_Media</button><button type="button" data-table="Staff">Staff</button><button type="button" data-table="Student">Student</button><button type="button" data-table="Support">Support</button><button type="button" data-table="Teacher">Teacher</button><button type="button" data-table="Transactions">Transactions</button><button type="button" data-table="Website">Website</button><button type="button" data-table="v_course_enrolment" class="v">v_course_enrolment</button><button type="button" data-table="v_guardian_billing" class="v">v_guardian_billing</button><button type="button" data-table="v_platform_engagement" class="v">v_platform_engagement</button><button type="button" data-table="v_staff_monthly_transactions" class="v">v_staff_monthly_transactions</button><button type="button" data-table="v_staff_transactions" class="v">v_staff_transactions</button><button type="button" data-table="v_teacher_roster" class="v">v_teacher_roster</button></div></details>
+        <template id="j0">SELECT &#x27;Students&#x27; AS who, count(*) AS how_many FROM Student
+UNION ALL SELECT &#x27;Teachers&#x27;, count(*) FROM Teacher
+UNION ALL SELECT &#x27;Clients&#x27;, count(*) FROM Client
+UNION ALL SELECT &#x27;Courses&#x27;, count(*) FROM Course;</template>
+<template id="j01">SELECT
+    dp.DP_Engagements,
+    w.W_URL
+FROM Digital_Platforms dp
+JOIN Website w ON w.DP_ID = dp.DP_ID
+ORDER BY dp.DP_Engagements DESC;</template>
+<template id="j02">SELECT
+    s.Staff_Position,
+    e.E_FullName,
+    tr.Tran_Amount,
+    COUNT(tr.Tran_Date) AS Transaction_Count
+FROM Staff s
+JOIN Employee e              ON e.E_ID   = s.E_ID
+JOIN EmployeeTransactions et ON et.E_ID  = e.E_ID
+JOIN Transactions tr         ON tr.Tran_ID = et.Tran_ID
+WHERE e.E_Gender = &#x27;F&#x27;
+   OR tr.Tran_Type = &#x27;Monthly&#x27;
+GROUP BY s.Staff_Position, e.E_FullName, tr.Tran_Amount, tr.Tran_Date
+ORDER BY s.Staff_Position;</template>
+<template id="j03">SELECT
+    e.E_FullName,
+    e.E_Jobscope,
+    t.T_Course,
+    t.T_EmploymentStatus,
+    l.L_LocationID,
+    l.L_AddressDetails,
+    s.S_ID,
+    s.S_MasteryLevel,
+    c.C_ID,
+    c.C_Selected_Course,
+    sc.Sch_ID,
+    sc.Sch_DayOfWeek
+FROM Employee e
+JOIN Teacher t           ON t.E_ID = e.E_ID
+JOIN EmployeeLocation el ON el.E_ID = e.E_ID
+JOIN Location l          ON l.L_LocationID = el.L_LocationID
+JOIN StudentTeacher st   ON st.T_ID = t.T_ID
+JOIN Student s           ON s.S_ID = st.S_ID
+JOIN StudentCourse cs    ON cs.S_ID = s.S_ID
+JOIN Course c            ON c.C_ID = cs.C_ID
+JOIN TeacherSchedule ts  ON ts.T_ID = t.T_ID
+JOIN Schedule sc         ON sc.Sch_ID = ts.Sch_ID
+WHERE t.T_ContractType = &#x27;Full Time&#x27;
+  AND c.C_Course_Rating &gt; 4.0
+  AND s.S_MasteryLevel = &#x27;Quran&#x27;
+  AND s.S_Session = &#x27;1&#x27;
+ORDER BY e.E_FullName, s.S_ID;</template>
+<template id="j04">SELECT
+    s.S_ID,
+    cl.Client_Name AS &quot;Guaridan Name&quot;,
+    g.G_MaritalStatus,
+    b.Bank_Name,
+    i.I_Amount,
+    tr.Tran_Amount,
+    p.Pay_ID,
+    sup.Support_Type
+FROM Client cl
+JOIN Guardian g          ON g.Client_ID = cl.Client_ID
+JOIN StudentGuardian sg  ON sg.G_ID = g.G_ID
+JOIN Student s           ON s.S_ID = sg.S_ID
+JOIN BankClient bc       ON bc.Client_ID = cl.Client_ID
+JOIN Bank b              ON b.Bank_ID = bc.Bank_ID
+JOIN ClientInvoice ci    ON ci.Client_ID = cl.Client_ID
+JOIN Invoice i           ON i.Invoice_ID = ci.Invoice_ID
+JOIN BankTransactions bt ON bt.Bank_ID = b.Bank_ID
+JOIN Transactions tr     ON tr.Tran_ID = bt.Tran_ID
+JOIN Payment p           ON p.Tran_ID = tr.Tran_ID
+JOIN ClientSupport cs    ON cs.Client_ID = cl.Client_ID
+JOIN Support sup         ON sup.Support_ID = cs.Support_ID
+WHERE cl.C_Gender = &#x27;M&#x27;
+  AND sup.Support_Origin = &#x27;Web&#x27;
+  AND p.Pay_Approval_Status = &#x27;Approved&#x27;
+  AND s.S_Session = &#x27;2&#x27;
+ORDER BY s.S_ID DESC;</template>
+<template id="j05">SELECT *
+FROM v_staff_monthly_transactions
+ORDER BY E_ID;</template>
+      </div>
+
+      <h2>What I'd design differently now</h2>
+      <p>Running it properly also meant reading it critically. It loads cleanly and every query works, but with a few years of hindsight:</p>
+      <ul>
+        <li><strong>Too many link tables.</strong> 36 of the 56 tables are link tables, and in the data most of them are really one-to-many. A single foreign key would do, and query four wouldn't need thirteen tables.</li>
+        <li><strong>One person, three names.</strong> A guardian, a client and a student can all be the same human, with nothing tying them together. Today I'd have one <code>Person</code> table and roles on top.</li>
+        <li><strong>The same fact stored twice.</strong> Schedules record their student and teacher directly <em>and</em> in two link tables. They agree now, which is exactly when duplicates look harmless.</li>
+        <li><strong>The documentation drifted.</strong> The report's schema list and its <code>CREATE TABLE</code>s disagree on a few tables. A test that checks one against the other would have caught it.</li>
+      </ul>
+      <p>None of that is a reason to be embarrassed by it. It's the same lesson every project since has taught me: write the model down, then check the real thing against it.</p>
+    </div>
+
+    <div class="post-foot">
+      <a class="back" href="database.html">← A whole company in 49 tables</a>
+      <a class="back" href="index.html">All notes →</a>
+    </div>
+  </article>
+</main>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  try { var saved = localStorage.getItem('theme'); if (saved) root.setAttribute('data-theme', saved); } catch (e) {}
+  document.getElementById('theme-btn').addEventListener('click', function () {
+    var cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+  });
+})();
+</script>
+<script src="../assets/db-playground.js?v=20261107a" defer></script>
+</body>
+</html>
