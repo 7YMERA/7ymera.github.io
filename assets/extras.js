@@ -36,7 +36,7 @@
     // Everything moves with transform and opacity only.
     var cta = document.getElementById('cur-cta');
     var frame = document.getElementById('cur-frame'), stage = cur.querySelector('.cur-stage');
-    var colL = cur.querySelector('.cur-col.left'), colR = cur.querySelector('.cur-col.right'), mid = cur.querySelector('.cur-center');
+    var colL = cur.querySelector('.cur-col.left:not(.outer)'), colR = cur.querySelector('.cur-col.right:not(.outer)'), outL = cur.querySelector('.cur-col.left.outer'), outR = cur.querySelector('.cur-col.right.outer'), mid = cur.querySelector('.cur-center');
     var reel = cur.querySelector('.cur-reel'), ch = document.getElementById('cur-hero'), title = document.getElementById('cur-title');
     var clamp = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
     var ease = function (t) { return t * t * (3 - 2 * t); };
@@ -59,6 +59,9 @@
       var c = ease(clamp(q / .5)), dx = c * innerWidth * .55, sc = 1 + c * .25;
       colL.style.transform = 'translate3d(' + (-dx) + 'px, 0, 0) rotate(' + (-7 - c * 10) + 'deg) scale(' + sc + ')';
       colR.style.transform = 'translate3d(' + dx + 'px, 0, 0) rotate(' + (7 + c * 10) + 'deg) scale(' + sc + ')';
+      // The outer columns part a little faster, for depth.
+      if (outL) outL.style.transform = 'translate3d(' + (-dx * 1.35) + 'px, 0, 0) rotate(' + (-5 - c * 8) + 'deg) scale(' + (.86 + c * .2) + ')';
+      if (outR) outR.style.transform = 'translate3d(' + (dx * 1.35) + 'px, 0, 0) rotate(' + (5 + c * 8) + 'deg) scale(' + (.86 + c * .2) + ')';
       mid.style.opacity = Math.max(0, 1 - q * 4.5);
       mid.style.transform = 'translate3d(0, ' + (-q * 60) + 'px, 0) scale(' + (1 - q * .08) + ')';
       if (reel) {
