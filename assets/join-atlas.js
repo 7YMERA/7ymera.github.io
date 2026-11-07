@@ -108,7 +108,7 @@
     map.textContent = ''; nodeEls = {}; edgeEls = [];
     var defs = el('defs', {}, map);
     [['ja-ah', 'arrow'], ['ja-ah-hot', 'arrow hot']].forEach(function (m) {
-      var mk = el('marker', { id: m[0], viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, defs);
+      var mk = el('marker', { id: m[0], viewBox: '0 0 10 10', refX: 9, refY: 5, markerUnits: 'userSpaceOnUse', markerWidth: 14, markerHeight: 14, orient: 'auto-start-reverse' }, defs);
       el('path', { d: 'M0,0 L10,5 L0,10 z', class: m[1] }, mk);
     });
     var gE = el('g', {}, map), gL = el('g', {}, map), gN = el('g', {}, map);

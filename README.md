@@ -169,6 +169,9 @@ Every interactive piece below started as a React + Tailwind component on [21st.d
 - **Before/after sliders** (a range input over two images clipped with `--pos`).
 - **The skill tree.**
 - **SQL playgrounds** (`db-playground.js`): sql.js (SQLite in WebAssembly) loads a database file only when the playground nears the screen, then runs the original coursework queries in the browser.
+- **Join Atlas** (`join-atlas.js` + `join-atlas.css`, on the Jom Al-Quran note): a map of the database's 20 main tables, with the 36 link tables as diamonds and the EER's subtypes as arrows. Pick tables and it finds the shortest foreign-key route, writes the JOINs and runs them. It can switch to the 2024 diagram's layout, colour link tables by their real cardinality, and compare each table with the report's attribute list (`assets/db/jom-al-quran-drift.json`). Everything is read from the database itself, and it shares sql.js with the playground on the same page. Built in [database-project-uplift](https://github.com/7YMERA/database-project-uplift).
+
+![The Join Atlas showing report query 4's shortest route](docs/screens/join-atlas.webp)
 
 ---
 
@@ -213,7 +216,7 @@ The note pages share one template. Their themed SVG diagrams (flowcharts, sequen
 index.html               the home page (sections listed above)
 notes/                   the notes, plus notes/index.html
 assets/
-  site.css               all styles, one file, with a comment heading per component
+  site.css               all site styles, one file, with a comment heading per component
   extras.js              opening, carousel, ticker, beam, dock, skill tree
   curved-reel.js         21st.dev Tilted Grid Hero port
   tumble-deck.js         21st.dev Tumble Deck Showcase port (not on the page now)
@@ -221,7 +224,9 @@ assets/
   coverflow.js           21st.dev Coverflow Carousel port
   folders.js             21st.dev Glassmorphism Folder Cards port
   db-playground.js       sql.js playground for the database notes
-  db/                    the two SQLite databases (personal data replaced with fake values)
+  join-atlas.js / .css   the Join Atlas on the Jom Al-Quran note (its own file, every rule scoped under .ja)
+  db/                    the two SQLite databases (personal data replaced with fake values),
+                         plus jom-al-quran-drift.json (report attributes vs the built tables)
   me/                    photos
   notes/                 note images, covers, diagrams
   slb-screens/           the SLB click-through
@@ -233,7 +238,7 @@ docs/screens/            screenshots used in this README
 
 - **Text:** edit `index.html` or the note pages directly.
 - **Styles:** `assets/site.css`. Newer rules sit lower in the file and win over older ones.
-- **After changing any CSS or JS,** bump the `?v=` key in every page, for example `sed -i 's/?v=20261107k/?v=20261107l/g' index.html notes/*.html`.
+- **After changing any CSS or JS,** bump the `?v=` key in every page, for example `sed -i 's/?v=20261107k/?v=20261107l/g' index.html notes/*.html`. `join-atlas.css` and `join-atlas.js` are only loaded by `notes/jom-al-quran.html` and keep their own key there, so bump that one separately.
 - **Theme colours** are CSS variables on `:root`, redefined for dark mode under both `prefers-color-scheme: dark` and `[data-theme="dark"]`.
 - **Check before pushing:** load the page at 1300 px and 390 px wide, make sure nothing scrolls sideways, and watch the console for errors.
 
