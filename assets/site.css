@@ -1139,3 +1139,14 @@ section.block { padding-block: 80px 8px; }
 .cur-frame::before { display: none; }
 @media (max-width: 560px) { .me-card .me-show { grid-template-columns: 1fr; justify-items: center; } .me-card .ms-photos { max-width: 210px; } }
 .fact-tiles small a { color: inherit; text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); } a.jr-org { text-decoration: none; } a.jr-org:hover { text-decoration: underline; }
+/* After the headline: a clear next step, so the end of the opening isn't empty */
+.cur-next { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 22px; }
+.cur-go { display: inline-flex; align-items: center; padding: 11px 20px; border-radius: 999px; font-weight: 600; text-decoration: none; color: var(--ink); background: color-mix(in srgb, var(--surface) 88%, transparent); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.cur-go.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.cur-go:hover { border-color: var(--accent); }
+.cur-scroll { display: grid; place-items: center; width: 34px; height: 34px; margin-top: 18px; color: var(--muted); animation: curBob 1.8s ease-in-out infinite; }
+.cur-scroll svg { width: 22px; height: 22px; }
+@keyframes curBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) { .cur-scroll { animation: none; } }
+@media (max-width: 760px) { .cur-reel { --rh: 300px; } .cur-next { margin-top: 26px; } .cur-go { padding: 12px 20px; } }
+@media (max-width: 760px) { .cur-reel { --rh: 270px; } .cur-scroll { display: none; } }

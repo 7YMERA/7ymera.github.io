@@ -45,7 +45,8 @@
       Hs = stage.clientHeight; R = reel ? reel.offsetHeight : 0;
       // Centre the reel and the headline as one block, a little above middle.
       var gap = innerWidth < 760 ? 14 : 22, hh = ch ? ch.offsetHeight : 0;
-      var top = Math.max(Hs * .04, Math.min(Hs * .1, (Hs - (R * .85 + gap + hh)) / 2));
+      // Centre the reel and headline as one block (a touch above middle).
+      var top = Math.max(Hs * .04, (Hs - (R * .85 + gap + hh)) / 2 - Hs * .03);
       endY = top + R * .85 / 2 - Hs / 2;           // where the reel's centre ends up
       if (ch) ch.style.top = (top + R * .85 + gap) + 'px';
     }
