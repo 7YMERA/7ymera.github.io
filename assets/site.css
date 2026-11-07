@@ -1138,3 +1138,4 @@ section.block { padding-block: 80px 8px; }
 .cur-frame, :root:not([data-theme="light"]) .cur-frame { background: transparent; }
 .cur-frame::before { display: none; }
 @media (max-width: 560px) { .me-card .me-show { grid-template-columns: 1fr; justify-items: center; } .me-card .ms-photos { max-width: 210px; } }
+.fact-tiles small a { color: inherit; text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); } a.jr-org { text-decoration: none; } a.jr-org:hover { text-decoration: underline; }
