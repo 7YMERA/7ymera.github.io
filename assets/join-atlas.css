@@ -1,0 +1,120 @@
+/* Join Atlas, on the Jom Al-Quran note. Ported from github.com/7YMERA/database-project-uplift.
+   Everything is scoped under .ja; colours come from the site tokens in site.css. */
+.post-body > .ja { max-width: none; }
+.ja { --edge: #b9c7ca; --w: min(1160px, calc(100vw - 48px)); width: var(--w); margin-inline: calc((100% - var(--w)) / 2); font-size: 1rem; line-height: 1.6; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ja { --edge: #2c444b; } }
+:root[data-theme="dark"] .ja { --edge: #2c444b; }
+@media (max-width: 600px) { .ja { --w: calc(100vw - 32px); } }
+.ja p, .ja h3, .ja h4 { margin: 0; }
+.ja { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 960px) { .ja { grid-template-columns: minmax(0, 1fr); } }
+
+.ja .map-card, .ja .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 14px; }
+.ja .panel { display: grid; gap: 12px; position: sticky; top: 12px; }
+.ja .panel > * { min-width: 0; }
+@media (max-width: 960px) { .ja .panel { position: static; } }
+
+.ja .map-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.ja .presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.ja .presets button { font: 500 .8125rem var(--f-body); padding: 6px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.ja .presets button:hover, .ja .presets button.on { border-color: var(--accent); background: var(--accent-soft); }
+.ja .map-tools { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.ja .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; background: var(--bg); }
+.ja .seg button { border: 0; background: none; color: var(--muted); font: 600 .8125rem var(--f-body); padding: 5px 12px; border-radius: 999px; cursor: pointer; }
+.ja .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.ja .drift { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.ja .drift h4 { margin: 0 0 4px; font: 600 .75rem var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--gold); }
+.ja .drift p { margin: 0; font-size: .8125rem; line-height: 1.8; color: var(--ink); }
+.ja .drift code { font: .75rem var(--f-mono); padding: 1px 5px; border-radius: 5px; background: var(--sunk); }
+.ja .lens { font-size: .8125rem; color: var(--muted); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.ja .lens input { accent-color: var(--accent); }
+
+.ja .map-scroll { overflow-x: auto; border-radius: 12px; background: var(--sunk); }
+.ja #ja-map { display: block; width: 100%; min-width: 640px; height: auto; user-select: none; }
+
+/* edges */
+.ja .e { stroke: var(--edge); stroke-width: 1.6; fill: none; transition: stroke .2s, stroke-width .2s, opacity .2s; }
+.ja .e.isa { stroke: var(--muted); stroke-width: 2.2; marker-end: url(#ja-ah); }
+.ja .e.isa.hot { marker-end: url(#ja-ah-hot); }
+.ja .arrow { fill: var(--muted); }
+.ja .arrow.hot { fill: var(--accent); }
+.ja .lk { fill: var(--surface); stroke: var(--edge); stroke-width: 1.4; transition: fill .2s, stroke .2s; }
+.ja .lk-hit { fill: transparent; cursor: help; }
+.ja .lensed .e.one { stroke: var(--muted); stroke-dasharray: 4 4; }
+.ja .lensed .e.many1 { stroke: var(--gold); }
+.ja .lensed .e.nm { stroke: var(--accent); stroke-width: 3; }
+.ja .lensed .lk.one { stroke: var(--muted); }
+.ja .lensed .lk.many1 { stroke: var(--gold); fill: var(--gold-soft); }
+.ja .lensed .lk.nm { stroke: var(--accent); fill: var(--accent-soft); }
+.ja .routing .e:not(.hot), .ja .routing .lk:not(.hot) { opacity: .25; }
+.ja .e.hot { stroke: var(--accent); stroke-width: 4; stroke-dasharray: none; opacity: 1; }
+.ja .lk.hot { stroke: var(--accent); fill: var(--accent); }
+
+/* nodes */
+.ja .n { cursor: pointer; outline: none; }
+.ja .n rect { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; transition: fill .2s, stroke .2s; }
+.ja .n .nm-t { font: 600 16px var(--f-body); fill: var(--ink); }
+.ja .n .ct-t { font: 500 12px var(--f-mono); fill: var(--muted); }
+.ja .n:hover rect, .ja .n:focus-visible rect { stroke: var(--accent); }
+.ja .n:focus-visible rect { stroke-width: 3; }
+.ja .n.via rect { stroke: var(--accent); stroke-dasharray: 5 3; }
+.ja .n.sel rect { fill: var(--accent); stroke: var(--accent); }
+.ja .n.sel .nm-t, .ja .n.sel .ct-t { fill: var(--accent-ink); }
+.ja .routing .n:not(.sel):not(.via) { opacity: .45; }
+
+.ja .ja-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .8125rem; color: var(--muted); margin-top: 10px; }
+.ja .ja-legend p { flex-basis: 100%; margin: 4px 0 0; color: var(--ink); }
+.ja .sw { display: inline-block; width: 22px; height: 0; border-top: 3px solid; vertical-align: middle; margin-right: 6px; }
+.ja .sw.isa { border-color: var(--muted); position: relative; }
+.ja .sw.isa::after { content: ""; position: absolute; right: -2px; top: -7px; border: 5.5px solid transparent; border-left: 7px solid var(--muted); border-right: 0; }
+.ja .sw.lk-plain { border-color: var(--edge); }
+.ja .ja-legend:not(.lensed) .lens-only, .ja .ja-legend.lensed .lens-off { display: none; }
+.ja .sw.one { border-color: var(--muted); border-top-style: dashed; }
+.ja .sw.many1 { border-color: var(--gold); }
+.ja .sw.nm { border-color: var(--accent); }
+
+.ja .picker { margin-top: 10px; font-size: .875rem; }
+.ja .picker summary { cursor: pointer; font-weight: 600; }
+.ja .picker div { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.ja .picker button { font: .75rem var(--f-mono); padding: 6px 9px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.ja .picker button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+/* route panel */
+.ja .route { display: grid; gap: 8px; }
+.ja .route .hint { margin: 0; color: var(--muted); }
+.ja .ja-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ja .ja-chip { display: inline-flex; align-items: center; gap: 6px; font: 600 .8125rem var(--f-body); padding: 4px 6px 4px 11px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); }
+.ja .ja-chip button { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 1rem; line-height: 1; padding: 0 4px; }
+.ja .clear { font: 500 .8125rem var(--f-body); border: 0; background: none; color: var(--accent); cursor: pointer; padding: 4px; }
+.ja .path { margin: 0; font-size: .875rem; line-height: 1.9; }
+.ja .path b { font-weight: 600; }
+.ja .path .via-t { font: .75rem var(--f-mono); color: var(--muted); }
+.ja .path .arrow { color: var(--muted); margin: 0 4px; }
+.ja .stats { display: flex; gap: 14px; flex-wrap: wrap; font: 500 .8125rem var(--f-mono); color: var(--muted); }
+.ja .stats strong { color: var(--ink); }
+.ja .note .clear { padding: 0; font-weight: 600; text-decoration: underline; }
+.ja .note { margin: 0; font-size: .8125rem; padding: 8px 10px; border-radius: 10px; background: var(--gold-soft); color: var(--ink); }
+.ja .detail h3 { margin: 0 0 4px; font: 700 1.125rem var(--f-display); }
+.ja .detail p { margin: 0 0 8px; font-size: .875rem; color: var(--muted); }
+.ja .cols { display: flex; flex-wrap: wrap; gap: 4px; }
+.ja .cols code { font: .6875rem var(--f-mono); padding: 3px 6px; border-radius: 6px; background: var(--sunk); }
+.ja .cols code.pk { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.ja .cols code.fk { background: var(--gold-soft); color: var(--gold); }
+
+.ja .edit { border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--ink); }
+.ja .edit textarea { display: block; width: 100%; min-height: 200px; resize: vertical; border: 0; padding: 12px 14px; background: transparent; color: var(--bg); font: .78rem/1.6 var(--f-mono); tab-size: 2; }
+.ja .edit textarea:focus { outline: none; }
+.ja .bar { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-top: 1px solid color-mix(in srgb, var(--bg) 18%, transparent); }
+.ja .bar button { border: 0; border-radius: 999px; padding: 8px 16px; background: var(--accent); color: var(--accent-ink); font: 700 .875rem var(--f-body); cursor: pointer; }
+.ja .bar button:disabled { opacity: .5; cursor: wait; }
+.ja #ja-status { font: .75rem var(--f-mono); color: color-mix(in srgb, var(--bg) 70%, transparent); }
+.ja #ja-status.bad { color: var(--bad); }
+
+.ja .out:empty { display: none; }
+.ja .tbl { overflow: auto; max-height: 380px; border-radius: 12px; border: 1px solid var(--line); }
+.ja .tbl table { border-collapse: collapse; font-size: .8125rem; white-space: nowrap; width: 100%; }
+.ja .tbl th, .ja .tbl td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line); }
+.ja .tbl th { position: sticky; top: 0; background: var(--surface); font: 600 .75rem var(--f-mono); color: var(--muted); }
+.ja .tbl i { color: var(--muted); }
+.ja .empty { color: var(--muted); font-size: .875rem; margin: 0; }
+

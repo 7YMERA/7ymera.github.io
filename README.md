@@ -200,7 +200,7 @@ Long-form write-ups in `notes/`, linked from the Notes folders and listed at [`/
 | `jumaatfinder.html` | Finding Friday prayers from official data |
 | `aws-two-departments.html` | The UTP AWS assignment, where my AWS started |
 | `database.html` | A company database in 49 tables, with a live SQL playground |
-| `jom-al-quran.html` | A 56-table tuition business database, with a live SQL playground |
+| `jom-al-quran.html` | A 56-table tuition business database, with a live SQL playground, the original EER diagram and a join map (`join-atlas.js`) that writes and runs JOINs |
 | `convocation-2026.html` | Graduation day |
 
 ![The SQL playground running an original join](docs/screens/sql-playground.webp)
