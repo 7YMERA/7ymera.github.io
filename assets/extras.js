@@ -63,8 +63,8 @@
       mid.style.transform = 'translate3d(0, ' + (-q * 60) + 'px, 0) scale(' + (1 - q * .08) + ')';
       if (reel) {
         var m = ease(clamp((q - .3) / .4));
-        // Hidden while the name is on screen, so it never shows through the text.
-        reel.style.opacity = clamp((q - .2) / .24).toFixed(3);
+        // Faint behind the photos from the start, then full strength as it rises.
+        reel.style.opacity = (.32 + .68 * clamp((q - .2) / .24)).toFixed(3);
         reel.style.transform = 'translate3d(0, ' + (m * endY).toFixed(1) + 'px, 0) scale(' + (1 - .15 * m).toFixed(3) + ')';
       }
       if (ch) {
