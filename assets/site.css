@@ -1173,3 +1173,72 @@ section.block { padding-block: 80px 8px; }
 .rq-code { font: 600 .6875rem var(--f-mono); color: var(--accent); letter-spacing: .04em; }
 .cur-card.req b { font: 800 1rem/1.2 var(--f-display); color: var(--ink); }
 .rq-line { font-size: .75rem; line-height: 1.4; color: var(--muted); }
+
+/* Glass folders (plain-JS port of 21st.dev "Glassmorphism Folder Cards") */
+.fd-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 96px 40px; margin-top: 36px; justify-items: center; }
+@media (max-width: 1000px) { .fd-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .fd-grid { grid-template-columns: 1fr; gap: 72px; } }
+.fd { --px: 0; --py: 0; --ease: cubic-bezier(.2, .8, .2, 1); --spring: cubic-bezier(.34, 1.36, .5, 1);
+  --hinge: 0deg; --lift: 42px; --spread: 0px; --fan: 0deg; --stack: 15px; --ink: #141416; --ink-soft: rgba(20, 20, 22, .55);
+  position: relative; width: 100%; max-width: 330px; isolation: isolate; -webkit-tap-highlight-color: transparent; }
+.fd:hover, .fd:focus-within { --hinge: -11deg; --lift: -34px; --spread: 8px; --fan: 1.4deg; --stack: 10px; }
+.fd[data-open] { --hinge: -24deg; --lift: -96px; --spread: 40px; --fan: 5deg; --stack: 30px; z-index: 5; }
+.fd-stage { position: absolute; left: 0; top: 0; width: 340px; height: 272px; transform-origin: 0 0; }
+.fd-tilt { position: absolute; inset: 0; transform: perspective(1400px) rotateX(calc(var(--py) * -3deg)) rotateY(calc(var(--px) * 4deg)); transition: transform .9s var(--ease); }
+.fd-shadow { position: absolute; left: 18px; right: 18px; bottom: -6px; height: 60px; border-radius: 40px; background: rgba(16, 18, 24, .3); filter: blur(22px); }
+.fd-back { position: absolute; inset: 0; overflow: hidden; background: linear-gradient(180deg, #f3f3f4, #e3e3e6); }
+.fd-art { position: absolute; left: -12px; top: -12px; width: 364px; height: 296px; max-width: none; object-fit: cover; object-position: top; transform: translate(calc(var(--px) * -7px), calc(var(--py) * -6px)) scale(1.02); transition: transform 1.1s var(--ease); }
+.fd-back-sheen { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,0) 22%), radial-gradient(120% 80% at 80% 0%, rgba(255,255,255,.16), rgba(255,255,255,0) 60%); }
+.fd-rim { position: absolute; left: 0; top: 0; max-width: none; overflow: visible; pointer-events: none; fill: none; }
+.fd-back-rim { width: 340px; height: 272px; }
+.fd-back-rim path { stroke: rgba(255, 255, 255, .45); stroke-width: 1; }
+
+.fd-files { position: absolute; inset: 0; z-index: 5; pointer-events: none; clip-path: inset(-400px -400px 10px -400px); }
+.fd-sheet { box-sizing: border-box; position: absolute; left: 34px; top: 96px; width: 272px; height: 184px; border-radius: 16px; overflow: hidden; text-decoration: none; cursor: pointer; pointer-events: auto;
+  background: linear-gradient(180deg, #fff, #f2f2f0); box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 0 0 .5px rgba(0,0,0,.1), 0 10px 26px -8px rgba(10,12,20,.28);
+  transform-origin: 50% 100%;
+  transform: translate(calc(var(--jx) + var(--slot) * var(--spread)), calc(var(--lift) + var(--depth) * var(--stack) * -1)) rotate(calc(var(--jr) + var(--slot) * var(--fan)));
+  transition: transform .75s var(--spring) calc(var(--depth) * 40ms), box-shadow .4s var(--ease), translate .9s var(--ease), opacity .9s var(--ease); }
+.fd:not([data-open]) .fd-sheet { pointer-events: none; }
+.fd[data-open] .fd-sheet:hover, .fd[data-open] .fd-sheet:focus-visible {
+  transform: translate(calc(var(--jx) + var(--slot) * var(--spread)), calc(var(--lift) + var(--depth) * var(--stack) * -1 - 18px)) rotate(calc(var(--slot) * var(--fan) * .6));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 0 0 .5px rgba(0,0,0,.1), 0 22px 40px -12px rgba(10,12,20,.42); transition-delay: 0s; }
+.fd-sheet:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.fd-sheet-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.fd-sheet--img::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,0) 40%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); pointer-events: none; }
+.fd-sheet-head { position: absolute; left: 14px; right: 14px; top: 11px; z-index: 1; display: flex; align-items: baseline; justify-content: space-between; gap: 10px; white-space: nowrap; }
+.fd-sheet-name { overflow: hidden; text-overflow: ellipsis; font: 600 13px var(--f-body, sans-serif); color: #18181b; }
+.fd-sheet-meta { flex: none; font: 10px var(--f-mono); letter-spacing: .02em; color: rgba(24,24,27,.5); }
+.fd-sheet--img .fd-sheet-name { color: #fafafa; } .fd-sheet--img .fd-sheet-meta { color: rgba(250,250,250,.72); }
+.fd-lines { position: absolute; left: 14px; right: 14px; top: 40px; display: flex; flex-direction: column; gap: 9px; }
+.fd-lines i { display: block; height: 5px; border-radius: 3px; background: rgba(24,24,27,.08); }
+.fd-lines i:nth-child(1) { height: 9px; width: 70%; margin-bottom: 4px; background: rgba(10,108,116,.25); }
+.fd-lines i:nth-child(2) { width: 92%; } .fd-lines i:nth-child(3) { width: 64%; } .fd-lines i:nth-child(4) { width: 88%; } .fd-lines i:nth-child(5) { width: 42%; }
+
+.fd-front { position: absolute; left: 0; top: 74px; width: 340px; height: 198px; z-index: 10; transform-origin: 50% 100%; transform: perspective(760px) rotateX(var(--hinge)); transition: transform .8s var(--spring), translate 1s var(--ease), opacity 1s var(--ease); }
+.fd-tint { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,.55) 0%, rgba(250,251,251,.86) 38%, rgba(252,252,252,.97) 100%); }
+.fd-front::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(260px 200px at calc(50% + var(--px) * 46%) calc(30% + var(--py) * 40%), rgba(255,255,255,.55), rgba(255,255,255,0) 70%); opacity: .8; }
+.fd-front-rim { width: 340px; height: 198px; }
+.fd-front-rim path { stroke-width: 2.4; }
+.fd-hit { all: unset; position: absolute; inset: 0; z-index: 2; cursor: pointer; }
+.fd-front:has(.fd-hit:focus-visible) .fd-front-rim path { stroke-width: 5; }
+.fd-hit:focus-visible ~ .fd-label .fd-title { text-decoration: underline; text-underline-offset: 4px; }
+.fd-label { position: absolute; left: 28px; bottom: 30px; right: 110px; z-index: 1; display: flex; flex-direction: column; gap: 4px; pointer-events: none; color: var(--ink); }
+.fd-kicker { font: 600 10px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.fd-title { font: 700 21px/1.15 var(--f-display); letter-spacing: -.015em; }
+.fd-meta { font: 12px var(--f-mono); letter-spacing: .03em; color: var(--ink-soft); }
+.fd-open-hint { position: absolute; right: 22px; bottom: 24px; z-index: 1; pointer-events: none; display: inline-flex; gap: 6px; align-items: center; padding: 10px 14px; border-radius: 14px; font: 600 13px var(--f-body, sans-serif); color: #fff;
+  background: radial-gradient(120% 90% at 50% 0%, #3a3a3f, #121214 55%, #050506); box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 0 0 1px rgba(0,0,0,.75), 0 12px 20px -8px rgba(0,0,0,.5); transition: transform .35s var(--spring); }
+.fd:hover .fd-open-hint { transform: translateY(-2px); }
+.fd[data-open] .fd-open-hint { opacity: 0; }
+
+/* entrance: the folder assembles itself */
+.fd:not([data-entered]) .fd-back, .fd:not([data-entered]) .fd-back-rim { translate: 0 22px; opacity: 0; }
+.fd:not([data-entered]) .fd-sheet { translate: 0 -120px; opacity: 0; }
+.fd:not([data-entered]) .fd-front { translate: 0 46px; opacity: 0; }
+.fd:not([data-entered]) .fd-shadow { opacity: 0; }
+.fd-back, .fd-back-rim, .fd-shadow { transition: translate 1s var(--ease), opacity .9s var(--ease); }
+.fd[data-entered] .fd-sheet { transition-delay: calc(var(--depth) * 40ms), 0s, calc(.18s + var(--depth) * 90ms), calc(.18s + var(--depth) * 90ms); }
+.fd[data-entered] .fd-front { transition-delay: 0s, .42s, .42s; }
+@media (prefers-reduced-motion: reduce) { .fd *, .fd *::before, .fd *::after { transition-duration: 0s !important; transition-delay: 0s !important; animation: none !important; } .fd-tilt { transform: none; } }
+:root[data-theme="dark"] .fd { --ink: #141416; }
