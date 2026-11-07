@@ -10,7 +10,7 @@
  * Press and hold to stop it; let go and it carries on.
  */
 (function () {
-  var SLICES = 16, CAMERA = 1.6, MAX_WIDTH = 55;
+  var CAMERA = 1.6, MAX_WIDTH = 55;
 
   function arc(bend) { return (CAMERA - 1 + Math.cos(bend)) / (2 * CAMERA * Math.sin(bend)); }
   function deg(r) { return r * 180 / Math.PI; }
@@ -32,7 +32,7 @@
   function build(el) {
     var images = JSON.parse(el.getAttribute('data-reel') || '[]');
     if (!images.length) return;
-    var d = el.dataset;
+    var d = el.dataset, SLICES = +(d.slices || 16);
     var o = {
       speed: +(d.speed || 4), tile: +(d.tile || 26), aspect: +(d.aspect || 16 / 9),
       gap: +(d.gap || 6), axis: +(d.axis || 50), fade: +(d.fade || 12),

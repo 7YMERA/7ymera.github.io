@@ -28,36 +28,67 @@
     fr.addEventListener('pointerleave', function () { fr.classList.remove('lit'); });
   }
   if (cur) {
+    // The opening, in three acts as you scroll through it:
+    //  1. the framed card grows to fill the screen,
+    //  2. the photo columns part and the name fades, while the spinning reel
+    //     behind them comes forward and rises to the top,
+    //  3. "I write the spec. Then I build it." arrives under the reel.
+    // Everything moves with transform and opacity only.
     var cta = document.getElementById('cur-cta');
-    var hero = document.querySelector('.hero');
-    cta.addEventListener('click', function () { (hero || cur.nextElementSibling).scrollIntoView({ behavior: calm ? 'auto' : 'smooth' }); });
-    if (!calm) {
-      // Move the two photo columns and fade the title with transforms and
-      // opacity only, written straight to the three elements, so the
-      // browser never has to recalculate styles for the rest of the page.
-      var frame = document.getElementById('cur-frame');
-      var colL = cur.querySelector('.cur-col.left'), colR = cur.querySelector('.cur-col.right'), mid = cur.querySelector('.cur-center');
+    var frame = document.getElementById('cur-frame'), stage = cur.querySelector('.cur-stage');
+    var colL = cur.querySelector('.cur-col.left'), colR = cur.querySelector('.cur-col.right'), mid = cur.querySelector('.cur-center');
+    var reel = cur.querySelector('.cur-reel'), ch = document.getElementById('cur-hero'), title = document.getElementById('cur-title');
+    var clamp = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
+    var ease = function (t) { return t * t * (3 - 2 * t); };
+    var Hs = 0, R = 0, endY = 0;
+    function measure() {
+      Hs = stage.clientHeight; R = reel ? reel.offsetHeight : 0;
+      // Centre the reel and the headline as one block, a little above middle.
+      var gap = innerWidth < 760 ? 14 : 22, hh = ch ? ch.offsetHeight : 0;
+      var top = Math.max(Hs * .04, Math.min(Hs * .1, (Hs - (R * .85 + gap + hh)) / 2));
+      endY = top + R * .85 / 2 - Hs / 2;           // where the reel's centre ends up
+      if (ch) ch.style.top = (top + R * .85 + gap) + 'px';
+    }
+    // Progress runs over the time the stage is pinned, so every act plays
+    // while it's on screen; the last stretch holds the finished headline.
+    function range() { return cur.offsetHeight - innerHeight; }
+    function apply(p) {
+      var g = Math.min(1, p / .3), q = clamp((p - .25) / .75);
+      var small = innerWidth < 760;
+      var fx = (small ? 10 : Math.min(140, Math.max(16, innerWidth * .08))) * (1 - g), fy = (small ? 14 : Math.min(90, Math.max(16, innerHeight * .07))) * (1 - g);
+      frame.style.clipPath = 'inset(' + fy.toFixed(1) + 'px ' + fx.toFixed(1) + 'px)';
+      var c = ease(clamp(q / .5)), dx = c * innerWidth * .55, sc = 1 + c * .25;
+      colL.style.transform = 'translate3d(' + (-dx) + 'px, 0, 0) rotate(' + (-7 - c * 10) + 'deg) scale(' + sc + ')';
+      colR.style.transform = 'translate3d(' + dx + 'px, 0, 0) rotate(' + (7 + c * 10) + 'deg) scale(' + sc + ')';
+      mid.style.opacity = Math.max(0, 1 - q * 3.4);
+      mid.style.transform = 'translate3d(0, ' + (-q * 60) + 'px, 0) scale(' + (1 - q * .08) + ')';
+      if (reel) {
+        var m = ease(clamp((q - .3) / .4));
+        reel.style.opacity = (.3 + .7 * clamp((q - .22) / .3)).toFixed(3);
+        reel.style.transform = 'translate3d(0, ' + (m * endY).toFixed(1) + 'px, 0) scale(' + (1 - .15 * m).toFixed(3) + ')';
+      }
+      if (ch) {
+        var o = clamp((q - .62) / .22);
+        ch.style.opacity = o.toFixed(3);
+        ch.style.transform = 'translate3d(0, ' + ((1 - o) * 26).toFixed(1) + 'px, 0)';
+        ch.style.pointerEvents = o > .5 ? 'auto' : 'none';
+        if (o > .05 && title && !title.classList.contains('reveal')) title.classList.add('reveal');
+      }
+    }
+    cta.addEventListener('click', function () { scrollTo({ top: cur.offsetTop + range() * .98, behavior: calm ? 'auto' : 'smooth' }); });
+    measure();
+    if (calm) {
+      // No motion: show the finished state straight away.
+      apply(1); addEventListener('resize', function () { measure(); apply(1); });
+    } else {
       var busy = false, lastP = -1;
       var tick = function () {
         busy = false;
-        var r = cur.getBoundingClientRect(), range = r.height - innerHeight * .3;
-        var p = Math.max(0, Math.min(1, -r.top / (range || 1)));
-        if (Math.abs(p - lastP) < .001) return; lastP = p;
-        // First third of the scroll: the framed card grows to full screen.
-        // After that: the photo columns part.
-        var g = Math.min(1, p / .35), q = Math.max(0, (p - .3) / .7);
-        var small = innerWidth < 760;
-        var fx = (small ? 10 : Math.min(140, Math.max(16, innerWidth * .08))) * (1 - g), fy = (small ? 14 : Math.min(90, Math.max(16, innerHeight * .07))) * (1 - g);
-        frame.style.clipPath = 'inset(' + fy.toFixed(1) + 'px ' + fx.toFixed(1) + 'px round ' + (28 * (1 - g)).toFixed(1) + 'px)';
-        p = q;
-        var dx = p * innerWidth * .48, s = 1 + p * .25;
-        colL.style.transform = 'translate3d(' + (-dx) + 'px, 0, 0) rotate(' + (-7 - p * 10) + 'deg) scale(' + s + ')';
-        colR.style.transform = 'translate3d(' + dx + 'px, 0, 0) rotate(' + (7 + p * 10) + 'deg) scale(' + s + ')';
-        mid.style.opacity = Math.max(0, 1 - p * 1.6);
-        mid.style.transform = 'translate3d(0, ' + (-p * 40) + 'px, 0) scale(' + (1 - p * .06) + ')';
+        var p = clamp(-cur.getBoundingClientRect().top / (range() || 1));
+        if (Math.abs(p - lastP) < .001) return; lastP = p; apply(p);
       };
       addEventListener('scroll', function () { if (!busy) { busy = true; requestAnimationFrame(tick); } }, { passive: true });
-      addEventListener('resize', function () { lastP = -1; tick(); }); tick();
+      addEventListener('resize', function () { measure(); lastP = -1; tick(); }); tick();
     }
   }
 
@@ -95,7 +126,7 @@
       var p = Math.max(0, Math.min(1, (mark - r.top) / r.height));
       beam.style.height = (p * 100) + '%';
       items.forEach(function (li) {
-        var dot = li.querySelector('.rail i');
+        var dot = li.querySelector('.jr-dot, .rail i');
         if (dot) li.classList.toggle('lit', dot.getBoundingClientRect().top < mark);
       });
     }
