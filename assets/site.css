@@ -1281,3 +1281,16 @@ section.block { padding-block: 80px 8px; }
 .me-card .ms-photo.prev, .me-card .ms-photo.next { opacity: 0; transform: scale(.94); }
 .me-card .ms-photos { margin-inline: 0; max-width: 270px; }
 .me-card .ms-copy { padding-left: 4px; }
+/* the big Photos | Why hire me switch above the card */
+.me-side { display: grid; gap: 14px; min-width: 0; }
+.flip-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 6px; border-radius: 20px; background: color-mix(in srgb, var(--surface) 80%, transparent); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.flip-switch button { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 0; border-radius: 15px; background: none; color: var(--ink); text-align: left; cursor: pointer; transition: background .25s, color .25s; }
+.flip-switch button svg { width: 26px; height: 26px; flex: none; color: var(--accent); }
+.flip-switch button b { display: block; font: 700 1.0625rem/1.2 var(--f-display); }
+.flip-switch button small { display: block; font-size: .8125rem; color: var(--muted); }
+.flip-switch button:hover { background: var(--accent-soft); }
+.flip-switch button[aria-selected="true"] { background: var(--ink); color: var(--bg); }
+.flip-switch button[aria-selected="true"] svg { color: var(--gold); }
+.flip-switch button[aria-selected="true"] small { color: color-mix(in srgb, var(--bg) 70%, transparent); }
+.me-card.flip { cursor: pointer; }
+@media (max-width: 480px) { .flip-switch button { padding: 10px 10px; gap: 8px; } .flip-switch button small { display: none; } }

@@ -311,19 +311,20 @@
   addEventListener('hashchange', fromHash);
 })();
 
-/* REQ-001 card: flip between the photos and the user story. */
+/* REQ-001 card: a big Photos | Why hire me switch flips the card. */
 (function () {
   var card = document.getElementById('me-card'); if (!card) return;
   var front = card.querySelector('.flip-face.front'), back = card.querySelector('.flip-face.back');
-  card.querySelectorAll('[data-flip]').forEach(function (b) {
-    b.addEventListener('click', function () {
-      var on = !card.classList.contains('flipped');
-      card.classList.toggle('flipped', on);
-      // the hidden side is out of the accessibility tree and the tab order
-      front.toggleAttribute('inert', on); back.toggleAttribute('inert', !on);
-      front.setAttribute('aria-hidden', String(on)); back.setAttribute('aria-hidden', String(!on));
-      setTimeout(function () { (on ? back : front).querySelector('[data-flip]').focus({ preventScroll: true }); }, 50);
-    });
-  });
-  back.setAttribute('inert', '');
+  var tabs = document.querySelectorAll('.flip-switch [data-side]');
+  function show(side) {
+    var on = side === 'back';
+    card.classList.toggle('flipped', on);
+    front.toggleAttribute('inert', on); back.toggleAttribute('inert', !on);
+    front.setAttribute('aria-hidden', String(on)); back.setAttribute('aria-hidden', String(!on));
+    tabs.forEach(function (t) { t.setAttribute('aria-selected', String(t.dataset.side === side)); });
+  }
+  tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.side); }); });
+  // tapping the card itself also flips it (but not its buttons or links)
+  card.addEventListener('click', function (e) { if (e.target.closest('button, a')) return; show(card.classList.contains('flipped') ? 'front' : 'back'); });
+  show('front');
 })();
