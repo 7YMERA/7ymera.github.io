@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jom Al-Quran: 56 tables, back from Oracle · Alif Najmi</title>
-<meta name="description" content="A university database for a Quran-class business, ported from Oracle to SQLite with a live SQL playground and a critical review.">
+<meta name="description" content="A university database for a Quran-class business, ported from Oracle to SQLite with a live SQL playground, a join map and a critical review.">
 <meta property="og:title" content="Jom Al-Quran: 56 tables, back from Oracle">
 <meta property="og:description" content="A tuition business database, rebuilt and runnable in the browser.">
 <meta property="og:image" content="https://7ymera.github.io/assets/og-card.jpg">
@@ -21,6 +21,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="../assets/site.css?v=20261108a">
+<link rel="stylesheet" href="../assets/join-atlas.css?v=20261107b">
 </head>
 <body>
 <div class="sky" aria-hidden="true"></div>
@@ -46,7 +47,7 @@
       <a class="back" href="../#me">← Back to Alif</a>
       <span class="eyebrow">Notes · Coursework</span>
       <h1>Jom Al-Quran: 56 tables, back from Oracle</h1>
-      <p class="meta">7 November 2026 · 4 min read</p>
+      <p class="meta">7 November 2026 · 5 min read</p>
     </div>
 
     <div class="post-body">
@@ -156,11 +157,46 @@ FROM v_staff_monthly_transactions
 ORDER BY E_ID;</template>
       </div>
 
+      <h2>How the tables connect</h2>
+      <p>This is the diagram we drew in 2024. It was buried in the report as an embedded drawing, so it never made it into the first port. The arrows are subtypes: a guardian and a student are both kinds of client, a teacher is a kind of employee, a payment is a kind of transaction.</p>
+      <figure class="shot"><a href="../assets/notes/db/jom-eer-2024.webp" target="_blank" rel="noopener"><img src="../assets/notes/db/jom-eer-2024.webp" alt="The original EER diagram: 20 entities in boxes with their attributes, joined by labelled relationship lines" width="2400" height="1702" loading="lazy"></a><figcaption>The 2024 EER diagram. Open it full size to read the attributes.</figcaption></figure>
+      <p>A drawing that busy doesn't help you write a query, so here is the same schema as a map you can use. Pick the tables you care about. The atlas finds the shortest route between them, writes the JOINs and runs them. Switch to <em>As we drew it in 2024</em> to put every table back where we placed it, or pick one table to see how it drifted from what the report documented.</p>
+      <div class="ja" id="ja" data-db="../assets/db/jom-al-quran.sqlite" data-drift="../assets/db/jom-al-quran-drift.json">
+        <div class="map-card">
+          <div class="map-head"><div class="presets" id="ja-presets" aria-label="Questions to try"></div></div>
+          <div class="map-tools">
+            <div class="seg" role="group" aria-label="Map layout">
+              <button type="button" data-layout="tidy" aria-pressed="true">Tidied</button>
+              <button type="button" data-layout="eer" aria-pressed="false">As we drew it in 2024</button>
+            </div>
+            <label class="lens"><input type="checkbox" id="ja-lens"> Colour links by what the data says</label>
+          </div>
+          <div class="map-scroll"><svg id="ja-map" viewBox="0 0 1000 660" role="group" aria-label="Map of the 20 main tables and the links between them"></svg></div>
+          <div class="ja-legend" id="ja-legend">
+            <span><i class="sw isa"></i>Subtype of, from the 2024 diagram</span>
+            <span class="lens-only"><i class="sw one"></i>Link table, one-to-one in the data</span>
+            <span class="lens-only"><i class="sw many1"></i>Link table, really one-to-many</span>
+            <span class="lens-only"><i class="sw nm"></i>Link table, genuinely many-to-many</span>
+            <span class="lens-off"><i class="sw lk-plain"></i>Link table (hover a diamond)</span>
+            <p id="ja-lens-note" class="lens-only"></p>
+          </div>
+          <details class="picker"><summary>Pick from a list instead</summary><div id="ja-picker"></div></details>
+        </div>
+        <div class="panel">
+          <div class="route" id="ja-route"><p class="hint">Scroll here to load the database.</p></div>
+          <div class="edit">
+            <textarea id="ja-sql" spellcheck="false" aria-label="Generated SQL">-- Loading the database…</textarea>
+            <div class="bar"><button type="button" id="ja-run" disabled>Run <span aria-hidden="true">▶</span></button><span id="ja-status" aria-live="polite">Scroll here to load the database.</span></div>
+          </div>
+          <div class="out" id="ja-out"></div>
+        </div>
+      </div>
+
       <h2>What I'd design differently now</h2>
       <p>Running it properly also meant reading it critically. It loads cleanly and every query works, but with a few years of hindsight:</p>
       <ul>
         <li><strong>Too many link tables.</strong> 36 of the 56 tables are link tables, and in the data most of them are really one-to-many. A single foreign key would do, and query four wouldn't need thirteen tables.</li>
-        <li><strong>One person, three names.</strong> A guardian, a client and a student can all be the same human, with nothing tying them together. Today I'd have one <code>Person</code> table and roles on top.</li>
+        <li><strong>One person, three tables.</strong> The diagram makes guardians and students subtypes of client, but a parent's own row and their child's row are only tied together through a link table. The atlas's query-four preset shows what happens when you join them the short way: no rows. Today I'd have one <code>Person</code> table and roles on top.</li>
         <li><strong>The same fact stored twice.</strong> Schedules record their student and teacher directly <em>and</em> in two link tables. They agree now, which is exactly when duplicates look harmless.</li>
         <li><strong>The documentation drifted.</strong> The report's schema list and its <code>CREATE TABLE</code>s disagree on a few tables. A test that checks one against the other would have caught it.</li>
       </ul>
@@ -187,5 +223,6 @@ ORDER BY E_ID;</template>
 })();
 </script>
 <script src="../assets/db-playground.js?v=20261108a" defer></script>
+<script src="../assets/join-atlas.js?v=20261107b" defer></script>
 </body>
 </html>
