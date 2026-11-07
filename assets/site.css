@@ -1151,7 +1151,7 @@ section.block { padding-block: 80px 8px; }
 @media (max-width: 760px) { .cur-reel { --rh: 300px; } .cur-next { margin-top: 26px; } .cur-go { padding: 12px 20px; } }
 @media (max-width: 760px) { .cur-reel { --rh: 270px; } .cur-scroll { display: none; } }
 .lede strong a { color: inherit; text-decoration-color: color-mix(in srgb, var(--accent) 50%, transparent); }
-.cur-frame { clip-path: none !important; } .cur-reel { opacity: 0; }
+.cur-frame { clip-path: none !important; } .cur-reel { opacity: .32; }
 .curtain { height: 270vh; height: 270svh; }
 /* A second, outer photo column on each side fills the wide-screen margins */
 .cur-col.outer { opacity: .62; z-index: 0; }
