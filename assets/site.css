@@ -1243,23 +1243,8 @@ section.block { padding-block: 80px 8px; }
 @media (prefers-reduced-motion: reduce) { .fd *, .fd *::before, .fd *::after { transition-duration: 0s !important; transition-delay: 0s !important; animation: none !important; } .fd-tilt { transform: none; } }
 :root[data-theme="dark"] .fd { --ink: #141416; }
 
-/* REQ-001, bigger and two-sided: photos on the front, the user story on the back */
+/* REQ-001, bigger: photos and the user story share one carousel */
 .hero .hero-grid { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 48px; }
-.me-card.flip { transform: none; perspective: 1600px; }
-.flip-inner { position: relative; display: grid; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.2, .8, .2, 1); }
-.me-card.flipped .flip-inner { transform: rotateY(180deg); }
-.flip-face { grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden; transform: rotate(.4deg); }
-.flip-face.back { transform: rotateY(180deg) rotate(-.4deg); display: grid; grid-template-rows: auto 1fr; }
-.flip-face.back .spec-body { align-content: center; gap: 22px; padding: 28px 26px; }
-.flip-face.back .story { font-size: 1.25rem; line-height: 1.6; }
-.flip-face.back .ac li { font-size: 1rem; }
-.flip-face .spec-head { gap: 10px; }
-.flip-face.back .spec-head .status { margin-left: auto; }
-.flip-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--ink); color: var(--bg); font: 600 .8125rem var(--f-body, inherit); cursor: pointer; transition: background .2s, transform .2s; }
-.flip-btn:hover { background: var(--accent); color: var(--accent-ink); }
-.flip-btn span { display: inline-block; transition: transform .4s; }
-.flip-btn:hover span { transform: rotate(180deg); }
-.flip-face.front .flip-btn { margin-left: auto; }
 /* front: room for the tucked side photos, so nothing is cut at the card edge */
 .me-card .spec-body { padding: 26px 24px 24px; }
 .me-card .me-show { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 32px; }
@@ -1273,24 +1258,33 @@ section.block { padding-block: 80px 8px; }
 @media (max-width: 560px) {
   .me-card .me-show { grid-template-columns: 1fr; }
   .me-card .ms-photos { max-width: 210px; margin-inline: auto; }
-  .flip-face.back .story { font-size: 1.0625rem; }
-  .flip-face.back .spec-body { padding: 20px 18px; }
 }
-@media (prefers-reduced-motion: reduce) { .flip-inner { transition: none; } }
 /* inside the card: one clean photo, the others cross-fade in place */
 .me-card .ms-photo.prev, .me-card .ms-photo.next { opacity: 0; transform: scale(.94); }
 .me-card .ms-photos { margin-inline: 0; max-width: 270px; }
 .me-card .ms-copy { padding-left: 4px; }
-/* the big Photos | Why hire me switch above the card */
 .me-side { display: grid; gap: 14px; min-width: 0; }
-.flip-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 6px; border-radius: 20px; background: color-mix(in srgb, var(--surface) 80%, transparent); border: 1px solid var(--line); box-shadow: var(--shadow); }
-.flip-switch button { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 0; border-radius: 15px; background: none; color: var(--ink); text-align: left; cursor: pointer; transition: background .25s, color .25s; }
-.flip-switch button svg { width: 26px; height: 26px; flex: none; color: var(--accent); }
-.flip-switch button b { display: block; font: 700 1.0625rem/1.2 var(--f-display); }
-.flip-switch button small { display: block; font-size: .8125rem; color: var(--muted); }
-.flip-switch button:hover { background: var(--accent-soft); }
-.flip-switch button[aria-selected="true"] { background: var(--ink); color: var(--bg); }
-.flip-switch button[aria-selected="true"] svg { color: var(--gold); }
-.flip-switch button[aria-selected="true"] small { color: color-mix(in srgb, var(--bg) 70%, transparent); }
-.me-card.flip { cursor: pointer; }
-@media (max-width: 480px) { .flip-switch button { padding: 10px 10px; gap: 8px; } .flip-switch button small { display: none; } }
+.me-card { transform: none; }
+.me-card .spec-head .status { margin-left: auto; }
+/* slide 2: the spec sheet sits in the photo stack, the criteria on the right */
+.ms-doc { display: grid; grid-template-rows: auto auto 1fr auto; gap: 12px; padding: 22px 20px; background: linear-gradient(160deg, var(--surface), var(--sunk)); border: 1px solid var(--line); color: var(--ink); }
+.md-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font: 500 .75rem var(--f-mono); letter-spacing: .04em; color: var(--muted); padding-bottom: 10px; border-bottom: 1px dashed var(--line); }
+.md-ok { padding: 3px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.md-title { font: 800 1.5rem/1.1 var(--f-display); letter-spacing: -.02em; }
+.md-story { font-size: .9375rem; line-height: 1.55; align-self: start; }
+.md-story b { display: block; margin-top: 8px; font: 500 .6875rem var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--gold); }
+.md-story b:first-child { margin-top: 0; }
+.md-foot { display: grid; gap: 6px; font: 500 .6875rem var(--f-mono); color: var(--muted); }
+.md-bar { height: 5px; border-radius: 5px; background: var(--line); overflow: hidden; }
+.md-bar i { display: block; height: 100%; background: var(--accent); }
+.ms-hire .ac { margin-top: 12px; gap: 10px; }
+.ms-hire .ac li { font-size: .9688rem; }
+.me-show.anim .ms-hire.on .ac li { animation: ms-up .45s ease both; }
+.me-show.anim .ms-hire.on .ac li:nth-child(2) { animation-delay: .08s; }
+.me-show.anim .ms-hire.on .ac li:nth-child(3) { animation-delay: .16s; }
+.me-show.anim .ms-hire.on .ac li:nth-child(4) { animation-delay: .24s; }
+.ms-dots button.on i::after { animation-duration: var(--dur, 5s); }
+@media (max-width: 560px) { .ms-doc { padding: 18px 16px; gap: 10px; } .md-title { font-size: 1.25rem; } .md-story { font-size: .875rem; } .ms-dots { margin-left: 0; } }
+/* hidden slides still take up room, so the card keeps one height and the page doesn't jump */
+.me-card .ms-slide[hidden] { display: grid !important; visibility: hidden; }
+.me-card .ms-slides { min-height: 0; }

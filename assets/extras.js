@@ -311,20 +311,3 @@
   addEventListener('hashchange', fromHash);
 })();
 
-/* REQ-001 card: a big Photos | Why hire me switch flips the card. */
-(function () {
-  var card = document.getElementById('me-card'); if (!card) return;
-  var front = card.querySelector('.flip-face.front'), back = card.querySelector('.flip-face.back');
-  var tabs = document.querySelectorAll('.flip-switch [data-side]');
-  function show(side) {
-    var on = side === 'back';
-    card.classList.toggle('flipped', on);
-    front.toggleAttribute('inert', on); back.toggleAttribute('inert', !on);
-    front.setAttribute('aria-hidden', String(on)); back.setAttribute('aria-hidden', String(!on));
-    tabs.forEach(function (t) { t.setAttribute('aria-selected', String(t.dataset.side === side)); });
-  }
-  tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.side); }); });
-  // tapping the card itself also flips it (but not its buttons or links)
-  card.addEventListener('click', function (e) { if (e.target.closest('button, a')) return; show(card.classList.contains('flipped') ? 'front' : 'back'); });
-  show('front');
-})();
