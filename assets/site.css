@@ -1150,3 +1150,4 @@ section.block { padding-block: 80px 8px; }
 @media (prefers-reduced-motion: reduce) { .cur-scroll { animation: none; } }
 @media (max-width: 760px) { .cur-reel { --rh: 300px; } .cur-next { margin-top: 26px; } .cur-go { padding: 12px 20px; } }
 @media (max-width: 760px) { .cur-reel { --rh: 270px; } .cur-scroll { display: none; } }
+.lede strong a { color: inherit; text-decoration-color: color-mix(in srgb, var(--accent) 50%, transparent); }
