@@ -20,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=20261108a">
+<link rel="stylesheet" href="assets/site.css?v=20261108b">
 </head>
 <body>
 <div class="sky" aria-hidden="true"></div>
@@ -33,6 +33,7 @@
       <a href="#notes">Notes</a>
       <a href="#toolkit">Skills</a>
       <a href="#work">Work</a>
+      <a href="#pulse">Pulse</a>
       <a href="#journey">Journey</a>
       <a href="#contact">Contact</a>
     </nav>
@@ -439,7 +440,7 @@
           <p>Each one starts from a real problem someone told me about.</p>
         </div>
         <div class="filters" role="group" aria-label="Filter projects">
-          <button type="button" data-filter="all" aria-pressed="true">All<span class="count">6</span></button>
+          <button type="button" data-filter="all" aria-pressed="true">All<span class="count">7</span></button>
           <button type="button" data-filter="use" aria-pressed="false">Real users</button>
           <button type="button" data-filter="live" aria-pressed="false">Live demo</button>
           <button type="button" data-filter="civic" aria-pressed="false">For Malaysia</button>
@@ -543,7 +544,7 @@
             <div class="pj-go"><a class="btn" href="notes/slb-screens.html">Click through 26 screens</a><a href="notes/slb-power-apps.html">Read the story <span aria-hidden="true">→</span></a><a href="notes/slb-design.html">Charts &amp; data model <span aria-hidden="true">→</span></a></div>
           </div>
         </article>
-        <div class="pj-pair">
+        <div class="pj-pair trio">
         <article class="card pj mini" data-tags="live civic" id="p-kakilima">
           <div class="pj-media">
             <div class="pj-shot"><img src="assets/kaki.webp" alt="KakiLima home page" width="640" height="400" loading="lazy"></div>
@@ -570,9 +571,75 @@
             <div class="pj-go"><a href="notes/jumaatfinder.html">Story <span aria-hidden="true">→</span></a><a href="https://github.com/7YMERA/jumaat-finder-app" target="_blank" rel="noopener">Repo <span aria-hidden="true">→</span></a></div>
           </div>
         </article>
+        <article class="card pj mini" data-tags="" id="p-roblox">
+          <div class="pj-media">
+            <div class="rb-code" role="img" aria-label="Sketch of the Roblox sandbox: one Luau file per ability, and the server checks damage">
+<span>src/shared/Abilities/</span>
+<span>&nbsp;&nbsp;<b>Pulse.luau</b> <em>E</em></span>
+<span>&nbsp;&nbsp;<b>InkCalligraphy.luau</b> <em>R</em></span>
+<span>src/server/<b>DamageService</b>.luau</span>
+<span>&nbsp;&nbsp;validates, then hits</span>
+<span>anticipation → impact → follow-through</span>
+            </div>
+          </div>
+          <div class="pj-body">
+            <div class="pj-meta"><span class="pill wip">Tinkering</span><span class="pj-kind">Side quest · 2026</span></div>
+            <h3>EagleSan Sandbox</h3>
+            <p class="pj-pitch">A Roblox game where I try hand-made abilities, effects and sound, whenever I'm free.</p>
+            <ul class="pj-points"><li><b>One file per ability</b>: add one and it shows on the hotbar</li><li><b>Server checks damage</b>, the client plays the effect</li></ul>
+            <p class="pj-stack">Roblox Studio · Luau · Rojo · Blender</p>
+            <div class="pj-go"><a href="#pulse">Latest activity <span aria-hidden="true">→</span></a></div>
+          </div>
+        </article>
         </div>
       </div>
       <p class="toast" id="filter-empty" hidden>Nothing matches that filter.</p>
+    </div>
+  </section>
+
+  <section class="block" id="pulse">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="eyebrow">Status report · 8 Nov 2026</span>
+          <h2>What I'm building right now</h2>
+          <p>Twelve repositories, one place to see what moved lately. The feed below goes live when GitHub answers.</p>
+        </div>
+        <a class="btn" href="https://github.com/7YMERA" target="_blank" rel="noopener">Open GitHub</a>
+      </div>
+      <div class="pl-stats">
+        <div class="pl-stat"><b data-to="12">12</b><span>repositories</span></div>
+        <div class="pl-stat"><b data-to="446">446</b><span>commits across them</span></div>
+        <div class="pl-stat"><b data-to="7">7</b><span>repos pushed to this week</span></div>
+        <div class="pl-stat"><b data-to="4">4</b><span>live apps with real users or demos</span></div>
+      </div>
+      <div class="pl-grid">
+        <div class="pl-stack">
+          <div class="pl-panel">
+            <h3>Project board</h3>
+            <ul class="pl-board">
+              <li class="pl-row"><span><b>TaskMatch v2</b></span><span class="pill live">Live</span><small>Portfolio-style look merged; agent handoff docs shipped.</small><time>8 Nov</time></li>
+              <li class="pl-row"><span><b>MyLokalEvent v2</b></span><span class="pill live">Live</span><small>Open events feed on the homepage, in BM and EN.</small><time>8 Nov</time></li>
+              <li class="pl-row"><span><b>SMK Subang dashboard</b></span><span class="pill use">In real use</span><small>v2.20: light mode by default, Tailwind v4 migration.</small><time>8 Nov</time></li>
+              <li class="pl-row"><span><b>KakiLima</b></span><span class="pill live">Live</span><small>Community wall (moderated posts) and roadmap pills.</small><time>8 Nov</time></li>
+              <li class="pl-row"><span><b>Jom Al-Quran database</b></span><span class="pill">Shipped</span><small>Join Atlas: an interactive schema map that runs JOINs.</small><time>7 Nov</time></li>
+              <li class="pl-row"><span><b>IT Asset Disposal v2</b></span><span class="pill wip">Design</span><small>Redesign as a device lifecycle and e-waste platform.</small><time>1 Nov</time></li>
+              <li class="pl-row"><span><b>JumaatFinder</b></span><span class="pill">Web app</span><small>452 official masjid with capacity, geocoded.</small><time>30 Oct</time></li>
+              <li class="pl-row"><span><b>EagleSan Sandbox</b></span><span class="pill wip">Tinkering</span><small>Roblox abilities, hotbar and arena. A side quest for free time.</small><time>30 Oct</time></li>
+            </ul>
+          </div>
+          <div class="pl-panel">
+            <h3>Commit map <span class="pill"><span id="pl-heat-total">0</span> in 17 weeks</span></h3>
+            <div class="pl-heat-wrap"><div id="pl-heat" role="img" aria-label="Commits per day across all twelve repositories over the last 17 weeks"></div></div>
+            <p class="pl-note">Each square is a day, darker means more commits. Most of the weight sits in the last three weeks.</p>
+          </div>
+        </div>
+        <div class="pl-panel">
+          <h3>Recent activity <span class="pill" id="pl-src">Snapshot</span></h3>
+          <ul id="pl-feed" aria-live="polite"><li class="pl-item">Loading…</li></ul>
+          <p class="pl-note">Public repositories only. Private work, such as the Roblox sandbox, shows in the board above.</p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -584,6 +651,7 @@
         <li class="jr-item k-work now"><span class="jr-dot" aria-hidden="true"></span><div class="jr-card"><div class="jr-top"><span class="jr-when">Oct 2026 – now</span><span class="jr-kind">Work</span></div><h3>Business Analyst</h3><span class="jr-org"><a href="https://axrail.ai" target="_blank" rel="noopener">axrail.ai</a> · Kuala Lumpur</span><p>In the Solution Architect team, gathering requirements and writing functional specs for data and AI solutions across banking, insurance, logistics, telco and SME clients.</p></div></li>
         <li class="jr-item k-work now"><span class="jr-dot" aria-hidden="true"></span><div class="jr-card"><div class="jr-top"><span class="jr-when">Oct 2026 – now</span><span class="jr-kind">Work</span></div><h3>AI Model Evaluator</h3><span class="jr-org">Handshake AI · Remote, freelance</span><p>Comparing and rating large language model responses against detailed rubrics, with the reasoning behind each call.</p></div></li>
         <li class="jr-item k-learn"><span class="jr-dot" aria-hidden="true"></span><div class="jr-card"><div class="jr-top"><span class="jr-when">Now</span><span class="jr-kind">Learning</span></div><h3>Learning Mandarin</h3><a class="jr-org" href="https://kunkwan.com/kunkwan-international-mandarin-training-centre/" target="_blank" rel="noopener">KunKwan International Mandarin Training Centre</a><p>Weekly classes, and slowly getting past ni hao.</p></div></li>
+        <li class="jr-item k-side"><span class="jr-dot" aria-hidden="true"></span><div class="jr-card"><div class="jr-top"><span class="jr-when">Oct 2026 – now</span><span class="jr-kind">Side project</span></div><h3>EagleSan Sandbox</h3><span class="jr-org">Roblox, for fun</span><p>A sandbox game for hand-made abilities, effects and sound. Small, but it's where I learn Luau and game feel in my free time.</p></div></li>
         <li class="jr-item k-side"><span class="jr-dot" aria-hidden="true"></span><div class="jr-card"><div class="jr-top"><span class="jr-when">2026</span><span class="jr-kind">Side project</span></div><h3>KakiLima, JumaatFinder and the SMK Subang dashboard</h3><span class="jr-org">Side projects</span><p>Three apps for real Malaysian problems: broken sidewalks, finding Friday prayers, and a school drowning in spreadsheets.</p></div></li>
         <li class="jr-item k-study"><span class="jr-dot" aria-hidden="true"></span><div class="jr-card"><div class="jr-top"><span class="jr-when">Aug 2026</span><span class="jr-kind">Study</span></div><h3>Graduated: BSc Computer Science (Hons)</h3><span class="jr-org">Universiti Teknologi PETRONAS</span><p>Second Class Upper. Enterprise Systems major, Corporate Management minor. MARA YTP scholar. Conferred at UTP's convocation in Nov 2026.</p></div></li>
         <li class="jr-item k-study"><span class="jr-dot" aria-hidden="true"></span><div class="jr-card"><div class="jr-top"><span class="jr-when">Jan – Aug 2026</span><span class="jr-kind">Study</span></div><h3>Final Year Project: TaskMatch</h3><span class="jr-org">UTP</span><p>A skill-based recommendation system for project teams, since rebuilt as TaskMatch v2.</p></div></li>
@@ -828,7 +896,7 @@
   // Quick jump (Ctrl+K)
   var items = [
     ['SMK Subang dashboard', '#p-smk', 'project'], ['TaskMatch v2', '#p-taskmatch', 'project'],
-    ['MyLokalEvent v2', '#p-mle', 'project'], ['KakiLima', '#p-kakilima', 'project'], ['JumaatFinder', '#p-jumaat', 'project'], ['IT Asset Disposal (SLB)', '#p-slb', 'project'],
+    ['MyLokalEvent v2', '#p-mle', 'project'], ['KakiLima', '#p-kakilima', 'project'], ['EagleSan Sandbox (Roblox)', '#p-roblox', 'project'], ['Status report and activity', '#pulse', 'section'], ['JumaatFinder', '#p-jumaat', 'project'], ['IT Asset Disposal (SLB)', '#p-slb', 'project'],
     ['Try TaskMatch demo', 'https://taskmatch-umber.vercel.app', 'live'], ['Visit MyLokalEvent', 'https://mylokalevent.vercel.app', 'live'], ['Visit KakiLima', 'https://kakilima-iota.vercel.app', 'live'],
     ['This is me', '#me', 'section'], ['All notes', 'notes/', 'note'], ['Note: Nine charts before one screen (SLB data model)', 'notes/slb-design.html', 'note'], ['Note: A dashboard 150 teachers actually open', 'notes/smk-dashboard.html', 'note'], ['Note: From coursework to something people could trust', 'notes/mylokalevent-v2.html', 'note'], ['Note: Accessible first, in four languages', 'notes/kakilima.html', 'note'], ['Note: Where can I solat Jumaat from here?', 'notes/jumaatfinder.html', 'note'], ['Note: One VPC, two departments, $56 (AWS coursework)', 'notes/aws-two-departments.html', 'note'], ['Note: A whole company in 49 tables (SQL playground)', 'notes/database.html', 'note'], ['Note: Jom Al-Quran, 56 tables (SQL playground)', 'notes/jom-al-quran.html', 'note'], ['Note: Rebuilding my FYP properly', 'notes/taskmatch-v2.html', 'note'], ['Note: From reply-all to Power Apps', 'notes/slb-power-apps.html', 'note'], ['Note: Four years, one walk across the stage', 'notes/convocation-2026.html', 'note'], ['Journey', '#journey', 'section'], ['Skill tree', '#toolkit', 'section'], ['Notes', '#notes', 'section'], ['Why I do this', '#why', 'section'], ['What I studied at UTP', '#studied', 'section'], ['Contact', '#contact', 'section'],
     ['Click through the IT Asset Disposal app', 'notes/slb-screens.html', 'live'], ['IT Asset Disposal source', 'https://github.com/7YMERA/it-asset-disposal-app-v1', 'link'], ['View CV', 'assets/Muhammad-Alif-Najmi-CV.pdf', 'link'], ['GitHub', 'https://github.com/7YMERA', 'link'], ['LinkedIn', 'https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin', 'link']
@@ -865,9 +933,10 @@
   });
 })();
 </script>
-<script src="assets/curved-reel.js?v=20261108a" defer></script>
-<script src="assets/folders.js?v=20261108a" defer></script>
-<script src="assets/coverflow.js?v=20261108a" defer></script>
-<script src="assets/extras.js?v=20261108a" defer></script>
+<script src="assets/curved-reel.js?v=20261108b" defer></script>
+<script src="assets/folders.js?v=20261108b" defer></script>
+<script src="assets/coverflow.js?v=20261108b" defer></script>
+<script src="assets/extras.js?v=20261108b" defer></script>
+<script src="assets/pulse.js?v=20261108b" defer></script>
 </body>
 </html>

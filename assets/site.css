@@ -1288,3 +1288,47 @@ section.block { padding-block: 80px 8px; }
 /* hidden slides still take up room, so the card keeps one height and the page doesn't jump */
 .me-card .ms-slide[hidden] { display: grid !important; visibility: hidden; }
 .me-card .ms-slides { min-height: 0; }
+
+/* ---- Pulse: status report, activity map, live feed (20261108b) ---- */
+.pl-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 22px; }
+.pl-stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; display: grid; gap: 4px; box-shadow: var(--shadow); }
+.pl-stat b { font-family: var(--f-display); font-size: var(--step-3); font-weight: 800; letter-spacing: -.02em; line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; }
+.pl-stat span { color: var(--muted); font-size: .875rem; }
+.pl-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+.pl-panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 24px; display: grid; gap: 16px; }
+.pl-panel h3 { font-size: var(--step-1); font-weight: 700; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pl-board { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.pl-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.pl-row:first-child { border-top: 0; padding-top: 0; }
+.pl-row b { font-weight: 600; }
+.pl-row small { grid-column: 1; color: var(--muted); font-size: .875rem; }
+.pl-row time { grid-column: 2; grid-row: 2; font-family: var(--f-mono); font-size: .6875rem; color: var(--muted); text-align: right; align-self: end; }
+.pl-row .pill { grid-column: 2; grid-row: 1; justify-self: end; }
+.pl-heat-wrap { overflow-x: auto; padding-bottom: 4px; }
+#pl-heat { display: grid; grid-template-rows: repeat(7, 14px); grid-auto-flow: column; grid-auto-columns: 14px; gap: 4px; width: max-content; }
+.h-c, .h-pad { width: 14px; height: 14px; border-radius: 4px; display: block; }
+.h-c { background: var(--sunk); border: 1px solid var(--line); }
+.h-c.l1 { background: color-mix(in srgb, var(--accent) 22%, var(--sunk)); border-color: transparent; }
+.h-c.l2 { background: color-mix(in srgb, var(--accent) 45%, var(--sunk)); border-color: transparent; }
+.h-c.l3 { background: color-mix(in srgb, var(--accent) 70%, var(--sunk)); border-color: transparent; }
+.h-c.l4 { background: var(--accent); border-color: transparent; }
+@media (prefers-reduced-motion: no-preference) {
+  .h-c { animation: h-in .5s both; animation-delay: calc(var(--i, 0) * 28ms); }
+  @keyframes h-in { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: none; } }
+}
+.pl-note { color: var(--muted); font-size: .875rem; }
+#pl-feed { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; position: relative; }
+.pl-item { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); }
+.pl-item:first-child { border-top: 0; }
+.pl-when { font-family: var(--f-mono); font-size: .6875rem; color: var(--muted); padding-top: 3px; }
+.pl-txt { display: grid; gap: 2px; min-width: 0; }
+.pl-txt b { font-weight: 600; }
+.pl-txt span { color: var(--muted); font-size: .9rem; overflow-wrap: anywhere; }
+.pl-stack { display: grid; gap: 22px; }
+@media (max-width: 900px) { .pl-grid { grid-template-columns: 1fr; } .pl-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .pl-panel { padding: 18px; } .pl-item { grid-template-columns: 62px minmax(0, 1fr); } }
+/* Work: three minis in a row, and the Roblox code panel */
+@media (min-width: 1000px) { .pj-pair.trio { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; } .pj-pair.trio .pj.mini h3 { font-size: 1.375rem; } }
+.rb-code { aspect-ratio: 16 / 10; border-radius: 16px; border: 1px solid var(--line); background: var(--sunk); padding: 18px 20px; font-family: var(--f-mono); font-size: .75rem; line-height: 1.7; color: var(--muted); overflow: hidden; display: grid; align-content: center; }
+.rb-code b { color: var(--accent); font-weight: 500; }
+.rb-code em { font-style: normal; color: var(--gold); }

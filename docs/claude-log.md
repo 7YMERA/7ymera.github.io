@@ -18,6 +18,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-08 · Pulse status report, Roblox card
+- New `#pulse` section before Journey: stat tiles, project board, commit map and a recent-activity feed (live GitHub events with a snapshot fallback). Code in `assets/pulse.js`, data in `assets/pulse-data.json`.
+- Added the EagleSan Sandbox (Roblox) card to Work (now a row of three minis) and a Journey entry. The repo is private, so it has no repo link.
+- Open: refresh `pulse-data.json` (commit counts, `heat`, `recent`) and the board text in `index.html` when projects move. Axrail work is left off on purpose; it lives on LinkedIn.
+
 ## 2026-11-08 · Handoff setup
 - Added `CLAUDE.md` (auto-read by Claude Code), this log, and `tools/check.js`, a smoke test of every page at 1300 and 390 px.
 - Why: so a new chat can start from these files instead of a long conversation.

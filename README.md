@@ -45,7 +45,8 @@ The home page, top to bottom:
 | **Notes** (`#notes`) | One glass folder per project. Opening one fans out the stories, demos, diagrams and repos. | `folders.js` |
 | **What UTP put me through** (`#studied`) | A coverflow of eight subject groups. The centre group's subjects, with what I did in each, show underneath. | `coverflow.js` |
 | **Skill tree** (`#toolkit`) | 41 skills in six branches, each dotted by where it came from (work, SLB, side projects, UTP, certification). | CSS + `extras.js` |
-| **Selected work** (`#work`) | Six projects, with filters, screenshots and before/after sliders. | inline script in `index.html` |
+| **Selected work** (`#work`) | Seven projects, with filters, screenshots and before/after sliders. | inline script in `index.html` |
+| **Pulse** (`#pulse`) | Status report: stat tiles, project board, 17-week commit map and a recent-activity feed. The feed tries GitHub's public events API and falls back to the snapshot. | `assets/pulse.js`, `assets/pulse-data.json` |
 | **Journey** (`#journey`) | Alternating cards on a centre line, coloured by kind, with a beam that fills as you scroll. | `extras.js` |
 | **Contact** | Links and the CV. | |
 
