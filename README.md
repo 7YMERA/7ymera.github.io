@@ -4,6 +4,8 @@ Portfolio and notes of **Muhammad Alif Najmi**, business analyst at [axrail.ai](
 
 Plain HTML, CSS and JavaScript, served by GitHub Pages. There is no framework, no build step and nothing to install: edit a file, push to `main`, and the site updates in a minute or two.
 
+> **AI agents:** start with [`CLAUDE.md`](CLAUDE.md) and the latest entry in [`docs/claude-log.md`](docs/claude-log.md), then read only the README section you need.
+
 ![The site today: the opening, after scrolling](docs/screens/opening-scrolled.webp)
 
 ---
