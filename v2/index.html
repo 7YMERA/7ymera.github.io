@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Alif Najmi · v2 preview</title>
+<meta name="description" content="Preview of a new look for Alif Najmi's portfolio: a low-poly Kuala Lumpur skyline and floating windows.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=64">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&amp;family=Inter:wght@400;500;600&amp;display=swap">
+<link rel="stylesheet" href="v2.css?v=20261109a">
+</head>
+<body>
+<div class="topbar">
+  <a class="tb-btn" href="../">← Current site</a>
+  <button class="tb-btn" id="theme-btn" type="button" aria-label="Switch light or dark theme"><span id="theme-label">Dark</span></button>
+</div>
+
+<header class="scene" id="scene">
+  <canvas id="sky" aria-hidden="true"></canvas>
+  <div class="scene-text">
+    <p class="kicker">v2 preview</p>
+    <h1>Alif Najmi</h1>
+    <p class="tag">I write the spec. Then I build it.</p>
+    <a class="big-btn" href="#me">Open the windows ↓</a>
+  </div>
+</header>
+
+<main class="desk" id="me">
+
+  <section class="win w-about" aria-labelledby="t-about">
+    <h2 class="bar" id="t-about">About me</h2>
+    <div class="body">
+      <p class="name">Muhammad Alif Najmi</p>
+      <p class="line">Business analyst at <a href="https://axrail.ai" target="_blank" rel="noopener">axrail.ai</a> in Kuala Lumpur. Computer Science graduate from UTP.</p>
+      <p class="small">I write requirements, then build small tools people really use: a school dashboard, civic apps, and the notes behind them.</p>
+      <div class="icons">
+        <a class="ic" href="https://github.com/7YMERA" target="_blank" rel="noopener">GitHub</a>
+        <a class="ic" href="https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="ic" href="../assets/Muhammad-Alif-Najmi-CV.pdf?v=11" target="_blank" rel="noopener">CV</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="win w-work" aria-labelledby="t-work">
+    <h2 class="bar" id="t-work">Work</h2>
+    <ul class="rows">
+      <li><a href="../notes/smk-dashboard.html"><b>SMK Subang dashboard</b><small>A dashboard 150 teachers actually open</small><em>In real use · 2026</em></a></li>
+      <li><a href="../notes/taskmatch-v2.html"><b>TaskMatch</b><small>Rebuilding my FYP properly</small><em>Final year · 2026</em></a></li>
+      <li><a href="../notes/slb-power-apps.html"><b>IT Asset Disposal app</b><small>From reply-all to Power Apps</small><em>Internship · 2025</em></a></li>
+      <li><a href="../notes/kakilima.html"><b>KakiLima</b><small>Accessible first, in four languages</small><em>Live · 2026</em></a></li>
+      <li><a href="../notes/jumaatfinder.html"><b>JumaatFinder</b><small>Where can I solat Jumaat from here?</small><em>Side project · 2026</em></a></li>
+    </ul>
+    <div class="more"><a class="big-btn sm" href="../#work">All projects ▸</a></div>
+  </section>
+
+  <section class="win w-notes" aria-labelledby="t-notes">
+    <h2 class="bar" id="t-notes">Notes</h2>
+    <ul class="rows">
+      <li><a href="../notes/database.html"><b>A whole company in 49 tables</b><small>Live SQL playground</small><em>Database</em></a></li>
+      <li><a href="../notes/jom-al-quran.html"><b>Jom Al-Quran</b><small>56 tables, back from Oracle</small><em>Database</em></a></li>
+      <li><a href="../notes/aws-two-departments.html"><b>One VPC, two departments, $56</b><small>AWS networking</small><em>Cloud</em></a></li>
+      <li><a href="../notes/slb-design.html"><b>Nine charts before one screen</b><small>How the design got decided</small><em>Design</em></a></li>
+    </ul>
+    <div class="more"><a class="big-btn sm" href="../notes/">All notes ▸</a></div>
+  </section>
+
+  <section class="win w-skills" aria-labelledby="t-skills">
+    <h2 class="bar" id="t-skills">Skills</h2>
+    <dl class="skills">
+      <dt>Analysis</dt><dd>Requirements · FRD / FSD · Process mapping</dd>
+      <dt>Data</dt><dd>SQL · PostgreSQL · Supabase</dd>
+      <dt>Web</dt><dd>TypeScript · Next.js · React · Vanilla JS</dd>
+      <dt>Platform</dt><dd>Power Apps · Power Automate · SharePoint · AWS</dd>
+      <dt>AI</dt><dd>LLM output evaluation · Side-by-side comparison</dd>
+      <dt>CS core</dt><dd>C++ · Java · MATLAB</dd>
+    </dl>
+    <div class="more"><a class="big-btn sm" href="../#toolkit">Full skill tree ▸</a></div>
+  </section>
+
+  <section class="win w-journey" aria-labelledby="t-journey">
+    <h2 class="bar" id="t-journey">Journey</h2>
+    <ul class="rows plain">
+      <li><b>Business Analyst</b><small>axrail.ai</small><em>Oct 2026 – now</em></li>
+      <li><b>BSc Computer Science (Hons)</b><small>Universiti Teknologi PETRONAS</small><em>Aug 2026</em></li>
+      <li><b>Digital IT Operations Intern</b><small>Internship</small><em>2025</em></li>
+      <li><b>Vice President, then Head of Academic &amp; Welfare</b><small>Student leadership at UTP</small><em>2023 – 2024</em></li>
+      <li><b>Started at UTP</b><small>Foundation in Computer Science</small><em>May 2022</em></li>
+    </ul>
+    <div class="more"><a class="big-btn sm" href="../#journey">Full journey ▸</a></div>
+  </section>
+
+  <section class="win w-goals" aria-labelledby="t-goals">
+    <h2 class="bar" id="t-goals">Why I do this</h2>
+    <ol class="goals">
+      <li><b>Help people</b>Fix the problems I can see around me.</li>
+      <li><b>Help lift Malaysia up</b>Baby steps, one skill at a time.</li>
+      <li><b>No room for corruption</b>Open systems that leave a trail.</li>
+    </ol>
+  </section>
+
+  <section class="win w-contact" aria-labelledby="t-contact">
+    <h2 class="bar" id="t-contact">Contact</h2>
+    <div class="body">
+      <p class="line">Got a process that needs untangling, or an idea that needs building?</p>
+      <div class="icons">
+        <button class="big-btn sm" id="copy-mail" type="button" data-copy="alifnajmx@gmail.com">Copy email</button>
+        <a class="big-btn sm alt" href="https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="big-btn sm alt" href="https://github.com/7YMERA" target="_blank" rel="noopener">GitHub</a>
+      </div>
+      <p class="small" id="toast" role="status" aria-live="polite">alifnajmx@gmail.com</p>
+    </div>
+  </section>
+
+</main>
+<footer class="foot">© 2026 Muhammad Alif Najmi · v2 preview · <a href="../">current site</a></footer>
+<script src="v2.js?v=20261109a" defer></script>
+</body>
+</html>
