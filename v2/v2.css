@@ -63,3 +63,10 @@ a{color:inherit}
 }
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.big-btn:hover{transform:none}}
 .scene-text .big-btn{text-shadow:none}
+
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:-1;display:none}
+html.gl #gl{display:block}
+html.gl #sky{display:none}
+html.gl body{background:linear-gradient(var(--sky1),var(--sky2)) fixed}
+html.gl .scene{background:none}
+html.gl .foot{background:var(--win);border-top:2px solid var(--line);margin-top:40px}

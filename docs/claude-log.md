@@ -18,6 +18,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-09 · /v2/ scroll-driven KLCC
+- `/v2/` now has a fixed WebGL background (`v2/v2-3d.js`, three.js r128 from cdnjs): low-poly KLCC twin towers, skybridge, KL Tower, city ring and orb. The camera orbits and rises/falls with scroll. Light/dark recolors it.
+- Falls back to the 2D canvas skyline in `v2.js` when WebGL or the CDN script is missing (`html.gl` class marks 3D on). Windows stay opaque, no backdrop-filter. Reduced motion renders only on scroll/resize.
+- Tested only with software GL in headless Chromium (no page errors, no sideways scroll at 1300 and 390 px). Real-device fps is untested; check on a phone.
+
 ## 2026-11-09 · /v2/ preview
 - New preview at `/v2/` (`v2/index.html`, `v2.css`, `v2.js`): low-poly KL skyline hero on a canvas, floating aqua windows (About, Work, Notes, Skills, Journey, Why, Contact), light/dark toggle, big buttons. Inspired by a reference site; all code and text are original.
 - Self-contained: doesn't touch `site.css` or `extras.js`, so no cache-key bump. Links back to the main site and notes with `../`.

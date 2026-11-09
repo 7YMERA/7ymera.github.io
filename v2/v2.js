@@ -4,7 +4,7 @@
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var C={};
   function theme(){try{return localStorage.getItem('v2-theme')}catch(e){return null}}
-  function setTheme(v){root.setAttribute('data-theme',v);document.getElementById('theme-label').textContent=v==='dark'?'Light':'Dark';try{localStorage.setItem('v2-theme',v)}catch(e){}readColors();draw()}
+  function setTheme(v){root.setAttribute('data-theme',v);document.getElementById('theme-label').textContent=v==='dark'?'Light':'Dark';try{localStorage.setItem('v2-theme',v)}catch(e){}readColors();draw();window.dispatchEvent(new Event('v2theme'))}
   function v(n){return getComputedStyle(root).getPropertyValue(n).trim()}
   function readColors(){['far','mid','near','glass','orb','ring','ink','sky1','sky2'].forEach(function(k){C[k]=v('--'+k)})}
   function shade(hex,f){var m=/^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(hex);if(!m)return hex;
@@ -22,7 +22,7 @@
     function rnd(){s=(s*9301+49297)%233280;return s/233280}
     while(x<W+60){var w=24+rnd()*38,h=minH+rnd()*(maxH-minH);prism(x,base,w,h,w*.25,col);x+=w+8+rnd()*14}}
   function draw(){
-    if(!W)return;
+    if(!W||root.classList.contains('gl'))return;
     var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,C.sky1);g.addColorStop(1,C.sky2);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
     // drifting dots
     ctx.fillStyle=C.ring;ctx.globalAlpha=.6;
@@ -53,7 +53,7 @@
     layer(26,C.near,33,0,30,90,base+14);
     ctx.fillStyle=shade(C.near,.8);ctx.fillRect(0,base,W,H-base)}
   function loop(ts){t=ts;px+=(tx-px)*.06;py+=(ty-py)*.06;draw();raf=vis?requestAnimationFrame(loop):0}
-  function start(){if(!reduce&&vis&&!raf)raf=requestAnimationFrame(loop)}
+  function start(){if(!reduce&&vis&&!raf&&!root.classList.contains('gl'))raf=requestAnimationFrame(loop)}
   scene.addEventListener('pointermove',function(e){var r=scene.getBoundingClientRect();tx=(e.clientX-r.left)/r.width-.5;ty=(e.clientY-r.top)/r.height-.5});
   if('IntersectionObserver' in window)new IntersectionObserver(function(es){vis=es[0].isIntersecting;if(vis)start();else{cancelAnimationFrame(raf);raf=0}}).observe(scene);
   document.getElementById('theme-btn').addEventListener('click',function(){setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark')});
@@ -62,5 +62,5 @@
     (navigator.clipboard?navigator.clipboard.writeText(a):Promise.reject()).then(function(){toast.textContent='Copied '+a},function(){toast.textContent='Email: '+a})});
   var saved=theme();if(saved==='dark'||saved==='light')root.setAttribute('data-theme',saved);
   document.getElementById('theme-label').textContent=root.getAttribute('data-theme')==='dark'?'Light':'Dark';
-  readColors();window.addEventListener('resize',resize);resize();start();
+  readColors();window.addEventListener('resize',resize);resize();start();window.dispatchEvent(new Event('v2theme'));
 })();
