@@ -117,7 +117,7 @@
     {name:'Merdeka PNB 118',real:679,top:new T.Vector3(-6,194,-102)},
     {name:'Menara Kuala Lumpur',real:421,top:new T.Vector3(-95,130,-70)},
     {name:'The Exchange 106',real:445,top:new T.Vector3(61,136,-132)}];
-  if(DIST)LM=[LM[0],{name:'Menara Kuala Lumpur',real:428,top:new T.Vector3(-221,127,181)}]; // the district model has only these two
+  if(DIST){LM[1].top.set(-217,194,303);LM[2].top.set(-221,127,181);LM[3].top.set(157,132,304)} // the district model puts the landmarks just south of the district, at 60 % of their real offsets
   var fx=[],fxGroup=new T.Group();scene.add(fxGroup);
   function fade(){var c=document.createElement('canvas');c.width=4;c.height=64;var x=c.getContext('2d'),gr=x.createLinearGradient(0,64,0,0);
     gr.addColorStop(0,'#fff');gr.addColorStop(.35,'#9a9a9a');gr.addColorStop(1,'#000');x.fillStyle=gr;x.fillRect(0,0,4,64);return new T.CanvasTexture(c)}
@@ -130,7 +130,7 @@
     var halo=new T.Mesh(new T.RingGeometry(9,10,48),haloM);halo.rotation.x=-Math.PI/2;halo.position.set(l.top.x,l.top.y-6,l.top.z);fxGroup.add(halo);halos.push(halo);
   });
   var radar=new T.Mesh(new T.RingGeometry(.975,1,128),radarM);radar.rotation.x=-Math.PI/2;radar.position.y=.4;fxGroup.add(radar);
-  var linkPairs=DIST?[[0,1]]:[[0,1],[1,3],[1,2],[0,3]],linkPos=[];
+  var linkPairs=[[0,1],[1,3],[1,2],[0,3]],linkPos=[];
   linkPairs.forEach(function(p){linkPos.push(LM[p[0]].top.x,LM[p[0]].top.y-4,LM[p[0]].top.z,LM[p[1]].top.x,LM[p[1]].top.y-4,LM[p[1]].top.z)});
   var linkGeo=new T.BufferGeometry();linkGeo.setAttribute('position',new T.Float32BufferAttribute(linkPos,3));
   var linkM=new T.LineBasicMaterial({transparent:true,opacity:.55,depthWrite:false});
@@ -246,7 +246,7 @@
     rideU=pchip(CX,CM);
     KI={};KF.forEach(function(k,j){KI[k[0]]=CX[j]});
     for(i=0;i<caps.length&&i<CAPS.length;i++){caps[i].dataset.from=Math.max(.012,KI[CAPS[i][0]]);caps[i].dataset.to=i===CAPS.length-1?1.01:KI[CAPS[i][1]]}
-    if(DIST){var lc=caps[3];if(lc){lc.innerHTML='<b>Petronas and Menara KL</b><span>The compact district model: 452 m and 421 m, in one 900 KB file. Scroll back up to fly it again.</span>';lc.dataset.to=1.01}
+    if(DIST){var lc=caps[3];if(lc){lc.innerHTML='<b>Four landmarks</b><span>Petronas, Merdeka 118, Menara KL and The Exchange 106, from the compact district model. Scroll back up to fly it again.</span>';lc.dataset.to=1.01}
       for(i=4;i<caps.length;i++){caps[i].dataset.from=9;caps[i].dataset.to=9}}
     hudBuild()}
   var rideU=function(c){return c};

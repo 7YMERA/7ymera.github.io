@@ -1,4 +1,6 @@
-// Usage: node convert-klcc.js model.dae out.json [cellMetres=3]
+// Usage: node convert-klcc-dae.js model.dae out.json [cellMetres=3] [assets/city dir with merdeka118.json and exchange106.json]
+// The SketchUp district has no Merdeka PNB 118 or The Exchange 106 (they stand outside it), so when the directory is given
+// those two hand-made models are added just south of the built-up area, at 60 % of their real offsets from the Petronas Towers, welded finer (1 m).
 // Flattens the SketchUp Collada (model.dae) to one welded mesh, in metres, Y up, centred on the Petronas Towers,
 // in the same int16/uint16 base64 format as assets/city/kl_city.json (scale 0.1 m).
 const fs=require('fs');
@@ -40,6 +42,15 @@ for(const w of tris)for(let o=0;o<w.length;o+=9){
  const p=vid(w[o],w[o+1],w[o+2]),q=vid(w[o+3],w[o+4],w[o+5]),r=vid(w[o+6],w[o+7],w[o+8]);
  if(p===q||q===r||p===r)continue;                                  // collapsed by the weld
  const key=[p,q,r].sort((x,y)=>x-y).join(',');if(seen.has(key))continue;seen.add(key);idx.push(p,q,r)}
+// missing landmarks: x = east, z = south, in metres from the Petronas midpoint
+const extra=process.argv[5];
+if(extra){const PL=[['merdeka118.json',-730,1020,-.5],['exchange106.json',530,1026,.4,2]];
+ for(const [f,ox,oz,ry,w] of PL){const d=JSON.parse(fs.readFileSync(extra+'/'+f,'utf8'));
+  const bb=Buffer.from(d.positions,'base64'),P=new Float32Array(bb.buffer,bb.byteOffset,bb.length/4),c=Math.cos(ry),sn=Math.sin(ry),W=w||1,lm=new Map(),lv=[];
+  const lid=v=>{const x=P[v*3],y=P[v*3+1],z=P[v*3+2],X=x*c+z*sn+ox,Z=-x*sn+z*c+oz,i=Math.round(X/W),j=Math.round(y/W),k=Math.round(Z/W),key='L'+i+','+j+','+k;let id=vmap.get(key);if(id===undefined){id=verts.length/3;vmap.set(key,id);verts.push(i*W,j*W,k*W)}return id};
+  let n=0;for(const part of ['body','glass']){const ib=Buffer.from(d[part],'base64'),I=new Uint16Array(ib.buffer,ib.byteOffset,ib.length/2);
+   for(let t=0;t<I.length;t+=3){const p=lid(I[t]),q=lid(I[t+1]),r=lid(I[t+2]);if(p===q||q===r||p===r)continue;const key=[p,q,r].sort((x,y)=>x-y).join(',');if(seen.has(key))continue;seen.add(key);idx.push(p,q,r);n++}}
+  console.log('added',f,n,'tris')}}
 if(verts.length/3>65535)throw new Error('over 65535 vertices; raise the cell size');
 const scale=0.1,pos=new Int16Array(verts.length);for(let i=0;i<verts.length;i++)pos[i]=Math.round(verts[i]/scale);
 fs.writeFileSync(out,JSON.stringify({scale,positions:Buffer.from(pos.buffer).toString('base64'),indices:Buffer.from(new Uint16Array(idx).buffer).toString('base64')}));
