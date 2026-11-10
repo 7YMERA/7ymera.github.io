@@ -7,7 +7,7 @@
   // data-flight-only on <html> (the /flight/ page): no orbit phase and no page around it, just the flight, driven by scroll.
   var ONLY=root.hasAttribute('data-flight-only');
   // ?bg=district: the compact one-mesh KLCC district (assets/city/klcc_district.json, tools/convert-klcc-dae.js) replaces the OSM city and the four landmark models.
-  var DIST=!/[?&]bg=osm/.test(location.search); // the district is the default; ?bg=osm brings back the OpenStreetMap city and the hand-placed landmarks
+  var DIST=!/[?&]bg=osm/.test(location.search); // the district is the map; ?bg=osm swaps in the OpenStreetMap city. In the district, the landmarks are the hand-made models, not the district's own blocky ones.
   var renderer;
   try{renderer=new T.WebGLRenderer({canvas:cv,alpha:true,antialias:true,powerPreference:'low-power'})}catch(e){return}
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -64,7 +64,7 @@
   loadModel(BASE+'city/exchange106.json',60,-125,.4,bodyM,null);   // The Exchange 106, cropped and simplified (tools/convert-dae-crop.py)  // Merdeka PNB 118 (SketchUp Collada, see tools/convert-dae.py)
   }
   // In the district, the two landmarks baked into its mesh were welded coarsely and have holes: draw the full-detail models over them (1 % larger, so they sit just outside).
-  if(DIST){var SC1=function(o){o.scale.multiplyScalar(1.01)};loadModel(BASE+'city/merdeka118.json',-217.4,303.3,-.5,bodyM,null,SC1);loadModel(BASE+'city/exchange106.json',157.4,304.7,.4,bodyM,null,SC1)}
+  if(DIST){loadModel(BASE+'city/klcc.json',0,0,0,bodyM,null);loadModel(BASE+'city/merdeka118.json',-217.4,303.3,-.5,bodyM,null);loadModel(BASE+'city/exchange106.json',157.4,304.7,.4,bodyM,null)}
   var gr=new T.Mesh(new T.CircleGeometry(1400,64),ground);gr.rotation.x=-Math.PI/2;gr.position.y=-.2;g.add(gr);
   // city ring
   var s=11;function rnd(){s=(s*9301+49297)%233280;return s/233280}
@@ -93,7 +93,14 @@
   var cityMesh=null;
   fetch(BASE+(DIST?'city/klcc_district.json':'city/kl_city.json')).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
     var q=new Int16Array(b64(d.positions,Uint8Array).buffer),pos=new Float32Array(q.length);for(var k=0;k<q.length;k++)pos[k]=q[k]*d.scale;
-    var geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));geo.setIndex(new T.BufferAttribute(b64(d.indices,Uint16Array),1));
+    var geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));var ix=b64(d.indices,Uint16Array);
+    if(DIST){ // cut the district's own versions of the four landmarks out of the mesh (metres from the Petronas midpoint: x east, z south); the hand-made models stand there instead
+      var CUT=[[0,0,150],[-730,1020,200],[530,1026,125]],keep=[];
+      for(var t=0;t<ix.length;t+=3){var ia=ix[t]*3,ib=ix[t+1]*3,ic=ix[t+2]*3,mx=(pos[ia]+pos[ib]+pos[ic])/3,mz=(pos[ia+2]+pos[ib+2]+pos[ic+2])/3,cut=false;
+        for(var c=0;c<CUT.length;c++){var dx=mx-CUT[c][0],dz=mz-CUT[c][1];if(dx*dx+dz*dz<CUT[c][2]*CUT[c][2]){cut=true;break}}
+        if(!cut)keep.push(ix[t],ix[t+1],ix[t+2])}
+      ix=new Uint16Array(keep)}
+    geo.setIndex(new T.BufferAttribute(ix,1));
     geo=geo.toNonIndexed();geo.computeVertexNormals(); // flat normals: the lighting needs them
     cityMesh=new T.Mesh(geo,cityM);cityMesh.scale.setScalar(SC);g.add(cityMesh);need=true;
   }).catch(function(){});

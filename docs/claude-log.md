@@ -24,6 +24,11 @@ where the last chat stopped without re-reading everything.
 - Checked in the browser: `/flight/?bg=district` runs with no console errors, facade shader and beams work, end shot is good; `/` unchanged. `tools/check.js` not run.
 - Open: the leg after the gap flies close past a tower on its way to Menara KL; the route is untuned. Making this the default means rewriting the Merdeka/Exchange captions, which is the owner's call. The mesh has no textures or colours.
 
+## 2026-11-11 · District map kept, its ugly landmarks swapped for the hand-made models; ring removed
+- Owner: the district looked ugly, but meant only the ugly parts (the blocky landmarks), not the whole map. `assets/scene.js` now cuts the district mesh's own versions of the Petronas Towers (150 m round the midpoint), Merdeka 118 (200 m) and The Exchange 106 (125 m) out when it loads, and stands the hand-made models there (`klcc.json`, `merdeka118.json`, `exchange106.json`); Menara KL and the rest of the district stay as the district has them. `?bg=osm` still gives the full OpenStreetMap city.
+- The ring of screens was removed (bent slivers, one clipping into a tower); the opening's flat spin reel is shown again. Cache key `20261111j`.
+- Open: "remove background pls" was ambiguous. I took it as the ring and the ugly landmark meshes; if it meant no 3D city at all, say so.
+
 ## 2026-11-11 · Ring of screens removed
 - Owner: "bro whats this LMAO". The ring of project screens (added earlier the same day) rendered as bent, tilted slivers crowded beside one tower, one clipping into it. Removed from `assets/scene.js` (`ringUpdate` is now a no-op) and the opening's flat spin reel is shown again (the CSS that hid it is gone). Cache key `20261111i`.
 - If screens behind the towers are wanted again: build them as flat, camera-facing quads on one fixed side (a slow conveyor behind the crowns) instead of a rotating cylinder.
