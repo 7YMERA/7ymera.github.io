@@ -18,6 +18,15 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-10 · /v2/ flight v8: calmer route, smoother camera, sci-fi layer
+- Owner feedback: Merdeka part too fast, awkward angles, the camera clipped into Suria KLCC near the skybridge, the spin under the bridge and back felt repetitive, only two buildings looked highlighted (Petronas and Exchange used a different material), the motion was rougher than v1.
+- New route (one direction, no loop): swing in, head-on at the skybridge, over the bridge and through the gap, one slow turn up Merdeka 118, over The Exchange 106, wide shot of all four. `#enter` is 780vh. Camera never goes below the bridge level near the towers; raycast sweep: nothing closer than 7 units (the gap itself).
+- Smoothness: spring-damped follow instead of a per-frame lerp, scroll map built from path length x slow factor with a monotone cubic (no speed jumps), gentler banking, in-between look-at waypoint so the view never whips.
+- All four landmarks share one material. The orb moved out of the flight path.
+- Sci-fi layer, inspired by 0z5a.github.io: HUD corners, altitude read-out, progress rail with six sector ticks, landmark tags with distance, beams and halos on each crown, glowing links with pulses, radar ring, floating wireframe shapes.
+- Cache key for `/v2/` is `20261110c`. Checked 1100 px light/dark and 390 px by screenshots, no page errors. Real-phone frame rate still untested. Owner says the models are free to download; authors still unrecorded.
+- Open: Menara KL is only tagged, not flown past. A real scroll-feel check on a phone is still needed.
+
 ## 2026-11-10 · Project rail dropped
 - The owner didn't like the clothes-rail look, so the project rail (commit `5c68a02`) was reverted from the home page and `/v2/`. The cache key is back to `20261108b`.
 - The code is still in git history if the spring physics, turn-to-front or flip view are wanted for something else.

@@ -83,3 +83,42 @@ html.gl .enter{display:block;height:620vh;position:relative}
 .ride-hint{position:absolute;right:20px;bottom:44px;margin:0;font:600 14px var(--pix);color:var(--ink);background:var(--win);border:2px solid var(--line);padding:6px 12px;opacity:.9}
 @media (prefers-reduced-motion:reduce){.ride-cap{transition:none}}
 @media (max-width:600px){.ride-hint{right:16px;bottom:auto;top:76px}.enter-sticky{padding:0 16px 32px}}
+
+/* ---- Flight v8: slower ride, HUD, landmark tags ---- */
+html.gl .enter{height:780vh}
+.ride-caps{counter-reset:cap}
+.ride-cap{counter-increment:cap}
+.ride-cap::before{content:"SECTOR " counter(cap,decimal-leading-zero) " / 06";display:block;font:600 11px var(--pix);letter-spacing:.16em;color:var(--line);margin-bottom:6px}
+.hud{position:absolute;inset:0;opacity:0;transition:opacity .6s}
+.hud.on{opacity:1}
+.hud-c{position:absolute;width:26px;height:26px;border:0 solid var(--line);opacity:.8}
+.hud-c.tl{left:14px;top:66px;border-width:2px 0 0 2px}
+.hud-c.tr{right:14px;top:66px;border-width:2px 2px 0 0}
+.hud-c.bl{left:14px;bottom:14px;border-width:0 0 2px 2px}
+.hud-c.br{right:14px;bottom:14px;border-width:0 2px 2px 0}
+.hud-side{position:absolute;right:26px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.hud-read{margin:0;display:flex;gap:8px;align-items:baseline;font:600 13px var(--pix);color:var(--ink);background:var(--win);border:2px solid var(--line);padding:4px 10px;letter-spacing:.06em}
+.hud-read span:first-child{color:var(--line)}
+.hud-rail{position:relative;width:4px;height:min(38vh,320px);background:color-mix(in srgb,var(--line) 25%,transparent);margin-right:6px}
+.hud-fill{position:absolute;inset:0;background:var(--line);transform-origin:top;transform:scaleY(0)}
+.hud-ticks{list-style:none;margin:0;padding:0;position:absolute;inset:0}
+.hud-ticks li{position:absolute;right:-6px;display:flex;align-items:center;gap:6px;transform:translateY(-50%);flex-direction:row-reverse}
+.hud-ticks i{width:14px;height:14px;background:var(--win);border:2px solid var(--line);transform:rotate(45deg)}
+.hud-ticks b{font:600 11px var(--pix);color:var(--ink2);margin-right:4px}
+.hud-ticks li.on i{background:var(--line)}
+.hud-ticks li.on b{color:var(--ink)}
+.hud-sec{margin:0;max-width:170px;text-align:right;font:600 12px/1.25 var(--pix);letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.hud-tags{position:absolute;inset:0;overflow:hidden}
+.lm-tag{position:absolute;left:0;top:0;opacity:0;transition:opacity .4s;will-change:transform;pointer-events:none}
+.lm-tag.show{opacity:1}
+.lm-tag>*{position:absolute;white-space:nowrap}
+.lm-dot{left:-5px;top:-5px;width:10px;height:10px;border:2px solid var(--line);background:var(--win);transform:rotate(45deg)}
+.lm-tag b{left:16px;top:-46px;font:600 13px var(--pix);letter-spacing:.05em;color:var(--ink);background:var(--win);border:2px solid var(--line);padding:3px 8px}
+.lm-tag span{left:16px;top:-22px;font:400 11px var(--sans);color:var(--ink2);background:var(--win);padding:1px 6px;border:1px solid var(--line);border-top:0}
+.lm-tag::before{content:"";position:absolute;left:0;top:-46px;width:2px;height:46px;background:var(--line)}
+@media (max-width:600px){
+  .hud-side{right:14px}.hud-sec,.hud-ticks b{display:none}.hud-read{font-size:12px;padding:3px 8px}
+  .hud-rail{height:30vh}.hud-c.tl,.hud-c.tr{top:70px}
+  .lm-tag b{font-size:11px;padding:2px 6px;top:-40px}.lm-tag span{display:none}.lm-tag::before{height:40px;top:-40px}
+}
+@media (prefers-reduced-motion:reduce){.hud,.lm-tag{transition:none}}

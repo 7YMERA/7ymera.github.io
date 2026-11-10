@@ -193,7 +193,8 @@ Every interactive piece below started as a React + Tailwind component on [21st.d
 | 4 | **More real landmarks** | Merdeka PNB 118 (SketchUp Collada), Menara KL, The Exchange 106 (cropped from a 55 MB precinct and simplified). | `5fa22dc`, `d8af849` |
 | 5 | **A Masjid Negara, then dropped** | Built from code (18-fold dome, minaret, hollow prayer hall) with a scroll ride into the hall. Dropped: no free model to base it on, and the owner preferred a flight through the skyline. | `42d61e2` |
 | 6 | **The real city** | An OpenStreetMap city (FBX) replaced the random boxes: true footprints and heights. A facade shader gave every wall windows: a glass grid by day, lit offices at night. | `6818a90` |
-| 7 | **The flight, as it is now** | A long, slow scroll flight: down between the Petronas Towers, straight up their sides, level with the skybridge, up to the crowns, then across to Merdeka 118 and up its face, over the top and out. The satellite "map" under the city was removed (the owner didn't like the map look). | this commit |
+| 7 | **The first flight** | A long, slow scroll flight: down between the Petronas Towers, straight up their sides, level with the skybridge, up to the crowns, then across to Merdeka 118 and up its face, over the top and out. The satellite "map" under the city was removed (the owner didn't like the map look). | `6797f26` |
+| 8 | **The flight, as it is now** | Re-routed after feedback: one direction only (no spinning back under the bridge), head-on at the skybridge, over the bridge and through the gap, one slow turn up Merdeka 118, over The Exchange 106, then a wide shot of all four. Smoother camera, one material for every landmark, and a sci-fi layer (HUD, landmark tags, beams, links, radar ring, wireframe shapes) inspired by `0z5a.github.io`. | this commit |
 
 Things tried and dropped along the way, still in git history: a clothes-rail component port for the Work section (`5c68a02`, reverted in `2ecf38a`), and a lab of four motion ideas that was never merged (`lab/ideas/index.html` on branch `claude/wonderful-galileo-bgrct6`).
 
@@ -201,7 +202,7 @@ Things tried and dropped along the way, still in git history: a clothes-rail com
 
 - **Files:** `v2/index.html` (cards + the `#enter` flight section), `v2/v2.css`, `v2/v2.js` (theme toggle, copy button, and the 2D canvas fallback), `v2/v2-3d.js` (the WebGL scene).
 - **Fallback:** `v2-3d.js` adds `html.gl` only when WebGL and three.js load. Without it the page shows the 2D skyline from version 1 and hides `#enter`.
-- **Two scroll phases.** From the top to just before `#enter`, the camera orbits the skyline (`orbitPose()`). Inside `#enter` (a 620vh section with sticky captions) the camera leaves the orbit and follows a path (`buildRide()`): 15 waypoints for the camera and 15 matching look-at points. `RT` and `rideU()` map scroll to position on the path, so most of the scroll is spent between the towers.
+- **Two scroll phases.** From the top to just before `#enter`, the camera orbits the skyline (`orbitPose()`). Inside `#enter` (a 780vh section with sticky captions) the camera leaves the orbit and follows a path (`buildRide()`): named waypoints in `KF`, each with a camera position, a look-at point and a slow factor, written in `(u, w, y)` (u along the gap between the towers, w across it). Each stretch gets scroll share = its length × its slow factor, and `pchip()` joins them into a smooth monotone map, so speed is even and slow where the factor is high. The camera follows the scroll with a critically damped spring (`damp()`), not a fixed lerp, so wheel notches glide.
 - **Models** are loaded as small JSON (`loadModel()`): positions as float32 or int16 and triangle indices, base64. All landmarks share one scale (`SC = 132 / 444.138`) so their real heights compare truthfully (Merdeka 118 is taller than the towers). Each model has a `body` and a `glass` part so the light and dark themes recolour them.
 - **City:** `kl_city.json` (about 535 KB, 34k vertices) is real OpenStreetMap geometry centred on KLCC. Buildings under the hand-made landmarks are removed. Flat normals are computed on load.
 - **Facade shader:** `facade()` patches a Lambert material in `onBeforeCompile`. Windows are laid on walls from world position and a derivative-based normal, with `facade_glass.jpg` by day and `facade_night.jpg` as emissive at night. Roofs are left plain.
@@ -220,14 +221,16 @@ A `.skp` file cannot be read here: export it from SketchUp as OBJ, DAE or glTF f
 
 ### Changing the flight
 
-- **Longer or shorter:** change `height` on `html.gl .enter` in `v2.css` (currently `620vh`).
-- **More time somewhere:** edit the `RT` table in `v2-3d.js` (scroll fraction → fraction of the path).
-- **Different route:** edit the waypoints in `buildRide()`. The camera path and the look-at path must keep the same number of points: they use uniform Catmull-Rom spacing so the same position on both lands on the same pair of waypoints.
-- **Captions:** the `.ride-cap` paragraphs in `index.html` carry `data-from` and `data-to` (scroll fractions) and fade in between them.
+- **Longer or shorter:** change `height` on `html.gl .enter` in `v2.css` (currently `780vh`).
+- **More time somewhere:** raise that waypoint's slow factor (last number) in `KF` in `v2-3d.js`.
+- **Different route:** edit `KF`. Camera and look-at share the same knots (uniform Catmull-Rom), so they stay in step. Open the page with `?dbg` to get `window.__v2` (camera, scene, `rideP`, `rideU`, `draw(c)`) for checking: sample `rideP` and raycast from each point to measure clearance (the current route stays at least 7 units from every wall; that is the width of the gap).
+- **Captions and HUD:** the `.ride-cap` paragraphs in `index.html` are matched to the `CAPS` pairs in `v2-3d.js` by order; their `data-from`/`data-to` are filled in at build time. The right-hand rail, the altitude read-out and the landmark tags (`LM`) are built from them.
 
 ### Lessons and gotchas
 
 - Set `html.gl` **before** measuring scroll: `#enter` is `display:none` until then, and the ride would start part-way in.
+- All four landmarks must share one material (`bodyM`). When two used a different one, only two looked highlighted and the Petronas Towers looked bluer.
+- A look-at point that moves far in a short scroll makes the view whip round. Add an in-between waypoint (see `turn`).
 - Use uniform (`catmullrom`) curves for both paths. Centripetal curves space their knots by distance, so the camera and its target drift apart.
 - The camera must clear the skyline: the real city has 100 to 300 m blocks, so the orbit sits at about 330 m. `cam.near` is 0.3 so close walls do not clip.
 - The city mesh needs normals (computed after `toNonIndexed()`), or Lambert lighting turns it black.
@@ -237,7 +240,7 @@ A `.skp` file cannot be read here: export it from SketchUp as OBJ, DAE or glTF f
 
 ### Credit and licence (to confirm)
 
-The landmark models (`klcc`, `menara_kl`, `merdeka118`, `exchange106`), the city FBX and the facade textures were supplied by the owner. They arrived without readme or licence files, so their authors and licences are unknown. Confirm they can be published, or delete the `.json` and facade `.jpg` files in `v2/`; the page falls back to the hand-built tower and omits the rest.
+The landmark models (`klcc`, `menara_kl`, `merdeka118`, `exchange106`), the city FBX and the facade textures were supplied by the owner, who says they are all free to download. They arrived without readme or licence files, so the authors and exact licences are still unrecorded. If an author asks for credit or removal, or delete the `.json` and facade `.jpg` files in `v2/`; the page falls back to the hand-built tower and omits the rest.
 
 ---
 
