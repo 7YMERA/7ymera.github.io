@@ -70,3 +70,16 @@ html.gl #sky{display:none}
 html.gl body{background:linear-gradient(var(--sky1),var(--sky2)) fixed}
 html.gl .scene{background:none}
 html.gl .foot{background:var(--win);border-top:2px solid var(--line);margin-top:40px}
+
+/* The ride: a tall scroll section with no windows, so the camera can fly into Masjid Negara */
+.enter{display:none}
+html.gl .enter{display:block;height:340vh;position:relative}
+.enter-sticky{position:sticky;top:0;height:100vh;height:100svh;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;padding:0 20px 40px;pointer-events:none}
+.ride-caps{position:relative;width:min(440px,100%);min-height:140px}
+.ride-cap{position:absolute;left:0;bottom:0;margin:0;padding:14px 16px;background:var(--win);border:2px solid var(--line);box-shadow:5px 5px 0 var(--shadow);opacity:0;transform:translateY(14px);transition:opacity .35s,transform .35s;font-family:var(--pix)}
+.ride-cap.on{opacity:1;transform:none}
+.ride-cap b{display:block;font:600 22px var(--pix);margin-bottom:4px}
+.ride-cap span{display:block;font:400 14px/1.45 var(--sans);color:var(--ink2)}
+.ride-hint{position:absolute;right:20px;bottom:44px;margin:0;font:600 14px var(--pix);color:var(--ink);background:var(--win);border:2px solid var(--line);padding:6px 12px;opacity:.9}
+@media (prefers-reduced-motion:reduce){.ride-cap{transition:none}}
+@media (max-width:600px){.ride-hint{right:16px;bottom:auto;top:76px}.enter-sticky{padding:0 16px 32px}}

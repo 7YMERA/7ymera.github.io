@@ -5,7 +5,7 @@
   var renderer;
   try{renderer=new T.WebGLRenderer({canvas:cv,alpha:true,antialias:true,powerPreference:'low-power'})}catch(e){return}
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var scene=new T.Scene(),cam=new T.PerspectiveCamera(42,1,1,900);
+  var scene=new T.Scene(),cam=new T.PerspectiveCamera(42,1,.3,900);
   var M={},C={},mats=[];
   function css(n){return getComputedStyle(root).getPropertyValue(n).trim()}
   function col(k){return new T.Color(C[k])}
@@ -55,14 +55,19 @@
   loadModel('menara_kl.json',-95,-70,0,bodyM2,null,function(){g.remove(kl)}); // Menara KL; replaces the stand-in cylinder tower below once loaded
   loadModel('merdeka118.json',-10,-95,-.5,bodyM2,null);
   loadModel('exchange106.json',60,-125,.4,bodyM,null);   // The Exchange 106, cropped and simplified (tools/convert-dae-crop.py)  // Merdeka PNB 118 (SketchUp Collada, see tools/convert-dae.py)
-  // Masjid Negara, built from code (no model file): 18-fold umbrella dome, smaller pleated dome, slender minaret,
-  // waffle-coffered roof slabs, sawtooth hall and reflecting pool. Units here are metres; the group is scaled up a little so it reads beside the towers.
+  // Masjid Negara, built from code (no model file). Units are metres; the group is scaled to sit beside the towers.
+  // It has a real interior (hollow prayer hall, coffered ceiling with a round opening under the dome) so the scroll ride can fly in.
+  var masjid=null;
   (function(){
-    var mq=new T.Group();
-    var cv=document.createElement('canvas');cv.width=cv.height=32;var cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,32,32);cx.fillStyle='#c9c9c9';cx.fillRect(5,5,22,22);cx.fillStyle='#f2f2f2';cx.fillRect(8,8,16,16);
-    var waffle=new T.CanvasTexture(cv);waffle.wrapS=waffle.wrapT=T.RepeatWrapping;
-    var slabSide=mat('far'),slabTop=mat('far',{map:waffle}),domeM=mat('orb',{side:T.DoubleSide}),pale=mat('glass'),glassD=mat('ring',{side:T.DoubleSide,emissive:0xffffff,emissiveIntensity:.2});
+    var mq=new T.Group();masjid=mq;
+    function tex(w,h,draw){var c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'));var t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;return t}
+    var waffle=tex(32,32,function(x){x.fillStyle='#fff';x.fillRect(0,0,32,32);x.fillStyle='#c9c9c9';x.fillRect(5,5,22,22);x.fillStyle='#f2f2f2';x.fillRect(8,8,16,16)});
+    var waffleC=waffle.clone();waffleC.needsUpdate=true;waffleC.repeat.set(1/9,1/9);
+    var rows=tex(8,32,function(x){x.fillStyle='#fff';x.fillRect(0,0,8,32);x.fillStyle='#b8b8b8';x.fillRect(0,28,8,4)});rows.repeat.set(1,26);
+    var slabSide=mat('far'),slabTop=mat('far',{map:waffle}),ceilTop=mat('far',{map:waffleC}),floorM=mat('far',{map:rows}),
+        domeM=mat('orb',{side:T.DoubleSide}),pale=mat('glass'),glassD=mat('ring',{side:T.DoubleSide,emissive:0xffffff,emissiveIntensity:.2});
     var flagRed=new T.MeshLambertMaterial({color:0xcc0001,flatShading:true}),flagYellow=new T.MeshLambertMaterial({color:0xffcc00,flatShading:true,emissive:0x6b5200});
+    function box(x0,x1,z0,z1,y0,y1,m){var mm=new T.Mesh(new T.BoxGeometry(x1-x0,y1-y0,z1-z0),m||slabSide);mm.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);mq.add(mm);return mm}
     function slab(x0,x1,z0,z1,y0,y1){
       var w=x1-x0,d=z1-z0,geo=new T.BoxGeometry(w,y1-y0,d),uv=geo.attributes.uv;
       for(var i=8;i<12;i++)uv.setXY(i,uv.getX(i)*w/9,uv.getY(i)*d/9);
@@ -74,27 +79,37 @@
       for(j=0;j<rings;j++)for(i=0;i<per;i++){var a0=j*per+i,b0=j*per+(i+1)%per,c0=(j+1)*per+i,d0=(j+1)*per+(i+1)%per;idx.push(a0,c0,b0,b0,c0,d0)}
       var geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(pos,3));geo.setIndex(idx);geo=geo.toNonIndexed();geo.computeVertexNormals();
       return new T.Mesh(geo,mt)}
-    // roof slabs (a cross-shaped complex around the main hall)
-    slab(-60,60,-26,26,0,9);slab(-105,40,10,28,0,6);slab(20,112,-38,-12,0,6);slab(-45,-8,-64,-24,0,6);slab(55,85,18,50,0,5);
+    // prayer hall: four walls (the front one has a 14 m entrance), carpet with prayer rows, coffered ceiling with a round opening
+    box(-61.5,-60,-27.5,27.5,0,9);box(60,61.5,-27.5,27.5,0,9);box(-61.5,61.5,-27.5,-26,0,9);box(-61.5,-7,26,27.5,0,9);box(7,61.5,26,27.5,0,9);
+    var fl=new T.Mesh(new T.PlaneGeometry(120,52),floorM);fl.rotation.x=-Math.PI/2;fl.position.y=.25;mq.add(fl);
+    var sh=new T.Shape();sh.moveTo(-61.5,-27.5);sh.lineTo(61.5,-27.5);sh.lineTo(61.5,27.5);sh.lineTo(-61.5,27.5);sh.lineTo(-61.5,-27.5);
+    var hole=new T.Path();hole.absarc(0,0,24,0,Math.PI*2,true);sh.holes.push(hole);
+    var ceil=new T.Mesh(new T.ExtrudeGeometry(sh,{depth:2,bevelEnabled:false,curveSegments:36}),[ceilTop,slabSide]);ceil.rotation.x=-Math.PI/2;ceil.position.y=9;mq.add(ceil);
+    for(var ci=0;ci<14;ci++){var ca=ci/14*Math.PI*2,col=new T.Mesh(new T.CylinderGeometry(1.1,1.1,9,10),pale);col.position.set(Math.cos(ca)*25.5,4.5,Math.sin(ca)*25.5);mq.add(col)}
+    box(-5,5,-25.6,-24.8,.3,11,domeM);box(-5,5,-25.2,-24.4,11,11.8,flagYellow); // mihrab niche and its gold lintel
+    // wings, walkway and pool
+    box(-105,-61.5,-12,28,0,6);slab(20,112,-38,-12,0,6);slab(-45,-8,-64,-27.5,0,6);slab(55,85,18,50,0,5);
+    box(-6,6,27.5,49,0,.5);
+    var pool=new T.Mesh(new T.PlaneGeometry(70,26),glassD);pool.rotation.x=-Math.PI/2;pool.position.set(0,.4,62);mq.add(pool);
     // main dome: glass drum, red band, 18-fold umbrella, yellow star finial
-    var drum=new T.Mesh(new T.CylinderGeometry(24,24,7,36,1,true),glassD);drum.position.set(0,12.5,0);mq.add(drum);
-    var band=new T.Mesh(new T.CylinderGeometry(24.6,24.6,1.6,36,1,true),flagRed);band.position.set(0,16.4,0);mq.add(band);
-    var dome=pleat(18,27,46,16,8,domeM);dome.position.y=0;mq.add(dome);
-    var fin=new T.Mesh(new T.ConeGeometry(1.4,10,5),flagYellow);fin.position.set(0,16+46-16+5,0);fin.position.y=62+3;mq.add(fin);
+    var drum=new T.Mesh(new T.CylinderGeometry(24,24,7,36,1,true),glassD);drum.position.set(0,14.5,0);mq.add(drum);
+    var band=new T.Mesh(new T.CylinderGeometry(27.4,27.4,1.4,36,1,true),flagRed);band.position.set(0,17.9,0);mq.add(band);
+    var dome=pleat(18,27,46,16,8,domeM);dome.position.y=2;mq.add(dome);
+    var fin=new T.Mesh(new T.ConeGeometry(1.4,10,5),flagYellow);fin.position.set(0,53,0);mq.add(fin);
     // smaller pleated dome on the west wing
     var d2=pleat(12,15,22,6,6,domeM);d2.position.set(-122,0,-4);mq.add(d2);
     var drum2=new T.Mesh(new T.CylinderGeometry(13.5,13.5,6,24,1,true),glassD);drum2.position.set(-122,3,-4);mq.add(drum2);
     var fin2=new T.Mesh(new T.ConeGeometry(.9,6,5),flagYellow);fin2.position.set(-122,25,-4);mq.add(fin2);
     // minaret: tapered shaft, lantern, spire, yellow tip
-    var sh=new T.Mesh(new T.CylinderGeometry(1.5,2.4,52,6),pale);sh.position.set(32,26,22);mq.add(sh);
+    var shaft2=new T.Mesh(new T.CylinderGeometry(1.5,2.4,52,6),pale);shaft2.position.set(32,26,22);mq.add(shaft2);
     var lan=new T.Mesh(new T.CylinderGeometry(3.6,2.2,5,8),pale);lan.position.set(32,53,22);mq.add(lan);
     var sp=new T.Mesh(new T.CylinderGeometry(.25,.9,18,5),pale);sp.position.set(32,65,22);mq.add(sp);
     var tip=new T.Mesh(new T.ConeGeometry(.9,3,5),flagYellow);tip.position.set(32,75,22);mq.add(tip);
     // sawtooth hall on the south-west
     var hall=new T.Mesh(new T.BoxGeometry(44,9,26),slabSide);hall.position.set(-70,4.5,52);mq.add(hall);
     for(var k=0;k<6;k++){var saw=new T.Mesh(new T.CylinderGeometry(4.6,4.6,26,3),pale);saw.rotation.x=Math.PI/2;saw.rotation.z=Math.PI/2;saw.position.set(-88+k*7.2,11.2,52);mq.add(saw)}
-    // reflecting pool
-    var pool=new T.Mesh(new T.PlaneGeometry(70,26),glassD);pool.rotation.x=-Math.PI/2;pool.position.set(10,.4,62);mq.add(pool);
+    var lamp=new T.PointLight(0xfff0d0,.6,60,1.5);lamp.position.set(0,7,0);mq.add(lamp);
+    mq.userData.domeM=domeM;mq.userData.lamp=lamp;
     var MQ=1.35;mq.scale.setScalar(SC*MQ);mq.position.set(58,0,-4);mq.rotation.y=2.6;g.add(mq);
   })();
   var gr=new T.Mesh(new T.CircleGeometry(520,48),ground);gr.rotation.x=-Math.PI/2;gr.position.y=-.2;g.add(gr);
@@ -122,27 +137,45 @@
     tower.emissive.set(C.glass);tower.emissiveIntensity=dark?1:.28;glassM.emissive.set(C.ring);glassM.emissiveIntensity=dark?.9:.15;
     if(glassModelM){glassModelM.emissive.set(C.ring);glassModelM.emissiveIntensity=dark?.8:.12}ringM.color.set(C.ring);specks.material.color.set(C.ring);
     var f=col('sky2');scene.fog=new T.Fog(f,dark?300:360,dark?720:800);
+    if(masjid){masjid.userData.domeM.emissive.set(C.orb);masjid.userData.domeM.emissiveIntensity=dark?.28:.08;masjid.userData.lamp.intensity=dark?1.2:.6}
     amb.intensity=dark?.45:.5;sun.intensity=dark?.55:.55;sun.color.set(dark?0x9cc8ff:0xffffff)}
   recolor();window.addEventListener('v2theme',function(){recolor();need=true});
   var W=0,Hh=0,mobile=false,need=true,px=0,tx=0,cp=0,tp=0;
   function size(){W=innerWidth;Hh=innerHeight;mobile=W<=820;renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile?1.5:2));renderer.setSize(W,Hh,false);cam.aspect=W/Hh;cam.updateProjectionMatrix();need=true}
-  function prog(){var m=document.documentElement.scrollHeight-innerHeight;return m>0?Math.min(1,Math.max(0,scrollY/m)):0}
+  var enter=document.getElementById('enter'),caps=enter?enter.querySelectorAll('.ride-cap'):[],tr=0,cr=0,rideP=null,rideT=null;
+  // The page scroll is split in two: first the orbit round the skyline, then (inside #enter) the ride into the masjid.
+  function prog(){var m=document.documentElement.scrollHeight-innerHeight;if(!enter)return m>0?Math.min(1,Math.max(0,scrollY/m)):0;var st=Math.max(1,enter.offsetTop-innerHeight);return Math.min(1,Math.max(0,scrollY/st))}
+  function rideProg(){if(!enter)return 0;var m=document.documentElement.scrollHeight-innerHeight,st=enter.offsetTop-innerHeight;return m>st?Math.min(1,Math.max(0,(scrollY-st)/(m-st))):0}
+  function orbitPose(p,pxv){var e=Math.sin(p*Math.PI),ang=.55+p*Math.PI*1.7+pxv*.12,rad=(mobile?270:230)-e*30,hgt=(mobile?55:40)+e*80;
+    return{pos:new T.Vector3(Math.cos(ang)*rad,hgt,Math.sin(ang)*rad),tgt:new T.Vector3(0,H*(mobile?.5:.52)-e*18,0)}}
+  function buildRide(){
+    if(!masjid)return;masjid.updateMatrixWorld(true);
+    function L(x,y,z){return masjid.localToWorld(new T.Vector3(x,y,z))}
+    var o=orbitPose(1,0);
+    // camera path: out of the orbit, over the pool, through the entrance, along the hall toward the mihrab, then up under the dome
+    rideP=new T.CatmullRomCurve3([o.pos,L(60,150,320),L(18,50,160),L(6,16,84),L(2,5.4,40),L(0,4.6,15),L(0,4.4,2),L(0,4.2,-5)],false,'centripetal');
+    rideT=new T.CatmullRomCurve3([o.tgt,L(0,40,0),L(0,34,0),L(0,18,0),L(0,8,0),L(0,6,-26),L(0,24,-16),L(0,62,-12)],false,'centripetal')}
   function place(time){
-    var p=cp,e=Math.sin(p*Math.PI);
-    var ang=.55+p*Math.PI*1.7+px*.12,rad=(mobile?270:230)-e*30,hgt=(mobile?55:40)+e*80;
-    cam.position.set(Math.cos(ang)*rad,hgt,Math.sin(ang)*rad);cam.lookAt(0,H*(mobile?.5:.52)-e*18,0);
-    var k=Math.min(1,p*5),ox=mobile?0:-W*.2*(1-k),oy=mobile?-Hh*.2*(1-k):Hh*.06*(1-k);
-    cam.setViewOffset(W,Hh,ox,oy,W,Hh);
+    var p=cp;
+    if(cr>.0004&&rideP){
+      var u=cr*cr*(3-2*cr)*.55+cr*.45;
+      cam.position.copy(rideP.getPoint(u));cam.lookAt(rideT.getPoint(u));cam.setViewOffset(W,Hh,0,0,W,Hh);
+    }else{
+      var o=orbitPose(p,px);cam.position.copy(o.pos);cam.lookAt(o.tgt);
+      var k=Math.min(1,p*5),ox=mobile?0:-W*.2*(1-k),oy=mobile?-Hh*.2*(1-k):Hh*.06*(1-k);
+      cam.setViewOffset(W,Hh,ox,oy,W,Hh);
+    }
+    for(var ci=0;ci<caps.length;ci++){var c=caps[ci],on=cr>=+c.dataset.from&&cr<+c.dataset.to;if(on!==c.classList.contains('on'))c.classList.toggle('on',on)}
     orb.rotation.y=time*.0004;ring.rotation.z=time*.0006;orb.position.y=H+30+Math.sin(time*.0009)*3;
     specks.rotation.y=time*.00003}
   var raf=0,run=true;
   function frame(time){
-    cp+=(tp-cp)*.08;px+=(tx-px)*.05;
-    if(!reduce||need||Math.abs(tp-cp)>.0005){place(reduce?0:time);renderer.render(scene,cam);need=false}
+    cp+=(tp-cp)*.08;px+=(tx-px)*.05;cr+=(tr-cr)*.08;
+    if(!reduce||need||Math.abs(tp-cp)>.0005||Math.abs(tr-cr)>.0005){place(reduce?0:time);renderer.render(scene,cam);need=false}
     raf=run?requestAnimationFrame(frame):0}
-  addEventListener('scroll',function(){tp=prog();need=true},{passive:true});
-  addEventListener('resize',function(){size();tp=prog()});
+  addEventListener('scroll',function(){tp=prog();tr=rideProg();need=true},{passive:true});
+  addEventListener('resize',function(){size();buildRide();tp=prog();tr=rideProg()});
   addEventListener('pointermove',function(e){tx=e.clientX/innerWidth-.5});
   document.addEventListener('visibilitychange',function(){run=!document.hidden;if(run&&!raf)raf=requestAnimationFrame(frame)});
-  size();tp=cp=prog();root.classList.add('gl');raf=requestAnimationFrame(frame);
+  size();buildRide();tp=cp=prog();tr=cr=rideProg();root.classList.add('gl');raf=requestAnimationFrame(frame);
 })();
