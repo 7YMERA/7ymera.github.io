@@ -24,6 +24,11 @@ where the last chat stopped without re-reading everything.
 - Checked in the browser: `/flight/?bg=district` runs with no console errors, facade shader and beams work, end shot is good; `/` unchanged. `tools/check.js` not run.
 - Open: the leg after the gap flies close past a tower on its way to Menara KL; the route is untuned. Making this the default means rewriting the Merdeka/Exchange captions, which is the owner's call. The mesh has no textures or colours.
 
+## 2026-11-12 · More Merdeka 118
+- Owner: Merdeka 118 is their favourite building. (1) In the district version the flight never visited it (it ended on a wide shot). The district route in `assets/scene.js` (`buildKF`, `DIST` branch) now mirrors the OSM one: out through the gap, a slow climb round Merdeka (`m0`..`m4`, slow factor 2.4, centre `MCD` = (82, 364) in the flight's (u, w) frame), then across to The Exchange (`turn`, `pass`, centre `EXD` = (331, 85)) and the wide `end` shot. Captions are the same six as before (the old district caption hack is gone). `arcAt` takes the district centre when `DIST`.
+- (2) A lead-in of its own before Skills: `#merdekastage` ("My favourite building", "679 m, the tallest in Malaysia"), camera low at the base looking up with Menara KL and the Petronas Towers small beside it; label on the right (`.stage-r`). The skill-tree shots still climb it base to spire. Cache key `20261112a`.
+- Checked flight points (out, m0 to m4, turn, pass, end) and the lead-in at 1300 px and 390 px; no page errors. Open: the flight now has more scroll spent on Merdeka (`.enter` is still 780vh); the end shot is a rough guess.
+
 ## 2026-11-12 · Phones see the city behind the content
 - Owner (iPhone screenshot): solid panels hid the whole scene. The "no panels" rules in `assets/scene.css` now apply at every width, not only 1000 px and up: sections and the hero have no panel, headings and loose text keep small plates, cards stay solid. Notes also has no panel on phones (two folder columns are still desktop only). On phones the gaps between blocks are 84 px (were 28) so more of the city shows. The left/right layout and the skill-tree split stay desktop only. Cache key `20261111s`.
 - Checked 390 px: me, notes, UTP, journey; smoke test 30/30. Open: legibility of the glass Notes folders over the busy city on a phone; real-phone speed.
