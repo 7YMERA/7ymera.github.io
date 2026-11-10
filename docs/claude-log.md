@@ -20,8 +20,8 @@ where the last chat stopped without re-reading everything.
 
 ---
 
-## 2026-11-13 · Metro-map skill tree, lower sky rail, calmer slow scrolling
-- `assets/metro-map.js` builds the skill tree as a metro map from the existing `.st-branch` lists (they stay in the page, hidden visually, for screen readers): 6 lines, one station per skill, 5 interchanges (capsules), origin dots, two trains. Sideways scroll on phones. Fun-fact card: the owner is a train and metro freak.
+## 2026-11-13 · Lower sky rail, calmer slow scrolling (metro-map skill tree tried, then reverted)
+- REVERTED at the owner's request (didn't like it): `assets/metro-map.js` built the skill tree as a metro map from the existing `.st-branch` lists (they stay in the page, hidden visually, for screen readers): 6 lines, one station per skill, 5 interchanges (capsules), origin dots, two trains. Sideways scroll on phones. Fun-fact card: the owner is a train and metro freak.
 - Sky rail lowered from y=95 to y=58 (88 only over the one tower at the start); raycast-checked against building tops.
 - Flight: after 0.9 s without input the page creeps forward by itself (about 42 px/s, 30 on phones) so slow scrolling doesn't show as stutter; camera progress is speed-limited (0.085 per second) so a fast flick can't whip the map. Redraw is every frame while flying. Key `20261113a`.
 - Open: phone frame rate untested on a real device; the idle drift and the speed cap need the owner's feel-test.
