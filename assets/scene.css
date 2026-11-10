@@ -143,17 +143,17 @@ html.gl .stage{display:block;height:120vh;position:relative;pointer-events:none}
   html.gl .tree-split .st-branch{background:var(--bg);border:2px solid var(--fx);box-shadow:5px 5px 0 var(--hard);border-radius:6px}
 }
 
-/* Notes: no panel, so nothing ghosts through it. The folders sit straight on the city, two to a row, under a plate with the heading. */
+/* Notes: no panel, so nothing ghosts through. The folders sit straight on the city under a plate with the heading (two to a row when wide). */
+html.gl main>section.block#notes{background:none;border:0;box-shadow:none;padding:0}
+html.gl #notes .nb-head{padding:22px 26px;background:var(--bg);border:2px solid var(--fx);box-shadow:6px 6px 0 var(--hard);border-radius:6px}
 @media (min-width:1000px){
-  html.gl main>section.block#notes{background:none;border:0;box-shadow:none;padding:0}
-  html.gl #notes .nb-head{padding:22px 26px;background:var(--bg);border:2px solid var(--fx);box-shadow:6px 6px 0 var(--hard);border-radius:6px}
   html.gl #notes .fd-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:84px 32px;margin-top:44px}
 }
 
 
-/* ---- No panels on wide screens: every block sits straight on the city (like Notes). The cards keep their own surfaces;
+/* ---- No panels, at every width: every block sits straight on the city (like Notes). The cards keep their own surfaces;
    headings and any loose text get a small plate so they stay readable. ---- */
-@media (min-width:1000px){
+@media all{
   html.gl main>section.block,html.gl main>.hero{background:none;border:0;box-shadow:none;padding-bottom:0}
   html.gl main>.hero{padding-block:0}
   html.gl main>section.block{padding-top:0}
@@ -170,3 +170,13 @@ html.gl .jr-card,html.gl .uni-cf .cf-details,html.gl .uni-card,html.gl .st-branc
 
 /* The top bar sits above everything on the page (folders, cards) and is solid, so content goes behind it. Below the Ctrl+K dialog (z 20). */
 .top{z-index:18;background:var(--bg)}
+
+/* Phones: more of the city between the blocks, and plates a little tighter */
+@media (max-width:700px){
+  html.gl main>section.block,html.gl main>.hero{margin:84px auto}
+  html.gl main>#me{margin-top:60px}
+  html.gl .sec-head{padding:16px 18px;margin-bottom:20px}
+  html.gl #me .hero-text{padding:18px}
+  html.gl #notes .nb-head{padding:16px 18px}
+  html.gl section.contact{margin-top:84px}
+}

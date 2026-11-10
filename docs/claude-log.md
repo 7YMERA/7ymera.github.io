@@ -24,6 +24,10 @@ where the last chat stopped without re-reading everything.
 - Checked in the browser: `/flight/?bg=district` runs with no console errors, facade shader and beams work, end shot is good; `/` unchanged. `tools/check.js` not run.
 - Open: the leg after the gap flies close past a tower on its way to Menara KL; the route is untuned. Making this the default means rewriting the Merdeka/Exchange captions, which is the owner's call. The mesh has no textures or colours.
 
+## 2026-11-12 · Phones see the city behind the content
+- Owner (iPhone screenshot): solid panels hid the whole scene. The "no panels" rules in `assets/scene.css` now apply at every width, not only 1000 px and up: sections and the hero have no panel, headings and loose text keep small plates, cards stay solid. Notes also has no panel on phones (two folder columns are still desktop only). On phones the gaps between blocks are 84 px (were 28) so more of the city shows. The left/right layout and the skill-tree split stay desktop only. Cache key `20261111s`.
+- Checked 390 px: me, notes, UTP, journey; smoke test 30/30. Open: legibility of the glass Notes folders over the busy city on a phone; real-phone speed.
+
 ## 2026-11-11 · Phone version: the 3D city is the default again, loading note removed
 - Owner: the poly city on a phone "ain't so bad", so the lite mode (no 3D, 5 second "use desktop" screen) was removed again: head script, `#lite-load`, the inline loader and the `.lite` CSS are gone; three.js and `scene.js` are plain deferred scripts as before. Phones run the same scene as desktop (with the existing phone camera tweaks in `scene.js`: `mobile` poses, no side offset). Cache key `20261111r`.
 - Open: real-phone frame rate is still untested; the lite version is in git history (`e549069`) if it is wanted as a fallback for slow devices.
