@@ -24,6 +24,10 @@ where the last chat stopped without re-reading everything.
 - Checked in the browser: `/flight/?bg=district` runs with no console errors, facade shader and beams work, end shot is good; `/` unchanged. `tools/check.js` not run.
 - Open: the leg after the gap flies close past a tower on its way to Menara KL; the route is untuned. Making this the default means rewriting the Merdeka/Exchange captions, which is the owner's call. The mesh has no textures or colours.
 
+## 2026-11-11 · Floating screens removed entirely
+- Owner did not like the floating panel (the conveyor of screens) behind the towers. The code is gone from `assets/scene.js` (`ringUpdate` is a no-op); nothing floats behind the towers any more. The opening keeps its own flat spin reel. Git history has both versions (`dc09e21`, `d1665c5` for the conveyor). Cache key `20261111m`.
+- Owner confirmed the landmark zips are the same files as before and that the district's own KL Tower stays (no cut-out for Menara KL).
+
 ## 2026-11-11 · District re-baked from the original, Exchange 106 re-cropped, bigger conveyor
 - Owner pushed the original KL City Centre to branch `kl-poly-design` (`model.dae`, 69 MB SketchUp 8). Nothing from it is on `main`. `tools/bake-district.py` re-bakes it (after `tools/convert-dae-dump.py`): 413k triangles within 1100 m of the towers, entirely-underground faces dropped, duplicate front/back faces removed, welded at 0.8 m (the weld rises until it fits 65535 vertices) instead of the old 3 m weld that dropped thin walls and many whole buildings. New `assets/city/klcc_district.json` is 1.59 MB (was 1.14 MB), 64.5k vertices, 134k triangles. The district material is now double-sided (SketchUp faces have no consistent winding).
 - The ugly Exchange 106 was my own doing: I had clustered it to a 2.5 m grid. Re-cropped at 0.7 m with `tools/convert-dae-crop.py` (now `assets/city/exchange106.json` 765 KB, was 306 KB): clean taper, no shards.
