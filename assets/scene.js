@@ -463,7 +463,7 @@
       cp.rec.textContent='REC '+('0'+Math.floor(sec/60)).slice(-2)+':'+('0'+sec%60).slice(-2);cp.bat.textContent=bat+'%';cp.batt.style.transform='scaleX('+(bat/100).toFixed(2)+')'}}
   var tv=new T.Vector3();
   function hudUpdate(inRide,u,c){
-    if(!hud)return;hud.classList.toggle('on',inRide);if(!inRide){cpPrev=null;return}
+    if(!hud)return;var on=inRide&&(ONLY||flying); /* only once the flight section fills the screen, not while the last Journey cards are still showing */ hud.classList.toggle('on',on);if(!on){cpPrev=null;return}
     if(!cp.ready)cockpitBuild();cockpitUpdate(c,performance.now());
     hFill.style.transform='scaleY('+clamp(c/HOLD0,0,1).toFixed(4)+')';
     var alt=Math.round(cam.position.y*KU/5)*5;if(alt!==hLast){hLast=alt;hAlt.textContent=alt}
