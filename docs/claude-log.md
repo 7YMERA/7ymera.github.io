@@ -22,6 +22,11 @@ where the last chat stopped without re-reading everything.
 - The owner didn't like the clothes-rail look, so the project rail (commit `5c68a02`) was reverted from the home page and `/v2/`. The cache key is back to `20261108b`.
 - The code is still in git history if the spring physics, turn-to-front or flip view are wanted for something else.
 
+## 2026-11-10 · /v2/ uses the real Petronas Towers model
+- The owner supplied a SketchUp export of the Petronas Twin Towers (OBJ in a zip). `tools/convert-klcc.py` ear-clips it to triangles, splits it into body and glass, recentres it and writes `v2/klcc.json` (about 520 KB, 16.7k vertices). `v2/v2-3d.js` loads it and scales it to the scene; the old hand-built towers remain as a fallback if the file fails to load.
+- Merdeka 118 (`.skp`) was also supplied but SketchUp's own format can't be read here. It needs exporting from SketchUp as OBJ, DAE or glTF first.
+- Open: the model's author and licence are unknown (the zip came with no readme). Confirm it may be redistributed, or remove `v2/klcc.json` (the page falls back to the built tower).
+
 ## 2026-11-09 · /v2/ scroll-driven KLCC
 - `/v2/` now has a fixed WebGL background (`v2/v2-3d.js`, three.js r128 from cdnjs): low-poly KLCC twin towers, skybridge, KL Tower, city ring and orb. The camera orbits and rises/falls with scroll. Light/dark recolors it.
 - Falls back to the 2D canvas skyline in `v2.js` when WebGL or the CDN script is missing (`html.gl` class marks 3D on). Windows stay opaque, no backdrop-filter. Reduced motion renders only on scroll/resize.
