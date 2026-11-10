@@ -86,8 +86,8 @@ html.gl .enter{display:block;height:1250vh;position:relative}
 .lm-tag::before{content:"";position:absolute;left:0;top:-46px;width:2px;height:46px;background:var(--fx)}
 @media (max-width:600px){
   .enter-sticky{padding:0 16px 32px}
-  .ride-hint{right:16px;bottom:auto;top:128px}
-  .fly-skip{left:16px;top:70px;min-height:44px}
+  .ride-hint{right:16px;bottom:196px;top:auto}
+  .fly-skip{left:14px;top:auto;bottom:196px;min-height:44px;padding:8px 14px;font-size:14px}
   .hud-side{right:14px}.hud-sec,.hud-ticks b{display:none}.hud-read{font-size:12px;padding:3px 8px}
   .hud-rail{height:30vh}
   .lm-tag b{font-size:11px;padding:2px 6px;top:-40px}.lm-tag span{display:none}.lm-tag::before{height:40px;top:-40px}
