@@ -18,6 +18,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-11 · Photos into the curtain, DevFest slide removed
+- Owner: the DevFest photo is just their lanyard, not an event they took part in, so the "At DevFest" slide (claim) and `assets/me/devfest-lanyard.webp` are removed (the carousel is back to 7 slides). `portrait-white-wall.webp` joins the left curtain column and `on-a-call.webp` the right one: a fifth photo in each repeat group (`--k:4`), so they cycle in with the graduation photos. `v2/index.html` regenerated.
+- Checked 1300 px and 390 px: all new images load, no errors; `tools/check.js` 30/30. No CSS or JS changed, so no cache-key bump.
+- Open: the curtain's "I write the spec" reel act and the earlier reel-wrap change (0e8cf40) were not touched. If the reel change was unwanted, say so and it is a quick revert.
+
 ## 2026-11-11 · Spin reel wraps further round on phones
 - On narrow screens (under 600 px wide) `assets/curved-reel.js` now uses tiles at 62% of the size, a narrower width cap (30% of the screen) and a deeper bend (85 degrees instead of the page's 70). The reel shows about three tiles curving away on both sides, instead of one flat banner. Desktop is unchanged. Checked on `/v2/` at 390 px (the opening's reel act) and the classic page at 390 px and 1300 px. Cache key `20261111b`.
 - Open: not tried on a real phone. If it is too small or too curved, the two numbers are `0.62` and `85` in `render()`.
