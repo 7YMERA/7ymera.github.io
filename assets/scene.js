@@ -169,13 +169,11 @@
     mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});
     tower.emissive.set(C.glass);tower.emissiveIntensity=dark?1:.28;glassM.emissive.set(C.ring);glassM.emissiveIntensity=dark?.9:.15;
     cityU.uNight.value=dark?1:0;
-    for(var rj=0;rj<(RING||[]).length;rj++)RING[rj].mat.color.set(dark?0xb9c6dc:0xffffff);
     if(glassModelM){glassModelM.emissive.set(C.ring);glassModelM.emissiveIntensity=dark?.8:.12}ringM.color.set(C.ring);specks.material.color.set(C.ring);
     var f=col('sky2');scene.fog=new T.Fog(f,dark?260:300,dark?640:680);
     fxStyle(dark);amb.intensity=dark?.45:.5;sun.intensity=dark?.55:.55;sun.color.set(dark?0x9cc8ff:0xffffff)}
   recolor();window.addEventListener('scenetheme',function(){recolor();need=true});
   new MutationObserver(function(){recolor();need=true}).observe(root,{attributes:true,attributeFilter:['data-theme']}); // the page's own theme button flips data-theme
-  var RING=null; // the ring of screens (built further down); recolor() may run before it exists
   var W=0,Hh=0,mobile=false,need=true,px=0,tx=0,cr=0,tr=0,vr={v:0},vx={v:0},dtF=.016,tgtPose=mob(END),curPose=mob(END),vPose=[{v:0},{v:0},{v:0},{v:0},{v:0},{v:0},{v:0},{v:0}];
   function size(){W=innerWidth;Hh=innerHeight;mobile=W<=820;renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile?1.5:2));renderer.setSize(W,Hh,false);cam.aspect=W/Hh;cam.updateProjectionMatrix();need=true}
   var enter=document.getElementById('enter'),caps=enter?enter.querySelectorAll('.ride-cap'):[],roll=0,rideP=null,rideT=null;
@@ -330,30 +328,7 @@
   var tick=0;
   // the lead-in sections show their label while they are on screen
   if('IntersectionObserver' in window){var stObs=new IntersectionObserver(function(es){es.forEach(function(e){e.target.classList.toggle('on',e.isIntersecting&&e.intersectionRatio>.55)})},{threshold:[0,.55,1]});document.querySelectorAll('.stage').forEach(function(el){stObs.observe(el)})}
-  // ---- THE RING OF SCREENS ----
-  // The project screenshots (the same list the opening's old flat reel used) hang on a ring round the crowns of the Petronas Towers and
-  // turn slowly. The towers hide the ones that pass behind them. A screen on the near side fades out so it never blocks the view,
-  // and the whole ring is hidden during the flight (the route goes through it).
-  var ring=new T.Group(),ringImgs=[];RING=[];
-  try{var reelEl=document.querySelector('.reel');ringImgs=JSON.parse((reelEl&&reelEl.getAttribute('data-reel'))||'[]')}catch(err){ringImgs=[]}
-  if(ringImgs.length){
-    var NR=8,RR=62,RW=38,RH=24,RY=100;
-    for(var ri=0;ri<NR;ri++){
-      var rtex=loader.load(ringImgs[ri%ringImgs.length]);rtex.anisotropy=4;rtex.wrapS=T.RepeatWrapping;rtex.repeat.x=-1;rtex.offset.x=1; // the screens face inward, so the far side of the ring reads the right way round
-      var th0=ri*2*Math.PI/NR,rlen=RW/RR;
-      var rmat=new T.MeshBasicMaterial({map:rtex,transparent:true,opacity:1,toneMapped:false,fog:false,side:T.BackSide});
-      var rm=new T.Mesh(new T.CylinderGeometry(RR,RR,RH,12,1,true,th0,rlen),rmat);rm.position.y=RY;ring.add(rm);
-      RING.push({m:rm,mid:th0+rlen/2,mat:rmat})}
-    scene.add(ring);recolor()}
-  function ringUpdate(time,inRide){
-    if(!RING.length)return;
-    if(inRide){ring.visible=false;return}
-    ring.rotation.y=reduce?0:time*.00005;
-    var cl=Math.hypot(cam.position.x,cam.position.z)||1,cxn=cam.position.x/cl,czn=cam.position.z/cl,any=false;
-    for(var i=0;i<RING.length;i++){
-      var ph=RING[i].mid+ring.rotation.y,d=Math.sin(ph)*cxn+Math.cos(ph)*czn;   // 1 = on the camera's side of the towers, -1 = behind them
-      var o=clamp((.2-d)/.55,0,1);RING[i].mat.opacity=o;RING[i].m.visible=o>.01;if(o>.01)any=true}
-    ring.visible=any}
+  function ringUpdate(){} // the ring of screens was removed (it turned screens into bent slivers); see docs/claude-log.md
   var flying=false;
   function place(time){
     if(enter){var pin=scrollY>=enter.offsetTop-40&&scrollY<=enter.offsetTop+enter.offsetHeight-innerHeight+40;if(pin!==flying){flying=pin;root.classList.toggle('flying',pin)}} // hides the dock while the captions are on screen
@@ -395,5 +370,5 @@
   document.addEventListener('visibilitychange',function(){run=!document.hidden;if(run&&!raf){last=performance.now();raf=requestAnimationFrame(frame)}});
   root.classList.add('gl'); // first: it makes #enter visible, and the scroll maths below needs its real position
   size();buildRide();layoutKeys();tgtPose=dirPose(scrollY);curPose=tgtPose.slice();tr=cr=rideProg();raf=requestAnimationFrame(frame);
-  if(ONLY||/[?&]dbg/.test(location.search))window.__scene={RING:function(){return RING},ring:ring,scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam)}};
+  if(ONLY||/[?&]dbg/.test(location.search))window.__scene={scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam)}};
 })();

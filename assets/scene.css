@@ -150,5 +150,3 @@ html.gl .stage{display:block;height:120vh;position:relative;pointer-events:none}
   html.gl #notes .fd-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:84px 32px;margin-top:44px}
 }
 
-/* The opening's flat reel of screens is now a ring of screens round the towers in the 3D scene (assets/scene.js). */
-html.gl .cur-reel{display:none}

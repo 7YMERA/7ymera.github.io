@@ -24,6 +24,10 @@ where the last chat stopped without re-reading everything.
 - Checked in the browser: `/flight/?bg=district` runs with no console errors, facade shader and beams work, end shot is good; `/` unchanged. `tools/check.js` not run.
 - Open: the leg after the gap flies close past a tower on its way to Menara KL; the route is untuned. Making this the default means rewriting the Merdeka/Exchange captions, which is the owner's call. The mesh has no textures or colours.
 
+## 2026-11-11 · Ring of screens removed
+- Owner: "bro whats this LMAO". The ring of project screens (added earlier the same day) rendered as bent, tilted slivers crowded beside one tower, one clipping into it. Removed from `assets/scene.js` (`ringUpdate` is now a no-op) and the opening's flat spin reel is shown again (the CSS that hid it is gone). Cache key `20261111i`.
+- If screens behind the towers are wanted again: build them as flat, camera-facing quads on one fixed side (a slow conveyor behind the crowns) instead of a rotating cylinder.
+
 ## 2026-11-11 · Section director, ring of screens, the district as the default city
 - **Section director** (`assets/scene.js`, `DIR` keys): before the flight every section has its own camera shot, smoothed by a spring. Notes: under the Petronas Towers looking up, climbing as you read. UTP: the shot follows the coverflow group (`cf-change` event added to `coverflow.js`; 7 shots: whole, crowns, side-on, foot, from above, podium, back). Skills: Merdeka 118 base to spire. Work: Menara KL (new `#workstage` lead-in). Journey: The Exchange 106. Panels keep to one side on wide screens (`side-l`, `side-r`, `tree-split` in `scene.css`); the skill tree splits left and right of the building. Notes has no panel, folders two per row.
 - **Ring of screens**: the project screenshots (the old flat reel's list) hang on a ring round the towers' crowns and turn slowly; near-side screens fade so they never block the view; hidden in the flight. The old flat reel is hidden when WebGL runs.
