@@ -42,22 +42,66 @@
   function b64(str,Type){var bin=atob(str),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Type(u.buffer)}
   var SC=H/444.138; // one scale for every landmark, so their real heights compare truthfully
   var bodyM=mat('near',{side:T.DoubleSide}),bodyM2=mat('mid',{side:T.DoubleSide}),glassModelM=mat('ring',{side:T.DoubleSide,emissive:0xffffff,emissiveIntensity:.3});
-  function loadModel(url,x,z,ry,bm,fallback){
+  function loadModel(url,x,z,ry,bm,fallback,done){
     fetch(url).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
       var pos=b64(d.positions,Float32Array),out=new T.Group();
       [['body',bm],['glass',glassModelM]].forEach(function(p){
         var geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));geo.setIndex(new T.BufferAttribute(b64(d[p[0]],Uint16Array),1));
         geo=geo.toNonIndexed();geo.computeVertexNormals();out.add(new T.Mesh(geo,p[1]))});
-      out.scale.setScalar(SC);out.position.set(x,0,z);out.rotation.y=ry;g.add(out);recolor();need=true;
+      out.scale.setScalar(SC);out.position.set(x,0,z);out.rotation.y=ry;g.add(out);if(done)done();recolor();need=true;
     }).catch(function(){if(fallback)fallback();recolor();need=true});
   }
-  loadModel('klcc.json',0,0,0,bodyM,procedural);          // Petronas Twin Towers (SketchUp export, see tools/convert-klcc.py)
-  loadModel('merdeka118.json',-10,-95,-.5,bodyM2,null);  // Merdeka PNB 118 (SketchUp Collada, see tools/convert-dae.py)
+  loadModel('klcc.json',0,0,0,bodyM,procedural);          // Petronas Twin Towers (SketchUp export, see tools/convert-obj.py)
+  loadModel('menara_kl.json',-95,-70,0,bodyM2,null,function(){g.remove(kl)}); // Menara KL; replaces the stand-in cylinder tower below once loaded
+  loadModel('merdeka118.json',-10,-95,-.5,bodyM2,null);
+  loadModel('exchange106.json',60,-125,.4,bodyM,null);   // The Exchange 106, cropped and simplified (tools/convert-dae-crop.py)  // Merdeka PNB 118 (SketchUp Collada, see tools/convert-dae.py)
+  // Masjid Negara, built from code (no model file): 18-fold umbrella dome, smaller pleated dome, slender minaret,
+  // waffle-coffered roof slabs, sawtooth hall and reflecting pool. Units here are metres; the group is scaled up a little so it reads beside the towers.
+  (function(){
+    var mq=new T.Group();
+    var cv=document.createElement('canvas');cv.width=cv.height=32;var cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,32,32);cx.fillStyle='#c9c9c9';cx.fillRect(5,5,22,22);cx.fillStyle='#f2f2f2';cx.fillRect(8,8,16,16);
+    var waffle=new T.CanvasTexture(cv);waffle.wrapS=waffle.wrapT=T.RepeatWrapping;
+    var slabSide=mat('far'),slabTop=mat('far',{map:waffle}),domeM=mat('orb',{side:T.DoubleSide}),pale=mat('glass'),glassD=mat('ring',{side:T.DoubleSide,emissive:0xffffff,emissiveIntensity:.2});
+    var flagRed=new T.MeshLambertMaterial({color:0xcc0001,flatShading:true}),flagYellow=new T.MeshLambertMaterial({color:0xffcc00,flatShading:true,emissive:0x6b5200});
+    function slab(x0,x1,z0,z1,y0,y1){
+      var w=x1-x0,d=z1-z0,geo=new T.BoxGeometry(w,y1-y0,d),uv=geo.attributes.uv;
+      for(var i=8;i<12;i++)uv.setXY(i,uv.getX(i)*w/9,uv.getY(i)*d/9);
+      var m=new T.Mesh(geo,[slabSide,slabSide,slabTop,slabSide,slabSide,slabSide]);m.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);mq.add(m);return m}
+    function pleat(N,R,H,h0,rings,mt){
+      var per=2*N,pos=[],idx=[],i,j;
+      for(j=0;j<=rings;j++){var t=j/rings,y=h0+(H-h0)*(1-Math.pow(t,2.1));
+        for(i=0;i<per;i++){var ridge=i%2===0,a=Math.PI*i/N,r=R*t*(ridge?1:1-0.22*t);pos.push(Math.cos(a)*r,y-(ridge?0:(H-h0)*0.06*t),Math.sin(a)*r)}}
+      for(j=0;j<rings;j++)for(i=0;i<per;i++){var a0=j*per+i,b0=j*per+(i+1)%per,c0=(j+1)*per+i,d0=(j+1)*per+(i+1)%per;idx.push(a0,c0,b0,b0,c0,d0)}
+      var geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(pos,3));geo.setIndex(idx);geo=geo.toNonIndexed();geo.computeVertexNormals();
+      return new T.Mesh(geo,mt)}
+    // roof slabs (a cross-shaped complex around the main hall)
+    slab(-60,60,-26,26,0,9);slab(-105,40,10,28,0,6);slab(20,112,-38,-12,0,6);slab(-45,-8,-64,-24,0,6);slab(55,85,18,50,0,5);
+    // main dome: glass drum, red band, 18-fold umbrella, yellow star finial
+    var drum=new T.Mesh(new T.CylinderGeometry(24,24,7,36,1,true),glassD);drum.position.set(0,12.5,0);mq.add(drum);
+    var band=new T.Mesh(new T.CylinderGeometry(24.6,24.6,1.6,36,1,true),flagRed);band.position.set(0,16.4,0);mq.add(band);
+    var dome=pleat(18,27,46,16,8,domeM);dome.position.y=0;mq.add(dome);
+    var fin=new T.Mesh(new T.ConeGeometry(1.4,10,5),flagYellow);fin.position.set(0,16+46-16+5,0);fin.position.y=62+3;mq.add(fin);
+    // smaller pleated dome on the west wing
+    var d2=pleat(12,15,22,6,6,domeM);d2.position.set(-122,0,-4);mq.add(d2);
+    var drum2=new T.Mesh(new T.CylinderGeometry(13.5,13.5,6,24,1,true),glassD);drum2.position.set(-122,3,-4);mq.add(drum2);
+    var fin2=new T.Mesh(new T.ConeGeometry(.9,6,5),flagYellow);fin2.position.set(-122,25,-4);mq.add(fin2);
+    // minaret: tapered shaft, lantern, spire, yellow tip
+    var sh=new T.Mesh(new T.CylinderGeometry(1.5,2.4,52,6),pale);sh.position.set(32,26,22);mq.add(sh);
+    var lan=new T.Mesh(new T.CylinderGeometry(3.6,2.2,5,8),pale);lan.position.set(32,53,22);mq.add(lan);
+    var sp=new T.Mesh(new T.CylinderGeometry(.25,.9,18,5),pale);sp.position.set(32,65,22);mq.add(sp);
+    var tip=new T.Mesh(new T.ConeGeometry(.9,3,5),flagYellow);tip.position.set(32,75,22);mq.add(tip);
+    // sawtooth hall on the south-west
+    var hall=new T.Mesh(new T.BoxGeometry(44,9,26),slabSide);hall.position.set(-70,4.5,52);mq.add(hall);
+    for(var k=0;k<6;k++){var saw=new T.Mesh(new T.CylinderGeometry(4.6,4.6,26,3),pale);saw.rotation.x=Math.PI/2;saw.rotation.z=Math.PI/2;saw.position.set(-88+k*7.2,11.2,52);mq.add(saw)}
+    // reflecting pool
+    var pool=new T.Mesh(new T.PlaneGeometry(70,26),glassD);pool.rotation.x=-Math.PI/2;pool.position.set(10,.4,62);mq.add(pool);
+    var MQ=1.35;mq.scale.setScalar(SC*MQ);mq.position.set(58,0,-4);mq.rotation.y=2.6;g.add(mq);
+  })();
   var gr=new T.Mesh(new T.CircleGeometry(520,48),ground);gr.rotation.x=-Math.PI/2;gr.position.y=-.2;g.add(gr);
   // city ring
   var s=11;function rnd(){s=(s*9301+49297)%233280;return s/233280}
   for(var i=0;i<130;i++){var a=rnd()*6.283,d=135+rnd()*240,w=8+rnd()*18,h=8+rnd()*(d<160?55:35);
-    if(Math.hypot(Math.cos(a)*d+10,Math.sin(a)*d+95)<62)continue;var b=new T.Mesh(new T.BoxGeometry(w,h,w*(.7+rnd()*.6)),d<170?city:cityF);b.position.set(Math.cos(a)*d,h/2,Math.sin(a)*d);b.rotation.y=rnd()*3;g.add(b)}
+    if(Math.hypot(Math.cos(a)*d+10,Math.sin(a)*d+95)<62||Math.hypot(Math.cos(a)*d-60,Math.sin(a)*d+125)<58||Math.hypot(Math.cos(a)*d-58,Math.sin(a)*d+4)<58)continue;var b=new T.Mesh(new T.BoxGeometry(w,h,w*(.7+rnd()*.6)),d<170?city:cityF);b.position.set(Math.cos(a)*d,h/2,Math.sin(a)*d);b.rotation.y=rnd()*3;g.add(b)}
   // KL Tower
   var kl=new T.Group();kl.position.set(-95,0,-70);
   var shaft=new T.Mesh(new T.CylinderGeometry(2,3.4,120,8),towerB);shaft.position.y=60;
@@ -87,7 +131,7 @@
     var p=cp,e=Math.sin(p*Math.PI);
     var ang=.55+p*Math.PI*1.7+px*.12,rad=(mobile?270:230)-e*30,hgt=(mobile?55:40)+e*80;
     cam.position.set(Math.cos(ang)*rad,hgt,Math.sin(ang)*rad);cam.lookAt(0,H*(mobile?.5:.52)-e*18,0);
-    var k=Math.min(1,p*5),ox=mobile?0:-W*.2*(1-k),oy=mobile?-Hh*.2*(1-k):0;
+    var k=Math.min(1,p*5),ox=mobile?0:-W*.2*(1-k),oy=mobile?-Hh*.2*(1-k):Hh*.06*(1-k);
     cam.setViewOffset(W,Hh,ox,oy,W,Hh);
     orb.rotation.y=time*.0004;ring.rotation.z=time*.0006;orb.position.y=H+30+Math.sin(time*.0009)*3;
     specks.rotation.y=time*.00003}

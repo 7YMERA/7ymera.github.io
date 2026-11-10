@@ -1,5 +1,11 @@
+"""OBJ -> compact mesh json for v2/v2-3d.js (positions float32, body/glass uint16 triangle indices, base64).
+Usage: python3 -I convert-obj.py model.obj out.json [glassMaterials] [glassYMin,glassYMax]
+  glassMaterials: comma list of material names (or prefixes ending in *) coloured as glass; use "" for none.
+  glassYMin,glassYMax: also treat triangles whose centre height (model units) falls in this band as glass.
+The model is recentred on its bounding box in x/z and dropped so its lowest point is y = 0. Y is up."""
 import numpy as np, base64, json, sys, collections
 src, out = sys.argv[1], sys.argv[2]
+YB = [float(x) for x in sys.argv[4].split(',')] if len(sys.argv) > 4 else None
 V=[]; faces=[]; cur=None
 for line in open(src, errors='ignore'):
     t=line.split()
@@ -37,13 +43,16 @@ def tri(ids):
     elif len(idx)>3:  # fallback fan
         for j in range(1,len(idx)-1): res.append([ids[idx[0]],ids[idx[j]],ids[idx[j+1]]])
     return res
-GLASS=set(sys.argv[3].split(',')) if len(sys.argv)>3 else set()
+GLASS=set(x for x in (sys.argv[3].split(',') if len(sys.argv)>3 else []) if x)
 cls={0:[],1:[]}
 for m,ids in faces:
-    c=1 if (m in GLASS or (m or '').lower().startswith(('skywalk','a4'))) else 0
-    cls[c]+=tri(ids)
+    c=1 if (m in GLASS or any(g.endswith('*') and (m or '').startswith(g[:-1]) for g in GLASS)) else 0
+    for t3 in tri(ids):
+        cc=c
+        if YB and YB[0]<=V[t3][:,1].mean()<=YB[1]: cc=1
+        cls[cc].append(t3)
 # recentre: tower centre in x,z, ground at y=0
-cx,cz=67.5,86.0; ymin=V[:,1].min()
+used0=sorted({i for c in cls.values() for t in c for i in t}); cx=(V[used0,0].min()+V[used0,0].max())/2; cz=(V[used0,2].min()+V[used0,2].max())/2; ymin=V[used0,1].min()
 V[:,0]-=cx; V[:,2]-=cz; V[:,1]-=ymin
 used=sorted({i for c in cls.values() for t in c for i in t}); remap={o:n for n,o in enumerate(used)}
 pos=V[used].astype(np.float32)
