@@ -54,7 +54,7 @@ The REQ-001 card, the "I write the spec. Then I build it." line and the teal-and
 | **2.2** | 11 Nov | A camera shot for every section (a director): the UTP shots follow the coverflow, the skill tree splits round Merdeka 118. The KLCC district becomes the map. | `183c59e`, `8e7c9aa`, `209e535` |
 | **2.3** | 11 Nov | No panels behind any block, so the city shows through everywhere, phones included. The content goes behind the top bar. | `0b93ad8`, `813d708` |
 | **2.4** | 12 Nov | More love for Merdeka 118 (a lead-in and a flight that climbs it), the flight reworked (no wall clips, no whips, captions in step), a new finale: a horizontal skyline, or a full zoom-out on phones. | `d6e08db`, `a37d9c2`, `e4acb09` |
-| **2.5** | 12 Nov | **The sci-fi layer:** stars, a ringed moon with a moon of its own, gyroscope rings round the Petronas and Merdeka crowns, and a dragon of light looping the skyline. | this commit |
+| **2.5** | 12 Nov | **The sci-fi layer:** stars, a ringed moon with a moon of its own, gyroscope rings round the Petronas and Merdeka crowns, and a dragon of light looping the skyline. | `1be0d1f` |
 
 Tried and dropped along the way (still in git history): a clothes-rail project gallery (`5c68a02`), a ring and then a conveyor of floating screens, a Masjid Negara you could fly into, and a 5 second phone loading screen. The longer story of the 3D city is in *The 3D city and the flight* below.
 
@@ -256,7 +256,7 @@ The notes pages (`notes/*.html`) load `site.css` and `assets/scene.css` (no WebG
 | 7 | **The first flight** | A long, slow scroll flight: down between the Petronas Towers, straight up their sides, level with the skybridge, up to the crowns, then across to Merdeka 118 and up its face, over the top and out. The satellite "map" under the city was removed (the owner didn't like the map look). | `6797f26` |
 | 8 | **The calm one-way flight** | Re-routed after feedback: one direction only (no spinning back under the bridge), head-on at the skybridge, over the bridge and through the gap, one slow turn up Merdeka 118, over The Exchange 106, then a wide shot of all four. Smoother camera, one material for every landmark, and a sci-fi layer (HUD, landmark tags, beams, links, radar ring, wireframe shapes) inspired by `0z5a.github.io`. | `c5ca5b5` |
 | 9 | **One page** | The whole home page over the 3D city, the flight as an interlude before Contact, still at `/v2/` while it was reviewed. The old stand-alone preview (floating windows, the 2D canvas skyline) was removed; find it at `c5ca5b5`. | `a1478db` |
-| 10 | **No more versions** | The 3D city became the home page itself, at `/`. `/v2/` and the generator script were removed; the aurora-only site that came before is commit `f3b9f08`. | this commit |
+| 10 | **No more versions** | The 3D city became the home page itself, at `/`. `/v2/` and the generator script were removed; the aurora-only site that came before is commit `f3b9f08`. | `1be0d1f` |
 
 Things tried and dropped along the way, still in git history: a clothes-rail component port for the Work section (`5c68a02`, reverted in `2ecf38a`), and a lab of four motion ideas that was never merged (`lab/ideas/index.html` on branch `claude/wonderful-galileo-bgrct6`).
 
