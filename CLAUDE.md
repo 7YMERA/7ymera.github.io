@@ -41,7 +41,7 @@ any agent working on this repo, kept short on purpose so it costs little context
 - **Light mode is the default** (`<html data-theme="light">`). Check both themes and 390 px width.
 - **The owner dislikes small hidden buttons** for major features. Make controls big and obvious.
 
-- **The old flat-aurora site** is the git tag `classic-site` (`git checkout classic-site`). There is no `/v2/` any more: the 3D city is the home page.
+- **The old flat-aurora site** is commit `f3b9f08` (`git checkout f3b9f08`). There is no `/v2/` any more: the 3D city is the home page.
 
 ## Privacy (public repo, never break these)
 
