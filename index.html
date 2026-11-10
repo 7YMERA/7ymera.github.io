@@ -14,16 +14,17 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://7ymera.github.io/">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#0a6c74">
+<meta name="theme-color" content="#0b2a6b">
 <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=64">
 <link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=180">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=20261111b">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@500;600&display=swap">
+<link rel="stylesheet" href="assets/site.css?v=20261111c">
+<link rel="stylesheet" href="assets/scene.css?v=20261111c">
 </head>
 <body>
-<div class="sky" aria-hidden="true"></div>
+<canvas id="gl" aria-hidden="true"></canvas>
 
 <header class="top">
   <div class="wrap">
@@ -84,14 +85,17 @@
           <figure class="cur-card" style="--k:1"><img src="assets/me/in-line.webp" alt="Waiting in line for my name" loading="eager" draggable="false"></figure>
           <figure class="cur-card" style="--k:2"><img src="assets/me/golden-hour.webp" alt="Golden hour after the ceremony" loading="lazy" draggable="false"></figure>
           <figure class="cur-card" style="--k:3"><img src="assets/me/scroll-tube.webp" alt="The scroll tube" loading="lazy" draggable="false"></figure>
+          <figure class="cur-card" style="--k:4"><img src="assets/me/portrait-white-wall.webp" alt="Portrait against a white wall" loading="lazy" draggable="false"></figure>
           <figure class="cur-card" aria-hidden="true" style="--k:0"><img src="assets/me/mirror.webp" alt="" loading="lazy" draggable="false"></figure>
           <figure class="cur-card" aria-hidden="true" style="--k:1"><img src="assets/me/in-line.webp" alt="" loading="lazy" draggable="false"></figure>
           <figure class="cur-card" aria-hidden="true" style="--k:2"><img src="assets/me/golden-hour.webp" alt="" loading="lazy" draggable="false"></figure>
           <figure class="cur-card" aria-hidden="true" style="--k:3"><img src="assets/me/scroll-tube.webp" alt="" loading="lazy" draggable="false"></figure>
+          <figure class="cur-card" aria-hidden="true" style="--k:4"><img src="assets/me/portrait-white-wall.webp" alt="" loading="lazy" draggable="false"></figure>
           <figure class="cur-card" aria-hidden="true" style="--k:0"><img src="assets/me/mirror.webp" alt="" loading="lazy" draggable="false"></figure>
           <figure class="cur-card" aria-hidden="true" style="--k:1"><img src="assets/me/in-line.webp" alt="" loading="lazy" draggable="false"></figure>
           <figure class="cur-card" aria-hidden="true" style="--k:2"><img src="assets/me/golden-hour.webp" alt="" loading="lazy" draggable="false"></figure>
           <figure class="cur-card" aria-hidden="true" style="--k:3"><img src="assets/me/scroll-tube.webp" alt="" loading="lazy" draggable="false"></figure>
+          <figure class="cur-card" aria-hidden="true" style="--k:4"><img src="assets/me/portrait-white-wall.webp" alt="" loading="lazy" draggable="false"></figure>
         </div>
       </div>
       <div class="cur-center">
@@ -110,14 +114,17 @@
           <figure class="cur-card" style="--k:1"><img src="assets/me/on-stage-card.webp" alt="On stage, receiving my scroll" loading="eager" draggable="false"></figure>
           <figure class="cur-card" style="--k:2"><img src="assets/me/by-the-hall.webp" alt="Outside the hall" loading="lazy" draggable="false"></figure>
           <figure class="cur-card" style="--k:3"><img src="assets/me/black-shirt.webp" alt="Mirror selfie in a black shirt" loading="lazy" draggable="false"></figure>
+          <figure class="cur-card" style="--k:4"><img src="assets/me/on-a-call.webp" alt="On a video call" loading="lazy" draggable="false"></figure>
           <figure class="cur-card" aria-hidden="true" style="--k:0"><img src="assets/me/walk-out.webp" alt="" loading="lazy" draggable="false"></figure>
           <figure class="cur-card" aria-hidden="true" style="--k:1"><img src="assets/me/on-stage-card.webp" alt="" loading="lazy" draggable="false"></figure>
           <figure class="cur-card" aria-hidden="true" style="--k:2"><img src="assets/me/by-the-hall.webp" alt="" loading="lazy" draggable="false"></figure>
           <figure class="cur-card" aria-hidden="true" style="--k:3"><img src="assets/me/black-shirt.webp" alt="" loading="lazy" draggable="false"></figure>
+          <figure class="cur-card" aria-hidden="true" style="--k:4"><img src="assets/me/on-a-call.webp" alt="" loading="lazy" draggable="false"></figure>
           <figure class="cur-card" aria-hidden="true" style="--k:0"><img src="assets/me/walk-out.webp" alt="" loading="lazy" draggable="false"></figure>
           <figure class="cur-card" aria-hidden="true" style="--k:1"><img src="assets/me/on-stage-card.webp" alt="" loading="lazy" draggable="false"></figure>
           <figure class="cur-card" aria-hidden="true" style="--k:2"><img src="assets/me/by-the-hall.webp" alt="" loading="lazy" draggable="false"></figure>
           <figure class="cur-card" aria-hidden="true" style="--k:3"><img src="assets/me/black-shirt.webp" alt="" loading="lazy" draggable="false"></figure>
+          <figure class="cur-card" aria-hidden="true" style="--k:4"><img src="assets/me/on-a-call.webp" alt="" loading="lazy" draggable="false"></figure>
         </div>
       </div>
       <div class="cur-col right outer" aria-hidden="true">
@@ -206,8 +213,7 @@
               <figure class="ms-photo"><img src="assets/me/walk-out.webp" alt="Alif holding a bouquet in front of the UTP chancellor hall" width="900" height="1200" loading="lazy"></figure>
               <figure class="ms-photo"><img src="assets/me/golden-hour.webp" alt="Alif in the late afternoon sun" width="800" height="1067" loading="lazy"></figure>
               <figure class="ms-photo"><img src="assets/me/portrait-white-wall.webp" alt="Alif against a white wall, in a dark ribbed polo shirt" width="900" height="1200" loading="lazy"></figure>
-              <figure class="ms-photo"><img src="assets/me/devfest-lanyard.webp" alt="Alif in a navy polo and a DevFest lanyard, a mirror selfie" width="900" height="1200" loading="lazy"></figure>
-              <figure class="ms-photo"><img src="assets/me/on-a-call.webp" alt="Alif on a video call, wearing red earphones" width="900" height="1200" loading="lazy"></figure>
+                            <figure class="ms-photo"><img src="assets/me/on-a-call.webp" alt="Alif on a video call, wearing red earphones" width="900" height="1200" loading="lazy"></figure>
             </div>
             <div class="ms-copy">
               <div class="ms-slides" aria-live="polite">
@@ -247,11 +253,6 @@
                   <p class="ms-quote">Business analyst by day, builder after hours. No filter, just a white wall.</p>
                 </article>
                 <article class="ms-slide" hidden>
-                  <h3>At DevFest</h3>
-                  <p class="ms-role">A developer community day</p>
-                  <p class="ms-quote">A day of talks by developers, for developers. Always good for new ideas.</p>
-                </article>
-                <article class="ms-slide" hidden>
                   <h3>Between meetings</h3>
                   <p class="ms-role">Business Analyst at axrail.ai</p>
                   <p class="ms-quote">Most of my day is calls: asking questions until a requirement is clear enough to write down.</p>
@@ -271,8 +272,7 @@
                   <button type="button" aria-label="Slide 4: The builder"><i></i></button>
                   <button type="button" aria-label="Slide 5: Off the clock"><i></i></button>
                   <button type="button" aria-label="Slide 6: Straight on"><i></i></button>
-                  <button type="button" aria-label="Slide 7: At DevFest"><i></i></button>
-                  <button type="button" aria-label="Slide 8: Between meetings"><i></i></button>
+                  <button type="button" aria-label="Slide 7: Between meetings"><i></i></button>
                 </div>
               </div>
             </div>
@@ -686,6 +686,30 @@
     </div>
   </section>
 
+  <section class="enter" id="enter" aria-label="Scroll to fly through Kuala Lumpur">
+  <div class="enter-sticky">
+    <div class="hud" id="hud" aria-hidden="true">
+      <i class="hud-c tl"></i><i class="hud-c tr"></i><i class="hud-c bl"></i><i class="hud-c br"></i>
+      <div class="hud-tags"></div>
+      <div class="hud-side">
+        <p class="hud-read"><span>ALT</span><b><span id="h-alt">0</span> m</b></p>
+        <div class="hud-rail"><i class="hud-fill" id="h-fill"></i><ol class="hud-ticks"></ol></div>
+        <p class="hud-sec" id="h-sec"></p>
+      </div>
+    </div>
+    <div class="ride-caps" aria-live="polite">
+      <p class="ride-cap" data-from="0.012" data-to="0.2"><b>Petronas Twin Towers</b><span>452 m. We swing in from the side and line up with the gap between them.</span></p>
+      <p class="ride-cap" data-from="0.2" data-to="0.35"><b>The skybridge</b><span>The bridge that joins the towers, 170 m above the street. Straight on, nothing in the way.</span></p>
+      <p class="ride-cap" data-from="0.35" data-to="0.45"><b>Through the gap</b><span>Over the bridge and out the far side, between the two towers.</span></p>
+      <p class="ride-cap" data-from="0.45" data-to="0.75"><b>Merdeka PNB 118</b><span>678.9 m, the tallest building in Malaysia. One slow turn up its face.</span></p>
+      <p class="ride-cap" data-from="0.75" data-to="0.85"><b>Over the top</b><span>Across the roof of The Exchange 106, with the Petronas Towers far below.</span></p>
+      <p class="ride-cap" data-from="0.85" data-to="1.01"><b>Four landmarks</b><span>Petronas, Merdeka 118, Menara KL and The Exchange 106. Scroll back up to fly it again.</span></p>
+    </div>
+    <p class="ride-hint">Keep scrolling</p>
+    <a class="fly-skip" href="#contact">Skip the flight ↓</a>
+  </div>
+</section>
+
   <section class="contact" id="contact">
     <div class="wrap">
       <span class="eyebrow" style="color:inherit;opacity:.7">Contact</span>
@@ -954,10 +978,12 @@
   });
 })();
 </script>
-<script src="assets/curved-reel.js?v=20261111b" defer></script>
-<script src="assets/folders.js?v=20261111b" defer></script>
-<script src="assets/coverflow.js?v=20261111b" defer></script>
-<script src="assets/extras.js?v=20261111b" defer></script>
-<script src="assets/pulse.js?v=20261111b" defer></script>
+<script src="assets/curved-reel.js?v=20261111c" defer></script>
+<script src="assets/folders.js?v=20261111c" defer></script>
+<script src="assets/coverflow.js?v=20261111c" defer></script>
+<script src="assets/extras.js?v=20261111c" defer></script>
+<script src="assets/pulse.js?v=20261111c" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+<script src="assets/scene.js?v=20261111c" defer></script>
 </body>
 </html>

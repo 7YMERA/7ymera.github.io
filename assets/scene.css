@@ -1,11 +1,11 @@
-/* v2 = the home page (assets/site.css) over the 3D Kuala Lumpur scene. This file only re-skins and adds; it loads after site.css.
-   Palette: v2's blues. Light mode is paper-blue, dark mode is v2's night navy. v1's token names are kept, so every v1 component follows. */
+/* The 3D Kuala Lumpur scene behind the home page (assets/scene.js). This file re-skins site.css and adds the flight; it loads after site.css.
+   Palette: paper-blue in light mode, night navy in dark mode. The token names from site.css are kept, so every component follows. */
 :root{
   --bg:#f4f8fc;--surface:#fbfdff;--sunk:#e6f1fa;--ink:#0b2a6b;--muted:#3f5b94;--line:#c3dcef;
   --accent:#1559c9;--accent-ink:#fff;--accent-soft:#dcecfb;--glow:rgba(42,166,232,.14);
   --shadow:0 1px 2px rgba(11,42,107,.08),0 10px 30px rgba(11,42,107,.10);
   --fx:#2aa6e8;--hard:#0b2f8a;--f-pix:"Pixelify Sans",ui-monospace,Menlo,Consolas,monospace;
-  /* scene colours, read by v2-3d.js */
+  /* scene colours, read by scene.js */
   --sky1:#eaf4fb;--sky2:#cfe6f7;--far:#bcd9ee;--mid:#8fc3e8;--near:#5aa6dc;--glass:#e9f6ff;--orb:#2c63c9;--ring:#8fd2ff;
   color-scheme:light}
 :root[data-theme="dark"]{
@@ -20,9 +20,8 @@
 #gl{position:fixed;inset:0;width:100%;height:100%;z-index:-1;display:none}
 html.gl #gl{display:block}
 html.gl body{background:linear-gradient(var(--sky1),var(--sky2)) fixed}
-.nav-v1{margin-left:6px;border:1.5px solid var(--fx);border-radius:999px;font-family:var(--f-pix);font-weight:600}
 
-/* Readability: every section sits on an opaque paper panel with a hard offset shadow (v2's window look), and the city shows in the gaps.
+/* Readability: every section sits on an opaque paper panel with a hard offset shadow (the hard-shadow window look), and the city shows in the gaps.
    No backdrop-filter: it would sample the moving scene on every frame. */
 html.gl main>section.block,html.gl main>.hero{
   width:min(calc(100% - 28px),calc(var(--col) + 56px));margin:72px auto;padding-bottom:24px;
