@@ -183,7 +183,7 @@
   new MutationObserver(function(){recolor();need=true}).observe(root,{attributes:true,attributeFilter:['data-theme']}); // the page's own theme button flips data-theme
   var W=0,Hh=0,mobile=false,need=true,px=0,tx=0,cr=0,tr=0,vr={v:0},vx={v:0},dtF=.016,tgtPose=mob(END),curPose=mob(END),vPose=[{v:0},{v:0},{v:0},{v:0},{v:0},{v:0},{v:0},{v:0}];
   function size(){W=innerWidth;Hh=innerHeight;mobile=W<=820;renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile?1.5:2));renderer.setSize(W,Hh,false);cam.aspect=W/Hh;cam.updateProjectionMatrix();need=true}
-  var enter=document.getElementById('enter'),caps=enter?enter.querySelectorAll('.ride-cap'):[],roll=0,rideP=null,rideT=null;
+  var enter=document.getElementById('enter'),caps=enter?enter.querySelectorAll('.ride-cap'):[],roll=0,rideP=null,rideT=null,rideQ=null;
   // The page scroll is split in two: first the orbit round the skyline, then (inside #enter) the flight.
   // ---- THE DIRECTOR ----
   // Before the flight, every section of the page has its own camera shot. A shot (a "pose") is:
@@ -267,14 +267,19 @@
   var MCD={u:82,w:364},EXD={u:331,w:85};                  // the district puts Merdeka 118 and The Exchange 106 south of KLCC, in (u,w)
   function arcAt(deg,r,y,ty){var C=DIST?MCD:MC,a=deg*Math.PI/180;return [A(C.u+Math.cos(a)*r,C.w+Math.sin(a)*r,y),A(C.u,C.w,ty)]}
   // [name, camera position, look-at point, slow factor of the stretch that FOLLOWS it (bigger = more scroll spent there)]
-  var KF=null,CAPS=[['start','front'],['front','over'],['over','out'],['out','m4'],['m4','pass'],['pass','end']];
+  var KF=null,CAPS=DIST?[['start','front'],['front','over'],['over','turn1'],['turn1','m5'],['m5','pass'],['pass','end']]:[['start','front'],['front','over'],['over','out'],['out','m4'],['m4','pass'],['pass','end']];
   function buildKF(){
     var o=orbitPose(1,0),m1=arcAt(90,55,96,112),m2=arcAt(130,55,116,132),m3=arcAt(180,55,138,150),m4=arcAt(230,55,166,178),m5=arcAt(270,55,200,205);
-    if(DIST){var E=EXD,C=MCD;KF=[['start',o.pos,o.tgt,1.0],['swing',A(135,-175,96),A(0,0,64),1.4],['side',A(185,-95,88),A(0,0,62),1.4],['front',A(165,-25,72),A(0,0,56),1.4],
+    if(DIST){var E=EXD,C=MCD,arcD=function(deg,r,y,ty){var q=deg*Math.PI/180;return [A(C.u+Math.cos(q)*r,C.w+Math.sin(q)*r,y),A(C.u,C.w,ty)]};KF=[['start',o.pos,o.tgt,1.0],['swing',A(135,-175,96),A(0,0,64),1.4],['side',A(185,-95,88),A(0,0,62),1.4],['front',A(165,-25,72),A(0,0,56),1.4],
       ['bridge',A(70,0,56),A(0,0,50),1.7],['over',A(30,0,66),A(-20,0,66),1.9],['gap',A(0,0,76),A(-60,-10,84),1.7],
-      ['out',A(-34,-6,100),A(C.u,C.w,130),1.0],
-      ['m0',m1[0],m1[1],2.4],['m1',m2[0],m2[1],2.4],['m2',m3[0],m3[1],2.4],['m3',m4[0],m4[1],2.4],['m4',m5[0],m5[1],2.4],
-      ['turn',A((C.u+E.u)/2,(C.w+E.w)/2,236),A(E.u,E.w,170),1.0],
+      // out of the gap, rising, with the view turning a little at a time (it used to swing 120 degrees in one step) towards Merdeka
+      ['exit',A(-46,-4,104),A(-92,34,104),1.5],['turn1',A(-72,28,132),A(-84,110,126),1.5],['turn2',A(-70,96,160),A(-40,200,140),1.5],
+      ['out',A(-30,190,190),A(20,270,150),1.4],['approach',A(C.u-83,C.w-100,160),A(C.u,C.w,120),1.4],
+      // the climb round Merdeka starts on the side we arrive from (230 degrees) and goes round the long way, rising
+      ['m0',arcD(230,55,96,112)[0],arcD(230,55,96,112)[1],2.4],['m1',arcD(180,55,116,132)[0],arcD(180,55,116,132)[1],2.4],['m2',arcD(130,55,138,150)[0],arcD(130,55,138,150)[1],2.4],
+      ['m3',arcD(80,55,166,178)[0],arcD(80,55,166,178)[1],2.4],['m4',arcD(30,55,200,205)[0],arcD(30,55,200,205)[1],2.4],
+      // leaving: the view turns a little at a time towards The Exchange
+      ['m5',arcD(-15,62,214,208)[0],arcD(-15,62,214,208)[1],1.4],['turnA',A(C.u+98,C.w-8,228),A(C.u+40,C.w-12,204),1.0],['turnB',A(C.u+112,C.w-30,232),A(C.u+82,C.w-72,200),1.0],['turnC',A(C.u+122,C.w-58,236),A(C.u+124,C.w-118,194),1.0],['turn',A(C.u+134,C.w-86,238),A(C.u+190,C.w-156,190),1.0],['cross',A((C.u+E.u)/2+10,(C.w+E.w)/2,240),A(E.u,E.w,160),1.0],
       ['pass',A(E.u-70,E.w+55,205),A(E.u,E.w,128),1.8],
       ['end',A(-120,190,330),A(150,200,90),1.5]];return}
     KF=[
@@ -347,11 +352,15 @@
     if(inRide){
       var u=rideU(cr);
       cam.position.copy(rideP.getPoint(u));cam.lookAt(rideT.getPoint(u));cam.setViewOffset(W,Hh,0,0,W,Hh);
+      // Ease the rotation: the view turns towards where it should look with a short lag (time constant about 0.2 s), so a sharp
+      // turn in the route can never show as a jolt. Reset when the flight starts, and when snapping.
+      if(!rideQ)rideQ=cam.quaternion.clone();else{rideQ.slerp(cam.quaternion,reduce?1:1-Math.exp(-dtF*5));cam.quaternion.copy(rideQ)}
       // lean into turns a little, like a drone, never more than 8 degrees
       var q0=rideP.getPoint(Math.max(0,u-.02)),q1=rideP.getPoint(u),q2=rideP.getPoint(Math.min(1,u+.02)),v1=q1.clone().sub(q0),v2=q2.clone().sub(q1);
       var turn=v1.length()*v2.length()>1e-6?v1.cross(v2).y/(v1.length()*v2.length()):0;roll+=(clamp(-turn*3,-.14,.14)-roll)*(1-Math.exp(-dtF*3));cam.rotateZ(roll);
       hudUpdate(true,u,cr)
     }else{
+      rideQ=null;
       var q=curPose,ang=(q[2]+px*7)*Math.PI/180;
       cam.position.set(q[0]+Math.cos(ang)*q[3],q[4],q[1]+Math.sin(ang)*q[3]);cam.lookAt(q[0],q[5],q[1]);
       cam.setViewOffset(W,Hh,-q[6]*W,-q[7]*Hh,W,Hh);hudUpdate(false)
@@ -362,7 +371,7 @@
     orb.rotation.y=time*.0004;ring.rotation.z=time*.0006;orb.position.y=230+Math.sin(time*.0009)*3;
     specks.rotation.y=time*.00003;fxUpdate(time,reduce)}
   var raf=0,run=true,last=0,lastR=0;
-  function snap(){curPose=tgtPose.slice();cr=tr;px=tx;vr.v=vx.v=0;vPose.forEach(function(v){v.v=0})}
+  function snap(){rideQ=null;curPose=tgtPose.slice();cr=tr;px=tx;vr.v=vx.v=0;vPose.forEach(function(v){v.v=0})}
   function frame(time){
     var dt=clamp((time-last)/1000,.001,.05);last=time;dtF=dt;tick++;
     if(reduce)snap();else{for(var j=0;j<8;j++)curPose[j]=damp(curPose[j],tgtPose[j],vPose[j],.55,dt);cr=clamp(damp(cr,tr,vr,.75,dt),0,1);px=damp(px,tx,vx,.6,dt)}
