@@ -341,7 +341,7 @@
   var BELT=[],belt=new T.Group(),beltImgs=[];
   try{var reelEl=document.querySelector('.reel');beltImgs=JSON.parse((reelEl&&reelEl.getAttribute('data-reel'))||'[]')}catch(err){beltImgs=[]}
   if(beltImgs.length){
-    var NB=8,BW=46,BH=28,BSP=62,BY=96,BDIST=100;
+    var NB=7,BW=66,BH=40,BSP=88,BY=98,BDIST=105;
     for(var bi=0;bi<NB;bi++){
       var btex=loader.load(beltImgs[bi%beltImgs.length]);btex.anisotropy=4;
       var bmat=new T.MeshBasicMaterial({map:btex,transparent:true,opacity:0,toneMapped:false,fog:false,side:T.DoubleSide,depthWrite:false});
