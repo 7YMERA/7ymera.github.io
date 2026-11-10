@@ -19,6 +19,9 @@
   var orbM=mat('orb'),ringM=new T.MeshBasicMaterial({color:C.ring});
   var amb=new T.AmbientLight(0xffffff,.75),sun=new T.DirectionalLight(0xffffff,.8);sun.position.set(80,140,60);scene.add(amb,sun);
   var g=new T.Group();scene.add(g);
+  var H=132;
+  // Fallback tower, used only if klcc.json can't load: stepped octagons turned 22.5deg so the plan reads as a star
+  function procedural(){
   // KLCC: stepped octagons, each step turned 22.5deg so the plan reads as a star
   function klcc(x){
     var h=0,steps=[[11,12,16],[10.4,11,14],[9.8,10.4,14],[9,9.8,12],[8.2,9,12],[7.2,8.2,11],[6,7.2,10],[4.6,6,9],[3.2,4.6,8]];
@@ -27,13 +30,25 @@
     var sp=new T.Mesh(new T.ConeGeometry(1.8,22,6),glassM);sp.position.set(x,h+11,0);g.add(sp);
     var tip=new T.Mesh(new T.CylinderGeometry(.25,.25,16,5),glassM);tip.position.set(x,h+30,0);g.add(tip);
     return h}
-  var H=klcc(-16);klcc(16);
+  klcc(-16);klcc(16);
   // skybridge, two angled legs
   var br=new T.Mesh(new T.BoxGeometry(24,3,4),glassM);br.position.set(0,H*.45,0);g.add(br);
   [-1,1].forEach(function(s){var l=new T.Mesh(new T.BoxGeometry(1.2,22,1.2),towerB);l.position.set(s*6,H*.45-11,0);l.rotation.z=s*.55;g.add(l)});
   // podium and mall
   var pd=new T.Mesh(new T.BoxGeometry(110,7,54),podium);pd.position.set(0,3.5,0);g.add(pd);
   var pd2=new T.Mesh(new T.BoxGeometry(70,5,34),podium);pd2.position.set(0,9.5,30);g.add(pd2);
+  }
+  // The real model: a SketchUp export of the Petronas Towers, converted by tools/convert-klcc.py into v2/klcc.json
+  function b64(str,Type){var bin=atob(str),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Type(u.buffer)}
+  var bodyM=mat('near',{side:T.DoubleSide}),glassModelM=mat('ring',{side:T.DoubleSide,emissive:0xffffff,emissiveIntensity:.3});
+  glassModelM.userData.glow=true;
+  fetch('klcc.json').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+    var pos=b64(d.positions,Float32Array),sc=H/d.height,out=new T.Group();
+    [['body',bodyM],['glass',glassModelM]].forEach(function(p){
+      var geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));geo.setIndex(new T.BufferAttribute(b64(d[p[0]],Uint16Array),1));
+      geo=geo.toNonIndexed();geo.computeVertexNormals();out.add(new T.Mesh(geo,p[1]))});
+    out.scale.setScalar(sc);g.add(out);recolor();need=true;
+  }).catch(function(){procedural();recolor();need=true});
   var gr=new T.Mesh(new T.CircleGeometry(520,48),ground);gr.rotation.x=-Math.PI/2;gr.position.y=-.2;g.add(gr);
   // city ring
   var s=11;function rnd(){s=(s*9301+49297)%233280;return s/233280}
@@ -57,7 +72,7 @@
     readColors();var dark=root.getAttribute('data-theme')==='dark';
     mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});
     tower.emissive.set(C.glass);tower.emissiveIntensity=dark?1:.28;glassM.emissive.set(C.ring);glassM.emissiveIntensity=dark?.9:.15;
-    ringM.color.set(C.ring);specks.material.color.set(C.ring);
+    if(glassModelM){glassModelM.emissive.set(C.ring);glassModelM.emissiveIntensity=dark?.8:.12}ringM.color.set(C.ring);specks.material.color.set(C.ring);
     var f=col('sky2');scene.fog=new T.Fog(f,dark?300:360,dark?720:800);
     amb.intensity=dark?.45:.5;sun.intensity=dark?.55:.55;sun.color.set(dark?0x9cc8ff:0xffffff)}
   recolor();window.addEventListener('v2theme',function(){recolor();need=true});
