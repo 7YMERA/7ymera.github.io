@@ -16,6 +16,14 @@ where the last chat stopped without re-reading everything.
 - **Jom Al-Quran raw project data** (the Database-2024-Project-Uplift zip) contains real-looking personal data.
   Only the scrubbed `assets/db/jom-al-quran.sqlite` is published. Never commit the raw data.
 
+
+---
+
+## 2026-11-13 · Trains and the chase
+- `scene.js`: a lit rail ring round the Petronas Towers (y=17) and a long sky line (y=95) over the city, with 5 instanced trains and headlight glows. Both routes were raycast-checked against the buildings.
+- The drone now chases the hero train between Menara KL and Merdeka 118 (behind and above, gentle sway). Merdeka lead-in shot moved so there is less empty sky.
+- Smoke test passes. Key `20261112m`.
+- Open: the skill tree as a metro map (owner asked); train style (monorail / metro map / high-speed) not answered; frame rate on a real phone untested.
 ---
 
 ## 2026-11-11 · Compact one-mesh city background (branch, off by default)
