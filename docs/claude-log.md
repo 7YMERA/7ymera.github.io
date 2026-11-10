@@ -18,6 +18,12 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-11 · Compact one-mesh city background (branch, off by default)
+- Owner supplied a SketchUp export of central KL (`model.dae`, 69 MB, about 419k triangles). New `tools/convert-klcc-dae.js` (Node, no Python) flattens it, welds vertices on a 3 m grid and writes `assets/city/klcc_district.json`: 36k vertices, 75k triangles, 890 KB, in metres, centred on the Petronas Towers, same int16 format as `kl_city.json`. The towers line up with the existing scene frame.
+- `scene.js`: `?bg=district` (works on `/` and `/flight/`) loads that one file in place of the OSM city and the four landmark models (about 1.8 MB). The model has only Petronas and Menara KL (no Merdeka 118 or Exchange 106), so in this mode the landmark list, links, flight route and captions are cut to those two. Without the parameter nothing changes. Cache key `20261111f`.
+- Checked in the browser: `/flight/?bg=district` runs with no console errors, facade shader and beams work, end shot is good; `/` unchanged. `tools/check.js` not run.
+- Open: the leg after the gap flies close past a tower on its way to Menara KL; the route is untuned. Making this the default means rewriting the Merdeka/Exchange captions, which is the owner's call. The mesh has no textures or colours.
+
 ## 2026-11-11 · A scroll buffer after the opening where the city turns
 - Owner asked for a scrolling buffer after "I write the spec. Then I build it." where the background rotates a bit before the details start. New `<section id="spin">` between the opening and *This is me* (150vh, 130vh on phones, no panel). In `assets/scene.js` `prog()` now maps the orbit in three parts: slow before, a fast eased turn of about 85 degrees (28 % of the orbit) while `#spin` is on screen, then the old slow drift (the end pose is unchanged, so the flight still starts where it did). A "Kuala Lumpur, 3.158 N 101.712 E" tag fades in mid-buffer. Spin metrics are read on scroll only, not per frame.
 - Checked 1300 px light and dark and 390 px: camera bearing goes about 48 to 133 degrees through the buffer, no errors, no sideways scroll; `tools/check.js` 30/30. Cache key `20261111e`.
