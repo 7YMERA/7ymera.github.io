@@ -24,6 +24,7 @@ any agent working on this repo, kept short on purpose so it costs little context
 | Join Atlas (Jom Al-Quran note) | `assets/join-atlas.js`, `.css` |
 | Notes (blog posts) | `notes/*.html`, listed in `notes/index.html`. Edit the HTML directly. |
 | README screenshots | `docs/screens/` |
+| /v2/ (home page over the 3D city, generated) | `tools/build-v2.py` builds `v2/index.html` from `index.html`; styles in `v2/merge.css`, scene in `v2/v2-3d.js` |
 | Smoke test | `tools/check.js` |
 
 ## Rules that bite
@@ -39,6 +40,8 @@ any agent working on this repo, kept short on purpose so it costs little context
 - **`[hidden]` is `display:none !important`** in `site.css`. Overriding it needs `!important`.
 - **Light mode is the default** (`<html data-theme="light">`). Check both themes and 390 px width.
 - **The owner dislikes small hidden buttons** for major features. Make controls big and obvious.
+
+- **/v2/ is generated.** After changing `index.html`, run `python3 tools/build-v2.py` and commit `v2/index.html` too.
 
 ## Privacy (public repo, never break these)
 

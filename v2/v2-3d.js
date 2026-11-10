@@ -9,7 +9,7 @@
   var M={},C={},mats=[];
   function css(n){return getComputedStyle(root).getPropertyValue(n).trim()}
   function col(k){return new T.Color(C[k])}
-  function readColors(){['far','mid','near','glass','orb','ring','line','sky1','sky2'].forEach(function(k){C[k]=css('--'+k)})}
+  function readColors(){C.line=css('--fx');['far','mid','near','glass','orb','ring','sky1','sky2'].forEach(function(k){C[k]=css('--'+k)})}
   readColors();
   function mat(role,opts){var m=new T.MeshLambertMaterial(Object.assign({flatShading:true},opts||{}));m.userData.role=role;mats.push(m);return m}
   function bands(){var c=document.createElement('canvas');c.width=8;c.height=64;var x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,8,64);x.fillStyle='#fff';x.fillRect(0,50,8,6);
@@ -162,6 +162,7 @@
     var f=col('sky2');scene.fog=new T.Fog(f,dark?260:300,dark?640:680);
     fxStyle(dark);amb.intensity=dark?.45:.5;sun.intensity=dark?.55:.55;sun.color.set(dark?0x9cc8ff:0xffffff)}
   recolor();window.addEventListener('v2theme',function(){recolor();need=true});
+  new MutationObserver(function(){recolor();need=true}).observe(root,{attributes:true,attributeFilter:['data-theme']}); // the page's own theme button flips data-theme
   var W=0,Hh=0,mobile=false,need=true,px=0,tx=0,cp=0,tp=0,cr=0,tr=0,vp={v:0},vr={v:0},vx={v:0},dtF=.016;
   function size(){W=innerWidth;Hh=innerHeight;mobile=W<=820;renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile?1.5:2));renderer.setSize(W,Hh,false);cam.aspect=W/Hh;cam.updateProjectionMatrix();need=true}
   var enter=document.getElementById('enter'),caps=enter?enter.querySelectorAll('.ride-cap'):[],roll=0,rideP=null,rideT=null;
@@ -246,7 +247,9 @@
       if(vis){e.style.transform='translate3d('+((tv.x*.5+.5)*W).toFixed(1)+'px,'+((-tv.y*.5+.5)*Hh).toFixed(1)+'px,0)';
         if(tick%8===0)e.lastChild.textContent=Math.round(LM[k].real)+' m · '+Math.round(dist*KU/10)*10+' m away'}}}
   var tick=0;
+  var flying=false;
   function place(time){
+    if(enter){var pin=scrollY>=enter.offsetTop-40&&scrollY<=enter.offsetTop+enter.offsetHeight-innerHeight+40;if(pin!==flying){flying=pin;root.classList.toggle('flying',pin)}} // hides the dock while the captions are on screen
     var p=cp,inRide=cr>.0004&&!!rideP;
     if(inRide){
       var u=rideU(cr);
@@ -263,13 +266,14 @@
     for(var ci=0;ci<caps.length;ci++){var c=caps[ci],on=cr>=+c.dataset.from&&cr<+c.dataset.to;if(on!==c.classList.contains('on'))c.classList.toggle('on',on)}
     orb.rotation.y=time*.0004;ring.rotation.z=time*.0006;orb.position.y=230+Math.sin(time*.0009)*3;
     specks.rotation.y=time*.00003;fxUpdate(time,reduce)}
-  var raf=0,run=true,last=0;
+  var raf=0,run=true,last=0,lastR=0;
   function snap(){cp=tp;cr=tr;px=tx;vp.v=vr.v=vx.v=0}
   function frame(time){
     var dt=clamp((time-last)/1000,.001,.05);last=time;dtF=dt;tick++;
     if(reduce)snap();else{cp=damp(cp,tp,vp,.4,dt);cr=clamp(damp(cr,tr,vr,.75,dt),0,1);px=damp(px,tx,vx,.6,dt)}
     var moving=Math.abs(tp-cp)>.0003||Math.abs(tr-cr)>.0003;
-    if(!reduce||need||moving){place(reduce?0:time);renderer.render(scene,cam);need=false}
+    // While the reader is only reading, redraw at about 15 fps (the beams and pulses still drift); while scrolling, every frame.
+    if(moving||need||(!reduce&&time-lastR>66)){place(reduce?0:time);renderer.render(scene,cam);need=false;lastR=time}
     raf=run?requestAnimationFrame(frame):0}
   addEventListener('scroll',function(){tp=prog();tr=rideProg();need=true},{passive:true});
   addEventListener('resize',function(){size();buildRide();tp=prog();tr=rideProg()});

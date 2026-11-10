@@ -18,6 +18,13 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-10 · /v2/ is now v1 + v2 merged
+- Owner asked for both worlds in one: v1's content, readability, components and way of delivering a portfolio, with v2's 3D city background and look. Info boxes and v2's fonts are not needed.
+- `tools/build-v2.py` generates `v2/index.html` from `index.html` (paths to `../`, canvas instead of the aurora, `merge.css`, flight section, three.js). `v2/merge.css` remaps v1's tokens to v2's blues (light paper-blue, v2's night navy for dark), makes each section an opaque panel with a hard shadow, plates the opening's words, and holds the flight HUD styles. Fonts stay v1's (readable); Pixelify Sans only on the HUD.
+- The flight moved to between Journey and Contact, with a big *Skip the flight* button; the dock hides while it plays. Scene redraws at ~15 fps while only reading. `pulse.js` now finds its data next to itself. Old stand-alone v2 (`v2.css`, `v2.js`, floating windows) removed; it lives at `c5ca5b5`.
+- `tools/check.js` now covers `v2/`: no errors, 404s or sideways scroll at 1300 px and 390 px. Screenshots checked light and dark. Real-phone frame rate and scroll feel still untested.
+- Open: notes pages are still plain v1. The v2 page loads about 3 MB of models on top of v1's images.
+
 ## 2026-11-10 · /v2/ flight v8: calmer route, smoother camera, sci-fi layer
 - Owner feedback: Merdeka part too fast, awkward angles, the camera clipped into Suria KLCC near the skybridge, the spin under the bridge and back felt repetitive, only two buildings looked highlighted (Petronas and Exchange used a different material), the motion was rougher than v1.
 - New route (one direction, no loop): swing in, head-on at the skybridge, over the bridge and through the gap, one slow turn up Merdeka 118, over The Exchange 106, wide shot of all four. `#enter` is 780vh. Camera never goes below the bridge level near the towers; raycast sweep: nothing closer than 7 units (the gap itself).
