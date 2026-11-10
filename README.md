@@ -13,14 +13,15 @@ Plain HTML, CSS and JavaScript, served by GitHub Pages. There is no framework, n
 ## Contents
 
 1. [How it started](#how-it-started)
-2. [What's on the page](#whats-on-the-page)
-3. [21st.dev components, ported to plain JS](#21stdev-components-ported-to-plain-js) ← start here if you're an agent borrowing code
-4. [The 3D city and the flight](#the-3d-city-and-the-flight)
-5. [Rules that kept it fast](#rules-that-kept-it-fast)
-6. [The notes](#the-notes)
-7. [Repository layout](#repository-layout)
-8. [Editing the site](#editing-the-site)
-9. [Privacy rules](#privacy-rules)
+2. [Version history](#version-history)
+3. [What's on the page](#whats-on-the-page)
+4. [21st.dev components, ported to plain JS](#21stdev-components-ported-to-plain-js) ← start here if you're an agent borrowing code
+5. [The 3D city and the flight](#the-3d-city-and-the-flight)
+6. [Rules that kept it fast](#rules-that-kept-it-fast)
+7. [The notes](#the-notes)
+8. [Repository layout](#repository-layout)
+9. [Editing the site](#editing-the-site)
+10. [Privacy rules](#privacy-rules)
 
 ---
 
@@ -33,6 +34,31 @@ The first version (25 October 2026) was one static page: a manifesto, a "REQ-001
 *The first version. The old personal email is blurred.*
 
 The REQ-001 card, the "I write the spec. Then I build it." line and the teal-and-gold palette all survived. Almost everything else has been rebuilt since, in about 100 commits.
+
+## Version history
+
+**Current version: 2.5.** Numbering: the first number changes when the site changes character (1.0 was a static page, 2.0 became the 3D city). The second number goes up for a major overhaul or a notable new feature. Small fixes and tweaks do not get a number; they live in [`docs/claude-log.md`](docs/claude-log.md). Dates come from the work log. Commit ids are on `main`: `git show <id>`.
+
+| Version | Date | What changed | Commit |
+|---|---|---|---|
+| **1.0** | 25 Oct 2026 | The first page: a manifesto, the REQ-001 "Hire Alif" card, three case studies and a timeline. Teal and gold. | (before this history) |
+| **1.1** | 6 Nov | Light mode by default, the curtain opening, a colourful aurora, a photo carousel in *This is me*, the first project notes. | `c0784a1` |
+| **1.2** | 6 Nov | *What UTP put me through* (42 subjects), the skill tree, coverflow carousels, the image stream, the spin reel. | `2d44530`, `3e55370` |
+| **1.3** | 7 Nov | The glass project folders, live SQL playgrounds in two database notes, the two-sided REQ-001 card, the outer photo columns, the README. | `62d5f10` |
+| **1.4** | 8 Nov | The Pulse status report with a live activity feed, and the handoff files (`CLAUDE.md`, the work log, the smoke test). | `85c014f` |
+| **1.5** | 9 Nov | The first low-poly Kuala Lumpur skyline, as a separate `/v2/` preview with floating windows. | `88e63a8` |
+| **1.6** | 10 Nov | A real 3D scene: scroll-driven camera, the real Petronas Towers, Merdeka 118, Menara KL and The Exchange 106, an OpenStreetMap city with windows lit at night. | `a77da07` to `6818a90` |
+| **1.7** | 10 Nov | The whole home page merged into the 3D version, with a calm one-way flight and a sci-fi HUD. | `c5ca5b5`, `a1478db` |
+| **2.0** | 10 Nov | **One site.** The 3D city became the home page at `/`; no more `/v2/`. The flat-aurora site is kept at commit `f3b9f08`. | `76230a4` |
+| **2.1** | 10 Nov | The notes pages re-skinned to match, `/flight/` (the flight on its own, with a viewer panel), a scroll buffer after the opening where the city turns. | `2759adb`, `ea000cd` |
+| **2.2** | 11 Nov | A camera shot for every section (a director): the UTP shots follow the coverflow, the skill tree splits round Merdeka 118. The KLCC district becomes the map. | `183c59e`, `8e7c9aa`, `209e535` |
+| **2.3** | 11 Nov | No panels behind any block, so the city shows through everywhere, phones included. The content goes behind the top bar. | `0b93ad8`, `813d708` |
+| **2.4** | 12 Nov | More love for Merdeka 118 (a lead-in and a flight that climbs it), the flight reworked (no wall clips, no whips, captions in step), a new finale: a horizontal skyline, or a full zoom-out on phones. | `d6e08db`, `a37d9c2`, `e4acb09` |
+| **2.5** | 12 Nov | **The sci-fi layer:** stars, a ringed moon with a moon of its own, gyroscope rings round the Petronas and Merdeka crowns, and a dragon of light looping the skyline. | this commit |
+
+Tried and dropped along the way (still in git history): a clothes-rail project gallery (`5c68a02`), a ring and then a conveyor of floating screens, a Masjid Negara you could fly into, and a 5 second phone loading screen. The longer story of the 3D city is in *The 3D city and the flight* below.
+
+---
 
 ## What's on the page
 
@@ -237,6 +263,7 @@ Things tried and dropped along the way, still in git history: a clothes-rail com
 ### How it works
 
 - **The city is the district by default** (`assets/city/klcc_district.json`, built with `tools/convert-klcc-dae.js`): one mesh, KLCC and its surroundings. Its own Petronas Towers, Merdeka 118 and The Exchange 106 were blocky, so `scene.js` cuts them out of the mesh on load and stands the hand-made models there. `?bg=osm` loads the OpenStreetMap city instead.
+- **The sci-fi layer** (`scene.js`, block `THE SCI-FI LAYER`): stars (`stars`), a ringed moon with a small moon of its own, both kept behind the city as seen from the camera (`moonG`, `sciUpdate`); gyroscope rings round the Petronas crowns and the top of Merdeka 118 (`addGyro`); and a dragon (`dragon`): points on a closed `CatmullRomCurve3` (`dCurve`), with a serpentine wave along the body, fins every sixth point, a head with horns, drawn by one `ShaderMaterial`. Edit the loop's control points to change its route, `dragonPts` for its length, `speed` for how fast it flies. Fewer stars and a shorter dragon on screens 820 px or narrower. Light and dark are styled in `sciStyle`.
 - **Fallback:** `scene.js` adds `html.gl` only when WebGL and three.js load. Without it the page is the plain site on a flat background and `#enter` (the flight) is hidden.
 - **The buffer after the opening (`#spin`).** A 150vh (130vh on phones) section with no panel, right after the opening and before *This is me*. While it is on screen the orbit turns about 85° (`SP0` and `SPW` in `scene.js`: the orbit is 6 % done when it starts and 28 % of it happens inside, eased in and out), and a small "Kuala Lumpur" coordinates tag fades in. Change its length with `height` on `html.gl .spin` in `scene.css`, the amount of turn with `SPW`. Without WebGL it is hidden. `/flight/` does not have it.
 - **Two scroll phases.** From the top of the page to just before `#enter`, the camera orbits the skyline (`orbitPose()`), slowly, over the whole home page. Inside `#enter` (a 780vh section with sticky captions) the camera leaves the orbit and follows a path (`buildRide()`): named waypoints in `KF`, each with a camera position, a look-at point and a slow factor, written in `(u, w, y)` (u along the gap between the towers, w across it). The scroll position is mapped to the path by length times the slow factors, with a monotone cubic, so the speed never jumps.
