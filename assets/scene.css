@@ -170,3 +170,20 @@ html.gl .jr-card,html.gl .uni-cf .cf-details,html.gl .uni-card,html.gl .st-branc
 
 /* The top bar sits above everything on the page (folders, cards) and is solid, so content goes behind it. Below the Ctrl+K dialog (z 20). */
 .top{z-index:18;background:var(--bg)}
+
+/* ---- Phone (lite) version: no WebGL, a plain blue backdrop, the panels stay, the flight and shots are off ---- */
+html.lite #gl,html.lite .enter,html.lite .spin,html.lite .stage{display:none!important}
+html.lite body{background:linear-gradient(var(--sky1),var(--sky2)) fixed}
+.lite-load{display:none}
+html.lite .lite-load{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px;background:linear-gradient(var(--sky1),var(--sky2));transition:opacity .7s ease}
+html.lite .lite-load.out{opacity:0;pointer-events:none}
+.ll-box{display:grid;justify-items:center;gap:12px;text-align:center;max-width:22rem}
+.ll-mark{width:56px;height:56px;border-radius:12px;background:var(--accent);box-shadow:5px 5px 0 var(--hard);animation:llpulse 1.4s ease-in-out infinite}
+.ll-name{margin:6px 0 0;font:800 2rem/1 var(--f-display);color:var(--ink);letter-spacing:-.02em}
+.ll-msg{margin:0;font:500 1.0625rem/1.4 var(--f-body);color:var(--muted)}
+.ll-bar{width:min(240px,70vw);height:6px;margin-top:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.ll-bar i{display:block;height:100%;background:var(--accent);transform-origin:left;transform:scaleX(0);animation:llfill 5s linear forwards}
+.ll-skip{margin-top:10px;min-height:48px;padding:10px 28px;border:2px solid var(--fx);border-radius:8px;background:var(--surface);color:var(--ink);font:600 1rem var(--f-body);box-shadow:4px 4px 0 var(--hard);cursor:pointer}
+@keyframes llfill{to{transform:scaleX(1)}}
+@keyframes llpulse{50%{transform:translateY(-6px)}}
+@media (prefers-reduced-motion:reduce){.ll-mark,.ll-bar i{animation:none}.ll-bar i{transform:none}html.lite .lite-load{transition:none}}
