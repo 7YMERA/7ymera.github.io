@@ -61,6 +61,8 @@
       layout();
       var d = details[cur];
       if (d && !calm) { d.classList.remove('in'); void d.offsetWidth; d.classList.add('in'); }
+      // Tell the page which item is in front (the 3D scene uses it to pick a camera shot).
+      root.dispatchEvent(new CustomEvent('cf-change', { bubbles: true, detail: { index: cur } }));
     }
 
     items.forEach(function (el, i) { el.addEventListener('click', function () { if (i !== cur) go(i); }); });

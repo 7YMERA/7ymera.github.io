@@ -21,11 +21,11 @@
 html.gl #gl{display:block}
 html.gl body{background:linear-gradient(var(--sky1),var(--sky2)) fixed}
 
-/* Readability: every section sits on an opaque paper panel with a hard offset shadow (the hard-shadow window look), and the city shows in the gaps.
+/* Readability: every section sits on a solid paper panel with a hard offset shadow (the hard-shadow window look), and the city shows in the gaps.
    No backdrop-filter: it would sample the moving scene on every frame. */
 html.gl main>section.block,html.gl main>.hero{
   width:min(calc(100% - 28px),calc(var(--col) + 56px));margin:72px auto;padding-bottom:24px;
-  background:color-mix(in srgb,var(--bg) 93%,transparent);border:2px solid var(--fx);box-shadow:6px 6px 0 var(--hard);border-radius:6px}
+  background:var(--bg);border:2px solid var(--fx);box-shadow:6px 6px 0 var(--hard);border-radius:6px}
 html.gl main>.hero{padding-block:28px 24px}
 html.gl section.block{padding-top:44px}
 html.gl .hero::before{display:none}
@@ -38,7 +38,7 @@ html.gl .card,html.gl .ent,html.gl .note-card{border-radius:10px}
 }
 
 /* The opening sits straight on the city: give its words a plate or a halo so they stay readable */
-html.gl .cur-center{background:color-mix(in srgb,var(--bg) 88%,transparent);border:2px solid var(--fx);box-shadow:6px 6px 0 var(--hard);border-radius:6px;padding:20px 26px}
+html.gl .cur-center{background:var(--bg);border:2px solid var(--fx);box-shadow:6px 6px 0 var(--hard);border-radius:6px;padding:20px 26px}
 html.gl .cur-hero .hero-title,html.gl .cur-hero .for,html.gl .cur-hero .lede{text-shadow:0 0 24px var(--bg),0 0 12px var(--bg),0 0 5px var(--bg),0 0 2px var(--bg)}
 html.gl .cur-hero .hero-title .l2{color:var(--accent)}
 
@@ -101,17 +101,54 @@ html.gl .enter{display:block;height:780vh;position:relative}
 .sky{background:linear-gradient(var(--sky1),var(--sky2))}
 .sky::before{top:0;bottom:0;left:0;width:100%;background:var(--note-sky) center/cover no-repeat;opacity:.55;animation:none;transform:none}
 .top{border-bottom:2px solid var(--fx)}
-main.wrap>.post{margin:44px auto 64px;padding:44px clamp(18px,4vw,44px) 28px;background:color-mix(in srgb,var(--bg) 93%,transparent);border:2px solid var(--fx);box-shadow:6px 6px 0 var(--hard);border-radius:6px}
+main.wrap>.post{margin:44px auto 64px;padding:44px clamp(18px,4vw,44px) 28px;background:var(--bg);border:2px solid var(--fx);box-shadow:6px 6px 0 var(--hard);border-radius:6px}
 @media (max-width:700px){main.wrap>.post{margin:20px auto 40px;box-shadow:4px 4px 0 var(--hard);border-radius:4px}}
 
 /* ---- The buffer after the opening: no panels, the city turns ---- */
 .spin{display:none}
 html.gl .spin{display:block;height:150vh;position:relative;pointer-events:none}
 .spin-sticky{position:sticky;top:0;height:100vh;height:100svh;display:grid;place-items:end center;padding:0 16px max(120px,16svh)}
-.spin-tag{margin:0;display:grid;gap:3px;text-align:center;padding:12px 20px;background:color-mix(in srgb,var(--bg) 90%,transparent);border:2px solid var(--fx);box-shadow:5px 5px 0 var(--hard);border-radius:6px;opacity:0;transform:translateY(12px);transition:opacity .5s,transform .5s}
+.spin-tag{margin:0;display:grid;gap:3px;text-align:center;padding:12px 20px;background:var(--bg);border:2px solid var(--fx);box-shadow:5px 5px 0 var(--hard);border-radius:6px;opacity:0;transform:translateY(12px);transition:opacity .5s,transform .5s}
 .spin.on .spin-tag{opacity:1;transform:none}
 .spin-tag b{font:600 .75rem var(--f-pix);letter-spacing:.2em;text-transform:uppercase;color:var(--fx)}
 .spin-tag span{font:500 1.05rem var(--f-display);color:var(--ink);letter-spacing:.02em}
 .spin-tag i{font:normal 500 .75rem var(--f-mono);color:var(--muted)}
 @media (max-width:700px){html.gl .spin{height:130vh}}
 @media (prefers-reduced-motion:reduce){.spin-tag{transition:none}}
+
+/* ---- Section shots: panels step aside so the scene shows (wide screens only) ---- */
+.stage{display:none}
+html.gl .stage{display:block;height:120vh;position:relative;pointer-events:none}
+.stage-sticky{position:sticky;top:0;height:100vh;height:100svh;display:grid;align-items:center;justify-items:start;padding:0 clamp(14px,6vw,96px)}
+.stage-tag{margin:0;display:grid;gap:4px;max-width:20rem;padding:16px 22px;background:var(--bg);border:2px solid var(--fx);box-shadow:6px 6px 0 var(--hard);border-radius:6px;opacity:0;transform:translateY(12px);transition:opacity .5s,transform .5s}
+.stage.on .stage-tag{opacity:1;transform:none}
+.stage-tag b{font:600 .75rem var(--f-pix);letter-spacing:.2em;text-transform:uppercase;color:var(--fx)}
+.stage-tag span{font:700 clamp(1.4rem,2.4vw,1.9rem)/1.1 var(--f-display);color:var(--ink)}
+.stage-tag i{font:normal 500 .8rem var(--f-mono);color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.stage-tag{transition:none}}
+@media (min-width:1000px){
+  /* the panel keeps to one side and the building shows on the other */
+  html.gl main>section.block.side-l{width:min(calc(100% - 28px),720px);margin-left:clamp(14px,4vw,72px);margin-right:auto}
+  html.gl main>section.block.side-r{width:min(calc(100% - 28px),720px);margin-right:clamp(14px,4vw,72px);margin-left:auto}
+  /* skill tree: a column of branches each side and Merdeka 118 standing in the middle */
+  html.gl main>section.block.tree-split{background:none;border:0;box-shadow:none;padding:0;margin:72px auto;width:min(calc(100% - 28px),calc(var(--col) + 56px))}
+  html.gl .tree-split .sec-head,html.gl .tree-split .marquee,html.gl .tree-split .st-legend{background:var(--bg);border:2px solid var(--fx);box-shadow:6px 6px 0 var(--hard);border-radius:6px}
+  html.gl .tree-split .sec-head{padding:24px 28px;margin:0 0 22px;max-width:36rem}
+  html.gl .tree-split .marquee{margin:0 0 28px;padding:10px 0;-webkit-mask-image:none;mask-image:none}
+  html.gl .tree-split .skilltree{gap:22px;margin-top:0}
+  html.gl .tree-split .st-legend{padding:10px 18px;justify-self:start}
+  html.gl .tree-split .st-root{display:none}
+  html.gl .tree-split .st-branches{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:max(34%,300px);row-gap:26px;padding-top:0}
+  html.gl .tree-split .st-branches::before,html.gl .tree-split .st-branches::after{display:none}
+  html.gl .tree-split .st-branch{background:var(--bg);border:2px solid var(--fx);box-shadow:5px 5px 0 var(--hard);border-radius:6px}
+}
+
+/* Notes: no panel, so nothing ghosts through it. The folders sit straight on the city, two to a row, under a plate with the heading. */
+@media (min-width:1000px){
+  html.gl main>section.block#notes{background:none;border:0;box-shadow:none;padding:0}
+  html.gl #notes .nb-head{padding:22px 26px;background:var(--bg);border:2px solid var(--fx);box-shadow:6px 6px 0 var(--hard);border-radius:6px}
+  html.gl #notes .fd-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:84px 32px;margin-top:44px}
+}
+
+/* The opening's flat reel of screens is now a ring of screens round the towers in the 3D scene (assets/scene.js). */
+html.gl .cur-reel{display:none}

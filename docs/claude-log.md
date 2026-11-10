@@ -18,6 +18,19 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-11 · Compact one-mesh city background (branch, off by default)
+- Owner supplied a SketchUp export of central KL (`model.dae`, 69 MB, about 419k triangles). New `tools/convert-klcc-dae.js` (Node, no Python) flattens it, welds vertices on a 3 m grid and writes `assets/city/klcc_district.json`: 36k vertices, 75k triangles, 890 KB, in metres, centred on the Petronas Towers, same int16 format as `kl_city.json`. The towers line up with the existing scene frame.
+- `scene.js`: `?bg=district` (works on `/` and `/flight/`) loads that one file in place of the OSM city and the four landmark models (about 1.8 MB). The SketchUp model has no Merdeka 118 or Exchange 106 (they stand outside it), so the converter adds the existing hand-made models into the same file, just south of the built-up area at 60 % of their real offsets from Petronas (file is now 1.14 MB, 46k vertices). The flight route in this mode is a shortened one and is untuned (owner said to leave the flight to the reviewing agent). Without the parameter nothing changes. Cache key `20261111f`.
+- Checked in the browser: `/flight/?bg=district` runs with no console errors, facade shader and beams work, end shot is good; `/` unchanged. `tools/check.js` not run.
+- Open: the leg after the gap flies close past a tower on its way to Menara KL; the route is untuned. Making this the default means rewriting the Merdeka/Exchange captions, which is the owner's call. The mesh has no textures or colours.
+
+## 2026-11-11 · Section director, ring of screens, the district as the default city
+- **Section director** (`assets/scene.js`, `DIR` keys): before the flight every section has its own camera shot, smoothed by a spring. Notes: under the Petronas Towers looking up, climbing as you read. UTP: the shot follows the coverflow group (`cf-change` event added to `coverflow.js`; 7 shots: whole, crowns, side-on, foot, from above, podium, back). Skills: Merdeka 118 base to spire. Work: Menara KL (new `#workstage` lead-in). Journey: The Exchange 106. Panels keep to one side on wide screens (`side-l`, `side-r`, `tree-split` in `scene.css`); the skill tree splits left and right of the building. Notes has no panel, folders two per row.
+- **Ring of screens**: the project screenshots (the old flat reel's list) hang on a ring round the towers' crowns and turn slowly; near-side screens fade so they never block the view; hidden in the flight. The old flat reel is hidden when WebGL runs.
+- **District background** (another session's branch `compact-district-background`, merged): one welded mesh of KLCC and its surroundings, far richer than the OSM city, one draw call. It is now the default; `?bg=osm` brings the old city and hand-placed landmarks back. In the district Merdeka 118, Exchange 106 and Menara KL stand just south of KLCC (so `MER`, `EXC`, `KLT` and the flight differ under `DIST`). Its baked Exchange and Merdeka were welded coarsely and had holes, so the full-detail models are drawn over them (1 % larger).
+- Checked 1300 px: notes, UTP groups, skills, work, journey and `/flight/` at five points, no page errors. Real-phone frame rate untested. Cache key `20261111h`.
+- Open: UTP shots 1 to 6 and the Journey shot were tuned on the old layout and checked only briefly on the district; the left/right layout is wide screens only (phones keep the stacked panels). Not yet reviewed by the owner.
+
 ## 2026-11-11 · A scroll buffer after the opening where the city turns
 - Owner asked for a scrolling buffer after "I write the spec. Then I build it." where the background rotates a bit before the details start. New `<section id="spin">` between the opening and *This is me* (150vh, 130vh on phones, no panel). In `assets/scene.js` `prog()` now maps the orbit in three parts: slow before, a fast eased turn of about 85 degrees (28 % of the orbit) while `#spin` is on screen, then the old slow drift (the end pose is unchanged, so the flight still starts where it did). A "Kuala Lumpur, 3.158 N 101.712 E" tag fades in mid-buffer. Spin metrics are read on scroll only, not per frame.
 - Checked 1300 px light and dark and 390 px: camera bearing goes about 48 to 133 degrees through the buffer, no errors, no sideways scroll; `tools/check.js` 30/30. Cache key `20261111e`.
@@ -73,6 +86,11 @@ where the last chat stopped without re-reading everything.
 - Sci-fi layer, inspired by 0z5a.github.io: HUD corners, altitude read-out, progress rail with six sector ticks, landmark tags with distance, beams and halos on each crown, glowing links with pulses, radar ring, floating wireframe shapes.
 - Cache key for `/v2/` is `20261110c`. Checked 1100 px light/dark and 390 px by screenshots, no page errors. Real-phone frame rate still untested. Owner says the models are free to download; authors still unrecorded.
 - Open: Menara KL is only tagged, not flown past. A real scroll-feel check on a phone is still needed.
+
+## 2026-11-10 · Motion ideas lab (branch only)
+- `lab/ideas/index.html`: one self-contained page with four playgrounds from the dropped rail's mechanics: a spine-out notes shelf (turn-to-front), skill flip cards (lift and flip view), a draggable journey strip (springs and bumping) and swinging status hang-tags. Real notes, skills, journey and project data; no images.
+- Kept on branch `claude/wonderful-galileo-bgrct6` only, not merged to `main`, and not linked from the site. A private artifact copy was published for previewing.
+- Open: owner picks which ideas (if any) to port into the site.
 
 ## 2026-11-10 · Project rail dropped
 - The owner didn't like the clothes-rail look, so the project rail (commit `5c68a02`) was reverted from the home page and `/v2/`. The cache key is back to `20261108b`.
