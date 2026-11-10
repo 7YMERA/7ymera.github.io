@@ -24,6 +24,12 @@ where the last chat stopped without re-reading everything.
 - Checked in the browser: `/flight/?bg=district` runs with no console errors, facade shader and beams work, end shot is good; `/` unchanged. `tools/check.js` not run.
 - Open: the leg after the gap flies close past a tower on its way to Menara KL; the route is untuned. Making this the default means rewriting the Merdeka/Exchange captions, which is the owner's call. The mesh has no textures or colours.
 
+## 2026-11-11 · Light phone version with a loading note
+- Screens up to 820 px wide get the lite version. A small script in the head adds `html.lite` (and `gl`, so the panel styles apply) before first paint. In lite mode three.js, `scene.js` and all of `assets/city/` are never requested (the scripts are now injected by an inline loader that returns early on phones); the canvas, flight, spin and stage sections are hidden; the body has a still sky-blue gradient. The page is about 2.3 MB on a phone against 5.4 MB on desktop (measured by response sizes in Playwright).
+- Loading screen (`#lite-load`, styles in `scene.css`): the name, a pulsing block, "Use desktop for the best experience" and a 5 second bar, then it fades out. A big Continue button skips it. Shown once per visit (sessionStorage `lite-seen`; reloading in the same tab skips it). Reduced motion removes the animation. Cache key `20261111q`.
+- The decision is made once at load; rotating or resizing a phone later does not switch versions. `/flight/` is unchanged (it always runs the 3D scene).
+- Checked 390 px (loading, opening, Notes) and 1300 px (unchanged, 8 scene requests); smoke test 30/30. Open: real-phone speed untested; the opening's reel and the glass folders still run on phones.
+
 ## 2026-11-11 · Content goes behind the top bar
 - Owner: the Notes folders overflowed on top of the top bar instead of going behind it. The glass folders use `z-index: 10`, the bar only 5. `assets/scene.css`: `.top` is now `z-index: 18` and a solid `var(--bg)` (below the Ctrl+K dialog at 20); this applies to the notes pages too. Cache key `20261111p`. Checked at 1300 px: folders scroll behind the bar, Ctrl+K still opens above it, smoke test 30/30.
 - Parked for later (owner's request): lighter phone version, plus a roughly 5 second loading screen that fades out saying "use desktop for the best experience". Not started.
