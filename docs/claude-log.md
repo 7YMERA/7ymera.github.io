@@ -18,6 +18,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-10 · Motion ideas lab (branch only)
+- `lab/ideas/index.html`: one self-contained page with four playgrounds from the dropped rail's mechanics: a spine-out notes shelf (turn-to-front), skill flip cards (lift and flip view), a draggable journey strip (springs and bumping) and swinging status hang-tags. Real notes, skills, journey and project data; no images.
+- Kept on branch `claude/wonderful-galileo-bgrct6` only, not merged to `main`, and not linked from the site. A private artifact copy was published for previewing.
+- Open: owner picks which ideas (if any) to port into the site.
+
 ## 2026-11-10 · Project rail dropped
 - The owner didn't like the clothes-rail look, so the project rail (commit `5c68a02`) was reverted from the home page and `/v2/`. The cache key is back to `20261108b`.
 - The code is still in git history if the spring physics, turn-to-front or flip view are wanted for something else.
