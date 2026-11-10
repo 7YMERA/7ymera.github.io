@@ -73,7 +73,7 @@ html.gl .foot{background:var(--win);border-top:2px solid var(--line);margin-top:
 
 /* The ride: a tall scroll section with no windows, so the camera can fly into Masjid Negara */
 .enter{display:none}
-html.gl .enter{display:block;height:340vh;position:relative}
+html.gl .enter{display:block;height:620vh;position:relative}
 .enter-sticky{position:sticky;top:0;height:100vh;height:100svh;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;padding:0 20px 40px;pointer-events:none}
 .ride-caps{position:relative;width:min(440px,100%);min-height:140px}
 .ride-cap{position:absolute;left:0;bottom:0;margin:0;padding:14px 16px;background:var(--win);border:2px solid var(--line);box-shadow:5px 5px 0 var(--shadow);opacity:0;transform:translateY(14px);transition:opacity .35s,transform .35s;font-family:var(--pix)}

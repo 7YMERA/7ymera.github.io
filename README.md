@@ -15,11 +15,12 @@ Plain HTML, CSS and JavaScript, served by GitHub Pages. There is no framework, n
 1. [How it started](#how-it-started)
 2. [What's on the page](#whats-on-the-page)
 3. [21st.dev components, ported to plain JS](#21stdev-components-ported-to-plain-js) ← start here if you're an agent borrowing code
-4. [Rules that kept it fast](#rules-that-kept-it-fast)
-5. [The notes](#the-notes)
-6. [Repository layout](#repository-layout)
-7. [Editing the site](#editing-the-site)
-8. [Privacy rules](#privacy-rules)
+4. [The /v2/ preview: a flight over Kuala Lumpur](#the-v2-preview-a-flight-over-kuala-lumpur)
+5. [Rules that kept it fast](#rules-that-kept-it-fast)
+6. [The notes](#the-notes)
+7. [Repository layout](#repository-layout)
+8. [Editing the site](#editing-the-site)
+9. [Privacy rules](#privacy-rules)
 
 ---
 
@@ -175,6 +176,68 @@ Every interactive piece below started as a React + Tailwind component on [21st.d
 - **Join Atlas** (`join-atlas.js` + `join-atlas.css`, on the Jom Al-Quran note): a map of the database's 20 main tables, with the 36 link tables as diamonds and the EER's subtypes as arrows. Pick tables and it finds the shortest foreign-key route, writes the JOINs and runs them. It can switch to the 2024 diagram's layout, colour link tables by their real cardinality, and compare each table with the report's attribute list (`assets/db/jom-al-quran-drift.json`). Everything is read from the database itself, and it shares sql.js with the playground on the same page. Built in [database-project-uplift](https://github.com/7YMERA/database-project-uplift).
 
 ![The Join Atlas showing report query 4's shortest route](docs/screens/join-atlas.webp)
+
+---
+
+## The /v2/ preview: a flight over Kuala Lumpur
+
+`/v2/` is a second, unlinked homepage that lives beside the real one (`v2/`). It is a preview: the main site is untouched. Its background is a WebGL scene (three.js from cdnjs) that the page scroll drives, behind a set of floating "window" cards. It went through many versions in one day. This section is the story from the first rough low-poly version to the current one, and the notes you need to change it.
+
+### How it got here
+
+| # | Version | What it was | Commit |
+|---|---|---|---|
+| 1 | **Low-poly canvas** | A 2D canvas skyline of flat prisms: two tapered towers, a KL Tower stick, a ringed orb. Floating windows over it. Light and dark themes. | `88e63a8` |
+| 2 | **First WebGL scroll scene** | Real 3D. The camera orbited a hand-built KLCC (stepped octagon cylinders turned 22.5° so they read as a star) as you scrolled. Random grey boxes made the city. | `a77da07` |
+| 3 | **Real Petronas Towers** | The owner's SketchUp model replaced the hand-built towers. | `067b605` |
+| 4 | **More real landmarks** | Merdeka PNB 118 (SketchUp Collada), Menara KL, The Exchange 106 (cropped from a 55 MB precinct and simplified). | `5fa22dc`, `d8af849` |
+| 5 | **A Masjid Negara, then dropped** | Built from code (18-fold dome, minaret, hollow prayer hall) with a scroll ride into the hall. Dropped: no free model to base it on, and the owner preferred a flight through the skyline. | `42d61e2` |
+| 6 | **The real city** | An OpenStreetMap city (FBX) replaced the random boxes: true footprints and heights. A facade shader gave every wall windows: a glass grid by day, lit offices at night. | `6818a90` |
+| 7 | **The flight, as it is now** | A long, slow scroll flight: down between the Petronas Towers, straight up their sides, level with the skybridge, up to the crowns, then across to Merdeka 118 and up its face, over the top and out. The satellite "map" under the city was removed (the owner didn't like the map look). | this commit |
+
+Things tried and dropped along the way, still in git history: a clothes-rail component port for the Work section (`5c68a02`, reverted in `2ecf38a`), and a lab of four motion ideas that was never merged (`lab/ideas/index.html` on branch `claude/wonderful-galileo-bgrct6`).
+
+### How it works
+
+- **Files:** `v2/index.html` (cards + the `#enter` flight section), `v2/v2.css`, `v2/v2.js` (theme toggle, copy button, and the 2D canvas fallback), `v2/v2-3d.js` (the WebGL scene).
+- **Fallback:** `v2-3d.js` adds `html.gl` only when WebGL and three.js load. Without it the page shows the 2D skyline from version 1 and hides `#enter`.
+- **Two scroll phases.** From the top to just before `#enter`, the camera orbits the skyline (`orbitPose()`). Inside `#enter` (a 620vh section with sticky captions) the camera leaves the orbit and follows a path (`buildRide()`): 15 waypoints for the camera and 15 matching look-at points. `RT` and `rideU()` map scroll to position on the path, so most of the scroll is spent between the towers.
+- **Models** are loaded as small JSON (`loadModel()`): positions as float32 or int16 and triangle indices, base64. All landmarks share one scale (`SC = 132 / 444.138`) so their real heights compare truthfully (Merdeka 118 is taller than the towers). Each model has a `body` and a `glass` part so the light and dark themes recolour them.
+- **City:** `kl_city.json` (about 535 KB, 34k vertices) is real OpenStreetMap geometry centred on KLCC. Buildings under the hand-made landmarks are removed. Flat normals are computed on load.
+- **Facade shader:** `facade()` patches a Lambert material in `onBeforeCompile`. Windows are laid on walls from world position and a derivative-based normal, with `facade_glass.jpg` by day and `facade_night.jpg` as emissive at night. Roofs are left plain.
+- **Performance:** windows over the scene are opaque (no `backdrop-filter`); the renderer pixel ratio is capped (1.5 on phones); with reduced motion it only renders on scroll or resize; the loop pauses when the tab is hidden. Not yet measured on a real phone.
+
+### Rebuilding the data (all tools are plain Python with numpy, no other installs)
+
+| Source | Tool | Output |
+|---|---|---|
+| SketchUp OBJ (Petronas Towers, Menara KL) | `tools/convert-obj.py model.obj out.json "glassMaterials" "yMin,yMax"` | `v2/klcc.json`, `v2/menara_kl.json` |
+| SketchUp Collada (Merdeka 118) | `tools/convert-dae.py model.dae out.json "glassSubstr" "skipSubstr"` | `v2/merdeka118.json` |
+| Huge Collada precinct (Exchange 106) | `tools/convert-dae-dump.py` then `tools/convert-dae-crop.py dump.pkl out.json grid x0,x1,z0,z1 "glass" "skip"` | `v2/exchange106.json` |
+| OpenStreetMap city FBX | `tools/convert-city.py city.fbx out.json` | `v2/kl_city.json` |
+
+A `.skp` file cannot be read here: export it from SketchUp as OBJ, DAE or glTF first.
+
+### Changing the flight
+
+- **Longer or shorter:** change `height` on `html.gl .enter` in `v2.css` (currently `620vh`).
+- **More time somewhere:** edit the `RT` table in `v2-3d.js` (scroll fraction → fraction of the path).
+- **Different route:** edit the waypoints in `buildRide()`. The camera path and the look-at path must keep the same number of points: they use uniform Catmull-Rom spacing so the same position on both lands on the same pair of waypoints.
+- **Captions:** the `.ride-cap` paragraphs in `index.html` carry `data-from` and `data-to` (scroll fractions) and fade in between them.
+
+### Lessons and gotchas
+
+- Set `html.gl` **before** measuring scroll: `#enter` is `display:none` until then, and the ride would start part-way in.
+- Use uniform (`catmullrom`) curves for both paths. Centripetal curves space their knots by distance, so the camera and its target drift apart.
+- The camera must clear the skyline: the real city has 100 to 300 m blocks, so the orbit sits at about 330 m. `cam.near` is 0.3 so close walls do not clip.
+- The city mesh needs normals (computed after `toNonIndexed()`), or Lambert lighting turns it black.
+- If you point the look-at at the empty column between the towers, the towers fall outside the field of view; aim at a crown instead.
+- The FBX ground plane maps its satellite photo with a stretched UV range (u -0.084 to 1.102, v 0.083 to 0.863). The photo was removed from the page, but that is how to line it up if it comes back.
+- Bump `?v=` on the `v2-3d.js`, `v2.css` and `v2.js` links in `v2/index.html` after changes.
+
+### Credit and licence (to confirm)
+
+The landmark models (`klcc`, `menara_kl`, `merdeka118`, `exchange106`), the city FBX and the facade textures were supplied by the owner. They arrived without readme or licence files, so their authors and licences are unknown. Confirm they can be published, or delete the `.json` and facade `.jpg` files in `v2/`; the page falls back to the hand-built tower and omits the rest.
 
 ---
 

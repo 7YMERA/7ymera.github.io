@@ -55,13 +55,13 @@
   loadModel('menara_kl.json',-95,-70,0,bodyM2,null,function(){g.remove(kl)}); // Menara KL; replaces the stand-in cylinder tower below once loaded
   loadModel('merdeka118.json',-10,-95,-.5,bodyM2,null);
   loadModel('exchange106.json',60,-125,.4,bodyM,null);   // The Exchange 106, cropped and simplified (tools/convert-dae-crop.py)  // Merdeka PNB 118 (SketchUp Collada, see tools/convert-dae.py)
-  var gr=new T.Mesh(new T.CircleGeometry(520,48),ground);gr.rotation.x=-Math.PI/2;gr.position.y=-.2;g.add(gr);
+  var gr=new T.Mesh(new T.CircleGeometry(1400,64),ground);gr.rotation.x=-Math.PI/2;gr.position.y=-.2;g.add(gr);
   // city ring
   var s=11;function rnd(){s=(s*9301+49297)%233280;return s/233280}
   var i;
-  // The city: real OpenStreetMap buildings of central Kuala Lumpur (tools/convert-city.py), centred on KLCC, with the satellite photo as the ground.
+  // The city: real OpenStreetMap buildings of central Kuala Lumpur (tools/convert-city.py), centred on KLCC, standing on a plain themed ground.
   // Windows come from two facade textures laid on the walls in the shader: a glass grid by day, lit offices at night.
-  var SATURL='kl_ground.jpg',loader=new T.TextureLoader();
+  var loader=new T.TextureLoader();
   function wrapTex(t){t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=4;return t}
   var cityU={uNight:{value:0},uDay:{value:wrapTex(loader.load('facade_glass.jpg'))},uNightTex:{value:wrapTex(loader.load('facade_night.jpg'))}};
   // Facade shader: windows on the walls, in world space, so every building (the OSM city and the landmark models alike) shows its floors.
@@ -87,10 +87,6 @@
     geo=geo.toNonIndexed();geo.computeVertexNormals(); // flat normals: the lighting needs them
     cityMesh=new T.Mesh(geo,cityM);cityMesh.scale.setScalar(SC);g.add(cityMesh);need=true;
   }).catch(function(){});
-  // The FBX ground plane maps the photo with u -0.084..1.102 and v 0.863..0.083 (north to south), so the image is stretched like this:
-  var satTex=loader.load(SATURL);satTex.repeat.set(1,.78);satTex.offset.set(0,.083);
-  var satM=mat('far',{map:satTex});
-  var sat=new T.Mesh(new T.PlaneGeometry(2335*SC,1821*SC),satM);sat.rotation.x=-Math.PI/2;sat.position.set(504*SC,.12,320*SC);g.add(sat);
   // KL Tower
   var kl=new T.Group();kl.position.set(-95,0,-70);
   var shaft=new T.Mesh(new T.CylinderGeometry(2,3.4,120,8),towerB);shaft.position.y=60;
@@ -132,13 +128,18 @@
     function V(x,y,z){return new T.Vector3(x,y,z)}
     function along(d,y){return V(NRM.x*d,y,NRM.z*d)}
     var M=MERDEKA;
-    // 12 waypoints: 0 orbit end | 1-4 sink toward the gap | 5 on the plaza between the towers, looking straight up | 6 rise out | 7-9 climb Merdeka 118 | 10 over the top | 11 wide shot
-    rideP=new T.CatmullRomCurve3([o.pos,along(235,125),along(125,98),along(58,58),along(20,16),V(0,11,0),along(-40,30),V(M.x+8,36,M.z+74),V(M.x+14,90,M.z+66),V(M.x+4,168,M.z+40),V(M.x-6,222,M.z+20),V(-150,215,170)],false,'centripetal');
-    rideT=new T.CatmullRomCurve3([o.tgt,V(0,50,0),along(-70,42),along(-90,46),along(-60,70),V(-3,150,6),V(-6,80,-40),V(M.x,100,M.z),V(M.x,160,M.z),V(M.x,200,M.z-6),V(0,60,0),V(0,62,-30)],false,'centripetal')}
+    // 15 waypoints (index: what happens)
+    //  0 orbit end | 1-4 sink toward the gap | 5 plaza between the towers, looking straight up
+    //  6-8 rise up the gap, level with the skybridge, then past it | 9 crown level | 10-12 climb Merdeka 118 | 13 over the top | 14 wide shot
+    rideP=new T.CatmullRomCurve3([o.pos,along(235,125),along(125,98),along(58,58),along(20,16),V(0,11,0),along(9,30),along(9,62),along(9,100),along(22,128),V(M.x+8,36,M.z+74),V(M.x+14,90,M.z+66),V(M.x+4,168,M.z+40),V(M.x-6,222,M.z+20),V(-150,215,170)],false,'catmullrom',.5);
+    rideT=new T.CatmullRomCurve3([o.tgt,V(0,50,0),along(-70,42),along(-90,46),along(-60,70),V(-3,150,6),V(0,62,0),V(0,52,0),V(-11.2,118,10),V(10.9,136,-9.7),V(M.x,100,M.z),V(M.x,160,M.z),V(M.x,200,M.z-6),V(0,60,0),V(0,62,-30)],false,'catmullrom',.5)}
+  // Scroll position -> position along the path. Most of the scroll is spent between the towers (waypoints 4-9), then on Merdeka (9-13).
+  var RT=[[0,0],[.10,4/14],[.62,9/14],[.92,13/14],[1,1]];
+  function rideU(c){for(var i=1;i<RT.length;i++){if(c<=RT[i][0]){var a=RT[i-1],b=RT[i],t=(c-a[0])/(b[0]-a[0]);t=t*t*(3-2*t)*.3+t*.7;return a[1]+(b[1]-a[1])*t}}return 1}
   function place(time){
     var p=cp;
     if(cr>.0004&&rideP){
-      var u=cr*cr*(3-2*cr)*.55+cr*.45;
+      var u=rideU(cr);
       cam.position.copy(rideP.getPoint(u));cam.lookAt(rideT.getPoint(u));cam.setViewOffset(W,Hh,0,0,W,Hh);
       // bank into turns like an aircraft
       var q0=rideP.getPoint(Math.max(0,u-.02)),q1=rideP.getPoint(u),q2=rideP.getPoint(Math.min(1,u+.02)),v1=q1.clone().sub(q0),v2=q2.clone().sub(q1);

@@ -27,6 +27,14 @@ where the last chat stopped without re-reading everything.
 - The owner didn't like the clothes-rail look, so the project rail (commit `5c68a02`) was reverted from the home page and `/v2/`. The cache key is back to `20261108b`.
 - The code is still in git history if the spring physics, turn-to-front or flip view are wanted for something else.
 
+## 2026-11-10 · /v2/ flight slowed down, map removed, README story
+- Owner asked for a slower flight with more time between the towers, no satellite map, and the history in the README.
+- Flight: `#enter` is now 620vh (was 340vh). New 15-waypoint path: sink into the gap, look straight up, rise level with the skybridge, up to the crowns, then Merdeka 118 and over the top. `RT`/`rideU()` give the towers about half of the whole scroll. Six captions. Camera and look-at paths now use uniform Catmull-Rom (centripetal drifted apart).
+- Satellite plane and `v2/kl_ground.jpg` removed (the look-at map was disliked). Ground is a plain themed disc (radius 1400) that the fog fades out; the real building footprints stay.
+- README: new section "The /v2/ preview: a flight over Kuala Lumpur" with the version history (low-poly canvas to now), how it works, how to rebuild the data, how to change the flight, gotchas and the licence caveat.
+- Checked 1300 px light/dark and 390 px: no page errors. Frame rate on a real phone untested.
+- Open: model and texture licences still unconfirmed (see README).
+
 ## 2026-11-10 · /v2/ real KL city, and the ride becomes a flight
 - The owner supplied a Kuala Lumpur city FBX (blender-osm: OpenStreetMap footprints extruded to their tagged heights, plus a 4608x3072 satellite photo and four facade textures). `tools/convert-city.py` parses the binary FBX, ear-clips the polygons, drops the OSM stand-ins where the hand-made landmarks stand (KLCC, Merdeka 118, Exchange 106, Menara KL), recentres on KLCC and writes `v2/kl_city.json` (about 535 KB, 34k vertices, int16 at 0.1 m). It replaces the old random block ring. The ground is the satellite photo (`v2/kl_ground.jpg`, downscaled to 2048 px) on a plane trimmed to the part of the map the photo covers, using the FBX's own UV stretch (u 0..1, v 0.083..0.863).
 - Windows come from a shader (`facade()` in `v2/v2-3d.js`): the owner's glass texture gives a window grid by day, the night-office texture lights the windows in dark mode. It is applied to the city and to the landmark models, so floors are readable as the camera climbs.
