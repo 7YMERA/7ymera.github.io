@@ -88,7 +88,7 @@
         diffuseColor.rgb*=mix(1.0,clamp(dl*1.9,0.0,1.3),wall*0.75);
         totalEmissiveRadiance+=texture2D(uNightTex,fuv).rgb*wall*uNight*1.25;`)};
     return m}
-  var cityM=facade(mat('mid'));
+  var cityM=facade(mat('mid',DIST?{side:T.DoubleSide}:{}));
   facade(bodyM); // all four landmarks share one material and the facade shader, so none is bluer than the rest
   var cityMesh=null;
   fetch(BASE+(DIST?'city/klcc_district.json':'city/kl_city.json')).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
