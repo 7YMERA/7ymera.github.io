@@ -131,16 +131,16 @@ html.gl .stage{display:block;height:120vh;position:relative;pointer-events:none}
   html.gl main>section.block.side-l{width:min(calc(100% - 28px),720px);margin-left:clamp(14px,4vw,72px);margin-right:auto}
   html.gl main>section.block.side-r{width:min(calc(100% - 28px),720px);margin-right:clamp(14px,4vw,72px);margin-left:auto}
   /* skill tree: a column of branches each side and Merdeka 118 standing in the middle */
-  html.gl main>section.block.split{background:none;border:0;box-shadow:none;padding:0;margin:72px auto;width:min(calc(100% - 28px),calc(var(--col) + 56px))}
-  html.gl .split .sec-head,html.gl .split .marquee,html.gl .split .st-legend{background:var(--bg);border:2px solid var(--fx);box-shadow:6px 6px 0 var(--hard);border-radius:6px}
-  html.gl .split .sec-head{padding:24px 28px;margin:0 0 22px;max-width:36rem}
-  html.gl .split .marquee{margin:0 0 28px;padding:10px 0;-webkit-mask-image:none;mask-image:none}
-  html.gl .split .skilltree{gap:22px;margin-top:0}
-  html.gl .split .st-legend{padding:10px 18px;justify-self:start}
-  html.gl .split .st-root{display:none}
-  html.gl .split .st-branches{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:max(34%,300px);row-gap:26px;padding-top:0}
-  html.gl .split .st-branches::before,html.gl .split .st-branches::after{display:none}
-  html.gl .split .st-branch{background:var(--bg);border:2px solid var(--fx);box-shadow:5px 5px 0 var(--hard);border-radius:6px}
+  html.gl main>section.block.tree-split{background:none;border:0;box-shadow:none;padding:0;margin:72px auto;width:min(calc(100% - 28px),calc(var(--col) + 56px))}
+  html.gl .tree-split .sec-head,html.gl .tree-split .marquee,html.gl .tree-split .st-legend{background:var(--bg);border:2px solid var(--fx);box-shadow:6px 6px 0 var(--hard);border-radius:6px}
+  html.gl .tree-split .sec-head{padding:24px 28px;margin:0 0 22px;max-width:36rem}
+  html.gl .tree-split .marquee{margin:0 0 28px;padding:10px 0;-webkit-mask-image:none;mask-image:none}
+  html.gl .tree-split .skilltree{gap:22px;margin-top:0}
+  html.gl .tree-split .st-legend{padding:10px 18px;justify-self:start}
+  html.gl .tree-split .st-root{display:none}
+  html.gl .tree-split .st-branches{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:max(34%,300px);row-gap:26px;padding-top:0}
+  html.gl .tree-split .st-branches::before,html.gl .tree-split .st-branches::after{display:none}
+  html.gl .tree-split .st-branch{background:var(--bg);border:2px solid var(--fx);box-shadow:5px 5px 0 var(--hard);border-radius:6px}
 }
 
 /* Notes: no panel, so nothing ghosts through it. The folders sit straight on the city, two to a row, under a plate with the heading. */

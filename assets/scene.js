@@ -7,7 +7,7 @@
   // data-flight-only on <html> (the /flight/ page): no orbit phase and no page around it, just the flight, driven by scroll.
   var ONLY=root.hasAttribute('data-flight-only');
   // ?bg=district: the compact one-mesh KLCC district (assets/city/klcc_district.json, tools/convert-klcc-dae.js) replaces the OSM city and the four landmark models.
-  var DIST=/[?&]bg=district/.test(location.search);
+  var DIST=!/[?&]bg=osm/.test(location.search); // the district is the default; ?bg=osm brings back the OpenStreetMap city and the hand-placed landmarks
   var renderer;
   try{renderer=new T.WebGLRenderer({canvas:cv,alpha:true,antialias:true,powerPreference:'low-power'})}catch(e){return}
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -54,7 +54,7 @@
       [['body',bm],['glass',glassModelM]].forEach(function(p){
         var geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));geo.setIndex(new T.BufferAttribute(b64(d[p[0]],Uint16Array),1));
         geo=geo.toNonIndexed();geo.computeVertexNormals();out.add(new T.Mesh(geo,p[1]))});
-      out.scale.setScalar(SC);out.position.set(x,0,z);out.rotation.y=ry;g.add(out);if(done)done();recolor();need=true;
+      out.scale.setScalar(SC);out.position.set(x,0,z);out.rotation.y=ry;g.add(out);if(done)done(out);recolor();need=true;
     }).catch(function(){if(fallback)fallback();recolor();need=true});
   }
   if(!DIST){
@@ -63,6 +63,8 @@
   loadModel(BASE+'city/merdeka118.json',-10,-95,-.5,bodyM,null);
   loadModel(BASE+'city/exchange106.json',60,-125,.4,bodyM,null);   // The Exchange 106, cropped and simplified (tools/convert-dae-crop.py)  // Merdeka PNB 118 (SketchUp Collada, see tools/convert-dae.py)
   }
+  // In the district, the two landmarks baked into its mesh were welded coarsely and have holes: draw the full-detail models over them (1 % larger, so they sit just outside).
+  if(DIST){var SC1=function(o){o.scale.multiplyScalar(1.01)};loadModel(BASE+'city/merdeka118.json',-217.4,303.3,-.5,bodyM,null,SC1);loadModel(BASE+'city/exchange106.json',157.4,304.7,.4,bodyM,null,SC1)}
   var gr=new T.Mesh(new T.CircleGeometry(1400,64),ground);gr.rotation.x=-Math.PI/2;gr.position.y=-.2;g.add(gr);
   // city ring
   var s=11;function rnd(){s=(s*9301+49297)%233280;return s/233280}
@@ -187,7 +189,7 @@
   // spaced so a shot holds while its section is read and the move to the next one happens in the gap between them.
   var spin=document.getElementById('spin'),SP0=.06,SPW=.28,sTop=0,sH=0; // sTop/sH: the buffer's place (read on layout, not per frame)
   function P(cx,cz,a,r,y,ty,sx,sy){return [cx,cz,a,r,y,ty,sx||0,sy||0]}
-  var MER=[-10,-95],EXC=[60,-125],KLT=[-95,-70];           // Merdeka 118, The Exchange 106, Menara KL (scene units, Petronas is 0,0)
+  var MER=DIST?[-217,303]:[-10,-95],EXC=DIST?[157,304]:[60,-125],KLT=DIST?[-221,181]:[-95,-70];           // Merdeka 118, The Exchange 106, Menara KL (scene units, Petronas is 0,0)
   var GAP=48.3;                                            // bearing of the gap between the towers (street side)
   var UTP=[                                                // UTP: one shot per group in the coverflow, in the order of its cards
     P(0,0,40,235,85,66,.24),                               // 0 Languages: the whole of the towers
