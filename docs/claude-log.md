@@ -18,6 +18,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-11 · A scroll buffer after the opening where the city turns
+- Owner asked for a scrolling buffer after "I write the spec. Then I build it." where the background rotates a bit before the details start. New `<section id="spin">` between the opening and *This is me* (150vh, 130vh on phones, no panel). In `assets/scene.js` `prog()` now maps the orbit in three parts: slow before, a fast eased turn of about 85 degrees (28 % of the orbit) while `#spin` is on screen, then the old slow drift (the end pose is unchanged, so the flight still starts where it did). A "Kuala Lumpur, 3.158 N 101.712 E" tag fades in mid-buffer. Spin metrics are read on scroll only, not per frame.
+- Checked 1300 px light and dark and 390 px: camera bearing goes about 48 to 133 degrees through the buffer, no errors, no sideways scroll; `tools/check.js` 30/30. Cache key `20261111e`.
+- Open: the amount and length are guesses; `SPW` and the `.spin` height tune them. Not tried on a real phone.
+
 ## 2026-11-11 · Notes pages re-skinned to match, and a flight-only page
 - Notes pages (`notes/*.html`) now load `assets/scene.css` too: same blues, article on a hard-shadow panel, and the aurora is replaced by a still, lightly blurred picture of the city (`assets/city-light.webp` 19 KB, `assets/city-dark.webp` 49 KB). No WebGL on notes. The pictures come from `node tools/make-note-backdrops.js` (re-run it if the scene changes). Theme-colour is the blue on notes. Cache key `20261111d`.
 - New `/flight/` (`flight/index.html`): the scene with no floating UI, for viewing and debugging. Scroll flies the route; **H** (or `?panel`) opens a panel with a scrub slider, auto-fly with speed, captions + HUD toggle, theme and a link to the current moment (`#t=0.42`). `scene.js` got `BASE` (loads models relative to itself, so it works from any folder) and a `data-flight-only` mode (no orbit phase). Documented in the README. Not linked from the site, noindex.

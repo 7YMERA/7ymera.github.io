@@ -171,7 +171,17 @@
   function size(){W=innerWidth;Hh=innerHeight;mobile=W<=820;renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile?1.5:2));renderer.setSize(W,Hh,false);cam.aspect=W/Hh;cam.updateProjectionMatrix();need=true}
   var enter=document.getElementById('enter'),caps=enter?enter.querySelectorAll('.ride-cap'):[],roll=0,rideP=null,rideT=null;
   // The page scroll is split in two: first the orbit round the skyline, then (inside #enter) the flight.
-  function prog(){if(ONLY)return 1;var m=document.documentElement.scrollHeight-innerHeight;if(!enter)return m>0?Math.min(1,Math.max(0,scrollY/m)):0;var st=Math.max(1,enter.offsetTop-innerHeight);return Math.min(1,Math.max(0,scrollY/st))}
+  // The orbit is one slow turn over the whole page, except in the buffer (#spin, straight after the opening):
+  // there the city turns about 85 degrees (28 % of the orbit) with an ease in and out, while no panel is in the way.
+  var spin=document.getElementById('spin'),SP0=.06,SPW=.28,sTop=0,sH=0; // sTop/sH are read on scroll only (prog), never per frame
+  function prog(){if(ONLY)return 1;var m=document.documentElement.scrollHeight-innerHeight;if(!enter)return m>0?Math.min(1,Math.max(0,scrollY/m)):0;
+    var st=Math.max(1,enter.offsetTop-innerHeight),y=scrollY;
+    if(spin){sTop=spin.offsetTop;sH=spin.offsetHeight}
+    if(!spin||sH===0)return Math.min(1,Math.max(0,y/st));
+    var a=sTop-innerHeight,b=Math.min(sTop+sH-innerHeight,st-1);
+    if(y<=a)return SP0*Math.min(1,Math.max(0,y/Math.max(1,a)));
+    if(y<=b){var t=(y-a)/Math.max(1,b-a);t=t*t*(3-2*t);return SP0+SPW*t}
+    return SP0+SPW+(1-SP0-SPW)*Math.min(1,Math.max(0,(y-b)/Math.max(1,st-b)))}
   function rideProg(){if(!enter)return 0;var m=document.documentElement.scrollHeight-innerHeight,st=ONLY?0:enter.offsetTop-innerHeight;return m>st?Math.min(1,Math.max(0,(scrollY-st)/(m-st))):0}
   function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
   // Critically damped follow (no overshoot, no jump when a wheel notch lands): the camera glides to where the scroll bar is.
@@ -268,6 +278,7 @@
       cam.setViewOffset(W,Hh,ox,oy,W,Hh);hudUpdate(false)
     }
     for(var ci=0;ci<caps.length;ci++){var c=caps[ci],on=cr>=+c.dataset.from&&cr<+c.dataset.to;if(on!==c.classList.contains('on'))c.classList.toggle('on',on)}
+    if(spin&&sH){var sy=scrollY-(sTop-innerHeight),sf=sy/Math.max(1,sH),sOn=sf>.18&&sf<.95;if(sOn!==spin.classList.contains('on'))spin.classList.toggle('on',sOn)} // the coordinates tag
     orb.rotation.y=time*.0004;ring.rotation.z=time*.0006;orb.position.y=230+Math.sin(time*.0009)*3;
     specks.rotation.y=time*.00003;fxUpdate(time,reduce)}
   var raf=0,run=true,last=0,lastR=0;

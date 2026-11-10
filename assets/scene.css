@@ -103,3 +103,15 @@ html.gl .enter{display:block;height:780vh;position:relative}
 .top{border-bottom:2px solid var(--fx)}
 main.wrap>.post{margin:44px auto 64px;padding:44px clamp(18px,4vw,44px) 28px;background:color-mix(in srgb,var(--bg) 93%,transparent);border:2px solid var(--fx);box-shadow:6px 6px 0 var(--hard);border-radius:6px}
 @media (max-width:700px){main.wrap>.post{margin:20px auto 40px;box-shadow:4px 4px 0 var(--hard);border-radius:4px}}
+
+/* ---- The buffer after the opening: no panels, the city turns ---- */
+.spin{display:none}
+html.gl .spin{display:block;height:150vh;position:relative;pointer-events:none}
+.spin-sticky{position:sticky;top:0;height:100vh;height:100svh;display:grid;place-items:end center;padding:0 16px max(120px,16svh)}
+.spin-tag{margin:0;display:grid;gap:3px;text-align:center;padding:12px 20px;background:color-mix(in srgb,var(--bg) 90%,transparent);border:2px solid var(--fx);box-shadow:5px 5px 0 var(--hard);border-radius:6px;opacity:0;transform:translateY(12px);transition:opacity .5s,transform .5s}
+.spin.on .spin-tag{opacity:1;transform:none}
+.spin-tag b{font:600 .75rem var(--f-pix);letter-spacing:.2em;text-transform:uppercase;color:var(--fx)}
+.spin-tag span{font:500 1.05rem var(--f-display);color:var(--ink);letter-spacing:.02em}
+.spin-tag i{font:normal 500 .75rem var(--f-mono);color:var(--muted)}
+@media (max-width:700px){html.gl .spin{height:130vh}}
+@media (prefers-reduced-motion:reduce){.spin-tag{transition:none}}
