@@ -16,8 +16,8 @@
   function deg(r) { return r * 180 / Math.PI; }
   function round(n) { return +n.toFixed(4); }
 
-  function measure(width, height, o) {
-    var h = Math.min(o.tile / 100 * height, MAX_WIDTH / 100 * width / o.aspect);
+  function measure(width, height, o, mw) {
+    var h = Math.min(o.tile / 100 * height, mw / 100 * width / o.aspect);
     var radius = width * arc(o.bend);
     if (!(h > 0) || !(radius > 0)) return { columns: 2, sweep: 0, unit: 0, limit: 0 };
     var unit = deg(h / radius);
@@ -33,7 +33,7 @@
     var images = JSON.parse(el.getAttribute('data-reel') || '[]');
     if (!images.length) return;
     var d = el.dataset, SLICES = +(d.slices || 16);
-    var o = {
+    var base = {
       speed: +(d.speed || 4), tile: +(d.tile || 26), aspect: +(d.aspect || 16 / 9),
       gap: +(d.gap || 6), axis: +(d.axis || 50), fade: +(d.fade || 12),
       bend: Math.min(85, Math.max(5, +(d.curve || 80))) * Math.PI / 180
@@ -48,12 +48,16 @@
     var style = document.createElement('style');
     el.appendChild(style); el.appendChild(band);
 
-    var last = null;
+    var o = base, last = null;
     function render(width, height) {
-      var L = measure(width, height, o);
-      if (last && last.columns === L.columns && last.sweep === L.sweep && last.unit === L.unit) return;
-      last = L;
-      var u = function (n) { return 'calc(' + round(n) + ' * min(' + o.tile + 'cqh, ' + round(MAX_WIDTH / o.aspect) + 'cqw))'; };
+      // Narrow screens: smaller tiles and a deeper bend, so the reel wraps round the sides
+      // instead of showing one flat banner (the tiles are otherwise most of the screen wide).
+      var narrow = width < 600, mw = narrow ? 30 : MAX_WIDTH;
+      o = narrow ? { speed: base.speed, tile: base.tile * 0.62, aspect: base.aspect, gap: base.gap, axis: base.axis, fade: base.fade, bend: 85 * Math.PI / 180 } : base;
+      var L = measure(width, height, o, mw);
+      if (last && last.columns === L.columns && last.sweep === L.sweep && last.unit === L.unit && last.narrow === narrow) return;
+      last = L; last.narrow = narrow;
+      var u = function (n) { return 'calc(' + round(n) + ' * min(' + o.tile + 'cqh, ' + round(mw / o.aspect) + 'cqw))'; };
       var r = 100 * arc(o.bend), radius = (+r.toFixed(3)) + 'cqw';
       var turn = function (a) { return 'translateZ(' + radius + ') rotateY(' + round(a) + 'deg) translateZ(-' + radius + ')'; };
       var hide = round((L.sweep - L.limit) / (2 * L.sweep || 1) * 100);
