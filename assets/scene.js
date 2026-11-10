@@ -2,6 +2,10 @@
 (function(){
   if(!window.THREE)return;
   var T=THREE,root=document.documentElement,cv=document.getElementById('gl');
+  // Where this script lives (assets/), so the models load from any page, whatever its folder.
+  var BASE=(((document.currentScript||document.querySelector('script[src*="scene.js"]')||{}).src)||'').replace(/scene\.js.*$/,'');
+  // data-flight-only on <html> (the /flight/ page): no orbit phase and no page around it, just the flight, driven by scroll.
+  var ONLY=root.hasAttribute('data-flight-only');
   var renderer;
   try{renderer=new T.WebGLRenderer({canvas:cv,alpha:true,antialias:true,powerPreference:'low-power'})}catch(e){return}
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -51,10 +55,10 @@
       out.scale.setScalar(SC);out.position.set(x,0,z);out.rotation.y=ry;g.add(out);if(done)done();recolor();need=true;
     }).catch(function(){if(fallback)fallback();recolor();need=true});
   }
-  loadModel('assets/city/klcc.json',0,0,0,bodyM,procedural);          // Petronas Twin Towers (SketchUp export, see tools/convert-obj.py)
-  loadModel('assets/city/menara_kl.json',-95,-70,0,bodyM,null,function(){g.remove(kl)}); // Menara KL; replaces the stand-in cylinder tower below once loaded
-  loadModel('assets/city/merdeka118.json',-10,-95,-.5,bodyM,null);
-  loadModel('assets/city/exchange106.json',60,-125,.4,bodyM,null);   // The Exchange 106, cropped and simplified (tools/convert-dae-crop.py)  // Merdeka PNB 118 (SketchUp Collada, see tools/convert-dae.py)
+  loadModel(BASE+'city/klcc.json',0,0,0,bodyM,procedural);          // Petronas Twin Towers (SketchUp export, see tools/convert-obj.py)
+  loadModel(BASE+'city/menara_kl.json',-95,-70,0,bodyM,null,function(){g.remove(kl)}); // Menara KL; replaces the stand-in cylinder tower below once loaded
+  loadModel(BASE+'city/merdeka118.json',-10,-95,-.5,bodyM,null);
+  loadModel(BASE+'city/exchange106.json',60,-125,.4,bodyM,null);   // The Exchange 106, cropped and simplified (tools/convert-dae-crop.py)  // Merdeka PNB 118 (SketchUp Collada, see tools/convert-dae.py)
   var gr=new T.Mesh(new T.CircleGeometry(1400,64),ground);gr.rotation.x=-Math.PI/2;gr.position.y=-.2;g.add(gr);
   // city ring
   var s=11;function rnd(){s=(s*9301+49297)%233280;return s/233280}
@@ -63,7 +67,7 @@
   // Windows come from two facade textures laid on the walls in the shader: a glass grid by day, lit offices at night.
   var loader=new T.TextureLoader();
   function wrapTex(t){t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=4;return t}
-  var cityU={uNight:{value:0},uDay:{value:wrapTex(loader.load('assets/city/facade_glass.jpg'))},uNightTex:{value:wrapTex(loader.load('assets/city/facade_night.jpg'))}};
+  var cityU={uNight:{value:0},uDay:{value:wrapTex(loader.load(BASE+'city/facade_glass.jpg'))},uNightTex:{value:wrapTex(loader.load(BASE+'city/facade_night.jpg'))}};
   // Facade shader: windows on the walls, in world space, so every building (the OSM city and the landmark models alike) shows its floors.
   function facade(m){
     m.onBeforeCompile=function(sh){
@@ -81,7 +85,7 @@
   var cityM=facade(mat('mid'));
   facade(bodyM); // all four landmarks share one material and the facade shader, so none is bluer than the rest
   var cityMesh=null;
-  fetch('assets/city/kl_city.json').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+  fetch(BASE+'city/kl_city.json').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
     var q=new Int16Array(b64(d.positions,Uint8Array).buffer),pos=new Float32Array(q.length);for(var k=0;k<q.length;k++)pos[k]=q[k]*d.scale;
     var geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));geo.setIndex(new T.BufferAttribute(b64(d.indices,Uint16Array),1));
     geo=geo.toNonIndexed();geo.computeVertexNormals(); // flat normals: the lighting needs them
@@ -167,8 +171,8 @@
   function size(){W=innerWidth;Hh=innerHeight;mobile=W<=820;renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile?1.5:2));renderer.setSize(W,Hh,false);cam.aspect=W/Hh;cam.updateProjectionMatrix();need=true}
   var enter=document.getElementById('enter'),caps=enter?enter.querySelectorAll('.ride-cap'):[],roll=0,rideP=null,rideT=null;
   // The page scroll is split in two: first the orbit round the skyline, then (inside #enter) the flight.
-  function prog(){var m=document.documentElement.scrollHeight-innerHeight;if(!enter)return m>0?Math.min(1,Math.max(0,scrollY/m)):0;var st=Math.max(1,enter.offsetTop-innerHeight);return Math.min(1,Math.max(0,scrollY/st))}
-  function rideProg(){if(!enter)return 0;var m=document.documentElement.scrollHeight-innerHeight,st=enter.offsetTop-innerHeight;return m>st?Math.min(1,Math.max(0,(scrollY-st)/(m-st))):0}
+  function prog(){if(ONLY)return 1;var m=document.documentElement.scrollHeight-innerHeight;if(!enter)return m>0?Math.min(1,Math.max(0,scrollY/m)):0;var st=Math.max(1,enter.offsetTop-innerHeight);return Math.min(1,Math.max(0,scrollY/st))}
+  function rideProg(){if(!enter)return 0;var m=document.documentElement.scrollHeight-innerHeight,st=ONLY?0:enter.offsetTop-innerHeight;return m>st?Math.min(1,Math.max(0,(scrollY-st)/(m-st))):0}
   function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
   // Critically damped follow (no overshoot, no jump when a wheel notch lands): the camera glides to where the scroll bar is.
   function damp(c,t,v,st,dt){var o=2/st,x=o*dt,e=1/(1+x+.48*x*x+.235*x*x*x),ch=c-t,tmp=(v.v+o*ch)*dt;v.v=(v.v-o*tmp)*e;return t+(ch+tmp)*e}
@@ -281,5 +285,5 @@
   document.addEventListener('visibilitychange',function(){run=!document.hidden;if(run&&!raf){last=performance.now();raf=requestAnimationFrame(frame)}});
   root.classList.add('gl'); // first: it makes #enter visible, and the scroll maths below needs its real position
   size();buildRide();tp=cp=prog();tr=cr=rideProg();raf=requestAnimationFrame(frame);
-  if(/[?&]dbg/.test(location.search))window.__scene={scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam)}};
+  if(ONLY||/[?&]dbg/.test(location.search))window.__scene={scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam)}};
 })();

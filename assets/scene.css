@@ -93,3 +93,13 @@ html.gl .enter{display:block;height:780vh;position:relative}
   .lm-tag b{font-size:11px;padding:2px 6px;top:-40px}.lm-tag span{display:none}.lm-tag::before{height:40px;top:-40px}
 }
 @media (prefers-reduced-motion:reduce){.ride-cap,.hud,.lm-tag{transition:none}}
+
+/* ---- Notes pages: the same blues, a still picture of the city behind the article ----
+   (The notes pages only load site.css and this file; the 3D scene itself runs on the home page and /flight/.) */
+:root{--note-sky:url("city-light.webp")}
+:root[data-theme="dark"]{--note-sky:url("city-dark.webp")}
+.sky{background:linear-gradient(var(--sky1),var(--sky2))}
+.sky::before{top:0;bottom:0;left:0;width:100%;background:var(--note-sky) center/cover no-repeat;opacity:.55;animation:none;transform:none}
+.top{border-bottom:2px solid var(--fx)}
+main.wrap>.post{margin:44px auto 64px;padding:44px clamp(18px,4vw,44px) 28px;background:color-mix(in srgb,var(--bg) 93%,transparent);border:2px solid var(--fx);box-shadow:6px 6px 0 var(--hard);border-radius:6px}
+@media (max-width:700px){main.wrap>.post{margin:20px auto 40px;box-shadow:4px 4px 0 var(--hard);border-radius:4px}}

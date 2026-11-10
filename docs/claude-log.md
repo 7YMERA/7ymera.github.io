@@ -18,6 +18,13 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-11 · Notes pages re-skinned to match, and a flight-only page
+- Notes pages (`notes/*.html`) now load `assets/scene.css` too: same blues, article on a hard-shadow panel, and the aurora is replaced by a still, lightly blurred picture of the city (`assets/city-light.webp` 19 KB, `assets/city-dark.webp` 49 KB). No WebGL on notes. The pictures come from `node tools/make-note-backdrops.js` (re-run it if the scene changes). Theme-colour is the blue on notes. Cache key `20261111d`.
+- New `/flight/` (`flight/index.html`): the scene with no floating UI, for viewing and debugging. Scroll flies the route; **H** (or `?panel`) opens a panel with a scrub slider, auto-fly with speed, captions + HUD toggle, theme and a link to the current moment (`#t=0.42`). `scene.js` got `BASE` (loads models relative to itself, so it works from any folder) and a `data-flight-only` mode (no orbit phase). Documented in the README. Not linked from the site, noindex.
+- Bug found while testing: auto-fly stuck because `site.css` has `scroll-behavior: smooth`; per-frame scrolling is now instant and keeps its own fractional position.
+- Checked: notes index, a long note, the slb-screens tour and a phone note in light/dark; `/flight/` clean, with panel, dark and at 390 px; keyboard (H, Space, arrows, T, U) and wheel-stops-auto-fly. `tools/check.js` now includes `/flight/`. Real-phone frame rate still untested.
+- Open: `/flight/` has its own copy of the `#enter` markup; if captions change on the home page, change them there too.
+
 ## 2026-11-11 · One site: the 3D city is the home page, no more /v2/
 - Owner asked to merge v1 and v2 into a single site with no version name. The old flat-aurora site is commit **`f3b9f08`** (a tag could not be pushed to GitHub from here); to get it back: `git checkout f3b9f08`.
 - `/` is now the 3D city version: `index.html` carries the canvas, the flight section and the three.js / `scene.js` scripts directly (no generator). Moved: `v2/v2-3d.js` to `assets/scene.js`, `v2/merge.css` to `assets/scene.css`, models and facade textures to `assets/city/`. Removed: `v2/`, `tools/build-v2.py`, `tools/v2-flight.html`, the "Classic site" nav link, the noindex tag and the before/after screenshots. The og/twitter tags are back (the preview had stripped them). Theme colour is now the blue. `tools/check.js` no longer lists `v2/`; the screenshots were renamed `city-*`. README section is now "The 3D city and the flight"; `CLAUDE.md` updated. Cache key `20261111c` everywhere.
