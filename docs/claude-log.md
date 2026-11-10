@@ -18,6 +18,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-11 · Spin reel wraps further round on phones
+- On narrow screens (under 600 px wide) `assets/curved-reel.js` now uses tiles at 62% of the size, a narrower width cap (30% of the screen) and a deeper bend (85 degrees instead of the page's 70). The reel shows about three tiles curving away on both sides, instead of one flat banner. Desktop is unchanged. Checked on `/v2/` at 390 px (the opening's reel act) and the classic page at 390 px and 1300 px. Cache key `20261111b`.
+- Open: not tried on a real phone. If it is too small or too curved, the two numbers are `0.62` and `85` in `render()`.
+
 ## 2026-11-11 · Three new photos in the "This is me" card
 - Added three photos as slides 6 to 8 of the REQ-001 carousel (photo, title, one line each): `portrait-white-wall.webp` ("Straight on"), `devfest-lanyard.webp` ("At DevFest") and `on-a-call.webp` ("Between meetings"). `index.html` edited, `v2/index.html` regenerated with `tools/build-v2.py`. The card's steady height is unchanged (the new quotes are short).
 - Privacy (public repo): the call photo is the webcam frame only, cropped out of a screenshot, so none of the tabs, the work email, the meeting title or colleague names are in it. The DevFest mirror selfie is cropped above the Menara Maxis visitor badge (a client name) and shows only the DevFest lanyard. Metadata stripped (re-encoded, 0 EXIF tags); originals are not in the repo.
