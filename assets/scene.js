@@ -11,7 +11,7 @@
   var renderer;
   try{renderer=new T.WebGLRenderer({canvas:cv,alpha:true,antialias:true,powerPreference:'low-power'})}catch(e){return}
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var scene=new T.Scene(),cam=new T.PerspectiveCamera(42,1,.3,900);
+  var scene=new T.Scene(),cam=new T.PerspectiveCamera(42,1,.3,1600);
   var M={},C={},mats=[];
   function css(n){return getComputedStyle(root).getPropertyValue(n).trim()}
   function col(k){return new T.Color(C[k])}
@@ -171,13 +171,14 @@
     polyM.color.set(c);polyM.blending=bl;polyM.opacity=dark?.8:.7;polyM.needsUpdate=true;
     linkM.color.set(c);linkM.opacity=dark?.5:.6;pulseM.color.set(dark?C.glass:C.line);
     fx.forEach(function(m){m.needsUpdate=true})}
+  var fogN0=300,fogF0=680; // base fog (set by recolor); the finale pushes it back
   function recolor(){
     readColors();var dark=root.getAttribute('data-theme')==='dark';
     mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});
     tower.emissive.set(C.glass);tower.emissiveIntensity=dark?1:.28;glassM.emissive.set(C.ring);glassM.emissiveIntensity=dark?.9:.15;
     cityU.uNight.value=dark?1:0;
     if(glassModelM){glassModelM.emissive.set(C.ring);glassModelM.emissiveIntensity=dark?.8:.12}ringM.color.set(C.ring);specks.material.color.set(C.ring);
-    var f=col('sky2');scene.fog=new T.Fog(f,dark?260:300,dark?640:680);
+    var f=col('sky2');fogN0=dark?260:300;fogF0=dark?640:680;scene.fog=new T.Fog(f,fogN0,fogF0);
     fxStyle(dark);amb.intensity=dark?.45:.5;sun.intensity=dark?.55:.55;sun.color.set(dark?0x9cc8ff:0xffffff)}
   recolor();window.addEventListener('scenetheme',function(){recolor();need=true});
   new MutationObserver(function(){recolor();need=true}).observe(root,{attributes:true,attributeFilter:['data-theme']}); // the page's own theme button flips data-theme
@@ -264,6 +265,7 @@
   var UX=new T.Vector3(.665,0,.747),WX=new T.Vector3(-.747,0,.665);
   function A(u,w,y){return new T.Vector3(UX.x*u+WX.x*w,y,UX.z*u+WX.z*w)}
   var MC={u:-80,w:-63};                                   // Merdeka 118's axis
+  var ENDC={u:120,w:205},ENDN={u:-.5,w:-.866};            // the middle of the four landmarks, and the direction from it to the finale camera
   var MCD={u:82,w:364},EXD={u:331,w:85};                  // the district puts Merdeka 118 and The Exchange 106 south of KLCC, in (u,w)
   function arcAt(deg,r,y,ty){var C=DIST?MCD:MC,a=deg*Math.PI/180;return [A(C.u+Math.cos(a)*r,C.w+Math.sin(a)*r,y),A(C.u,C.w,ty)]}
   // [name, camera position, look-at point, slow factor of the stretch that FOLLOWS it (bigger = more scroll spent there)]
@@ -281,7 +283,9 @@
       // leaving: the view turns a little at a time towards The Exchange
       ['m5',arcD(-15,62,214,208)[0],arcD(-15,62,214,208)[1],1.4],['turnA',A(C.u+98,C.w-8,228),A(C.u+40,C.w-12,204),1.0],['turnB',A(C.u+112,C.w-30,232),A(C.u+82,C.w-72,200),1.0],['turnC',A(C.u+122,C.w-58,236),A(C.u+124,C.w-118,194),1.0],['turn',A(C.u+134,C.w-86,238),A(C.u+190,C.w-156,190),1.0],['cross',A((C.u+E.u)/2+10,(C.w+E.w)/2,240),A(E.u,E.w,160),1.0],
       ['pass',A(E.u-70,E.w+55,205),A(E.u,E.w,128),1.8],
-      ['end',A(-120,190,330),A(150,200,90),1.5]];return}
+      // The finale. Wide screens: a horizontal shot of the skyline, camera low and far back on the street side so the four landmarks
+      // line up across the screen. Portrait phones cannot fit a row, so there it is a full zoom-out: high and far, looking down at the whole district.
+      ['end',mobile?A(ENDC.u+ENDN.u*560,ENDC.w+ENDN.w*560,400):A(ENDC.u+ENDN.u*600,ENDC.w+ENDN.w*600,92),A(ENDC.u,ENDC.w,mobile?30:96),1.5]];return}
     KF=[
       ['start',o.pos,o.tgt,1.0],
       ['swing',A(135,-175,96),A(0,0,64),1.4],
@@ -337,7 +341,7 @@
     if(sec!==hSecLast){hSecLast=sec;var b=caps[sec]&&caps[sec].querySelector('b');hSec.textContent=b?b.textContent:'';for(i=0;i<hTicks.length;i++)hTicks[i].classList.toggle('on',i<=sec)}
     for(var k=0;k<LM.length;k++){
       tv.copy(LM[k].top);var dist=tv.distanceTo(cam.position);tv.project(cam);
-      var vis=tv.z<1&&Math.abs(tv.x)<.94&&Math.abs(tv.y)<.9&&dist>24&&dist<430,e=hTags[k];
+      var vis=tv.z<1&&Math.abs(tv.x)<.94&&Math.abs(tv.y)<.9&&dist>24&&dist<760,e=hTags[k];
       if(vis!==e.classList.contains('show'))e.classList.toggle('show',vis);
       if(vis){e.style.transform='translate3d('+((tv.x*.5+.5)*W).toFixed(1)+'px,'+((-tv.y*.5+.5)*Hh).toFixed(1)+'px,0)';
         if(tick%8===0)e.lastChild.textContent=Math.round(LM[k].real)+' m · '+Math.round(dist*KU/10)*10+' m away'}}}
@@ -352,15 +356,19 @@
     if(inRide){
       var u=rideU(cr);
       cam.position.copy(rideP.getPoint(u));cam.lookAt(rideT.getPoint(u));cam.setViewOffset(W,Hh,0,0,W,Hh);
+      // finale: widen the view (phones a lot, desktop a little) and push the fog back, so the whole skyline is in frame
+      var ke=KI['pass']!=null?KI['pass']:.7,fs=clamp((cr-ke-.55*((KI['end']||.97)-ke))/(.45*((KI['end']||.97)-ke)),0,1);fs=fs*fs*(3-2*fs);
+      var fv=42+(mobile?30:10)*fs;if(Math.abs(fv-cam.fov)>.01){cam.fov=fv;cam.updateProjectionMatrix()}
+      if(scene.fog){scene.fog.near=fogN0+260*fs;scene.fog.far=fogF0+560*fs}
       // Ease the rotation: the view turns towards where it should look with a short lag (time constant about 0.2 s), so a sharp
       // turn in the route can never show as a jolt. Reset when the flight starts, and when snapping.
       if(!rideQ)rideQ=cam.quaternion.clone();else{rideQ.slerp(cam.quaternion,reduce?1:1-Math.exp(-dtF*5));cam.quaternion.copy(rideQ)}
       // lean into turns a little, like a drone, never more than 8 degrees
       var q0=rideP.getPoint(Math.max(0,u-.02)),q1=rideP.getPoint(u),q2=rideP.getPoint(Math.min(1,u+.02)),v1=q1.clone().sub(q0),v2=q2.clone().sub(q1);
-      var turn=v1.length()*v2.length()>1e-6?v1.cross(v2).y/(v1.length()*v2.length()):0;roll+=(clamp(-turn*3,-.14,.14)-roll)*(1-Math.exp(-dtF*3));cam.rotateZ(roll);
+      var turn=v1.length()*v2.length()>1e-6?v1.cross(v2).y/(v1.length()*v2.length()):0;roll+=(clamp(-turn*3,-.14,.14)-roll)*(1-Math.exp(-dtF*3));cam.rotateZ(roll*(1-fs)); // level horizon for the finale
       hudUpdate(true,u,cr)
     }else{
-      rideQ=null;
+      rideQ=null;if(cam.fov!==42){cam.fov=42;cam.updateProjectionMatrix()}if(scene.fog){scene.fog.near=fogN0;scene.fog.far=fogF0}
       var q=curPose,ang=(q[2]+px*7)*Math.PI/180;
       cam.position.set(q[0]+Math.cos(ang)*q[3],q[4],q[1]+Math.sin(ang)*q[3]);cam.lookAt(q[0],q[5],q[1]);
       cam.setViewOffset(W,Hh,-q[6]*W,-q[7]*Hh,W,Hh);hudUpdate(false)
