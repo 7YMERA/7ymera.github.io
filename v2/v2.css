@@ -11,7 +11,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--sans)}
 a{color:inherit}
 .topbar{position:fixed;top:12px;right:12px;left:12px;display:flex;justify-content:space-between;gap:8px;z-index:5;pointer-events:none}
 .tb-btn{pointer-events:auto;font:600 15px var(--pix);color:var(--btnink);background:var(--btn);border:0;border-radius:999px;padding:10px 18px;min-height:44px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
-.scene{position:relative;height:min(78vh,640px);min-height:420px;overflow:hidden;background:linear-gradient(var(--sky1),var(--sky2))}
+.scene{position:relative;height:min(88vh,720px);min-height:420px;overflow:hidden;background:linear-gradient(var(--sky1),var(--sky2))}
 #sky{position:absolute;inset:0;width:100%;height:100%;display:block}
 .scene-text{position:absolute;left:max(20px,5vw);bottom:48px;max-width:min(560px,90vw);text-shadow:0 0 14px var(--sky1),0 0 4px var(--sky1)}
 .kicker{margin:0;font:600 14px var(--pix);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}

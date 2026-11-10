@@ -27,6 +27,12 @@ where the last chat stopped without re-reading everything.
 - The owner didn't like the clothes-rail look, so the project rail (commit `5c68a02`) was reverted from the home page and `/v2/`. The cache key is back to `20261108b`.
 - The code is still in git history if the spring physics, turn-to-front or flip view are wanted for something else.
 
+## 2026-11-10 · /v2/ skyline: KL Tower, Exchange 106, Masjid Negara
+- Added the owner's Menara KL model (`v2/menara_kl.json`, from an OBJ) and The Exchange 106 (`v2/exchange106.json`, cropped out of a 55 MB SketchUp Collada precinct and simplified by vertex clustering to about 20k triangles). They replace the stand-in cylinder tower. Tools: `tools/convert-obj.py` (replaces `convert-klcc.py`; takes glass materials or a glass height band), `convert-dae-dump.py` + `convert-dae-crop.py` for big Collada files.
+- Masjid Negara is built from code in `v2/v2-3d.js` (no model): 18-fold pleated umbrella dome in the flag's blue with a red band and yellow finial, smaller pleated dome, minaret, waffle-coffered roof slabs, sawtooth hall, reflecting pool. It sits at the foot of the towers in the hero. Hero is a little taller (`min(88vh,720px)`) and the camera raised slightly so it shows.
+- Checked at 1300 px light/dark and 390 px: no page errors. Frame rate on a real phone is untested; total model data is about 1.1 MB.
+- Open: author and licence of all supplied models are unknown. Confirm they can be published, or delete the `.json` files (the page then falls back to the built Petronas tower and the stand-in KL Tower).
+
 ## 2026-11-10 · Merdeka PNB 118 added to /v2/
 - Added the owner's Merdeka PNB 118 model (SketchUp Collada, zip) to the `/v2/` skyline behind and to the right of the Petronas Towers. `tools/convert-dae.py` flattens the Collada scene graph (inches, Z-up, instanced nodes) into `v2/merdeka118.json` (about 58 KB, 1.2k vertices). Both landmarks share one scale, so Merdeka 118 stands taller than the towers, as in life. `v2-3d.js` now loads both through one `loadModel()`.
 - The raw `.skp` upload can't be read here, so the Collada export was used instead.
