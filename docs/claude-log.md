@@ -27,6 +27,12 @@ where the last chat stopped without re-reading everything.
 - The owner didn't like the clothes-rail look, so the project rail (commit `5c68a02`) was reverted from the home page and `/v2/`. The cache key is back to `20261108b`.
 - The code is still in git history if the spring physics, turn-to-front or flip view are wanted for something else.
 
+## 2026-11-10 · /v2/ scroll ride into Masjid Negara
+- New `#enter` section at the end of `/v2/` (340vh, sticky captions). The page scroll is now split: the first part still orbits the skyline, then the camera flies along a Catmull-Rom path (`buildRide()` in `v2/v2-3d.js`) over the pool, through the entrance, along the prayer hall toward the mihrab, then up under the dome. `cam.near` is now 0.3 so interior walls don't clip.
+- The masjid now has a real interior: hollow hall with an entrance, carpet rows, ring of columns, mihrab niche, coffered ceiling with a round opening under the 18-fold dome (dome and finial heights also fixed). Dark mode adds a warm interior lamp and a dome glow.
+- Without WebGL the section is hidden (`html.gl .enter`). Checked 1300 px light/dark and 390 px: no page errors. Real-device frame rate untested.
+- Open: the interior is simple geometry; add arches, a minbar or chandeliers if wanted. A taller or longer ride is one CSS value (`.enter` height).
+
 ## 2026-11-10 · /v2/ skyline: KL Tower, Exchange 106, Masjid Negara
 - Added the owner's Menara KL model (`v2/menara_kl.json`, from an OBJ) and The Exchange 106 (`v2/exchange106.json`, cropped out of a 55 MB SketchUp Collada precinct and simplified by vertex clustering to about 20k triangles). They replace the stand-in cylinder tower. Tools: `tools/convert-obj.py` (replaces `convert-klcc.py`; takes glass materials or a glass height band), `convert-dae-dump.py` + `convert-dae-crop.py` for big Collada files.
 - Masjid Negara is built from code in `v2/v2-3d.js` (no model): 18-fold pleated umbrella dome in the flag's blue with a red band and yellow finial, smaller pleated dome, minaret, waffle-coffered roof slabs, sawtooth hall, reflecting pool. It sits at the foot of the towers in the hero. Hero is a little taller (`min(88vh,720px)`) and the camera raised slightly so it shows.
