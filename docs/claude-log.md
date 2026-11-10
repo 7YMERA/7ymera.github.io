@@ -24,6 +24,10 @@ where the last chat stopped without re-reading everything.
 - Checked in the browser: `/flight/?bg=district` runs with no console errors, facade shader and beams work, end shot is good; `/` unchanged. `tools/check.js` not run.
 - Open: the leg after the gap flies close past a tower on its way to Menara KL; the route is untuned. Making this the default means rewriting the Merdeka/Exchange captions, which is the owner's call. The mesh has no textures or colours.
 
+## 2026-11-12 · Phones: dock removed, Menu button instead
+- Owner (iPhone): the page felt too narrow with the bottom dock and the grey side tab that brings it back; asked to remove it or repurpose it. On screens 760 px and narrower `.dock` and `.dock-show` are `display:none` (`assets/scene.css`), and the top bar's search button now reads "Menu" (`.k-btn::after`); it opens the existing quick-jump dialog. The quick-jump list now starts with the main sections in page order (This is me, Notes, UTP, Skill tree, Selected work, Status report, Journey, Fly over Kuala Lumpur, Contact), then projects, notes and links (`items` in `index.html`). The desktop dock behaviour is unchanged. Cache key `20261112j`.
+- Checked at 390 px: no dock or tab, Menu opens the list, a tap on an item jumps; smoke test 30/30. Open: the notes pages' top bar has no Menu list (they never had the dock either).
+
 ## 2026-11-12 · Phone: skip button no longer covers the compass
 - Owner (iPhone screenshot): "Skip the flight" sat on top of the compass tape. On phones (600 px and narrower) the skip button now sits bottom-left just above the caption and the "Keep scrolling" hint bottom-right beside it (`.fly-skip`, `.ride-hint` in `scene.css`). Also the cockpit (`#hud.on`) now only appears once the flight section fills the screen (`ONLY||flying`), instead of as soon as its top edge enters the view, so it no longer overlaps the last Journey cards. Cache key `20261112h`. Checked at 390 px at three scroll points; smoke test 30/30.
 
