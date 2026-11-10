@@ -167,3 +167,6 @@ html.gl .stage{display:block;height:120vh;position:relative;pointer-events:none}
 
 /* Cards that sat on the old panel were slightly see-through; with no panel the city would ghost through them. Make them solid. */
 html.gl .jr-card,html.gl .uni-cf .cf-details,html.gl .uni-card,html.gl .st-branch,html.gl .fact-tiles li,html.gl .goal-list li,html.gl .card,html.gl .pj,html.gl .note-card,html.gl .ent,html.gl .pl-card,html.gl .stat,html.gl .stat-tile{background-color:var(--surface)}
+
+/* The top bar sits above everything on the page (folders, cards) and is solid, so content goes behind it. Below the Ctrl+K dialog (z 20). */
+.top{z-index:18;background:var(--bg)}

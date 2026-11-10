@@ -24,6 +24,10 @@ where the last chat stopped without re-reading everything.
 - Checked in the browser: `/flight/?bg=district` runs with no console errors, facade shader and beams work, end shot is good; `/` unchanged. `tools/check.js` not run.
 - Open: the leg after the gap flies close past a tower on its way to Menara KL; the route is untuned. Making this the default means rewriting the Merdeka/Exchange captions, which is the owner's call. The mesh has no textures or colours.
 
+## 2026-11-11 · Content goes behind the top bar
+- Owner: the Notes folders overflowed on top of the top bar instead of going behind it. The glass folders use `z-index: 10`, the bar only 5. `assets/scene.css`: `.top` is now `z-index: 18` and a solid `var(--bg)` (below the Ctrl+K dialog at 20); this applies to the notes pages too. Cache key `20261111p`. Checked at 1300 px: folders scroll behind the bar, Ctrl+K still opens above it, smoke test 30/30.
+- Parked for later (owner's request): lighter phone version, plus a roughly 5 second loading screen that fades out saying "use desktop for the best experience". Not started.
+
 ## 2026-11-11 · No panels behind any block on wide screens
 - Owner liked how Notes works (no panel, cards straight on the city) and asked for the same everywhere. `assets/scene.css`: at 1000 px and wider, every `main>section.block` and the hero lose their background, border and shadow; section headings (`.sec-head`), the hero's text, the goal cards, fact tiles and the journey legend get their own small plate; the cards that used to sit on the panel (`.jr-card`, `.cf-details`, `.uni-card`, `.st-branch`, `.card`, etc.) are made solid so the city does not ghost through. Phones are unchanged (still panels) at the owner's request ("leave the phone for now"). Cache key `20261111o`.
 - Checked 1300 px: me, goals, UTP, work, pulse, journey, contact. Open: some inner text with no card of its own may still sit directly on the city in places; tell me where it is hard to read.
