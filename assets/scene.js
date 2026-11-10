@@ -163,6 +163,86 @@
     for(var j=0;j<linkPairs.length;j++){var f=still?.5:((t*.12+j*.27)%1),a=LM[linkPairs[j][0]].top,b=LM[linkPairs[j][1]].top;
       fxTmp.copy(a).lerp(b,f);pulsePos[j*3]=fxTmp.x;pulsePos[j*3+1]=fxTmp.y-4;pulsePos[j*3+2]=fxTmp.z}
     pulseGeo.attributes.position.needsUpdate=true}
+  // ===== THE SCI-FI LAYER =====
+  // Stars, a moon with a ring and a small moon of its own, gyroscope rings round the Petronas and Merdeka crowns, and a dragon:
+  // a serpentine ribbon of light that loops over the skyline. All are cheap (points, thin rings, one textured sphere); the stars and moons
+  // follow the camera's bearing so they are always the backdrop behind the city, whichever way the shot looks.
+  var sci=new T.Group();scene.add(sci);
+  var SMALL=innerWidth<=820;
+  // -- stars
+  var starGeo=new T.BufferGeometry(),starPos=[],SN=SMALL?420:900;
+  for(var si=0;si<SN;si++){var sa=Math.random()*6.2832,se=Math.acos(1-Math.random()*.92),sr=1150;starPos.push(Math.sin(se)*Math.cos(sa)*sr,Math.cos(se)*sr*.8+60,Math.sin(se)*Math.sin(sa)*sr)}
+  starGeo.setAttribute('position',new T.Float32BufferAttribute(starPos,3));
+  var starM=new T.PointsMaterial({size:SMALL?2.4:2,sizeAttenuation:false,transparent:true,depthWrite:false,fog:false});
+  var stars=new T.Points(starGeo,starM);stars.renderOrder=-20;stars.frustumCulled=false;sci.add(stars);
+  // -- moon: a cratered sphere, a tilted ring, a halo, and a small moon going round it
+  function moonTex(){var c=document.createElement('canvas');c.width=256;c.height=128;var x=c.getContext('2d');x.fillStyle='#d8d8d8';x.fillRect(0,0,256,128);
+    for(var i=0;i<46;i++){var cx=Math.random()*256,cy=Math.random()*128,r=3+Math.random()*13;x.fillStyle='rgba(60,70,90,'+(.1+Math.random()*.2)+')';x.beginPath();x.arc(cx,cy,r,0,6.2832);x.fill();
+      x.fillStyle='rgba(255,255,255,'+(.14+Math.random()*.12)+')';x.beginPath();x.arc(cx-r*.25,cy-r*.25,r*.7,0,6.2832);x.fill()}
+    var t=new T.CanvasTexture(c);return t}
+  function glowTex(){var c=document.createElement('canvas');c.width=c.height=128;var x=c.getContext('2d'),g=x.createRadialGradient(64,64,10,64,64,64);g.addColorStop(0,'rgba(255,255,255,.95)');g.addColorStop(.35,'rgba(255,255,255,.28)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return new T.CanvasTexture(c)}
+  var mTex=moonTex(),gTex=glowTex();
+  var moonM=new T.MeshBasicMaterial({map:mTex,fog:false}),moon=new T.Mesh(new T.SphereGeometry(70,32,20),moonM),moonG=new T.Group();
+  moon.renderOrder=-15;moonG.add(moon);
+  var moonHalo=new T.Sprite(new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,fog:false}));moonHalo.scale.set(300,300,1);moonHalo.renderOrder=-16;moonG.add(moonHalo);
+  var ringMat=new T.MeshBasicMaterial({transparent:true,side:T.DoubleSide,depthWrite:false,fog:false});
+  var moonRing=new T.Mesh(new T.RingGeometry(104,108,96),ringMat),moonRing2=new T.Mesh(new T.RingGeometry(116,118,96),ringMat);
+  moonRing.rotation.x=1.15;moonRing2.rotation.x=1.15;moonRing.renderOrder=moonRing2.renderOrder=-14;moonG.add(moonRing,moonRing2);
+  var moon2M=new T.MeshBasicMaterial({map:mTex,fog:false}),moon2=new T.Mesh(new T.SphereGeometry(15,20,14),moon2M);moon2.renderOrder=-14;moonG.add(moon2);
+  sci.add(moonG);
+  // -- gyroscope rings round the Petronas crowns and the top of Merdeka 118
+  var gyroM=new T.MeshBasicMaterial({transparent:true,depthWrite:false,side:T.DoubleSide}),gyros=[];
+  function addGyro(c,r,speed){var g=new T.Group();g.position.copy(c);
+    [[r,0,0,1],[r*1.3,1.1,.4,-.8],[r*1.62,.5,1.2,.6]].forEach(function(d,i){
+      var ring=new T.Mesh(new T.TorusGeometry(d[0],.32,6,96),gyroM),holder=new T.Group();holder.rotation.set(d[1],d[2],0);holder.add(ring);
+      var bead=new T.Mesh(new T.SphereGeometry(1.5,10,8),gyroM);bead.position.set(d[0],0,0);ring.add(bead);g.add(holder);gyros.push({h:holder,ring:ring,sp:d[3]*speed})});
+    sci.add(g);return g}
+  addGyro(new T.Vector3(0,128,0),22,1);
+  addGyro(LM[1].top.clone().add(new T.Vector3(0,-14,0)),12,1.4);
+  // -- the dragon
+  var dragonPts=SMALL?46:72,finEvery=6,dragonCount=dragonPts+2*Math.ceil(dragonPts/finEvery)+5;
+  var dPos=new Float32Array(dragonCount*3),dSize=new Float32Array(dragonCount),dAlpha=new Float32Array(dragonCount),dGeo=new T.BufferGeometry();
+  dGeo.setAttribute('position',new T.BufferAttribute(dPos,3));dGeo.setAttribute('size',new T.BufferAttribute(dSize,1));dGeo.setAttribute('alpha',new T.BufferAttribute(dAlpha,1));
+  var dragonM=new T.ShaderMaterial({transparent:true,depthWrite:false,uniforms:{uColor:{value:new T.Color(0x2aa6e8)},uHead:{value:new T.Color(0xffffff)},uScale:{value:400}},
+    vertexShader:'attribute float size;attribute float alpha;varying float vA;varying float vH;uniform float uScale;void main(){vA=alpha;vH=size>22.?1.:0.;vec4 mv=modelViewMatrix*vec4(position,1.);gl_PointSize=size*uScale/-mv.z;gl_Position=projectionMatrix*mv;}',
+    fragmentShader:'uniform vec3 uColor;uniform vec3 uHead;varying float vA;varying float vH;void main(){vec2 p=gl_PointCoord-.5;float d=length(p);if(d>.5)discard;float core=smoothstep(.5,.0,d);vec3 col=mix(uColor,uHead,vH*.9+core*.5);gl_FragColor=vec4(col,vA*(.25+.75*core));}'});
+  var dragon=new T.Points(dGeo,dragonM);dragon.frustumCulled=false;sci.add(dragon);
+  var dCurve=new T.CatmullRomCurve3([[-90,30,150],[30,-85,185],[190,-45,215],[290,90,170],[235,240,220],[100,320,190],[-50,250,225],[-130,125,180]].map(function(p){return A0(p[0],p[1],p[2])}),true,'catmullrom',.5);
+  var dLen=dCurve.getLength(),dT=new T.Vector3(),dP=new T.Vector3(),dB=new T.Vector3(),dN=new T.Vector3(),dUp=new T.Vector3(0,1,0);
+  function dragonUpdate(time,still){
+    var t=still?0:time*.001,speed=24,head=((t*speed)/dLen+.12)%1,k=0,sp=4.6;
+    function put(x,y,z,sz,al){dPos[k*3]=x;dPos[k*3+1]=y;dPos[k*3+2]=z;dSize[k]=sz;dAlpha[k]=al;k++}
+    for(var i=0;i<dragonPts;i++){
+      var u=((head-i*sp/dLen)%1+1)%1;dCurve.getPointAt(u,dP);dCurve.getTangentAt(u,dT);dB.crossVectors(dT,dUp).normalize();dN.crossVectors(dB,dT).normalize();
+      var f=i/dragonPts,wave=Math.sin(i*.3-t*3)*(3+10*f),lift=Math.cos(i*.24-t*2.3)*(2+6*f);
+      var x=dP.x+dB.x*wave+dN.x*lift,y=dP.y+dB.y*wave+dN.y*lift,z=dP.z+dB.z*wave+dN.z*lift;
+      var taper=i<5?1:(1-f*.8),sz=i===0?30:(i<4?17:10.5*taper+2.4);
+      put(x,y,z,sz,i===0?1:(.95-f*.7));
+      if(i>6&&i%finEvery===0&&i<dragonPts*.8){var fin=6+12*Math.sin(f*3.14159);put(x+dB.x*fin,y+dB.y*fin+2,z+dB.z*fin,5,.7-f*.4);put(x-dB.x*fin,y-dB.y*fin+2,z-dB.z*fin,5,.7-f*.4)}}
+    // head: two horns swept back, and a snout
+    dCurve.getPointAt(head,dP);dCurve.getTangentAt(head,dT);dB.crossVectors(dT,dUp).normalize();
+    put(dP.x-dT.x*5+dB.x*7,dP.y-dT.y*5+7,dP.z-dT.z*5+dB.z*7,7,.95);put(dP.x-dT.x*5-dB.x*7,dP.y-dT.y*5+7,dP.z-dT.z*5-dB.z*7,7,.95);
+    put(dP.x+dT.x*9,dP.y+dT.y*9,dP.z+dT.z*9,11,.9);put(dP.x-dT.x*11-dB.x*13,dP.y-dT.y*11+13,dP.z-dT.z*11-dB.z*13,4.6,.8);put(dP.x-dT.x*11+dB.x*13,dP.y-dT.y*11+13,dP.z-dT.z*11+dB.z*13,4.6,.8);
+    for(;k<dragonCount;k++){dPos[k*3+1]=-9999;dAlpha[k]=0;dSize[k]=0}
+    dGeo.attributes.position.needsUpdate=true;dGeo.attributes.size.needsUpdate=true;dGeo.attributes.alpha.needsUpdate=true;
+    dragonM.uniforms.uScale.value=Hh/(2*Math.tan(cam.fov*Math.PI/360))}
+  var sciPos=new T.Vector3();
+  function sciUpdate(time,still,inRide){
+    var t=still?0:time*.001,cl=Math.hypot(cam.position.x,cam.position.z)||1,dx=cam.position.x/cl,dz=cam.position.z/cl;
+    stars.rotation.y=t*.004;
+    moonG.position.set(-dx*900+(-dz)*260,330+Math.sin(t*.05)*6,-dz*900+dx*260);
+    moon.rotation.y=t*.03;moonRing.rotation.z=t*.02;moonRing2.rotation.z=-t*.015;
+    moon2.position.set(Math.cos(t*.22)*170,Math.sin(t*.22)*28,Math.sin(t*.22)*170);
+    for(var g=0;g<gyros.length;g++){gyros[g].ring.rotation.z=t*.5*gyros[g].sp;gyros[g].h.rotation.y+=still?0:.0016*gyros[g].sp}
+    dragonUpdate(time,still)}
+  function sciStyle(dark){
+    starM.color.set(dark?0xffffff:C.near);starM.opacity=dark?.9:.38;starM.blending=T.NormalBlending;
+    moonM.color.set(dark?0xe6edff:C.near);moon2M.color.set(dark?0xcfd8f2:C.mid);
+    moonHalo.material.color.set(dark?0x9dbbff:0xffffff);moonHalo.material.opacity=dark?.5:.85;
+    ringMat.color.set(dark?0xbcd2ff:C.near);ringMat.opacity=dark?.5:.55;
+    gyroM.color.set(dark?C.glass:C.line);gyroM.opacity=dark?.85:.75;gyroM.blending=dark?T.AdditiveBlending:T.NormalBlending;
+    dragonM.uniforms.uColor.value.set(dark?C.glass:C.line);dragonM.uniforms.uHead.value.set(dark?0xffffff:0x0b2f8a);dragonM.blending=dark?T.AdditiveBlending:T.NormalBlending;
+    [starM,ringMat,gyroM,dragonM,moonHalo.material].forEach(function(m){m.needsUpdate=true})}
   function fxStyle(dark){
     var bl=dark?T.AdditiveBlending:T.NormalBlending,c=C.line;
     beamM.color.set(c);beamM.blending=bl;beamM.opacity=dark?.7:.6;
@@ -170,7 +250,7 @@
     radarM.color.set(c);radarM.blending=bl;
     polyM.color.set(c);polyM.blending=bl;polyM.opacity=dark?.8:.7;polyM.needsUpdate=true;
     linkM.color.set(c);linkM.opacity=dark?.5:.6;pulseM.color.set(dark?C.glass:C.line);
-    fx.forEach(function(m){m.needsUpdate=true})}
+    fx.forEach(function(m){m.needsUpdate=true});sciStyle(dark)}
   var fogN0=300,fogF0=680; // base fog (set by recolor); the finale pushes it back
   function recolor(){
     readColors();var dark=root.getAttribute('data-theme')==='dark';
@@ -377,7 +457,7 @@
     if(spin&&sH){var sy=scrollY-(sTop-innerHeight),sf=sy/Math.max(1,sH),sOn=sf>.18&&sf<.95;if(sOn!==spin.classList.contains('on'))spin.classList.toggle('on',sOn)} // the coordinates tag
     ringUpdate(time,inRide);
     orb.rotation.y=time*.0004;ring.rotation.z=time*.0006;orb.position.y=230+Math.sin(time*.0009)*3;
-    specks.rotation.y=time*.00003;fxUpdate(time,reduce)}
+    specks.rotation.y=time*.00003;fxUpdate(time,reduce);sciUpdate(time,reduce,inRide)}
   var raf=0,run=true,last=0,lastR=0;
   function snap(){rideQ=null;curPose=tgtPose.slice();cr=tr;px=tx;vr.v=vx.v=0;vPose.forEach(function(v){v.v=0})}
   function frame(time){

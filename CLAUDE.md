@@ -44,6 +44,8 @@ any agent working on this repo, kept short on purpose so it costs little context
 
 - **The old flat-aurora site** is commit `f3b9f08` (`git checkout f3b9f08`). There is no `/v2/` any more: the 3D city is the home page.
 
+- **Version history:** on a major overhaul or a notable new feature, add a row to the README's *Version history* table and bump the number (a small fix gets none). Say what changed in one line and give the commit.
+
 ## Privacy (public repo, never break these)
 
 - Don't use the owner's work Google account or work Drive for anything on this site.
