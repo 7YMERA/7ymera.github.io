@@ -1,5 +1,7 @@
-"""Flatten a SketchUp Collada (.dae) into the compact mesh json used by v2/v2-3d.js.
-Usage: python3 -I convert_dae.py model.dae out.json "glassSubstr1,glassSubstr2" ["skipSubstr1,skipSubstr2"] | list"""
+"""Flatten a SketchUp Collada (.dae) scene graph and save every triangle, per material, as a pickle (metres, Y up).
+Step 1 for very large models: then run convert-dae-crop.py on the pickle to cut one building out and simplify it.
+Usage: python3 -I convert-dae-dump.py model.dae out.pkl ""   (the last argument is unused here)
+Needs numpy. The pickle is your own output: only load pickles you made."""
 import sys, json, base64, collections
 import numpy as np
 import xml.etree.ElementTree as ET
