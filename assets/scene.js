@@ -199,6 +199,49 @@
     sci.add(g);return g}
   addGyro(new T.Vector3(0,128,0),22,1);
   addGyro(LM[1].top.clone().add(new T.Vector3(0,-14,0)),12,1.4);
+  // ===== RAIL: a sky line through the landmarks and a ring round the Petronas Towers, with trains =====
+  // Both lines were checked with raycasts against the whole district: nothing within 4.5 units at these heights.
+  // The sky line runs Petronas > Menara KL > Merdeka 118 > The Exchange 106 > back. One "hero" train on it is driven by the scroll during the drone
+  // flight, so the camera can chase it from Menara KL to Merdeka (see place()); every other train runs on time.
+  var skyCurve=new T.CatmullRomCurve3([[41,0],[20,100],[-30,190],[-40,270],[10,340],[110,330],[200,260],[290,150],[300,60],[200,0],[100,-20]].map(function(p){return A0(p[0],p[1],95)}),true,'catmullrom',.5);
+  var ringPts=[];for(var rgi=0;rgi<12;rgi++){var rga=rgi/12*6.2832;ringPts.push(A0(Math.cos(rga)*41,Math.sin(rga)*41,17))}
+  var ringCurve=new T.CatmullRomCurve3(ringPts,true,'catmullrom',.5);
+  var skyLen=skyCurve.getLength(),ringLen=ringCurve.getLength();
+  var tgtV=new T.Vector3(),chH=new T.Vector3(),chT=new T.Vector3(),chS=new T.Vector3(),chP=new T.Vector3(),chL=new T.Vector3();
+  var railM=new T.MeshBasicMaterial({transparent:true,opacity:.9,fog:true}),railM2=new T.MeshBasicMaterial({transparent:true,opacity:.35,fog:true});
+  var skyTube=new T.Mesh(new T.TubeGeometry(skyCurve,260,.5,5,true),railM),ringTube=new T.Mesh(new T.TubeGeometry(ringCurve,120,.45,5,true),railM);
+  var skyGlow=new T.Mesh(new T.TubeGeometry(skyCurve,200,1.6,5,true),railM2);
+  scene.add(skyTube,ringTube,skyGlow);
+  // short pillars under the ring line
+  var pillarM=new T.MeshBasicMaterial({transparent:true,opacity:.7}),pillars=new T.InstancedMesh(new T.CylinderGeometry(.35,.5,17,6),pillarM,24),pdm=new T.Object3D();
+  for(var pi=0;pi<24;pi++){var pp=ringCurve.getPointAt(pi/24);pdm.position.set(pp.x,8.5,pp.z);pdm.updateMatrix();pillars.setMatrixAt(pi,pdm.matrix)}
+  scene.add(pillars);
+  // trains: cars are instanced boxes (long axis Z) plus a lit window strip on each
+  var CARL=6.4,CARGAP=.7,trains=[{c:skyCurve,len:skyLen,cars:5,sp:34,off:0,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:34,off:.5,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:0,off:0,hero:true},{c:ringCurve,len:ringLen,cars:4,sp:-15,off:0,hero:false},{c:ringCurve,len:ringLen,cars:4,sp:15,off:.5,hero:false}];
+  if(innerWidth<=820)trains.splice(1,1);
+  var nCars=0;trains.forEach(function(t){t.i0=nCars;nCars+=t.cars});
+  var carBodyM=new T.MeshBasicMaterial({fog:true}),carWinM=new T.MeshBasicMaterial({fog:true}),carStripeM=new T.MeshBasicMaterial({fog:true});
+  var carBody=new T.InstancedMesh(new T.BoxGeometry(2.5,2.7,CARL),carBodyM,nCars),carWin=new T.InstancedMesh(new T.BoxGeometry(2.62,.85,CARL-1.2),carWinM,nCars),carStripe=new T.InstancedMesh(new T.BoxGeometry(2.58,.32,CARL),carStripeM,nCars);
+  carBody.frustumCulled=carWin.frustumCulled=carStripe.frustumCulled=false;scene.add(carBody,carWin,carStripe);
+  var headGlowM=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xfff0c0,opacity:.9}),headGlows=trains.map(function(){var sp=new T.Sprite(headGlowM);sp.scale.set(15,15,1);scene.add(sp);return sp});
+  var trD=new T.Object3D(),trP=new T.Vector3(),trT=new T.Vector3(),trTarget=new T.Vector3(),heroS=0,heroOn=false;
+  var tK=0,tM=0;(function(){var kp=A0(-12,285,95),mp=A0(82,364,95),bk=1e9,bm=1e9,q=new T.Vector3();for(var i=0;i<400;i++){skyCurve.getPointAt(i/400,q);var dk=Math.hypot(q.x-kp.x,q.z-kp.z),dm=Math.hypot(q.x-mp.x,q.z-mp.z);if(dk<bk){bk=dk;tK=i/400}if(dm<bm){bm=dm;tM=i/400}}})();
+  function railUpdate(time,still){
+    var t=still?0:time*.001;
+    for(var k=0;k<trains.length;k++){var tr=trains[k];if(tr.hero&&!heroOn){headGlows[k].visible=false;for(var z=0;z<tr.cars;z++){trD.position.set(0,-9999,0);trD.updateMatrix();carBody.setMatrixAt(tr.i0+z,trD.matrix);carWin.setMatrixAt(tr.i0+z,trD.matrix);carStripe.setMatrixAt(tr.i0+z,trD.matrix)}continue}
+      var head=tr.hero?heroS:(((tr.off+(t*tr.sp)/tr.len)%1)+1)%1;
+      for(var c=0;c<tr.cars;c++){var u=(((head-c*(CARL+CARGAP)/tr.len)%1)+1)%1;tr.c.getPointAt(u,trP);tr.c.getTangentAt(u,trT);
+        trD.position.copy(trP);trTarget.copy(trP).add(trT);trD.lookAt(trTarget);trD.updateMatrix();
+        carBody.setMatrixAt(tr.i0+c,trD.matrix);
+        trD.position.y+=.35;trD.updateMatrix();carWin.setMatrixAt(tr.i0+c,trD.matrix);
+        trD.position.y-=1.05;trD.updateMatrix();carStripe.setMatrixAt(tr.i0+c,trD.matrix)}
+      tr.c.getPointAt(head,trP);tr.c.getTangentAt(head,trT);headGlows[k].visible=true;headGlows[k].position.copy(trP).addScaledVector(trT,CARL*.55).add(new T.Vector3(0,.3,0))}
+    carBody.instanceMatrix.needsUpdate=true;carWin.instanceMatrix.needsUpdate=true;carStripe.instanceMatrix.needsUpdate=true}
+  function railStyle(dark){
+    railM.color.set(dark?C.glass:C.line);railM.blending=dark?T.AdditiveBlending:T.NormalBlending;railM2.color.set(dark?C.glass:C.line);railM2.blending=dark?T.AdditiveBlending:T.NormalBlending;railM2.opacity=dark?.25:.3;pillarM.color.set(dark?C.mid:C.near);
+    carBodyM.color.set(dark?0x1b3d73:0xf6fbff);carWinM.color.set(dark?0xfff1b8:0x0b2a6b);carStripeM.color.set(dark?C.glass:0x1559c9);
+    headGlowM.opacity=dark?.95:.5;headGlowM.color.set(dark?0xfff0c0:0xffffff);
+    [railM,railM2,headGlowM].forEach(function(m){m.needsUpdate=true})}
   var sciPos=new T.Vector3();
   function sciUpdate(time,still,inRide){
     var t=still?0:time*.001,cl=Math.hypot(cam.position.x,cam.position.z)||1,dx=cam.position.x/cl,dz=cam.position.z/cl;
@@ -206,14 +249,15 @@
     moonG.position.set(-dx*900+(-dz)*260,330+Math.sin(t*.05)*6,-dz*900+dx*260);
     moon.rotation.y=t*.03;moonRing.rotation.z=t*.02;moonRing2.rotation.z=-t*.015;
     moon2.position.set(Math.cos(t*.22)*170,Math.sin(t*.22)*28,Math.sin(t*.22)*170);
-    for(var g=0;g<gyros.length;g++){gyros[g].ring.rotation.z=t*.5*gyros[g].sp;gyros[g].h.rotation.y+=still?0:.0016*gyros[g].sp}}
+    for(var g=0;g<gyros.length;g++){gyros[g].ring.rotation.z=t*.5*gyros[g].sp;gyros[g].h.rotation.y+=still?0:.0016*gyros[g].sp}
+    railUpdate(time,still)}
   function sciStyle(dark){
     starM.color.set(dark?0xffffff:C.near);starM.opacity=dark?.9:.38;starM.blending=T.NormalBlending;
     moonM.color.set(dark?0xe6edff:C.near);moon2M.color.set(dark?0xcfd8f2:C.mid);
     moonHalo.material.color.set(dark?0x9dbbff:0xffffff);moonHalo.material.opacity=dark?.5:.85;
     ringMat.color.set(dark?0xbcd2ff:C.near);ringMat.opacity=dark?.5:.55;
     gyroM.color.set(dark?C.glass:C.line);gyroM.opacity=dark?.85:.75;gyroM.blending=dark?T.AdditiveBlending:T.NormalBlending;
-    [starM,ringMat,gyroM,moonHalo.material].forEach(function(m){m.needsUpdate=true})}
+    [starM,ringMat,gyroM,moonHalo.material].forEach(function(m){m.needsUpdate=true});railStyle(dark)}
   function fxStyle(dark){
     var bl=dark?T.AdditiveBlending:T.NormalBlending,c=C.line;
     beamM.color.set(c);beamM.blending=bl;beamM.opacity=dark?.7:.6;
@@ -270,7 +314,7 @@
     ['notes',.9,-.5,P(0,0,98,130,98,74,.22)],
     ['studied',.14,-.5,function(){return UTP[utpIdx]}],   // UTP: the shot follows the group you pick
     ['studied',.9,-.5,function(){return UTP[utpIdx]}],
-    ['merdekastage',.3,-.5,P(MER[0],MER[1],125,150,6,122,.22)],  // a lead-in all of its own: the tower looming over its label
+    ['merdekastage',.3,-.5,P(MER[0],MER[1],128,135,16,78,-.2)],  // a lead-in all of its own: the tower looming over its label
     ['toolkit',.1,-.5,P(MER[0],MER[1],120,125,5,118,0)],    // Skills: Merdeka 118 between the two columns, base first ...
     ['toolkit',.38,-.5,P(MER[0],MER[1],140,300,95,96,0)], // ... the whole building ...
     ['toolkit',.66,-.5,P(MER[0],MER[1],172,150,150,150,0)],// ... the upper half ...
@@ -337,7 +381,7 @@
       KF.push(['bridge',A(70,0,56),A(0,0,50),1.7,0],['over',A(30,0,66),A(-20,0,66),1.9,Math.PI],['gap',A(0,0,76),A(-60,-10,84),1.7,Math.PI*2]); // barrel roll through the gap
       KF.push(['exit',A(-46,-4,104),A(-92,34,104),1.5,Math.PI*2],['turn1',A(-72,28,132),A(-84,110,126),1.5,Math.PI*2],['turn2',A(-70,96,160),A(-40,200,140),1.4,Math.PI*2],
               ['out',A(-30,190,170),A(K.u,K.w,120),1.1,Math.PI*2]);
-      spiral('k',K,27,21,44,124,-100,620,20,10,2.2,0);KF[KF.length-1][0]='kEnd';                          // Menara KL: two turns up to the pod
+      spiral('k',K,27,21,44,124,-100,620,20,10,2.2,0);KF[KF.length-1][0]='kEnd';KF[KF.length-1][3]=9;                          // Menara KL: two turns up to the pod
       // Merdeka: arrive from the near side (230 deg) and go round clockwise until the camera's direction of travel points at The Exchange (42 deg), so it flies straight on
       spiral('m',C,60,46,96,214,230,-678,24,12,2.4,0);
       (function(){var th=42*Math.PI/180,rx=Math.cos(th),rz=Math.sin(th),tx=Math.sin(th),tz=-Math.cos(th);
@@ -459,7 +503,17 @@
       cam.position.copy(rideP.getPoint(u));
       if(cr>HOLD0){ // the hold: the scene drifts slowly sideways as you scroll, so the whole map is shown while the page moves on
         var hf=clamp((cr-HOLD0)/(1-HOLD0),0,1),tg0=rideT.getPoint(u);tv.copy(tg0).sub(cam.position).normalize();tv.cross(cam.up);cam.position.addScaledVector(tv,(hf-.5)*(mobile?70:150));cam.position.y+=hf*(mobile?-40:14)}
-      cam.lookAt(rideT.getPoint(u));cam.setViewOffset(W,Hh,0,0,W,Hh);
+      // THE CHASE: between the end of the Menara KL climb and the start of the Merdeka climb the "hero" train on the sky line is driven by the scroll
+      // (from the Menara KL stop to the Merdeka stop) and the camera blends onto a chase position behind and above it.
+      var cwA=KI['kEnd'],cwB=KI['m0'],cw=0;heroOn=false;tgtV.copy(rideT.getPoint(u));
+      if(cwA!=null&&cwB!=null&&cr>cwA&&cr<cwB){
+        var cf=(cr-cwA)/(cwB-cwA),csm=function(x){x=clamp(x,0,1);return x*x*(3-2*x)};cw=csm(cf/.3)*csm((1-cf)/.3);
+        var cd=tM-tK;if(cd<0)cd+=1;heroS=((tK+cd*csm(cf))%1+1)%1;heroOn=cw>.02;
+        if(heroOn){skyCurve.getPointAt(heroS,chH);skyCurve.getTangentAt(heroS,chT);chS.crossVectors(chT,cam.up).normalize();
+          chP.copy(chH).addScaledVector(chT,-26).addScaledVector(cam.up,10).addScaledVector(chS,11*Math.sin((time||0)*.0009));
+          chL.copy(chH).addScaledVector(chT,18);
+          cam.position.lerp(chP,cw);tgtV.lerp(chL,cw)}}
+      cam.lookAt(tgtV);cam.setViewOffset(W,Hh,0,0,W,Hh);
       // finale: widen the view (phones a lot, desktop a little) and push the fog back, so the whole skyline is in frame
       var ke=KI['sweep1']!=null?KI['sweep1']:(KI['pass']!=null?KI['pass']:.7),ke2=KI['end']||HOLD0,fs=clamp((cr-ke-.4*(ke2-ke))/(.6*(ke2-ke)),0,1);fs=fs*fs*(3-2*fs);
       var kk=clamp(1-cr/.06,0,1),fv=42+(mobile?30:10)*fs+30*kk*kk; /* kk: a quick punch-in as the flight begins */if(Math.abs(fv-cam.fov)>.01){cam.fov=fv;cam.updateProjectionMatrix()}
@@ -472,7 +526,7 @@
       var turn=v1.length()*v2.length()>1e-6?v1.cross(v2).y/(v1.length()*v2.length()):0;roll+=(clamp(-turn*(DIST?7:3),DIST?-.42:-.14,DIST?.42:.14)-roll)*(1-Math.exp(-dtF*3));cam.rotateZ(roll*(1-fs)+rollAt(u)); // drone bank into turns, the scripted barrel roll, and a level horizon for the finale
       hudUpdate(true,u,cr)
     }else{
-      rideQ=null;if(cam.fov!==42){cam.fov=42;cam.updateProjectionMatrix()}if(scene.fog){scene.fog.near=fogN0;scene.fog.far=fogF0}
+      rideQ=null;heroOn=false;if(cam.fov!==42){cam.fov=42;cam.updateProjectionMatrix()}if(scene.fog){scene.fog.near=fogN0;scene.fog.far=fogF0}
       var q=curPose,ang=(q[2]+px*7)*Math.PI/180;
       cam.position.set(q[0]+Math.cos(ang)*q[3],q[4],q[1]+Math.sin(ang)*q[3]);cam.lookAt(q[0],q[5],q[1]);
       cam.setViewOffset(W,Hh,-q[6]*W,-q[7]*Hh,W,Hh);hudUpdate(false)
