@@ -203,7 +203,7 @@
   // Both lines were checked with raycasts against the whole district: nothing within 4.5 units at these heights.
   // The sky line runs Petronas > Menara KL > Merdeka 118 > The Exchange 106 > back. One "hero" train on it is driven by the scroll during the drone
   // flight, so the camera can chase it from Menara KL to Merdeka (see place()); every other train runs on time.
-  var skyCurve=new T.CatmullRomCurve3([[41,0],[20,100],[-30,190],[-40,270],[10,340],[110,330],[200,260],[290,150],[300,60],[200,0],[100,-20]].map(function(p){return A0(p[0],p[1],95)}),true,'catmullrom',.5);
+  var skyCurve=new T.CatmullRomCurve3([[41,0,88],[20,100,88],[-30,190,58],[-40,270,58],[10,340,58],[110,330,58],[200,260,58],[290,150,58],[300,60,58],[200,0,58],[100,-20,58]].map(function(p){return A0(p[0],p[1],p[2])}),true,'catmullrom',.5);
   var ringPts=[];for(var rgi=0;rgi<12;rgi++){var rga=rgi/12*6.2832;ringPts.push(A0(Math.cos(rga)*41,Math.sin(rga)*41,17))}
   var ringCurve=new T.CatmullRomCurve3(ringPts,true,'catmullrom',.5);
   var skyLen=skyCurve.getLength(),ringLen=ringCurve.getLength();
@@ -225,7 +225,7 @@
   carBody.frustumCulled=carWin.frustumCulled=carStripe.frustumCulled=false;scene.add(carBody,carWin,carStripe);
   var headGlowM=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xfff0c0,opacity:.9}),headGlows=trains.map(function(){var sp=new T.Sprite(headGlowM);sp.scale.set(15,15,1);scene.add(sp);return sp});
   var trD=new T.Object3D(),trP=new T.Vector3(),trT=new T.Vector3(),trTarget=new T.Vector3(),heroS=0,heroOn=false;
-  var tK=0,tM=0;(function(){var kp=A0(-12,285,95),mp=A0(82,364,95),bk=1e9,bm=1e9,q=new T.Vector3();for(var i=0;i<400;i++){skyCurve.getPointAt(i/400,q);var dk=Math.hypot(q.x-kp.x,q.z-kp.z),dm=Math.hypot(q.x-mp.x,q.z-mp.z);if(dk<bk){bk=dk;tK=i/400}if(dm<bm){bm=dm;tM=i/400}}})();
+  var tK=0,tM=0;(function(){var kp=A0(-12,285,58),mp=A0(82,364,58),bk=1e9,bm=1e9,q=new T.Vector3();for(var i=0;i<400;i++){skyCurve.getPointAt(i/400,q);var dk=Math.hypot(q.x-kp.x,q.z-kp.z),dm=Math.hypot(q.x-mp.x,q.z-mp.z);if(dk<bk){bk=dk;tK=i/400}if(dm<bm){bm=dm;tM=i/400}}})();
   function railUpdate(time,still){
     var t=still?0:time*.001;
     for(var k=0;k<trains.length;k++){var tr=trains[k];if(tr.hero&&!heroOn){headGlows[k].visible=false;for(var z=0;z<tr.cars;z++){trD.position.set(0,-9999,0);trD.updateMatrix();carBody.setMatrixAt(tr.i0+z,trD.matrix);carWin.setMatrixAt(tr.i0+z,trD.matrix);carStripe.setMatrixAt(tr.i0+z,trD.matrix)}continue}
@@ -540,11 +540,17 @@
   function snap(){rideQ=null;curPose=tgtPose.slice();cr=tr;px=tx;vr.v=vx.v=0;vPose.forEach(function(v){v.v=0})}
   function frame(time){
     var dt=clamp((time-last)/1000,.001,.05);last=time;dtF=dt;tick++;
-    if(reduce)snap();else{for(var j=0;j<8;j++)curPose[j]=damp(curPose[j],tgtPose[j],vPose[j],.55,dt);cr=clamp(damp(cr,tr,vr,.75,dt),0,1);px=damp(px,tx,vx,.6,dt)}
-    var moving=Math.abs(tr-cr)>.0003;for(var j2=0;j2<8;j2++)if(Math.abs(tgtPose[j2]-curPose[j2])>.02){moving=true;break}
+    if(reduce)snap();else{for(var j=0;j<8;j++)curPose[j]=damp(curPose[j],tgtPose[j],vPose[j],.55,dt);var cr0=cr;cr=clamp(damp(cr,tr,vr,.75,dt),0,1);if(flying){var cap=.085*dt;if(cr-cr0>cap){cr=cr0+cap;vr.v=Math.min(vr.v,cap/dt)}else if(cr0-cr>cap){cr=cr0-cap;vr.v=Math.max(vr.v,-cap/dt)}} /* speed limit: a fast flick can't whip the camera */px=damp(px,tx,vx,.6,dt)}
+    // Idle drift: in the drone flight, when the reader has stopped scrolling, the page creeps forward by itself so slow scrolling never shows as a stutter.
+    if(flying&&enter&&!reduce&&!document.hidden&&time-lastUser>900&&scrollY<enter.offsetTop+enter.offsetHeight-innerHeight-6){
+      driftAcc+=(mobile?30:42)*clamp((time-lastUser-900)/1500,0,1)*dt;
+      if(driftAcc>=1){var dy=Math.floor(driftAcc);driftAcc-=dy;scrollBy({top:dy,behavior:'instant'})}}
+    var moving=Math.abs(tr-cr)>(flying?.00002:.0003);for(var j2=0;j2<8;j2++)if(Math.abs(tgtPose[j2]-curPose[j2])>.02){moving=true;break}
     // While the reader is only reading, redraw at about 15 fps (the beams and pulses still drift); while scrolling, every frame.
     if(moving||need||(!reduce&&time-lastR>66)){place(reduce?0:time);renderer.render(scene,cam);need=false;lastR=time}
     raf=run?requestAnimationFrame(frame):0}
+  var lastUser=0,driftAcc=0;
+  ['wheel','touchstart','touchmove','keydown','pointerdown'].forEach(function(n){addEventListener(n,function(){lastUser=performance.now();driftAcc=0},{passive:true})});
   function retarget(){if(document.documentElement.scrollHeight!==lastLay)layoutKeys();tgtPose=dirPose(scrollY);tr=rideProg();need=true}
   addEventListener('scroll',retarget,{passive:true});
   // the UTP coverflow says which group is in front; the shot follows it

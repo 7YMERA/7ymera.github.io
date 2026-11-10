@@ -1342,3 +1342,26 @@ section.block { padding-block: 80px 8px; }
 .me-card .ms-slide.on::-webkit-scrollbar-thumb { background: var(--line); border-radius: 6px; }
 .me-card .ms-slides::after { content: ""; position: absolute; left: 0; right: 10px; bottom: 0; height: 38px; background: linear-gradient(to bottom, transparent, var(--surface, #fff)); pointer-events: none; opacity: 0; transition: opacity .2s; }
 .me-card .ms-slides.more::after { opacity: 1; }
+
+/* ---------- skill tree as a metro map (assets/metro-map.js) ---------- */
+.skilltree.has-metro .st-root{display:none}
+.skilltree.has-metro .st-branches{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;padding:0;margin:-1px;border:0}
+.skilltree.has-metro .st-branches::before,.skilltree.has-metro .st-branches::after{display:none}
+.metro{display:grid;gap:14px}
+.mm-scroll{overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;border-radius:18px;background:color-mix(in srgb,var(--bg) 82%,transparent);border:2px solid var(--line)}
+.mm-svg{display:block;width:100%;min-width:900px;height:auto;font-family:var(--f-display,inherit)}
+.mm-line{fill:none;stroke-width:9;stroke-linecap:round}
+.mm-term{fill:var(--bg);stroke-width:5}
+.mm-badge text{fill:#fff;font-size:15px;font-weight:700}
+.mm-dot{fill:var(--bg);stroke:var(--ink);stroke-width:3.5}
+.mm-x{fill:var(--bg);stroke:var(--ink);stroke-width:3.5}
+.mm-st.x .mm-dot{stroke-width:3.5}
+.mm-lab{fill:var(--ink);font-size:13.5px;font-weight:600;paint-order:stroke;stroke:var(--bg);stroke-width:4px;stroke-linejoin:round}
+.mm-st:focus-visible{outline:none}.mm-st:focus-visible .mm-dot{stroke-width:6}
+.mm-st:hover .mm-lab{fill:var(--accent)}
+.mm-o{stroke:var(--bg);stroke-width:1}
+.mm-hint{margin:0;font-size:.8125rem;color:var(--muted)}
+.mm-fact{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:16px;border:2px dashed var(--ink);background:color-mix(in srgb,var(--bg) 88%,transparent);font-size:.9375rem}
+.mm-fact b{font-family:var(--f-display)}
+.mm-tkt{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:var(--ink);color:var(--bg);flex:none}
+@media (max-width:760px){.mm-svg{min-width:1000px}.mm-lab{font-size:15px}}
