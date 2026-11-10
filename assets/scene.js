@@ -38,7 +38,7 @@
   var pd=new T.Mesh(new T.BoxGeometry(110,7,54),podium);pd.position.set(0,3.5,0);g.add(pd);
   var pd2=new T.Mesh(new T.BoxGeometry(70,5,34),podium);pd2.position.set(0,9.5,30);g.add(pd2);
   }
-  // The real model: a SketchUp export of the Petronas Towers, converted by tools/convert-klcc.py into v2/klcc.json
+  // The real model: a SketchUp export of the Petronas Towers, converted by tools/convert-obj.py into assets/city/klcc.json
   function b64(str,Type){var bin=atob(str),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Type(u.buffer)}
   var SC=H/444.138; // one scale for every landmark, so their real heights compare truthfully
   var bodyM=mat('near',{side:T.DoubleSide}),glassModelM=mat('ring',{side:T.DoubleSide,emissive:0xffffff,emissiveIntensity:.3});
@@ -51,10 +51,10 @@
       out.scale.setScalar(SC);out.position.set(x,0,z);out.rotation.y=ry;g.add(out);if(done)done();recolor();need=true;
     }).catch(function(){if(fallback)fallback();recolor();need=true});
   }
-  loadModel('klcc.json',0,0,0,bodyM,procedural);          // Petronas Twin Towers (SketchUp export, see tools/convert-obj.py)
-  loadModel('menara_kl.json',-95,-70,0,bodyM,null,function(){g.remove(kl)}); // Menara KL; replaces the stand-in cylinder tower below once loaded
-  loadModel('merdeka118.json',-10,-95,-.5,bodyM,null);
-  loadModel('exchange106.json',60,-125,.4,bodyM,null);   // The Exchange 106, cropped and simplified (tools/convert-dae-crop.py)  // Merdeka PNB 118 (SketchUp Collada, see tools/convert-dae.py)
+  loadModel('assets/city/klcc.json',0,0,0,bodyM,procedural);          // Petronas Twin Towers (SketchUp export, see tools/convert-obj.py)
+  loadModel('assets/city/menara_kl.json',-95,-70,0,bodyM,null,function(){g.remove(kl)}); // Menara KL; replaces the stand-in cylinder tower below once loaded
+  loadModel('assets/city/merdeka118.json',-10,-95,-.5,bodyM,null);
+  loadModel('assets/city/exchange106.json',60,-125,.4,bodyM,null);   // The Exchange 106, cropped and simplified (tools/convert-dae-crop.py)  // Merdeka PNB 118 (SketchUp Collada, see tools/convert-dae.py)
   var gr=new T.Mesh(new T.CircleGeometry(1400,64),ground);gr.rotation.x=-Math.PI/2;gr.position.y=-.2;g.add(gr);
   // city ring
   var s=11;function rnd(){s=(s*9301+49297)%233280;return s/233280}
@@ -63,7 +63,7 @@
   // Windows come from two facade textures laid on the walls in the shader: a glass grid by day, lit offices at night.
   var loader=new T.TextureLoader();
   function wrapTex(t){t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=4;return t}
-  var cityU={uNight:{value:0},uDay:{value:wrapTex(loader.load('facade_glass.jpg'))},uNightTex:{value:wrapTex(loader.load('facade_night.jpg'))}};
+  var cityU={uNight:{value:0},uDay:{value:wrapTex(loader.load('assets/city/facade_glass.jpg'))},uNightTex:{value:wrapTex(loader.load('assets/city/facade_night.jpg'))}};
   // Facade shader: windows on the walls, in world space, so every building (the OSM city and the landmark models alike) shows its floors.
   function facade(m){
     m.onBeforeCompile=function(sh){
@@ -81,7 +81,7 @@
   var cityM=facade(mat('mid'));
   facade(bodyM); // all four landmarks share one material and the facade shader, so none is bluer than the rest
   var cityMesh=null;
-  fetch('kl_city.json').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+  fetch('assets/city/kl_city.json').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
     var q=new Int16Array(b64(d.positions,Uint8Array).buffer),pos=new Float32Array(q.length);for(var k=0;k<q.length;k++)pos[k]=q[k]*d.scale;
     var geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));geo.setIndex(new T.BufferAttribute(b64(d.indices,Uint16Array),1));
     geo=geo.toNonIndexed();geo.computeVertexNormals(); // flat normals: the lighting needs them
@@ -161,7 +161,7 @@
     if(glassModelM){glassModelM.emissive.set(C.ring);glassModelM.emissiveIntensity=dark?.8:.12}ringM.color.set(C.ring);specks.material.color.set(C.ring);
     var f=col('sky2');scene.fog=new T.Fog(f,dark?260:300,dark?640:680);
     fxStyle(dark);amb.intensity=dark?.45:.5;sun.intensity=dark?.55:.55;sun.color.set(dark?0x9cc8ff:0xffffff)}
-  recolor();window.addEventListener('v2theme',function(){recolor();need=true});
+  recolor();window.addEventListener('scenetheme',function(){recolor();need=true});
   new MutationObserver(function(){recolor();need=true}).observe(root,{attributes:true,attributeFilter:['data-theme']}); // the page's own theme button flips data-theme
   var W=0,Hh=0,mobile=false,need=true,px=0,tx=0,cp=0,tp=0,cr=0,tr=0,vp={v:0},vr={v:0},vx={v:0},dtF=.016;
   function size(){W=innerWidth;Hh=innerHeight;mobile=W<=820;renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile?1.5:2));renderer.setSize(W,Hh,false);cam.aspect=W/Hh;cam.updateProjectionMatrix();need=true}
@@ -281,5 +281,5 @@
   document.addEventListener('visibilitychange',function(){run=!document.hidden;if(run&&!raf){last=performance.now();raf=requestAnimationFrame(frame)}});
   root.classList.add('gl'); // first: it makes #enter visible, and the scroll maths below needs its real position
   size();buildRide();tp=cp=prog();tr=cr=rideProg();raf=requestAnimationFrame(frame);
-  if(/[?&]dbg/.test(location.search))window.__v2={scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam)}};
+  if(/[?&]dbg/.test(location.search))window.__scene={scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam)}};
 })();

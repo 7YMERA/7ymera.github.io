@@ -15,7 +15,7 @@ Plain HTML, CSS and JavaScript, served by GitHub Pages. There is no framework, n
 1. [How it started](#how-it-started)
 2. [What's on the page](#whats-on-the-page)
 3. [21st.dev components, ported to plain JS](#21stdev-components-ported-to-plain-js) ← start here if you're an agent borrowing code
-4. [The /v2/ preview: a flight over Kuala Lumpur](#the-v2-preview-a-flight-over-kuala-lumpur)
+4. [The 3D city and the flight](#the-3d-city-and-the-flight)
 5. [Rules that kept it fast](#rules-that-kept-it-fast)
 6. [The notes](#the-notes)
 7. [Repository layout](#repository-layout)
@@ -59,7 +59,7 @@ The home page, top to bottom:
 | **Selected work** | **Journey** |
 | ![Selected work](docs/screens/work.webp) | ![Journey](docs/screens/journey.webp) |
 
-Also on every page: a light/dark switch (light by default, choice remembered), **Ctrl+K** quick jump, a site-wide aurora background, and on phones a bottom dock that can be tucked away.
+Also on every page: a light/dark switch (light by default, choice remembered), **Ctrl+K** quick jump, an aurora background on the notes pages (the home page has the 3D city instead, see below), and on phones a bottom dock that can be tucked away.
 
 ---
 
@@ -72,7 +72,7 @@ Every interactive piece below started as a React + Tailwind component on [21st.d
 | # | 21st.dev component | Our version | File | Where it's used | Status |
 |---|---|---|---|---|---|
 | 1 | **Tilted Grid Hero** | A single row of screenshots running round the inside of a cylinder ("Spin" reel) | `assets/curved-reel.js` | Behind the opening | ✅ live |
-| 2 | **Aurora Background** | A pre-rendered aurora *image* that slides with `transform` | CSS `.sky`, `.aurora` + `assets/aurora-*.webp` | Every page | ✅ live |
+| 2 | **Aurora Background** | A pre-rendered aurora *image* that slides with `transform` | CSS `.sky`, `.aurora` + `assets/aurora-*.webp` | Notes pages (the home page now has the 3D city) | ✅ live |
 | 3 | **Tumble Deck Showcase** | A scroll-driven stack of cards that tip forward one by one | `assets/tumble-deck.js` | — | 💤 in the repo, not on the page |
 | 4 | **Image Stream Hero** | One-sided corridor of images flowing towards you | `assets/image-stream.js` | Notes page header (`notes/`) | ✅ live |
 | 5 | **Circular Testimonials** | Photo carousel with side photos tilted behind, text that blurs in word by word | `extras.js` (*This is me* block) | REQ-001 card | ✅ live |
@@ -179,43 +179,31 @@ Every interactive piece below started as a React + Tailwind component on [21st.d
 
 ---
 
-## The /v2/ preview: a flight over Kuala Lumpur
+## The 3D city and the flight
 
-`/v2/` is a second, unlinked version of the **whole home page** (`v2/`). It is a preview: the main site is untouched. It is the real home page (every section, component and script of `index.html`) over a WebGL scene of Kuala Lumpur (three.js from cdnjs) that the page scroll drives, finished with a flight over the city between *Journey* and *Contact*. It went through many versions in two days. This section is the story from the first rough low-poly version to the current one, and the notes you need to change it.
+The home page (`index.html`) sits over a WebGL scene of Kuala Lumpur (three.js from cdnjs) that the page scroll drives. Between *Journey* and *Contact* there is a long scroll **flight** over the city. It started as a separate preview called "v2"; it is now simply the site. The site before it (the same page over a flat aurora) is kept as the git tag **`classic-site`**: `git checkout classic-site` gets it back.
 
-### v2 is v1 plus the city (the merge)
-
-| From v1 (the home page) | From v2 (the preview) |
+| What | Where |
 |---|---|
-| All the content and its readability: opening, hero, notes, studied, skill tree, work bento, Pulse, journey, contact, dock, quick jump | The 3D city behind everything, orbiting as you scroll |
-| Every component: spin reel, glass folders, coverflow, image stream, before/after sliders, timeline, carousel | The blue paper palette (light) and the night navy (dark, kept from v2) |
-| Fonts: Bricolage Grotesque, Albert Sans, JetBrains Mono (readable, and they suit the look) | Hard offset shadows and 2 px blue borders on every section panel; pixel labels (Pixelify Sans) only on the flight HUD |
-| v1's way of delivering a portfolio (sections, cards, bento), not v2's small info windows | The scroll flight over the Petronas Towers, Merdeka 118 and the skyline, with captions, HUD and landmark tags |
+| The page (all sections, the flight markup, the `<canvas id="gl">`) | `index.html`, edited by hand (nothing is generated) |
+| Scene, flight, HUD | `assets/scene.js` |
+| Palette, section panels, opening plates, flight and HUD styles; loads after `site.css` | `assets/scene.css` |
+| Landmark models, the city, facade textures | `assets/city/` |
 
-**Before and after** (same scroll positions, dark mode, 1300 px): the classic site on the left, `/v2/` on the right.
-
-| Classic site (v1) | `/v2/` (merged) |
-|---|---|
-| ![v1 opening](docs/screens/ba-v1-open.webp) | ![v2 opening](docs/screens/ba-v2-open.webp) |
-| ![v1 title line](docs/screens/ba-v1-title.webp) | ![v2 title line](docs/screens/ba-v2-title.webp) |
-| ![v1 selected work](docs/screens/ba-v1-work.webp) | ![v2 selected work](docs/screens/ba-v2-work.webp) |
-| ![v1 journey](docs/screens/ba-v1-journey.webp) | ![v2 journey](docs/screens/ba-v2-journey.webp) |
+![The opening in dark mode](docs/screens/city-opening-dark.webp)
 
 | | |
 |---|---|
-| ![v2 opening in dark mode](docs/screens/v2-opening-dark.webp) | ![v2 hero line over the city, dark](docs/screens/v2-hero-dark.webp) |
-| ![v2 journey section on its panel, light](docs/screens/v2-journey-light.webp) | ![The flight, head-on at the skybridge, dark](docs/screens/v2-flight-bridge.webp) |
+| ![Hero line over the city, dark](docs/screens/city-hero-dark.webp) | ![The flight, head-on at the skybridge, dark](docs/screens/city-flight-bridge.webp) |
+| ![Journey on its panel, light](docs/screens/city-journey-light.webp) | ![The flight's last shot: all four landmarks tagged, light](docs/screens/city-flight-wide.webp) |
 
-![The flight's last shot: all four landmarks tagged, light](docs/screens/v2-flight-wide.webp)
-
-- **Built, not hand-edited.** `v2/index.html` is generated by `python3 tools/build-v2.py` from `index.html`. It rewrites `assets/` and `notes/` paths to `../`, swaps the aurora for the canvas, adds `v2/merge.css`, a *Classic site* link, the flight section (`tools/v2-flight.html`) and the scripts. **After you change `index.html`, run the script and commit `v2/index.html` too.** v1's own CSS and JS files (`assets/*.css`, `assets/*.js`) are shared, not copied.
-- **`v2/merge.css`** re-skins v1 by overriding its tokens (`--bg`, `--ink`, `--accent`, ...) with v2's blues, so every v1 component follows with no per-component work. It also holds the panel style, the opening's plates and the flight/HUD styles. It loads after `site.css`.
+- **`assets/scene.css`** re-skins `site.css` by overriding its tokens (`--bg`, `--ink`, `--accent`, ...) with the blues, so every component follows with no per-component work. It also holds the panel style (opaque, a hard offset shadow, 2 px blue border), the opening's plates and the flight/HUD styles.
 - **Readability rules:** sections are opaque panels (93 % paper), no `backdrop-filter`; the opening's words get a plate or a halo because they sit straight on the city.
-- **Theme:** v1's own button flips `data-theme`; `v2-3d.js` watches the attribute (MutationObserver) and recolours the scene. Scene colours come from CSS variables (`--sky1`, `--far`, `--mid`, `--near`, `--glass`, `--orb`, `--ring`, `--fx`).
+- **Theme:** the site's own button flips `data-theme`; `scene.js` watches the attribute (MutationObserver) and recolours the scene. Scene colours come from CSS variables (`--sky1`, `--far`, `--mid`, `--near`, `--glass`, `--orb`, `--ring`, `--fx`).
 - **Performance:** while you only read, the scene redraws at about 15 fps; while you scroll, every frame. The dock hides during the flight so it doesn't cover the captions. *Skip the flight* is a big button at the top of the flight.
-- **Notes pages** (`notes/*.html`) are still plain v1; the *Notes* cards in v2 link to them.
+- **Notes pages** (`notes/*.html`) still use the plain aurora look and `site.css` only; the *Notes* cards on the home page link to them.
 
-### How it got here
+### How it got here (the first 3D preview was called "v2")
 
 | # | Version | What it was | Commit |
 |---|---|---|---|
@@ -227,17 +215,17 @@ Every interactive piece below started as a React + Tailwind component on [21st.d
 | 6 | **The real city** | An OpenStreetMap city (FBX) replaced the random boxes: true footprints and heights. A facade shader gave every wall windows: a glass grid by day, lit offices at night. | `6818a90` |
 | 7 | **The first flight** | A long, slow scroll flight: down between the Petronas Towers, straight up their sides, level with the skybridge, up to the crowns, then across to Merdeka 118 and up its face, over the top and out. The satellite "map" under the city was removed (the owner didn't like the map look). | `6797f26` |
 | 8 | **The calm one-way flight** | Re-routed after feedback: one direction only (no spinning back under the bridge), head-on at the skybridge, over the bridge and through the gap, one slow turn up Merdeka 118, over The Exchange 106, then a wide shot of all four. Smoother camera, one material for every landmark, and a sci-fi layer (HUD, landmark tags, beams, links, radar ring, wireframe shapes) inspired by `0z5a.github.io`. | `c5ca5b5` |
-| 9 | **v1 + v2 merged** | The whole home page over the 3D city, the flight as an interlude before Contact. The old stand-alone v2 (floating windows, `v2.css`, `v2.js`, the 2D canvas skyline) was removed; find it at `c5ca5b5`. | this commit |
+| 9 | **One page** | The whole home page over the 3D city, the flight as an interlude before Contact, still at `/v2/` while it was reviewed. The old stand-alone preview (floating windows, the 2D canvas skyline) was removed; find it at `c5ca5b5`. | `a1478db` |
+| 10 | **No more versions** | The 3D city became the home page itself, at `/`. `/v2/` and the generator script were removed; the aurora-only site that came before is kept as the git tag `classic-site`. | this commit |
 
 Things tried and dropped along the way, still in git history: a clothes-rail component port for the Work section (`5c68a02`, reverted in `2ecf38a`), and a lab of four motion ideas that was never merged (`lab/ideas/index.html` on branch `claude/wonderful-galileo-bgrct6`).
 
 ### How it works
 
-- **Files:** `v2/index.html` (generated), `v2/merge.css`, `v2/v2-3d.js` (the WebGL scene, flight and HUD), the model and texture files, and `tools/build-v2.py` + `tools/v2-flight.html` (the generator and the flight markup).
-- **Fallback:** `v2-3d.js` adds `html.gl` only when WebGL and three.js load. Without it the page is plain v1 on a flat background and `#enter` is hidden.
-- **Two scroll phases.** From the top of the page to just before `#enter`, the camera orbits the skyline (`orbitPose()`), slowly, over the whole home page. Inside `#enter` (a 780vh section with sticky captions) the camera leaves the orbit and follows a path (`buildRide()`): named waypoints in `KF`, each with a camera position, a look-at point and a slow factor, written in `(u, w, y)` (u along the gap between the towers, w across it). Each stretch gets scroll share = its length × its slow factor, and `pchip()` joins them into a smooth monotone map, so speed is even and slow where the factor is high. The camera follows the scroll with a critically damped spring (`damp()`), not a fixed lerp, so wheel notches glide.
+- **Fallback:** `scene.js` adds `html.gl` only when WebGL and three.js load. Without it the page is the plain site on a flat background and `#enter` (the flight) is hidden.
+- **Two scroll phases.** From the top of the page to just before `#enter`, the camera orbits the skyline (`orbitPose()`), slowly, over the whole home page. Inside `#enter` (a 780vh section with sticky captions) the camera leaves the orbit and follows a path (`buildRide()`): named waypoints in `KF`, each with a camera position, a look-at point and a slow factor, written in `(u, w, y)` (u along the gap between the towers, w across it). The scroll position is mapped to the path by length times the slow factors, with a monotone cubic, so the speed never jumps.
 - **Models** are loaded as small JSON (`loadModel()`): positions as float32 or int16 and triangle indices, base64. All landmarks share one scale (`SC = 132 / 444.138`) so their real heights compare truthfully (Merdeka 118 is taller than the towers). Each model has a `body` and a `glass` part so the light and dark themes recolour them.
-- **City:** `kl_city.json` (about 535 KB, 34k vertices) is real OpenStreetMap geometry centred on KLCC. Buildings under the hand-made landmarks are removed. Flat normals are computed on load.
+- **City:** `assets/city/kl_city.json` (about 535 KB, 34k vertices) is real OpenStreetMap geometry centred on KLCC. Buildings under the hand-made landmarks are removed. Flat normals are computed on load.
 - **Facade shader:** `facade()` patches a Lambert material in `onBeforeCompile`. Windows are laid on walls from world position and a derivative-based normal, with `facade_glass.jpg` by day and `facade_night.jpg` as emissive at night. Roofs are left plain.
 - **Performance:** windows over the scene are opaque (no `backdrop-filter`); the renderer pixel ratio is capped (1.5 on phones); with reduced motion it only renders on scroll or resize; the loop pauses when the tab is hidden. Not yet measured on a real phone.
 
@@ -245,20 +233,20 @@ Things tried and dropped along the way, still in git history: a clothes-rail com
 
 | Source | Tool | Output |
 |---|---|---|
-| SketchUp OBJ (Petronas Towers, Menara KL) | `tools/convert-obj.py model.obj out.json "glassMaterials" "yMin,yMax"` | `v2/klcc.json`, `v2/menara_kl.json` |
-| SketchUp Collada (Merdeka 118) | `tools/convert-dae.py model.dae out.json "glassSubstr" "skipSubstr"` | `v2/merdeka118.json` |
-| Huge Collada precinct (Exchange 106) | `tools/convert-dae-dump.py` then `tools/convert-dae-crop.py dump.pkl out.json grid x0,x1,z0,z1 "glass" "skip"` | `v2/exchange106.json` |
-| OpenStreetMap city FBX | `tools/convert-city.py city.fbx out.json` | `v2/kl_city.json` |
+| SketchUp OBJ (Petronas Towers, Menara KL) | `tools/convert-obj.py model.obj out.json "glassMaterials" "yMin,yMax"` | `assets/city/klcc.json`, `assets/city/menara_kl.json` |
+| SketchUp Collada (Merdeka 118) | `tools/convert-dae.py model.dae out.json "glassSubstr" "skipSubstr"` | `assets/city/merdeka118.json` |
+| Huge Collada precinct (Exchange 106) | `tools/convert-dae-dump.py` then `tools/convert-dae-crop.py dump.pkl out.json grid x0,x1,z0,z1 "glass" "skip"` | `assets/city/exchange106.json` |
+| OpenStreetMap city FBX | `tools/convert-city.py city.fbx out.json` | `assets/city/kl_city.json` |
 
 A `.skp` file cannot be read here: export it from SketchUp as OBJ, DAE or glTF first.
 
 ### Changing the flight
 
-- **Longer or shorter:** change `height` on `html.gl .enter` in `v2.css` (currently `780vh`).
-- **More time somewhere:** raise that waypoint's slow factor (last number) in `KF` in `v2-3d.js`.
-- **Different route:** edit `KF`. Camera and look-at share the same knots (uniform Catmull-Rom), so they stay in step. Open the page with `?dbg` to get `window.__v2` (camera, scene, `rideP`, `rideU`, `draw(c)`) for checking: sample `rideP` and raycast from each point to measure clearance (the current route stays at least 7 units from every wall; that is the width of the gap).
-- **Where the flight sits:** `tools/build-v2.py` inserts `tools/v2-flight.html` before `<section class="contact">`. Move it by changing that one line.
-- **Captions and HUD:** the `.ride-cap` paragraphs in `index.html` are matched to the `CAPS` pairs in `v2-3d.js` by order; their `data-from`/`data-to` are filled in at build time. The right-hand rail, the altitude read-out and the landmark tags (`LM`) are built from them.
+- **Longer or shorter:** change `height` on `html.gl .enter` in `assets/scene.css` (currently `780vh`).
+- **More time somewhere:** raise that waypoint's slow factor (last number) in `KF` in `assets/scene.js`.
+- **Different route:** edit `KF`. Camera and look-at share the same knots (uniform Catmull-Rom), so they stay in step. Open the page with `?dbg` to get `window.__scene` (camera, scene, `rideP`, `rideU`, `draw(c)`) for checking: sample `rideP` and raycast from each point to measure clearance (the current route stays at least 7 units from every wall; that is the width of the gap).
+- **Where the flight sits:** the `<section class="enter" id="enter">` block in `index.html`, just before `<section class="contact">`. Move the block to move the flight.
+- **Captions and HUD:** the `.ride-cap` paragraphs in `index.html` are matched to the `CAPS` pairs in `scene.js` by order; their `data-from`/`data-to` are filled in by the script. The right-hand rail, the altitude read-out and the landmark tags (`LM`) are built from them.
 
 ### Lessons and gotchas
 
@@ -270,12 +258,12 @@ A `.skp` file cannot be read here: export it from SketchUp as OBJ, DAE or glTF f
 - The city mesh needs normals (computed after `toNonIndexed()`), or Lambert lighting turns it black.
 - If you point the look-at at the empty column between the towers, the towers fall outside the field of view; aim at a crown instead.
 - The FBX ground plane maps its satellite photo with a stretched UV range (u -0.084 to 1.102, v 0.083 to 0.863). The photo was removed from the page, but that is how to line it up if it comes back.
-- Bump `KEY` in `tools/build-v2.py` (the `?v=` on `merge.css` and `v2-3d.js`) after changes, then run the script. v1's own files keep v1's key.
-- `pulse.js` finds `pulse-data.json` next to itself, so it works from `/` and `/v2/`; any new relative `fetch()` in a shared script should do the same.
+- Bump the `?v=` on every CSS and JS link (including `scene.css` and `scene.js`) after changes, as everywhere else.
+- `pulse.js` finds `pulse-data.json` next to itself; any new relative `fetch()` in a shared script should do the same.
 
 ### Credit and licence (to confirm)
 
-The landmark models (`klcc`, `menara_kl`, `merdeka118`, `exchange106`), the city FBX and the facade textures were supplied by the owner, who says they are all free to download. They arrived without readme or licence files, so the authors and exact licences are still unrecorded. If an author asks for credit or removal, or delete the `.json` and facade `.jpg` files in `v2/`; the page falls back to the hand-built tower and omits the rest.
+The landmark models (`klcc`, `menara_kl`, `merdeka118`, `exchange106`), the city FBX and the facade textures were supplied by the owner, who says they are all free to download. They arrived without readme or licence files, so the authors and exact licences are still unrecorded. If an author asks for credit or removal, delete the `.json` and facade `.jpg` files in `assets/city/`; the page falls back to the hand-built tower and omits the rest.
 
 ---
 

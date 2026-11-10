@@ -18,6 +18,13 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-11 · One site: the 3D city is the home page, no more /v2/
+- Owner asked to merge v1 and v2 into a single site with no version name. The old flat-aurora site is kept as git tag **`classic-site`** (`f3b9f08`); to get it back: `git checkout classic-site`.
+- `/` is now the 3D city version: `index.html` carries the canvas, the flight section and the three.js / `scene.js` scripts directly (no generator). Moved: `v2/v2-3d.js` to `assets/scene.js`, `v2/merge.css` to `assets/scene.css`, models and facade textures to `assets/city/`. Removed: `v2/`, `tools/build-v2.py`, `tools/v2-flight.html`, the "Classic site" nav link, the noindex tag and the before/after screenshots. The og/twitter tags are back (the preview had stripped them). Theme colour is now the blue. `tools/check.js` no longer lists `v2/`; the screenshots were renamed `city-*`. README section is now "The 3D city and the flight"; `CLAUDE.md` updated. Cache key `20261111c` everywhere.
+- Fixed a miss from my last push: `main` still had the DevFest slide and its (deleted) photo, so the live page had a broken image. That commit had only updated the generated page. Both the DevFest removal and the curtain photos are now in `index.html`.
+- Notes pages keep the plain aurora look (they use only `site.css`); the home page is blue. Open: re-skin the notes pages to match if wanted.
+- Checked 1300 px light/dark and 390 px: no page errors, no sideways scroll; `tools/check.js` 28/28. Real-phone frame rate still untested. Old links to `/v2/` now 404.
+
 ## 2026-11-11 · Photos into the curtain, DevFest slide removed
 - Owner: the DevFest photo is just their lanyard, not an event they took part in, so the "At DevFest" slide (claim) and `assets/me/devfest-lanyard.webp` are removed (the carousel is back to 7 slides). `portrait-white-wall.webp` joins the left curtain column and `on-a-call.webp` the right one: a fifth photo in each repeat group (`--k:4`), so they cycle in with the graduation photos. `v2/index.html` regenerated.
 - Checked 1300 px and 390 px: all new images load, no errors; `tools/check.js` 30/30. No CSS or JS changed, so no cache-key bump.
