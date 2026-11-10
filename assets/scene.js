@@ -6,6 +6,8 @@
   var BASE=(((document.currentScript||document.querySelector('script[src*="scene.js"]')||{}).src)||'').replace(/scene\.js.*$/,'');
   // data-flight-only on <html> (the /flight/ page): no orbit phase and no page around it, just the flight, driven by scroll.
   var ONLY=root.hasAttribute('data-flight-only');
+  // ?bg=district: the compact one-mesh KLCC district (assets/city/klcc_district.json, tools/convert-klcc-dae.js) replaces the OSM city and the four landmark models.
+  var DIST=/[?&]bg=district/.test(location.search);
   var renderer;
   try{renderer=new T.WebGLRenderer({canvas:cv,alpha:true,antialias:true,powerPreference:'low-power'})}catch(e){return}
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -55,10 +57,12 @@
       out.scale.setScalar(SC);out.position.set(x,0,z);out.rotation.y=ry;g.add(out);if(done)done();recolor();need=true;
     }).catch(function(){if(fallback)fallback();recolor();need=true});
   }
+  if(!DIST){
   loadModel(BASE+'city/klcc.json',0,0,0,bodyM,procedural);          // Petronas Twin Towers (SketchUp export, see tools/convert-obj.py)
   loadModel(BASE+'city/menara_kl.json',-95,-70,0,bodyM,null,function(){g.remove(kl)}); // Menara KL; replaces the stand-in cylinder tower below once loaded
   loadModel(BASE+'city/merdeka118.json',-10,-95,-.5,bodyM,null);
   loadModel(BASE+'city/exchange106.json',60,-125,.4,bodyM,null);   // The Exchange 106, cropped and simplified (tools/convert-dae-crop.py)  // Merdeka PNB 118 (SketchUp Collada, see tools/convert-dae.py)
+  }
   var gr=new T.Mesh(new T.CircleGeometry(1400,64),ground);gr.rotation.x=-Math.PI/2;gr.position.y=-.2;g.add(gr);
   // city ring
   var s=11;function rnd(){s=(s*9301+49297)%233280;return s/233280}
@@ -85,7 +89,7 @@
   var cityM=facade(mat('mid'));
   facade(bodyM); // all four landmarks share one material and the facade shader, so none is bluer than the rest
   var cityMesh=null;
-  fetch(BASE+'city/kl_city.json').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+  fetch(BASE+(DIST?'city/klcc_district.json':'city/kl_city.json')).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
     var q=new Int16Array(b64(d.positions,Uint8Array).buffer),pos=new Float32Array(q.length);for(var k=0;k<q.length;k++)pos[k]=q[k]*d.scale;
     var geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));geo.setIndex(new T.BufferAttribute(b64(d.indices,Uint16Array),1));
     geo=geo.toNonIndexed();geo.computeVertexNormals(); // flat normals: the lighting needs them
@@ -96,7 +100,7 @@
   var shaft=new T.Mesh(new T.CylinderGeometry(2,3.4,120,8),towerB);shaft.position.y=60;
   var pod=new T.Mesh(new T.CylinderGeometry(9,6,9,10),glassM);pod.position.y=118;
   var ant=new T.Mesh(new T.CylinderGeometry(.3,1,50,6),towerB);ant.position.y=148;
-  kl.add(shaft,pod,ant);g.add(kl);
+  kl.add(shaft,pod,ant);if(!DIST)g.add(kl);
   // orb and ring
   var orb=new T.Group();orb.position.set(-57,230,131);
   orb.add(new T.Mesh(new T.SphereGeometry(12,18,14),orbM));
@@ -113,6 +117,7 @@
     {name:'Merdeka PNB 118',real:679,top:new T.Vector3(-6,194,-102)},
     {name:'Menara Kuala Lumpur',real:421,top:new T.Vector3(-95,130,-70)},
     {name:'The Exchange 106',real:445,top:new T.Vector3(61,136,-132)}];
+  if(DIST){LM[1].top.set(-217,194,303);LM[2].top.set(-221,127,181);LM[3].top.set(157,132,304)} // the district model puts the landmarks just south of the district, at 60 % of their real offsets
   var fx=[],fxGroup=new T.Group();scene.add(fxGroup);
   function fade(){var c=document.createElement('canvas');c.width=4;c.height=64;var x=c.getContext('2d'),gr=x.createLinearGradient(0,64,0,0);
     gr.addColorStop(0,'#fff');gr.addColorStop(.35,'#9a9a9a');gr.addColorStop(1,'#000');x.fillStyle=gr;x.fillRect(0,0,4,64);return new T.CanvasTexture(c)}
@@ -253,9 +258,12 @@
   var MC={u:-80,w:-63};                                   // Merdeka 118's axis
   function arcAt(deg,r,y,ty){var a=deg*Math.PI/180;return [A(MC.u+Math.cos(a)*r,MC.w+Math.sin(a)*r,y),A(MC.u,MC.w,ty)]}
   // [name, camera position, look-at point, slow factor of the stretch that FOLLOWS it (bigger = more scroll spent there)]
-  var KF=null,CAPS=[['start','front'],['front','over'],['over','out'],['out','m4'],['m4','pass'],['pass','end']];
+  var KF=null,CAPS=DIST?[['start','front'],['front','over'],['over','out'],['out','end']]:[['start','front'],['front','over'],['over','out'],['out','m4'],['m4','pass'],['pass','end']];
   function buildKF(){
     var o=orbitPose(1,0),m1=arcAt(90,55,96,112),m2=arcAt(130,55,116,132),m3=arcAt(180,55,138,150),m4=arcAt(230,55,166,178),m5=arcAt(270,55,200,205);
+    if(DIST){KF=[['start',o.pos,o.tgt,1.0],['swing',A(135,-175,96),A(0,0,64),1.4],['side',A(185,-95,88),A(0,0,62),1.4],['front',A(165,-25,72),A(0,0,56),1.4],
+      ['bridge',A(70,0,56),A(0,0,50),1.7],['over',A(30,0,66),A(-20,0,66),1.9],['gap',A(0,0,76),A(-60,-10,84),1.7],
+      ['out',A(-34,-6,100),A(-12,285,100),1.6],['end',A(175,-250,330),A(-12,90,60),1.5]];return}
     KF=[
       ['start',o.pos,o.tgt,1.0],
       ['swing',A(135,-175,96),A(0,0,64),1.4],
@@ -293,6 +301,8 @@
     rideU=pchip(CX,CM);
     KI={};KF.forEach(function(k,j){KI[k[0]]=CX[j]});
     for(i=0;i<caps.length&&i<CAPS.length;i++){caps[i].dataset.from=Math.max(.012,KI[CAPS[i][0]]);caps[i].dataset.to=i===CAPS.length-1?1.01:KI[CAPS[i][1]]}
+    if(DIST){var lc=caps[3];if(lc){lc.innerHTML='<b>Four landmarks</b><span>Petronas, Merdeka 118, Menara KL and The Exchange 106, from the compact district model. Scroll back up to fly it again.</span>';lc.dataset.to=1.01}
+      for(i=4;i<caps.length;i++){caps[i].dataset.from=9;caps[i].dataset.to=9}}
     hudBuild()}
   var rideU=function(c){return c};
   // ---- HUD (DOM) ----
