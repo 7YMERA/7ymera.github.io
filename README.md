@@ -55,7 +55,7 @@ The REQ-001 card, the "I write the spec. Then I build it." line and the teal-and
 | **2.3** | 11 Nov | No panels behind any block, so the city shows through everywhere, phones included. The content goes behind the top bar. | `0b93ad8`, `813d708` |
 | **2.4** | 12 Nov | More love for Merdeka 118 (a lead-in and a flight that climbs it), the flight reworked (no wall clips, no whips, captions in step), a new finale: a horizontal skyline, or a full zoom-out on phones. | `d6e08db`, `a37d9c2`, `e4acb09` |
 | **2.5** | 12 Nov | **The sci-fi layer:** stars, a ringed moon with a moon of its own, gyroscope rings round the Petronas and Merdeka crowns, and a dragon of light looping the skyline. | `1be0d1f` |
-| **2.6** | 12 Nov | **The drone flight.** A new route: a spiral climb up the Petronas Towers, Menara KL and Merdeka 118, a barrel roll through the skybridge gap, a spiral dive down The Exchange 106; a zoom out then zoom in from Journey; a pilot cockpit overlay (compass, artificial horizon, speed, REC timer); and a finale that holds the skyline much longer. | `HASH` |
+| **2.6** | 12 Nov | **The drone flight.** A new route: a spiral climb up the Petronas Towers, Menara KL and Merdeka 118, a barrel roll through the skybridge gap, a spiral dive down The Exchange 106; a zoom out then zoom in from Journey; a pilot cockpit overlay (compass, artificial horizon, speed, REC timer); and a finale that holds the skyline much longer. | `3354488` |
 
 Tried and dropped along the way (still in git history): a clothes-rail project gallery (`5c68a02`), a ring and then a conveyor of floating screens, a Masjid Negara you could fly into, and a 5 second phone loading screen. The longer story of the 3D city is in *The 3D city and the flight* below.
 
