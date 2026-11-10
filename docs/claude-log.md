@@ -28,6 +28,11 @@ where the last chat stopped without re-reading everything.
 - Self-contained: doesn't touch `site.css` or `extras.js`, so no cache-key bump. Links back to the main site and notes with `../`.
 - Open: owner to review `/v2/`, then decide whether to swap it in as the homepage. Add a card for UTP studies if wanted. Pixelify Sans loads from Google Fonts; self-host if that matters. The main site gained Pulse and the Roblox card in the meantime; `/v2/` doesn't have them yet.
 
+## 2026-11-10 · Glass lab prototype
+- `lab/glass.html` (not linked from the site) and `assets/glass.js`: a reeded-glass panel in one WebGL shader, no library. Sliders for ribs, bend and frost; Aurora or app screenshot as the picture.
+- Draws only on screen and in a visible tab; reduced motion = one still frame. Not yet checked at 4x CPU throttle on a real phone.
+- Open: decide whether it goes on the page (hero or Notes header) or stays a lab.
+
 ## 2026-11-08 · Pulse status report, Roblox card
 - New `#pulse` section before Journey: stat tiles, project board, commit map and a recent-activity feed (live GitHub events with a snapshot fallback). Code in `assets/pulse.js`, data in `assets/pulse-data.json`.
 - Added the EagleSan Sandbox (Roblox) card to Work (now a row of three minis) and a Journey entry. The repo is private, so it has no repo link.
