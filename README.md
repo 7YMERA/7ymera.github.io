@@ -181,7 +181,7 @@ Every interactive piece below started as a React + Tailwind component on [21st.d
 
 ## The 3D city and the flight
 
-The home page (`index.html`) sits over a WebGL scene of Kuala Lumpur (three.js from cdnjs) that the page scroll drives. Between *Journey* and *Contact* there is a long scroll **flight** over the city. It started as a separate preview called "v2"; it is now simply the site. The site before it (the same page over a flat aurora) is kept as the git tag **`classic-site`**: `git checkout classic-site` gets it back.
+The home page (`index.html`) sits over a WebGL scene of Kuala Lumpur (three.js from cdnjs) that the page scroll drives. Between *Journey* and *Contact* there is a long scroll **flight** over the city. It started as a separate preview called "v2"; it is now simply the site. The site before it (the same page over a flat aurora) is commit **`f3b9f08`** in git history: `git checkout f3b9f08` gets it back (or `git show f3b9f08:index.html`).
 
 | What | Where |
 |---|---|
@@ -216,7 +216,7 @@ The home page (`index.html`) sits over a WebGL scene of Kuala Lumpur (three.js f
 | 7 | **The first flight** | A long, slow scroll flight: down between the Petronas Towers, straight up their sides, level with the skybridge, up to the crowns, then across to Merdeka 118 and up its face, over the top and out. The satellite "map" under the city was removed (the owner didn't like the map look). | `6797f26` |
 | 8 | **The calm one-way flight** | Re-routed after feedback: one direction only (no spinning back under the bridge), head-on at the skybridge, over the bridge and through the gap, one slow turn up Merdeka 118, over The Exchange 106, then a wide shot of all four. Smoother camera, one material for every landmark, and a sci-fi layer (HUD, landmark tags, beams, links, radar ring, wireframe shapes) inspired by `0z5a.github.io`. | `c5ca5b5` |
 | 9 | **One page** | The whole home page over the 3D city, the flight as an interlude before Contact, still at `/v2/` while it was reviewed. The old stand-alone preview (floating windows, the 2D canvas skyline) was removed; find it at `c5ca5b5`. | `a1478db` |
-| 10 | **No more versions** | The 3D city became the home page itself, at `/`. `/v2/` and the generator script were removed; the aurora-only site that came before is kept as the git tag `classic-site`. | this commit |
+| 10 | **No more versions** | The 3D city became the home page itself, at `/`. `/v2/` and the generator script were removed; the aurora-only site that came before is commit `f3b9f08`. | this commit |
 
 Things tried and dropped along the way, still in git history: a clothes-rail component port for the Work section (`5c68a02`, reverted in `2ecf38a`), and a lab of four motion ideas that was never merged (`lab/ideas/index.html` on branch `claude/wonderful-galileo-bgrct6`).
 
