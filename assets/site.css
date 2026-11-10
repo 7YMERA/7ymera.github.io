@@ -1342,3 +1342,13 @@ section.block { padding-block: 80px 8px; }
 .me-card .ms-slide.on::-webkit-scrollbar-thumb { background: var(--line); border-radius: 6px; }
 .me-card .ms-slides::after { content: ""; position: absolute; left: 0; right: 10px; bottom: 0; height: 38px; background: linear-gradient(to bottom, transparent, var(--surface, #fff)); pointer-events: none; opacity: 0; transition: opacity .2s; }
 .me-card .ms-slides.more::after { opacity: 1; }
+
+/* metro-map backdrop behind the skill tree: decorative only, the centre stays clear for Merdeka Maybank 118 */
+#toolkit{position:relative}
+#toolkit>.wrap{position:relative;z-index:1}
+.mm-bgs{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.mm-bg{position:absolute;left:0;top:0;width:100%;height:min(100%,1800px);opacity:.42;fill:none}
+.mm-bg path{stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.mm-bg circle{fill:var(--bg);stroke:var(--ink);stroke-width:3}
+.mm-bg .x{stroke-width:4}
+@media (max-width:900px){.mm-bgs{display:none}}
