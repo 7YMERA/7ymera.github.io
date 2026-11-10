@@ -18,6 +18,14 @@ where the last chat stopped without re-reading everything.
 
 
 
+
+---
+
+## 2026-11-13 · Flight entry no longer snaps, metro lines as a backdrop, slower idle drift
+- Owner's video (a phone-camera clip of the page; no speech tool here, so I read the frames plus their description): scrolling past "Started at UTP" the camera snapped out, then snapped in. Two causes: the Journey zoom-out key sat 150 px after the Exchange shot (a 400-unit move in one wheel notch), and the flight began with the lens jumping from 42 to 72 degrees. Fix in `scene.js`: zoom-out key moved to 62% of Journey (about 1000 px each way), and the flight's push-in now starts and ends at the normal lens.
+- Idle drift slowed to 28 px/s (20 on phones).
+- Metro map is now only a faint SVG backdrop behind the original skill tree (`.mm-bgs` in `index.html`, styles at the end of `site.css`, hidden on phones). Merdeka 118 stays in the middle. Key `20261113c`.
+- Open: owner to feel-test the entry transition and the drift speed.
 ---
 
 ## 2026-11-13 · Lower sky rail, calmer slow scrolling (metro-map skill tree tried, then reverted)

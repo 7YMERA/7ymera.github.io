@@ -323,8 +323,8 @@
     ['work',.5,-.5,P(KLT[0],KLT[1],64,215,82,66,.1)],
     ['pulse',.5,-.5,P(0,0,200,250,110,66,0)],
     ['journey',.1,-.5,P(EXC[0],EXC[1],140,78,8,76,-.22)], // Journey: The Exchange 106, climbing as the years go by
-    ['journey',.4,-.5,P(EXC[0],EXC[1],176,118,96,122,-.22)],
-    ['journey',1,-2.6,P(0,0,320,500,300,50,0)],                 // pull right back (zoom out) ...
+    ['journey',.3,-.5,P(EXC[0],EXC[1],176,118,96,122,-.22)],
+    ['journey',.62,0,P(0,0,320,500,300,50,0)],                 // pull right back (zoom out) ...
     ['enter',0,-1,END]                                         // ... then in to where the flight starts (zoom in)                                     // the flight starts here
   ];
   var KEYS=[],lastLay=-1;
@@ -516,7 +516,7 @@
       cam.lookAt(tgtV);cam.setViewOffset(W,Hh,0,0,W,Hh);
       // finale: widen the view (phones a lot, desktop a little) and push the fog back, so the whole skyline is in frame
       var ke=KI['sweep1']!=null?KI['sweep1']:(KI['pass']!=null?KI['pass']:.7),ke2=KI['end']||HOLD0,fs=clamp((cr-ke-.4*(ke2-ke))/(.6*(ke2-ke)),0,1);fs=fs*fs*(3-2*fs);
-      var kk=clamp(1-cr/.06,0,1),fv=42+(mobile?30:10)*fs+30*kk*kk; /* kk: a quick punch-in as the flight begins */if(Math.abs(fv-cam.fov)>.01){cam.fov=fv;cam.updateProjectionMatrix()}
+      var kk=Math.sin(Math.PI*clamp(cr/.07,0,1)),fv=42+(mobile?30:10)*fs+26*kk*kk; /* kk: a gentle push-in that starts and ends at the normal lens, so entering the flight never snaps */if(Math.abs(fv-cam.fov)>.01){cam.fov=fv;cam.updateProjectionMatrix()}
       if(scene.fog){scene.fog.near=fogN0+260*fs;scene.fog.far=fogF0+560*fs}
       // Ease the rotation: the view turns towards where it should look with a short lag (time constant about 0.2 s), so a sharp
       // turn in the route can never show as a jolt. Reset when the flight starts, and when snapping.
@@ -543,7 +543,7 @@
     if(reduce)snap();else{for(var j=0;j<8;j++)curPose[j]=damp(curPose[j],tgtPose[j],vPose[j],.55,dt);var cr0=cr;cr=clamp(damp(cr,tr,vr,.75,dt),0,1);if(flying){var cap=.085*dt;if(cr-cr0>cap){cr=cr0+cap;vr.v=Math.min(vr.v,cap/dt)}else if(cr0-cr>cap){cr=cr0-cap;vr.v=Math.max(vr.v,-cap/dt)}} /* speed limit: a fast flick can't whip the camera */px=damp(px,tx,vx,.6,dt)}
     // Idle drift: in the drone flight, when the reader has stopped scrolling, the page creeps forward by itself so slow scrolling never shows as a stutter.
     if(flying&&enter&&!reduce&&!document.hidden&&time-lastUser>900&&scrollY<enter.offsetTop+enter.offsetHeight-innerHeight-6){
-      driftAcc+=(mobile?30:42)*clamp((time-lastUser-900)/1500,0,1)*dt;
+      driftAcc+=(mobile?20:28)*clamp((time-lastUser-900)/1500,0,1)*dt;
       if(driftAcc>=1){var dy=Math.floor(driftAcc);driftAcc-=dy;scrollBy({top:dy,behavior:'instant'})}}
     var moving=Math.abs(tr-cr)>(flying?.00002:.0003);for(var j2=0;j2<8;j2++)if(Math.abs(tgtPose[j2]-curPose[j2])>.02){moving=true;break}
     // While the reader is only reading, redraw at about 15 fps (the beams and pulses still drift); while scrolling, every frame.
@@ -562,5 +562,5 @@
   document.addEventListener('visibilitychange',function(){run=!document.hidden;if(run&&!raf){last=performance.now();raf=requestAnimationFrame(frame)}});
   root.classList.add('gl'); // first: it makes #enter visible, and the scroll maths below needs its real position
   size();buildRide();layoutKeys();tgtPose=dirPose(scrollY);curPose=tgtPose.slice();tr=cr=rideProg();raf=requestAnimationFrame(frame);
-  if(ONLY||/[?&]dbg/.test(location.search))window.__scene={scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam)}};
+  if(ONLY||/[?&]dbg/.test(location.search))window.__scene={keys:function(){return KEYS.map(function(k){return k.y})},dirPose:dirPose,scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam)}};
 })();
