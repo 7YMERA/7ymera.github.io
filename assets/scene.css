@@ -230,3 +230,10 @@ html.gl .stage-r .stage-sticky{justify-items:end}
   .cp-rec small,.cp-batt{display:none}
 }
 @media (prefers-reduced-motion:reduce){.cp-dot2{animation:none}}
+
+/* Phones: no bottom dock and no side tab to bring it back (they ate width and covered the flight). The top bar's search button becomes a labelled Menu button; it opens the same quick-jump list of sections and projects. */
+@media (max-width:760px){
+  .dock,.dock-show{display:none!important}
+  .k-btn{width:auto;gap:8px;padding-inline:14px}
+  .k-btn::after{content:"Menu";font:600 .9rem var(--f-body);color:var(--ink)}
+}

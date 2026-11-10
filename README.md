@@ -86,7 +86,7 @@ The home page, top to bottom:
 | **Selected work** | **Journey** |
 | ![Selected work](docs/screens/work.webp) | ![Journey](docs/screens/journey.webp) |
 
-Also on every page: a light/dark switch (light by default, choice remembered), **Ctrl+K** quick jump, the city as the backdrop (live 3D on the home page, a still picture on the notes pages), and on phones a bottom dock that can be tucked away.
+Also on every page: a light/dark switch (light by default, choice remembered), **Ctrl+K** quick jump, the city as the backdrop (live 3D on the home page, a still picture on the notes pages), and on phones a labelled Menu button in the top bar (the bottom dock was removed from phones).
 
 ---
 
