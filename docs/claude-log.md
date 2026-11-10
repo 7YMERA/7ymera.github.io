@@ -18,6 +18,12 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-11 · Three new photos in the "This is me" card
+- Added three photos as slides 6 to 8 of the REQ-001 carousel (photo, title, one line each): `portrait-white-wall.webp` ("Straight on"), `devfest-lanyard.webp` ("At DevFest") and `on-a-call.webp` ("Between meetings"). `index.html` edited, `v2/index.html` regenerated with `tools/build-v2.py`. The card's steady height is unchanged (the new quotes are short).
+- Privacy (public repo): the call photo is the webcam frame only, cropped out of a screenshot, so none of the tabs, the work email, the meeting title or colleague names are in it. The DevFest mirror selfie is cropped above the Menara Maxis visitor badge (a client name) and shows only the DevFest lanyard. Metadata stripped (re-encoded, 0 EXIF tags); originals are not in the repo.
+- Not used: the fourth upload, a phone photo of a laptop screen showing the same call. It is skewed and shows work tabs, client names and the work email; the cropped webcam frame covers it. A clean screenshot or a normal photo would work.
+- Open: the captions are my wording, so the owner should check them (especially "At DevFest" and "Between meetings"). The webcam frame is low resolution, so a better photo would look sharper.
+
 ## 2026-11-11 · "This is me" card no longer reserves the tallest slide's height
 - Owner's phone screenshots showed a big empty gap under the short slides (the card kept the height of "Why hire me", because hidden slides stayed in layout).
 - Now hidden slides are `display:none`, and `extras.js` (`fit()`) sets `--ms-h` on `.ms-slides` to the height of the short slides (never under about 11em). The longer "Why hire me" slide scrolls inside that box (thin scrollbar, soft fade at the bottom while there is more, `overscroll-behavior: contain`). Scrolling inside a slide pauses the auto-advance like any other touch. Works on the classic page and on `/v2/`: same shared `site.css` and `extras.js`.
