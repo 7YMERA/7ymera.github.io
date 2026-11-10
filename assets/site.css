@@ -1332,3 +1332,8 @@ section.block { padding-block: 80px 8px; }
 .rb-code { aspect-ratio: 16 / 10; border-radius: 16px; border: 1px solid var(--line); background: var(--sunk); padding: 18px 20px; font-family: var(--f-mono); font-size: .75rem; line-height: 1.7; color: var(--muted); overflow: hidden; display: grid; align-content: center; }
 .rb-code b { color: var(--accent); font-weight: 500; }
 .rb-code em { font-style: normal; color: var(--gold); }
+
+/* Project rail: map the module's colours onto this site's theme */
+:root { --pr-ink: var(--ink); --pr-bg: var(--bg); --pr-surface: var(--surface); --pr-line: var(--line); --pr-muted: var(--muted); --pr-accent: var(--accent); --pr-accent-ink: var(--accent-ink); --pr-hanger: #a8743f; --pr-hook: #8a98a0; --pr-rail: #9fb0b5; }
+:root[data-theme="dark"] { --pr-hanger: #8a5d33; --pr-rail: #4a5e66; --pr-hook: #9fb0b8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --pr-hanger: #8a5d33; --pr-rail: #4a5e66; --pr-hook: #9fb0b8; } }

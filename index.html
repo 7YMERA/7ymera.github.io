@@ -20,7 +20,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=20261108b">
+<link rel="stylesheet" href="assets/site.css?v=20261110a">
+<link rel="stylesheet" href="assets/project-rail.css?v=20261110a">
 </head>
 <body>
 <div class="sky" aria-hidden="true"></div>
@@ -428,6 +429,15 @@
         </div>
       </div>
 
+    </div>
+  </section>
+
+  <section class="block" id="rail">
+    <div class="wrap">
+      <div class="sec-head"><div><span class="eyebrow">The rail</span><h2>Pull a project off the rail</h2><p>Hover or tap a hanger to turn it round, drag to slide them, click one to flip it over.</p></div></div>
+      <div class="prail" data-project-rail data-base="" data-label="Projects on a rail" data-caption="Hover, tap or use the arrow keys to turn a project to the front.">
+        <script type="application/json" class="prail-data">[{"id":"smk","name":"SMK Subang data dashboard","tag":"In real use","kind":"Side project · 2026","pitch":"One data hub for a Selangor secondary school, replacing a page of links and a messy spreadsheet.","points":["~150 teachers use it, mostly on phones","Who hasn't submitted, ready to paste into WhatsApp","Private by design: totals in public, names behind login"],"stack":"Next.js · Express · Supabase · Apps Script","image":"assets/smk.webp","links":[{"label":"Read the story","href":"notes/smk-dashboard.html","primary":true},{"label":"Repo","href":"https://github.com/7YMERA/dashboard-smksubang-portfolio"}]},{"id":"taskmatch","name":"TaskMatch v2","tag":"Live demo","kind":"UTP final year project, rebuilt · 2026","pitch":"Skill-based task matching for teams: who should do this task, and why.","points":["A fit score out of 100 you can see the reasons for","Tunes its own weights from how past tasks went","13 releases, with roles, audit trail and CI"],"stack":"Next.js · FastAPI · Supabase · pytest","image":"assets/tm-dashboard-v2.webp","links":[{"label":"Visit live","href":"https://taskmatch-umber.vercel.app","primary":true},{"label":"Read the story","href":"notes/taskmatch-v2.html"},{"label":"Repo","href":"https://github.com/7YMERA/taskmatch-v2"}]},{"id":"mle","name":"MyLokalEvent v2","tag":"MVP in progress","kind":"Coursework, rebuilt · 2026","pitch":"Local events in Malaysia, starting with fishing and coastal communities.","points":["Bahasa Melayu first, English one tap away","Security rebuilt from the ground up after a v1 review","Next up: paid listings through Stripe"],"stack":"Next.js 16 · React 19 · Supabase · Vitest","image":"assets/mle-home-v2.webp","links":[{"label":"Visit live","href":"https://mylokalevent.vercel.app","primary":true},{"label":"Read the story","href":"notes/mylokalevent-v2.html"},{"label":"Repo","href":"https://github.com/7YMERA/mylokalevent-v2"}]},{"id":"slb","name":"IT Asset Disposal","tag":"Deployed internally","kind":"SLB internship · 2025","pitch":"An e-waste process run on Excel and reply-all emails, turned into one tracked app.","points":["Two-level approval in the app, not in an email thread","Approvers filled in by location, so nobody emails the wrong person","Every step emailed automatically through Power Automate"],"stack":"Power Apps · SharePoint · Power Automate","image":"assets/slb-track-v2.webp","links":[{"label":"Click through 26 screens","href":"notes/slb-screens.html","primary":true},{"label":"Read the story","href":"notes/slb-power-apps.html"},{"label":"Charts & data model","href":"notes/slb-design.html"}]},{"id":"kakilima","name":"KakiLima","tag":"Live","kind":"Side project · 2026","pitch":"Where to report unsafe streets and transport, in four languages.","points":["EN, BM, 中文 and தமிழ்","Accessible first: text size and high contrast"],"stack":"Next.js · Tailwind v4","image":"assets/kaki.webp","links":[{"label":"Visit live","href":"https://kakilima-iota.vercel.app","primary":true},{"label":"Read the story","href":"notes/kakilima.html"}]},{"id":"jumaat","name":"JumaatFinder","tag":"Web app","kind":"Side project · 2026","pitch":"The nearest place for Solat Jumaat, and when to leave.","points":["565 official masjid and surau, geocoded","A leave-by time from JAKIM prayer times"],"stack":"Vanilla JS · Leaflet · Python","image":"assets/notes/jumaat-cover.webp","links":[{"label":"Read the story","href":"notes/jumaatfinder.html","primary":true},{"label":"Repo","href":"https://github.com/7YMERA/jumaat-finder-app"}]},{"id":"roblox","name":"EagleSan Sandbox","tag":"Tinkering","kind":"Side quest · 2026","pitch":"A Roblox game where I try hand-made abilities, effects and sound, whenever I'm free.","points":["One file per ability: add one and it shows on the hotbar","Server checks damage, the client plays the effect"],"stack":"Roblox Studio · Luau · Rojo · Blender","image":null,"links":[{"label":"See the activity","href":"#pulse","primary":true}]}]</script>
+      </div>
     </div>
   </section>
 
@@ -933,10 +943,11 @@
   });
 })();
 </script>
-<script src="assets/curved-reel.js?v=20261108b" defer></script>
-<script src="assets/folders.js?v=20261108b" defer></script>
-<script src="assets/coverflow.js?v=20261108b" defer></script>
-<script src="assets/extras.js?v=20261108b" defer></script>
-<script src="assets/pulse.js?v=20261108b" defer></script>
+<script src="assets/curved-reel.js?v=20261110a" defer></script>
+<script src="assets/folders.js?v=20261110a" defer></script>
+<script src="assets/project-rail.js?v=20261110a" defer></script>
+<script src="assets/coverflow.js?v=20261110a" defer></script>
+<script src="assets/extras.js?v=20261110a" defer></script>
+<script src="assets/pulse.js?v=20261110a" defer></script>
 </body>
 </html>

@@ -1,0 +1,81 @@
+/* Project rail (port of the 21st.dev Clothing Rail Hero). Colours come from --pr-* variables.
+   Each page maps them to its own theme, e.g. :root { --pr-ink: var(--ink); --pr-surface: var(--surface); ... } */
+.prail { position: relative; width: 100%; }
+.prail-stage { position: relative; width: 100%; overflow-x: clip; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.prail-rail { position: absolute; left: 0; right: 0; height: 10px; border-radius: 99px; z-index: 0; pointer-events: none;
+  background: linear-gradient(to bottom, color-mix(in oklab, var(--pr-rail, #9fb0b5) 60%, white), var(--pr-rail, #9fb0b5) 45%, color-mix(in oklab, var(--pr-rail, #9fb0b5) 65%, black));
+  box-shadow: 0 6px 10px -4px color-mix(in oklab, var(--pr-ink, #0f1e24) 28%, transparent); }
+.prail-slot { position: absolute; left: 0; padding: 0; margin: 0; border: 0; background: none; cursor: pointer; color: inherit; font: inherit; border-radius: 12px; will-change: transform; -webkit-tap-highlight-color: transparent; }
+.prail-slot:focus-visible { outline: 3px solid var(--pr-accent, #0a6c74); outline-offset: 4px; }
+.prail-swing, .prail-turn { position: absolute; inset: 0; display: block; }
+.prail-swing { transform-origin: 50% 1.3%; }
+.prail-turn { transform-style: preserve-3d; transform-origin: 50% 50%; }
+.prail-hanger { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 2; }
+.prail-hanger path { fill: none; stroke-linecap: round; }
+.prail-hanger .sh { stroke: #000; stroke-opacity: .22; stroke-width: 9.5; }
+.prail-hanger .bar { stroke: var(--pr-hanger, #a8743f); stroke-width: 8.5; }
+.prail-hanger .hi { stroke: #fff; stroke-opacity: .32; stroke-width: 1.1; }
+.prail-hanger .hook { stroke: var(--pr-hook, #8794a0); stroke-width: 2.6; }
+.prail-hanger .clip { fill: var(--pr-hook, #8794a0); }
+.prail-card { position: absolute; left: 12%; right: 12%; top: 16%; bottom: 0; display: flex; flex-direction: column; overflow: hidden; text-align: left;
+  border-radius: 10px; background: var(--pr-surface, #fff); border: 1px solid var(--pr-line, #d6e0e2);
+  box-shadow: 0 10px 24px -10px color-mix(in oklab, var(--pr-ink, #0f1e24) 45%, transparent); }
+.prail-media { position: relative; flex: 1 1 auto; min-height: 0; display: block; overflow: hidden; background: var(--pr-line, #d6e0e2); }
+.prail-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top left; pointer-events: none; }
+.prail-media.is-blank { background: linear-gradient(135deg, var(--pr-accent, #0a6c74), color-mix(in oklab, var(--pr-accent, #0a6c74) 40%, var(--pr-surface, #fff))); display: grid; place-items: center; }
+.prail-initial { font-weight: 700; font-size: calc(var(--h, 300px) * .22); color: var(--pr-accent-ink, #fff); opacity: .85; line-height: 1; }
+.prail-meta { display: block; padding: 8px 9px 9px; flex: 0 0 auto; }
+.prail-meta b { display: block; font-weight: 600; line-height: 1.18; color: var(--pr-ink, #0f1e24); font-size: max(12px, calc(var(--h, 300px) * .045)); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.prail-meta small { display: block; margin-top: 3px; color: var(--pr-muted, #52636a); font-size: max(10.5px, calc(var(--h, 300px) * .03)); line-height: 1.2; }
+.prail-shade { position: absolute; inset: 0; background: #000; opacity: .3; pointer-events: none; }
+.prail-tagw { position: absolute; left: 50%; top: 11%; transform-origin: 50% 0; pointer-events: none; z-index: 3; display: block; transform: rotate(-12deg); }
+.prail-tagline { display: block; width: 1px; height: 12px; margin-left: 3px; background: color-mix(in oklab, var(--pr-ink, #0f1e24) 40%, transparent); }
+.prail-tagbox { display: block; margin-left: 3px; transform: translateX(-50%); padding: 5px 7px 4px; white-space: nowrap; font-size: max(10px, calc(var(--h, 300px) * .028)); font-weight: 600; line-height: 1;
+  border-radius: 3px; background: var(--pr-accent, #0a6c74); color: var(--pr-accent-ink, #fff); box-shadow: 0 2px 6px rgba(0, 0, 0, .25); }
+.prail-dots { display: none; justify-content: center; gap: 8px; margin-top: 6px; }
+.prail.is-carousel .prail-dots { display: flex; }
+.prail-dot { width: 12px; height: 12px; padding: 0; border: 0; border-radius: 99px; background: color-mix(in oklab, var(--pr-ink, #0f1e24) 25%, transparent); cursor: pointer; transition: width .3s, background-color .3s; }
+.prail-dot[aria-current="true"] { width: 28px; background: var(--pr-ink, #0f1e24); }
+.prail-dot:focus-visible { outline: 3px solid var(--pr-accent, #0a6c74); outline-offset: 2px; }
+.prail-cap { text-align: center; padding: 14px 8px 4px; min-height: 4.2rem; }
+.prail-cap-t { margin: 0; font-weight: 600; font-size: 1.05rem; color: var(--pr-ink, #0f1e24); }
+.prail-cap-s { margin: 4px auto 0; max-width: 46ch; color: var(--pr-muted, #52636a); font-size: .92rem; line-height: 1.45; }
+
+/* Detail view */
+.prail-dlg { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; overflow-y: auto; color: var(--pr-ink, #0f1e24); }
+.prail-dlg[hidden] { display: none !important; }
+.prail-dim { position: absolute; inset: 0; background: color-mix(in oklab, var(--pr-bg, #f3f6f6) 94%, transparent); opacity: 0; transition: opacity .25s; }
+.prail-close { position: absolute; top: 14px; right: 14px; z-index: 2; min-height: 48px; padding: 10px 20px; border: 2px solid var(--pr-line, #d6e0e2); border-radius: 999px; background: var(--pr-surface, #fff); color: var(--pr-ink, #0f1e24); font: inherit; font-weight: 600; font-size: 1rem; cursor: pointer; opacity: 0; transition: opacity .25s; }
+.prail-close:hover { background: var(--pr-accent, #0a6c74); color: var(--pr-accent-ink, #fff); }
+.prail-dwrap { position: relative; display: grid; gap: 36px; align-items: center; width: 100%; max-width: 980px; margin: auto; padding-top: 56px; grid-template-columns: minmax(0, 1fr); opacity: 0; transform: translateY(22px) scale(.97); transition: opacity .3s, transform .35s cubic-bezier(.22, .85, .3, 1); }
+.prail-dlg.is-in .prail-dim, .prail-dlg.is-in .prail-close, .prail-dlg.is-in .prail-dwrap { opacity: 1; }
+.prail-dlg.is-in .prail-dwrap { transform: none; }
+@media (min-width: 820px) { .prail-dwrap { grid-template-columns: minmax(0, 1fr) minmax(0, 22rem); } }
+.prail-fig { position: relative; margin: 0 auto; width: min(340px, 78vw); aspect-ratio: 200 / 310; cursor: grab; touch-action: pan-y; perspective: 1400px; }
+.prail-fig:active { cursor: grabbing; }
+.prail-fig .prail-hanger { z-index: 3; }
+.prail-spin { position: absolute; inset: 0; transform-style: preserve-3d; }
+.prail-dface { position: absolute; left: 12%; right: 12%; top: 16%; bottom: 0; display: flex; flex-direction: column; overflow: hidden; border-radius: 12px; background: var(--pr-surface, #fff); border: 1px solid var(--pr-line, #d6e0e2); backface-visibility: hidden; -webkit-backface-visibility: hidden; box-shadow: 0 24px 40px -22px color-mix(in oklab, var(--pr-ink, #0f1e24) 55%, transparent); }
+.prail-dface.prail-back { transform: rotateY(180deg); padding: 18px 16px; overflow: auto; }
+.prail-back h4 { margin: 0 0 8px; font-size: 1.05rem; }
+.prail-back ul { margin: 0; padding-left: 18px; display: grid; gap: 8px; font-size: .95rem; line-height: 1.4; }
+.prail-stack { margin: 14px 0 0; color: var(--pr-muted, #52636a); font-size: .85rem; }
+.prail-dmedia { position: relative; flex: 1 1 auto; min-height: 0; display: block; overflow: hidden; background: var(--pr-line, #d6e0e2); }
+.prail-dmedia .prail-media { position: absolute; inset: 0; }
+.prail-dmeta { flex: 0 0 auto; padding: 12px 14px 14px; }
+.prail-dmeta b { display: block; font-size: 1.1rem; line-height: 1.2; }
+.prail-dmeta small { display: block; margin-top: 4px; color: var(--pr-muted, #52636a); font-size: .85rem; }
+.prail-info { display: flex; flex-direction: column; gap: 14px; text-align: center; }
+@media (min-width: 820px) { .prail-info { text-align: left; } }
+.prail-count { margin: 0; letter-spacing: .2em; font-size: .75rem; color: var(--pr-muted, #52636a); }
+.prail-info h3 { margin: 0; font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.12; }
+.prail-pitch { margin: 0; color: var(--pr-muted, #52636a); line-height: 1.55; }
+.prail-links, .prail-flip { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+@media (min-width: 820px) { .prail-links, .prail-flip { justify-content: flex-start; } }
+.prail-btn { display: inline-flex; align-items: center; min-height: 48px; padding: 10px 20px; border-radius: 12px; border: 2px solid var(--pr-line, #d6e0e2); background: var(--pr-surface, #fff); color: var(--pr-ink, #0f1e24); font-weight: 600; text-decoration: none; }
+.prail-btn.primary { background: var(--pr-accent, #0a6c74); border-color: var(--pr-accent, #0a6c74); color: var(--pr-accent-ink, #fff); }
+.prail-btn:hover { filter: brightness(1.08); }
+.prail-flip button { min-height: 44px; padding: 8px 18px; border-radius: 999px; border: 2px solid var(--pr-line, #d6e0e2); background: transparent; color: var(--pr-muted, #52636a); font: inherit; font-weight: 600; cursor: pointer; }
+.prail-flip button[aria-pressed="true"] { background: var(--pr-ink, #0f1e24); border-color: var(--pr-ink, #0f1e24); color: var(--pr-bg, #fff); }
+.prail-dlg button:focus-visible, .prail-dlg a:focus-visible { outline: 3px solid var(--pr-accent, #0a6c74); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .prail-dim, .prail-close, .prail-dwrap, .prail-dot { transition: none; } }

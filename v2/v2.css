@@ -70,3 +70,9 @@ html.gl #sky{display:none}
 html.gl body{background:linear-gradient(var(--sky1),var(--sky2)) fixed}
 html.gl .scene{background:none}
 html.gl .foot{background:var(--win);border-top:2px solid var(--line);margin-top:40px}
+
+/* Project rail on the v2 desk */
+.w-rail{grid-column:1/13}
+:root{--pr-ink:var(--ink);--pr-bg:var(--bg);--pr-surface:var(--win);--pr-line:var(--line);--pr-muted:var(--ink2);--pr-accent:var(--btn);--pr-accent-ink:var(--btnink);--pr-hanger:#c08a52;--pr-hook:#7f8fa0;--pr-rail:#7fa6c4}
+:root[data-theme=dark]{--pr-hanger:#8a5d33;--pr-rail:#4a6a8c}
+.w-rail .body{padding:10px 14px 4px}
