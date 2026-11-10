@@ -78,7 +78,6 @@ Every interactive piece below started as a React + Tailwind component on [21st.d
 | 6 | **Coverflow Carousel** | Album-style covers turned away on each side, detail panel below | `assets/coverflow.js` | UTP section | ✅ live |
 | 7 | **Glassmorphism Folder Cards** | Glass folders that lean on hover and fan out their files when opened | `assets/folders.js` | Notes section | ✅ live |
 | 8 | Number ticker, Timeline beam, Border spotlight, Dock, Marquee | Small effects | `extras.js` | Around the page | ✅ live |
-| 9 | **Clothing Rail Hero** (product-rail-gallery) | Project hangers on a rail: hover to turn, drag to slide, click to lift and flip | `assets/project-rail.js` + `.css` | `#rail` on the home page and `/v2/` | ✅ live |
 
 ### 1 · Tilted Grid Hero → curved reel (`curved-reel.js`)
 
@@ -165,14 +164,6 @@ Every interactive piece below started as a React + Tailwind component on [21st.d
 - **Border spotlight:** a card edge glows under the cursor via `--mx` / `--my`.
 - **Dock:** a phone-only bottom bar that highlights the section you're in and can be tucked away (remembered in `localStorage`).
 - **Marquee:** the scrolling tool names above the skill tree.
-
-### 9 · Clothing Rail Hero → `project-rail.js`
-
-- **What it is:** projects hang from a rail. Hover, focus or tap one and it swings round to face you while its neighbours slide aside. Drag to slide a hanger. Click the front one to lift it into a large view that flips front and back. Below about 210 px of hanger height it becomes a swipeable carousel with dots.
-- **What changed from the React version:** the garment drawings, the cloth displacement and grain filters, the blurred modal backdrop and the photo-only front/side/back set are gone. A hanger holds a screenshot card instead. The spring physics (position, turn, swing) and the neighbour collision are the same.
-- **Usage:** `<div data-project-rail data-base="" data-label="..."><script type="application/json" class="prail-data">[items]</script></div>`. An item is `{id, name, tag, kind, pitch, points[], stack, image, links[{label, href, primary}]}`; paths are relative to `data-base` (`""` on the home page, `"../"` on `/v2/`). No `image` shows a coloured initial.
-- **Theming:** the CSS reads `--pr-ink`, `--pr-bg`, `--pr-surface`, `--pr-line`, `--pr-muted`, `--pr-accent`, `--pr-accent-ink`, `--pr-hanger`, `--pr-hook`, `--pr-rail`. Each page maps them to its own theme (the mapping for the home page is at the end of `site.css`, for `/v2/` at the end of `v2.css`).
-- **Lessons:** the dialog is appended to `<body>`, so its colours must come from `:root`, not from the rail's container. Springs run only while something moves, autoplay stops on the first interaction and is gated by IntersectionObserver, and reduced-motion snaps instead of springing.
 
 ### Our own pieces (not from 21st.dev)
 

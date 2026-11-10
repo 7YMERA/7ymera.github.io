@@ -18,12 +18,6 @@ where the last chat stopped without re-reading everything.
 
 ---
 
-## 2026-11-10 · Project rail (v1 and /v2/)
-- Ported the 21st.dev Clothing Rail Hero to plain JS as a **project rail**: `assets/project-rail.js` + `project-rail.css`. Seven projects hang from a rail; hover/tap turns one to the front, drag slides, click lifts it into a flip view (front: screenshot, back: points and stack, plus links). Carousel with dots on phones. README port #9 documents it.
-- Mounted in two places: a new `#rail` section before Work on the home page, and a full-width window at the top of `/v2/`. Data is inline JSON in each page, copied from the Work cards, so update both if a project changes.
-- Home page colours map via `--pr-*` at the end of `site.css`, so the cache key was bumped to `20261110a` everywhere. `tools/check.js` passes.
-- Open: owner to review the rail on the home page; add a nav link for `#rail` if it stays. Roblox card has no screenshot (shows an initial).
-
 ## 2026-11-09 · /v2/ scroll-driven KLCC
 - `/v2/` now has a fixed WebGL background (`v2/v2-3d.js`, three.js r128 from cdnjs): low-poly KLCC twin towers, skybridge, KL Tower, city ring and orb. The camera orbits and rises/falls with scroll. Light/dark recolors it.
 - Falls back to the 2D canvas skyline in `v2.js` when WebGL or the CDN script is missing (`html.gl` class marks 3D on). Windows stay opaque, no backdrop-filter. Reduced motion renders only on scroll/resize.
