@@ -192,6 +192,15 @@ Every interactive piece below started as a React + Tailwind component on [21st.d
 | Fonts: Bricolage Grotesque, Albert Sans, JetBrains Mono (readable, and they suit the look) | Hard offset shadows and 2 px blue borders on every section panel; pixel labels (Pixelify Sans) only on the flight HUD |
 | v1's way of delivering a portfolio (sections, cards, bento), not v2's small info windows | The scroll flight over the Petronas Towers, Merdeka 118 and the skyline, with captions, HUD and landmark tags |
 
+**Before and after** (same scroll positions, dark mode, 1300 px): the classic site on the left, `/v2/` on the right.
+
+| Classic site (v1) | `/v2/` (merged) |
+|---|---|
+| ![v1 opening](docs/screens/ba-v1-open.webp) | ![v2 opening](docs/screens/ba-v2-open.webp) |
+| ![v1 title line](docs/screens/ba-v1-title.webp) | ![v2 title line](docs/screens/ba-v2-title.webp) |
+| ![v1 selected work](docs/screens/ba-v1-work.webp) | ![v2 selected work](docs/screens/ba-v2-work.webp) |
+| ![v1 journey](docs/screens/ba-v1-journey.webp) | ![v2 journey](docs/screens/ba-v2-journey.webp) |
+
 | | |
 |---|---|
 | ![v2 opening in dark mode](docs/screens/v2-opening-dark.webp) | ![v2 hero line over the city, dark](docs/screens/v2-hero-dark.webp) |
