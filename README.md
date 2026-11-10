@@ -57,7 +57,7 @@ The REQ-001 card, the "I write the spec. Then I build it." line and the teal-and
 | **2.5** | 12 Nov | **The sci-fi layer:** stars, a ringed moon with a moon of its own, gyroscope rings round the Petronas and Merdeka crowns. (A dragon of light was part of 2.5 and was removed again: it cost frame rate.) | `1be0d1f` |
 | **2.6** | 12 Nov | **The drone flight.** A new route: a spiral climb up the Petronas Towers, Menara KL and Merdeka 118, a barrel roll through the skybridge gap, a spiral dive down The Exchange 106; a zoom out then zoom in from Journey; a pilot cockpit overlay (compass, artificial horizon, speed, REC timer); and a finale that holds the skyline much longer. | `3354488` |
 | **2.7** | 13 Nov | **Trains and the chase.** A glowing rail ring round the Petronas Towers and a sky line over the city, with lit trains; the drone chases a train from Menara KL to Merdeka 118. | `fd61fe3` |
-| **2.8** | 13 Nov | **Metro-map skill tree.** Skills drawn as six metro lines with interchanges, plus a train-freak fun fact; the drone flight also drifts forward when idle and limits camera speed; sky rail lowered. | `00069d4` |
+| **2.8** | 13 Nov | **Smoother flight.** The drone flight drifts forward when idle and limits camera speed; sky rail lowered. (A metro-map skill tree was tried and removed at the owner's request.) | `00069d4` |
 
 Tried and dropped along the way (still in git history): a clothes-rail project gallery (`5c68a02`), a ring and then a conveyor of floating screens, a Masjid Negara you could fly into, and a 5 second phone loading screen. The longer story of the 3D city is in *The 3D city and the flight* below.
 
