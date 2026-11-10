@@ -55,68 +55,42 @@
   loadModel('menara_kl.json',-95,-70,0,bodyM2,null,function(){g.remove(kl)}); // Menara KL; replaces the stand-in cylinder tower below once loaded
   loadModel('merdeka118.json',-10,-95,-.5,bodyM2,null);
   loadModel('exchange106.json',60,-125,.4,bodyM,null);   // The Exchange 106, cropped and simplified (tools/convert-dae-crop.py)  // Merdeka PNB 118 (SketchUp Collada, see tools/convert-dae.py)
-  // Masjid Negara, built from code (no model file). Units are metres; the group is scaled to sit beside the towers.
-  // It has a real interior (hollow prayer hall, coffered ceiling with a round opening under the dome) so the scroll ride can fly in.
-  var masjid=null;
-  (function(){
-    var mq=new T.Group();masjid=mq;
-    function tex(w,h,draw){var c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'));var t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;return t}
-    var waffle=tex(32,32,function(x){x.fillStyle='#fff';x.fillRect(0,0,32,32);x.fillStyle='#c9c9c9';x.fillRect(5,5,22,22);x.fillStyle='#f2f2f2';x.fillRect(8,8,16,16)});
-    var waffleC=waffle.clone();waffleC.needsUpdate=true;waffleC.repeat.set(1/9,1/9);
-    var rows=tex(8,32,function(x){x.fillStyle='#fff';x.fillRect(0,0,8,32);x.fillStyle='#b8b8b8';x.fillRect(0,28,8,4)});rows.repeat.set(1,26);
-    var slabSide=mat('far'),slabTop=mat('far',{map:waffle}),ceilTop=mat('far',{map:waffleC}),floorM=mat('far',{map:rows}),
-        domeM=mat('orb',{side:T.DoubleSide}),pale=mat('glass'),glassD=mat('ring',{side:T.DoubleSide,emissive:0xffffff,emissiveIntensity:.2});
-    var flagRed=new T.MeshLambertMaterial({color:0xcc0001,flatShading:true}),flagYellow=new T.MeshLambertMaterial({color:0xffcc00,flatShading:true,emissive:0x6b5200});
-    function box(x0,x1,z0,z1,y0,y1,m){var mm=new T.Mesh(new T.BoxGeometry(x1-x0,y1-y0,z1-z0),m||slabSide);mm.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);mq.add(mm);return mm}
-    function slab(x0,x1,z0,z1,y0,y1){
-      var w=x1-x0,d=z1-z0,geo=new T.BoxGeometry(w,y1-y0,d),uv=geo.attributes.uv;
-      for(var i=8;i<12;i++)uv.setXY(i,uv.getX(i)*w/9,uv.getY(i)*d/9);
-      var m=new T.Mesh(geo,[slabSide,slabSide,slabTop,slabSide,slabSide,slabSide]);m.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);mq.add(m);return m}
-    function pleat(N,R,H,h0,rings,mt){
-      var per=2*N,pos=[],idx=[],i,j;
-      for(j=0;j<=rings;j++){var t=j/rings,y=h0+(H-h0)*(1-Math.pow(t,2.1));
-        for(i=0;i<per;i++){var ridge=i%2===0,a=Math.PI*i/N,r=R*t*(ridge?1:1-0.22*t);pos.push(Math.cos(a)*r,y-(ridge?0:(H-h0)*0.06*t),Math.sin(a)*r)}}
-      for(j=0;j<rings;j++)for(i=0;i<per;i++){var a0=j*per+i,b0=j*per+(i+1)%per,c0=(j+1)*per+i,d0=(j+1)*per+(i+1)%per;idx.push(a0,c0,b0,b0,c0,d0)}
-      var geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(pos,3));geo.setIndex(idx);geo=geo.toNonIndexed();geo.computeVertexNormals();
-      return new T.Mesh(geo,mt)}
-    // prayer hall: four walls (the front one has a 14 m entrance), carpet with prayer rows, coffered ceiling with a round opening
-    box(-61.5,-60,-27.5,27.5,0,9);box(60,61.5,-27.5,27.5,0,9);box(-61.5,61.5,-27.5,-26,0,9);box(-61.5,-7,26,27.5,0,9);box(7,61.5,26,27.5,0,9);
-    var fl=new T.Mesh(new T.PlaneGeometry(120,52),floorM);fl.rotation.x=-Math.PI/2;fl.position.y=.25;mq.add(fl);
-    var sh=new T.Shape();sh.moveTo(-61.5,-27.5);sh.lineTo(61.5,-27.5);sh.lineTo(61.5,27.5);sh.lineTo(-61.5,27.5);sh.lineTo(-61.5,-27.5);
-    var hole=new T.Path();hole.absarc(0,0,24,0,Math.PI*2,true);sh.holes.push(hole);
-    var ceil=new T.Mesh(new T.ExtrudeGeometry(sh,{depth:2,bevelEnabled:false,curveSegments:36}),[ceilTop,slabSide]);ceil.rotation.x=-Math.PI/2;ceil.position.y=9;mq.add(ceil);
-    for(var ci=0;ci<14;ci++){var ca=ci/14*Math.PI*2,col=new T.Mesh(new T.CylinderGeometry(1.1,1.1,9,10),pale);col.position.set(Math.cos(ca)*25.5,4.5,Math.sin(ca)*25.5);mq.add(col)}
-    box(-5,5,-25.6,-24.8,.3,11,domeM);box(-5,5,-25.2,-24.4,11,11.8,flagYellow); // mihrab niche and its gold lintel
-    // wings, walkway and pool
-    box(-105,-61.5,-12,28,0,6);slab(20,112,-38,-12,0,6);slab(-45,-8,-64,-27.5,0,6);slab(55,85,18,50,0,5);
-    box(-6,6,27.5,49,0,.5);
-    var pool=new T.Mesh(new T.PlaneGeometry(70,26),glassD);pool.rotation.x=-Math.PI/2;pool.position.set(0,.4,62);mq.add(pool);
-    // main dome: glass drum, red band, 18-fold umbrella, yellow star finial
-    var drum=new T.Mesh(new T.CylinderGeometry(24,24,7,36,1,true),glassD);drum.position.set(0,14.5,0);mq.add(drum);
-    var band=new T.Mesh(new T.CylinderGeometry(27.4,27.4,1.4,36,1,true),flagRed);band.position.set(0,17.9,0);mq.add(band);
-    var dome=pleat(18,27,46,16,8,domeM);dome.position.y=2;mq.add(dome);
-    var fin=new T.Mesh(new T.ConeGeometry(1.4,10,5),flagYellow);fin.position.set(0,53,0);mq.add(fin);
-    // smaller pleated dome on the west wing
-    var d2=pleat(12,15,22,6,6,domeM);d2.position.set(-122,0,-4);mq.add(d2);
-    var drum2=new T.Mesh(new T.CylinderGeometry(13.5,13.5,6,24,1,true),glassD);drum2.position.set(-122,3,-4);mq.add(drum2);
-    var fin2=new T.Mesh(new T.ConeGeometry(.9,6,5),flagYellow);fin2.position.set(-122,25,-4);mq.add(fin2);
-    // minaret: tapered shaft, lantern, spire, yellow tip
-    var shaft2=new T.Mesh(new T.CylinderGeometry(1.5,2.4,52,6),pale);shaft2.position.set(32,26,22);mq.add(shaft2);
-    var lan=new T.Mesh(new T.CylinderGeometry(3.6,2.2,5,8),pale);lan.position.set(32,53,22);mq.add(lan);
-    var sp=new T.Mesh(new T.CylinderGeometry(.25,.9,18,5),pale);sp.position.set(32,65,22);mq.add(sp);
-    var tip=new T.Mesh(new T.ConeGeometry(.9,3,5),flagYellow);tip.position.set(32,75,22);mq.add(tip);
-    // sawtooth hall on the south-west
-    var hall=new T.Mesh(new T.BoxGeometry(44,9,26),slabSide);hall.position.set(-70,4.5,52);mq.add(hall);
-    for(var k=0;k<6;k++){var saw=new T.Mesh(new T.CylinderGeometry(4.6,4.6,26,3),pale);saw.rotation.x=Math.PI/2;saw.rotation.z=Math.PI/2;saw.position.set(-88+k*7.2,11.2,52);mq.add(saw)}
-    var lamp=new T.PointLight(0xfff0d0,.6,60,1.5);lamp.position.set(0,7,0);mq.add(lamp);
-    mq.userData.domeM=domeM;mq.userData.lamp=lamp;
-    var MQ=1.35;mq.scale.setScalar(SC*MQ);mq.position.set(58,0,-4);mq.rotation.y=2.6;g.add(mq);
-  })();
   var gr=new T.Mesh(new T.CircleGeometry(520,48),ground);gr.rotation.x=-Math.PI/2;gr.position.y=-.2;g.add(gr);
   // city ring
   var s=11;function rnd(){s=(s*9301+49297)%233280;return s/233280}
-  for(var i=0;i<130;i++){var a=rnd()*6.283,d=135+rnd()*240,w=8+rnd()*18,h=8+rnd()*(d<160?55:35);
-    if(Math.hypot(Math.cos(a)*d+10,Math.sin(a)*d+95)<62||Math.hypot(Math.cos(a)*d-60,Math.sin(a)*d+125)<58||Math.hypot(Math.cos(a)*d-58,Math.sin(a)*d+4)<58)continue;var b=new T.Mesh(new T.BoxGeometry(w,h,w*(.7+rnd()*.6)),d<170?city:cityF);b.position.set(Math.cos(a)*d,h/2,Math.sin(a)*d);b.rotation.y=rnd()*3;g.add(b)}
+  var i;
+  // The city: real OpenStreetMap buildings of central Kuala Lumpur (tools/convert-city.py), centred on KLCC, with the satellite photo as the ground.
+  // Windows come from two facade textures laid on the walls in the shader: a glass grid by day, lit offices at night.
+  var SATURL='kl_ground.jpg',loader=new T.TextureLoader();
+  function wrapTex(t){t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=4;return t}
+  var cityU={uNight:{value:0},uDay:{value:wrapTex(loader.load('facade_glass.jpg'))},uNightTex:{value:wrapTex(loader.load('facade_night.jpg'))}};
+  // Facade shader: windows on the walls, in world space, so every building (the OSM city and the landmark models alike) shows its floors.
+  function facade(m){
+    m.onBeforeCompile=function(sh){
+      sh.uniforms.uNight=cityU.uNight;sh.uniforms.uDay=cityU.uDay;sh.uniforms.uNightTex=cityU.uNightTex;
+      sh.vertexShader=sh.vertexShader.replace('void main() {','varying vec3 vWP;\nvoid main() {').replace('#include <worldpos_vertex>','#include <worldpos_vertex>\n vWP=(modelMatrix*vec4(transformed,1.0)).xyz;');
+      sh.fragmentShader=sh.fragmentShader.replace('void main() {','varying vec3 vWP;uniform sampler2D uDay;uniform sampler2D uNightTex;uniform float uNight;\nvoid main() {')
+        .replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
+        vec3 fn=normalize(cross(dFdx(vWP),dFdy(vWP)));
+        float wall=1.0-smoothstep(0.45,0.75,abs(fn.y));
+        vec2 fuv=(abs(fn.z)>abs(fn.x)?vWP.xy:vWP.zy)/6.0;
+        float dl=dot(texture2D(uDay,fuv).rgb,vec3(0.333));
+        diffuseColor.rgb*=mix(1.0,clamp(dl*1.9,0.0,1.3),wall*0.75);
+        totalEmissiveRadiance+=texture2D(uNightTex,fuv).rgb*wall*uNight*1.25;`)};
+    return m}
+  var cityM=facade(mat('mid'));
+  facade(bodyM);facade(bodyM2); // the landmark models share the facade shader
+  var cityMesh=null;
+  fetch('kl_city.json').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+    var q=new Int16Array(b64(d.positions,Uint8Array).buffer),pos=new Float32Array(q.length);for(var k=0;k<q.length;k++)pos[k]=q[k]*d.scale;
+    var geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));geo.setIndex(new T.BufferAttribute(b64(d.indices,Uint16Array),1));
+    geo=geo.toNonIndexed();geo.computeVertexNormals(); // flat normals: the lighting needs them
+    cityMesh=new T.Mesh(geo,cityM);cityMesh.scale.setScalar(SC);g.add(cityMesh);need=true;
+  }).catch(function(){});
+  // The FBX ground plane maps the photo with u -0.084..1.102 and v 0.863..0.083 (north to south), so the image is stretched like this:
+  var satTex=loader.load(SATURL);satTex.repeat.set(1,.78);satTex.offset.set(0,.083);
+  var satM=mat('far',{map:satTex});
+  var sat=new T.Mesh(new T.PlaneGeometry(2335*SC,1821*SC),satM);sat.rotation.x=-Math.PI/2;sat.position.set(504*SC,.12,320*SC);g.add(sat);
   // KL Tower
   var kl=new T.Group();kl.position.set(-95,0,-70);
   var shaft=new T.Mesh(new T.CylinderGeometry(2,3.4,120,8),towerB);shaft.position.y=60;
@@ -135,31 +109,40 @@
     readColors();var dark=root.getAttribute('data-theme')==='dark';
     mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});
     tower.emissive.set(C.glass);tower.emissiveIntensity=dark?1:.28;glassM.emissive.set(C.ring);glassM.emissiveIntensity=dark?.9:.15;
+    cityU.uNight.value=dark?1:0;
     if(glassModelM){glassModelM.emissive.set(C.ring);glassModelM.emissiveIntensity=dark?.8:.12}ringM.color.set(C.ring);specks.material.color.set(C.ring);
-    var f=col('sky2');scene.fog=new T.Fog(f,dark?300:360,dark?720:800);
-    if(masjid){masjid.userData.domeM.emissive.set(C.orb);masjid.userData.domeM.emissiveIntensity=dark?.28:.08;masjid.userData.lamp.intensity=dark?1.2:.6}
+    var f=col('sky2');scene.fog=new T.Fog(f,dark?260:300,dark?640:680);
     amb.intensity=dark?.45:.5;sun.intensity=dark?.55:.55;sun.color.set(dark?0x9cc8ff:0xffffff)}
   recolor();window.addEventListener('v2theme',function(){recolor();need=true});
   var W=0,Hh=0,mobile=false,need=true,px=0,tx=0,cp=0,tp=0;
   function size(){W=innerWidth;Hh=innerHeight;mobile=W<=820;renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile?1.5:2));renderer.setSize(W,Hh,false);cam.aspect=W/Hh;cam.updateProjectionMatrix();need=true}
-  var enter=document.getElementById('enter'),caps=enter?enter.querySelectorAll('.ride-cap'):[],tr=0,cr=0,rideP=null,rideT=null;
+  var enter=document.getElementById('enter'),caps=enter?enter.querySelectorAll('.ride-cap'):[],tr=0,cr=0,roll=0,rideP=null,rideT=null;
   // The page scroll is split in two: first the orbit round the skyline, then (inside #enter) the ride into the masjid.
   function prog(){var m=document.documentElement.scrollHeight-innerHeight;if(!enter)return m>0?Math.min(1,Math.max(0,scrollY/m)):0;var st=Math.max(1,enter.offsetTop-innerHeight);return Math.min(1,Math.max(0,scrollY/st))}
   function rideProg(){if(!enter)return 0;var m=document.documentElement.scrollHeight-innerHeight,st=enter.offsetTop-innerHeight;return m>st?Math.min(1,Math.max(0,(scrollY-st)/(m-st))):0}
-  function orbitPose(p,pxv){var e=Math.sin(p*Math.PI),ang=.55+p*Math.PI*1.7+pxv*.12,rad=(mobile?270:230)-e*30,hgt=(mobile?55:40)+e*80;
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+  function orbitPose(p,pxv){var e=Math.sin(p*Math.PI),ang=.55+p*Math.PI*1.7+pxv*.12,rad=(mobile?290:250)-e*30,hgt=(mobile?112:100)+e*60;
     return{pos:new T.Vector3(Math.cos(ang)*rad,hgt,Math.sin(ang)*rad),tgt:new T.Vector3(0,H*(mobile?.5:.52)-e*18,0)}}
+  // The flight: out of the orbit, down to the plaza between the Petronas Towers and straight up their sides, across to Merdeka 118,
+  // up its face and over the top, then out to a wide shot. All in world units; the towers' axis comes from the model (tools/convert-obj.py output).
+  var NRM=new T.Vector3(.665,0,.747);                       // direction across the gap between the twin towers
+  var MERDEKA=new T.Vector3(-10,0,-95);                      // where merdeka118.json is placed
   function buildRide(){
-    if(!masjid)return;masjid.updateMatrixWorld(true);
-    function L(x,y,z){return masjid.localToWorld(new T.Vector3(x,y,z))}
     var o=orbitPose(1,0);
-    // camera path: out of the orbit, over the pool, through the entrance, along the hall toward the mihrab, then up under the dome
-    rideP=new T.CatmullRomCurve3([o.pos,L(60,150,320),L(18,50,160),L(6,16,84),L(2,5.4,40),L(0,4.6,15),L(0,4.4,2),L(0,4.2,-5)],false,'centripetal');
-    rideT=new T.CatmullRomCurve3([o.tgt,L(0,40,0),L(0,34,0),L(0,18,0),L(0,8,0),L(0,6,-26),L(0,24,-16),L(0,62,-12)],false,'centripetal')}
+    function V(x,y,z){return new T.Vector3(x,y,z)}
+    function along(d,y){return V(NRM.x*d,y,NRM.z*d)}
+    var M=MERDEKA;
+    // 12 waypoints: 0 orbit end | 1-4 sink toward the gap | 5 on the plaza between the towers, looking straight up | 6 rise out | 7-9 climb Merdeka 118 | 10 over the top | 11 wide shot
+    rideP=new T.CatmullRomCurve3([o.pos,along(235,125),along(125,98),along(58,58),along(20,16),V(0,11,0),along(-40,30),V(M.x+8,36,M.z+74),V(M.x+14,90,M.z+66),V(M.x+4,168,M.z+40),V(M.x-6,222,M.z+20),V(-150,215,170)],false,'centripetal');
+    rideT=new T.CatmullRomCurve3([o.tgt,V(0,50,0),along(-70,42),along(-90,46),along(-60,70),V(-3,150,6),V(-6,80,-40),V(M.x,100,M.z),V(M.x,160,M.z),V(M.x,200,M.z-6),V(0,60,0),V(0,62,-30)],false,'centripetal')}
   function place(time){
     var p=cp;
     if(cr>.0004&&rideP){
       var u=cr*cr*(3-2*cr)*.55+cr*.45;
       cam.position.copy(rideP.getPoint(u));cam.lookAt(rideT.getPoint(u));cam.setViewOffset(W,Hh,0,0,W,Hh);
+      // bank into turns like an aircraft
+      var q0=rideP.getPoint(Math.max(0,u-.02)),q1=rideP.getPoint(u),q2=rideP.getPoint(Math.min(1,u+.02)),v1=q1.clone().sub(q0),v2=q2.clone().sub(q1);
+      var turn=v1.length()*v2.length()>1e-6?v1.cross(v2).y/(v1.length()*v2.length()):0;roll+=(clamp(-turn*5,-.32,.32)-roll)*.08;cam.rotateZ(roll);
     }else{
       var o=orbitPose(p,px);cam.position.copy(o.pos);cam.lookAt(o.tgt);
       var k=Math.min(1,p*5),ox=mobile?0:-W*.2*(1-k),oy=mobile?-Hh*.2*(1-k):Hh*.06*(1-k);
@@ -177,5 +160,6 @@
   addEventListener('resize',function(){size();buildRide();tp=prog();tr=rideProg()});
   addEventListener('pointermove',function(e){tx=e.clientX/innerWidth-.5});
   document.addEventListener('visibilitychange',function(){run=!document.hidden;if(run&&!raf)raf=requestAnimationFrame(frame)});
-  size();buildRide();tp=cp=prog();tr=cr=rideProg();root.classList.add('gl');raf=requestAnimationFrame(frame);
+  root.classList.add('gl'); // first: it makes #enter visible, and the scroll maths below needs its real position
+  size();buildRide();tp=cp=prog();tr=cr=rideProg();raf=requestAnimationFrame(frame);
 })();
