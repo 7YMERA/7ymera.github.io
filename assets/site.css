@@ -1332,3 +1332,13 @@ section.block { padding-block: 80px 8px; }
 .rb-code { aspect-ratio: 16 / 10; border-radius: 16px; border: 1px solid var(--line); background: var(--sunk); padding: 18px 20px; font-family: var(--f-mono); font-size: .75rem; line-height: 1.7; color: var(--muted); overflow: hidden; display: grid; align-content: center; }
 .rb-code b { color: var(--accent); font-weight: 500; }
 .rb-code em { font-style: normal; color: var(--gold); }
+
+/* "This is me" card: one steady height (the short slides). The longer "Why hire me" slide scrolls inside it instead of
+   every slide reserving its height. extras.js sets --ms-h; without it the slides just size themselves. */
+.me-card .ms-slide[hidden] { display: none !important; }
+.me-card .ms-slides { position: relative; height: var(--ms-h, auto); }
+.me-card .ms-slide.on { max-height: var(--ms-h, none); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: var(--line) transparent; padding-right: 10px; }
+.me-card .ms-slide.on::-webkit-scrollbar { width: 6px; }
+.me-card .ms-slide.on::-webkit-scrollbar-thumb { background: var(--line); border-radius: 6px; }
+.me-card .ms-slides::after { content: ""; position: absolute; left: 0; right: 10px; bottom: 0; height: 38px; background: linear-gradient(to bottom, transparent, var(--surface, #fff)); pointer-events: none; opacity: 0; transition: opacity .2s; }
+.me-card .ms-slides.more::after { opacity: 1; }

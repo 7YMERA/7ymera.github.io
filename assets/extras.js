@@ -204,6 +204,27 @@
     q.setAttribute('aria-label', q.textContent.trim());
     q.innerHTML = words.map(function (w, i) { return '<span class="w" aria-hidden="true" style="--i:' + i + '">' + w + '</span>'; }).join(' ');
   });
+  // One steady card height: the height of the short slides. The longer "Why hire me" slide scrolls inside it,
+  // with a soft fade at the bottom while there is more to read.
+  var slidesBox = root.querySelector('.ms-slides');
+  function edge() {
+    var on = slidesBox.querySelector('.ms-slide.on');
+    slidesBox.classList.toggle('more', !!on && on.scrollHeight - on.clientHeight - on.scrollTop > 6);
+  }
+  function fit() {
+    var w = slidesBox.clientWidth; if (!w) return;
+    var h = parseFloat(getComputedStyle(root).fontSize) * 11;   // never shorter than about 11em
+    slides.forEach(function (s) {
+      if (s.classList.contains('ms-hire')) return;
+      var was = s.hidden, st = s.style.cssText;
+      s.hidden = false;
+      s.style.cssText = 'position:absolute;left:0;top:0;width:' + w + 'px;visibility:hidden;max-height:none;overflow:visible';
+      h = Math.max(h, s.offsetHeight);
+      s.style.cssText = st; s.hidden = was;
+    });
+    slidesBox.style.setProperty('--ms-h', Math.ceil(h + 4) + 'px');
+    edge();
+  }
   function show(i, user) {
     cur = (i + n) % n;
     photos.forEach(function (p, k) {
@@ -212,6 +233,7 @@
       p.classList.toggle('next', k === (cur + 1) % n);
     });
     slides.forEach(function (s, k) { s.hidden = k !== cur; s.classList.toggle('on', k === cur); });
+    slides[cur].scrollTop = 0; edge();
     dots.forEach(function (d, k) {
       d.classList.toggle('on', k === cur);
       if (k === cur) d.setAttribute('aria-current', 'true'); else d.removeAttribute('aria-current');
@@ -240,15 +262,20 @@
   // Pause while it's off-screen, and for 20 seconds after you move it yourself.
   var held = false, away = true, holdT = null;
   function sync() { root.classList.toggle('paused', held || away); }
-  function act(i) {
-    show(i, !calm);
+  function hold() {
     held = true; sync();
     clearTimeout(holdT);
     holdT = setTimeout(function () { held = false; sync(); }, 20000);
   }
+  function act(i) { show(i, !calm); hold(); }
+  // Reading a long slide: scrolling inside it pauses the auto-advance too.
+  slides.forEach(function (s) { s.addEventListener('scroll', function () { edge(); hold(); }, { passive: true }); });
   if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { away = !es[0].isIntersecting; sync(); }, { threshold: .35 }).observe(root);
   else away = false;
   sync(); show(0, false);
+  fit();
+  if (typeof ResizeObserver === 'function') new ResizeObserver(fit).observe(slidesBox); else addEventListener('resize', fit);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
 })();
 
 /* Showcase switch: flip between the tumble deck and the spinning reel.
