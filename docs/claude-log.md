@@ -24,6 +24,10 @@ where the last chat stopped without re-reading everything.
 - Checked in the browser: `/flight/?bg=district` runs with no console errors, facade shader and beams work, end shot is good; `/` unchanged. `tools/check.js` not run.
 - Open: the leg after the gap flies close past a tower on its way to Menara KL; the route is untuned. Making this the default means rewriting the Merdeka/Exchange captions, which is the owner's call. The mesh has no textures or colours.
 
+## 2026-11-11 · Phone version: the 3D city is the default again, loading note removed
+- Owner: the poly city on a phone "ain't so bad", so the lite mode (no 3D, 5 second "use desktop" screen) was removed again: head script, `#lite-load`, the inline loader and the `.lite` CSS are gone; three.js and `scene.js` are plain deferred scripts as before. Phones run the same scene as desktop (with the existing phone camera tweaks in `scene.js`: `mobile` poses, no side offset). Cache key `20261111r`.
+- Open: real-phone frame rate is still untested; the lite version is in git history (`e549069`) if it is wanted as a fallback for slow devices.
+
 ## 2026-11-11 · Light phone version with a loading note
 - Screens up to 820 px wide get the lite version. A small script in the head adds `html.lite` (and `gl`, so the panel styles apply) before first paint. In lite mode three.js, `scene.js` and all of `assets/city/` are never requested (the scripts are now injected by an inline loader that returns early on phones); the canvas, flight, spin and stage sections are hidden; the body has a still sky-blue gradient. The page is about 2.3 MB on a phone against 5.4 MB on desktop (measured by response sizes in Playwright).
 - Loading screen (`#lite-load`, styles in `scene.css`): the name, a pulsing block, "Use desktop for the best experience" and a 5 second bar, then it fades out. A big Continue button skips it. Shown once per visit (sessionStorage `lite-seen`; reloading in the same tab skips it). Reduced motion removes the animation. Cache key `20261111q`.
