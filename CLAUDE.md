@@ -24,7 +24,8 @@ any agent working on this repo, kept short on purpose so it costs little context
 | Join Atlas (Jom Al-Quran note) | `assets/join-atlas.js`, `.css` |
 | Notes (blog posts) | `notes/*.html`, listed in `notes/index.html`. Edit the HTML directly. |
 | README screenshots | `docs/screens/` |
-| 3D city, scroll flight, HUD | scene `assets/scene.js`, styles `assets/scene.css`, models and textures `assets/city/` (the page itself is `index.html`) |
+| 3D city, scroll flight, HUD | scene `assets/scene.js`, styles `assets/scene.css` (also skins the notes pages), models and textures `assets/city/` (the page itself is `index.html`) |
+| Flight on its own (view and debug) | `/flight/`: `flight/index.html`, panel on **H**. Keep its `#enter` block in step with `index.html`. |
 | Smoke test | `tools/check.js` |
 
 ## Rules that bite

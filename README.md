@@ -59,7 +59,7 @@ The home page, top to bottom:
 | **Selected work** | **Journey** |
 | ![Selected work](docs/screens/work.webp) | ![Journey](docs/screens/journey.webp) |
 
-Also on every page: a light/dark switch (light by default, choice remembered), **Ctrl+K** quick jump, an aurora background on the notes pages (the home page has the 3D city instead, see below), and on phones a bottom dock that can be tucked away.
+Also on every page: a light/dark switch (light by default, choice remembered), **Ctrl+K** quick jump, the city as the backdrop (live 3D on the home page, a still picture on the notes pages), and on phones a bottom dock that can be tucked away.
 
 ---
 
@@ -72,7 +72,7 @@ Every interactive piece below started as a React + Tailwind component on [21st.d
 | # | 21st.dev component | Our version | File | Where it's used | Status |
 |---|---|---|---|---|---|
 | 1 | **Tilted Grid Hero** | A single row of screenshots running round the inside of a cylinder ("Spin" reel) | `assets/curved-reel.js` | Behind the opening | ✅ live |
-| 2 | **Aurora Background** | A pre-rendered aurora *image* that slides with `transform` | CSS `.sky`, `.aurora` + `assets/aurora-*.webp` | Notes pages (the home page now has the 3D city) | ✅ live |
+| 2 | **Aurora Background** | A pre-rendered aurora *image* that slides with `transform` | CSS `.sky`, `.aurora` + `assets/aurora-*.webp` | Nothing now: the home page and the notes pages both use the city (the CSS is kept in `site.css`) | 💤 unused |
 | 3 | **Tumble Deck Showcase** | A scroll-driven stack of cards that tip forward one by one | `assets/tumble-deck.js` | — | 💤 in the repo, not on the page |
 | 4 | **Image Stream Hero** | One-sided corridor of images flowing towards you | `assets/image-stream.js` | Notes page header (`notes/`) | ✅ live |
 | 5 | **Circular Testimonials** | Photo carousel with side photos tilted behind, text that blurs in word by word | `extras.js` (*This is me* block) | REQ-001 card | ✅ live |
@@ -187,6 +187,7 @@ The home page (`index.html`) sits over a WebGL scene of Kuala Lumpur (three.js f
 |---|---|
 | The page (all sections, the flight markup, the `<canvas id="gl">`) | `index.html`, edited by hand (nothing is generated) |
 | Scene, flight, HUD | `assets/scene.js` |
+| Flight on its own, with a viewer panel | `flight/index.html` |
 | Palette, section panels, opening plates, flight and HUD styles; loads after `site.css` | `assets/scene.css` |
 | Landmark models, the city, facade textures | `assets/city/` |
 
@@ -201,7 +202,20 @@ The home page (`index.html`) sits over a WebGL scene of Kuala Lumpur (three.js f
 - **Readability rules:** sections are opaque panels (93 % paper), no `backdrop-filter`; the opening's words get a plate or a halo because they sit straight on the city.
 - **Theme:** the site's own button flips `data-theme`; `scene.js` watches the attribute (MutationObserver) and recolours the scene. Scene colours come from CSS variables (`--sky1`, `--far`, `--mid`, `--near`, `--glass`, `--orb`, `--ring`, `--fx`).
 - **Performance:** while you only read, the scene redraws at about 15 fps; while you scroll, every frame. The dock hides during the flight so it doesn't cover the captions. *Skip the flight* is a big button at the top of the flight.
-- **Notes pages** (`notes/*.html`) still use the plain aurora look and `site.css` only; the *Notes* cards on the home page link to them.
+- **Notes pages** (`notes/*.html`) share the palette and panel look; see *The notes pages match* below.
+
+### Seeing the flight on its own: `/flight/`
+
+`/flight/` is the scene and nothing else: no panels, no captions, no HUD. Scroll to fly the whole route. It is for looking at the flight and for debugging it. It is not linked from the site and is marked noindex.
+
+- **Panel (hidden by default):** press **H**, or open `/flight/?panel`. It has a scrub slider, **Auto-fly** with a speed button (0.5×, 1×, 2×, 3×; a full flight is about 90 s at 1×), **Captions + HUD** on and off, **Light / dark**, and **Copy link to this moment**. It also shows the flight position in percent and the camera position in metres.
+- **Keys:** `H` panel, `Space` auto-fly, `←` `→` nudge 1 %, `U` captions and HUD, `T` theme. The wheel or a touch stops auto-fly.
+- **Links to a moment:** `/flight/#t=0.42` opens 42 % through the flight. Other parameters: `?theme=dark`, `?ui` (captions on), `?panel`. The scene is exposed as `window.__scene` on this page (camera, `rideP`, `rideU`, `snap`, ...) for checking clearance.
+- **How:** `<html data-flight-only>` makes `scene.js` skip the orbit phase and map the page scroll straight onto the flight. The flight markup is a copy of the `#enter` section of `index.html`, so **if you change the captions or the HUD there, change them in `flight/index.html` too**. Per-frame scrolling must be instant (`behavior:'instant'`), because `site.css` sets `scroll-behavior: smooth`.
+
+### The notes pages match
+
+The notes pages (`notes/*.html`) load `site.css` and `assets/scene.css` (no WebGL, no three.js). `scene.css` gives them the same blues and a hard-shadow article panel, and replaces the aurora with a still, lightly blurred picture of the city (`assets/city-light.webp`, `assets/city-dark.webp`, about 20 and 50 KB). Regenerate the pictures after the scene changes with `node tools/make-note-backdrops.js` (home page served on port 8765).
 
 ### How it got here (the first 3D preview was called "v2")
 
