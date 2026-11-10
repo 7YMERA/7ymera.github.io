@@ -22,6 +22,11 @@ where the last chat stopped without re-reading everything.
 - The owner didn't like the clothes-rail look, so the project rail (commit `5c68a02`) was reverted from the home page and `/v2/`. The cache key is back to `20261108b`.
 - The code is still in git history if the spring physics, turn-to-front or flip view are wanted for something else.
 
+## 2026-11-10 · Merdeka PNB 118 added to /v2/
+- Added the owner's Merdeka PNB 118 model (SketchUp Collada, zip) to the `/v2/` skyline behind and to the right of the Petronas Towers. `tools/convert-dae.py` flattens the Collada scene graph (inches, Z-up, instanced nodes) into `v2/merdeka118.json` (about 58 KB, 1.2k vertices). Both landmarks share one scale, so Merdeka 118 stands taller than the towers, as in life. `v2-3d.js` now loads both through one `loadModel()`.
+- The raw `.skp` upload can't be read here, so the Collada export was used instead.
+- Open: author and licence of both models are unknown (no readme). Confirm they may be redistributed, or delete `v2/klcc.json` / `v2/merdeka118.json`; the page falls back to the built tower, or just omits Merdeka.
+
 ## 2026-11-10 · /v2/ uses the real Petronas Towers model
 - The owner supplied a SketchUp export of the Petronas Twin Towers (OBJ in a zip). `tools/convert-klcc.py` ear-clips it to triangles, splits it into body and glass, recentres it and writes `v2/klcc.json` (about 520 KB, 16.7k vertices). `v2/v2-3d.js` loads it and scales it to the scene; the old hand-built towers remain as a fallback if the file fails to load.
 - Merdeka 118 (`.skp`) was also supplied but SketchUp's own format can't be read here. It needs exporting from SketchUp as OBJ, DAE or glTF first.

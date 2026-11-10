@@ -40,20 +40,24 @@
   }
   // The real model: a SketchUp export of the Petronas Towers, converted by tools/convert-klcc.py into v2/klcc.json
   function b64(str,Type){var bin=atob(str),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Type(u.buffer)}
-  var bodyM=mat('near',{side:T.DoubleSide}),glassModelM=mat('ring',{side:T.DoubleSide,emissive:0xffffff,emissiveIntensity:.3});
-  glassModelM.userData.glow=true;
-  fetch('klcc.json').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
-    var pos=b64(d.positions,Float32Array),sc=H/d.height,out=new T.Group();
-    [['body',bodyM],['glass',glassModelM]].forEach(function(p){
-      var geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));geo.setIndex(new T.BufferAttribute(b64(d[p[0]],Uint16Array),1));
-      geo=geo.toNonIndexed();geo.computeVertexNormals();out.add(new T.Mesh(geo,p[1]))});
-    out.scale.setScalar(sc);g.add(out);recolor();need=true;
-  }).catch(function(){procedural();recolor();need=true});
+  var SC=H/444.138; // one scale for every landmark, so their real heights compare truthfully
+  var bodyM=mat('near',{side:T.DoubleSide}),bodyM2=mat('mid',{side:T.DoubleSide}),glassModelM=mat('ring',{side:T.DoubleSide,emissive:0xffffff,emissiveIntensity:.3});
+  function loadModel(url,x,z,ry,bm,fallback){
+    fetch(url).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+      var pos=b64(d.positions,Float32Array),out=new T.Group();
+      [['body',bm],['glass',glassModelM]].forEach(function(p){
+        var geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));geo.setIndex(new T.BufferAttribute(b64(d[p[0]],Uint16Array),1));
+        geo=geo.toNonIndexed();geo.computeVertexNormals();out.add(new T.Mesh(geo,p[1]))});
+      out.scale.setScalar(SC);out.position.set(x,0,z);out.rotation.y=ry;g.add(out);recolor();need=true;
+    }).catch(function(){if(fallback)fallback();recolor();need=true});
+  }
+  loadModel('klcc.json',0,0,0,bodyM,procedural);          // Petronas Twin Towers (SketchUp export, see tools/convert-klcc.py)
+  loadModel('merdeka118.json',-10,-95,-.5,bodyM2,null);  // Merdeka PNB 118 (SketchUp Collada, see tools/convert-dae.py)
   var gr=new T.Mesh(new T.CircleGeometry(520,48),ground);gr.rotation.x=-Math.PI/2;gr.position.y=-.2;g.add(gr);
   // city ring
   var s=11;function rnd(){s=(s*9301+49297)%233280;return s/233280}
   for(var i=0;i<130;i++){var a=rnd()*6.283,d=135+rnd()*240,w=8+rnd()*18,h=8+rnd()*(d<160?55:35);
-    var b=new T.Mesh(new T.BoxGeometry(w,h,w*(.7+rnd()*.6)),d<170?city:cityF);b.position.set(Math.cos(a)*d,h/2,Math.sin(a)*d);b.rotation.y=rnd()*3;g.add(b)}
+    if(Math.hypot(Math.cos(a)*d+10,Math.sin(a)*d+95)<62)continue;var b=new T.Mesh(new T.BoxGeometry(w,h,w*(.7+rnd()*.6)),d<170?city:cityF);b.position.set(Math.cos(a)*d,h/2,Math.sin(a)*d);b.rotation.y=rnd()*3;g.add(b)}
   // KL Tower
   var kl=new T.Group();kl.position.set(-95,0,-70);
   var shaft=new T.Mesh(new T.CylinderGeometry(2,3.4,120,8),towerB);shaft.position.y=60;
