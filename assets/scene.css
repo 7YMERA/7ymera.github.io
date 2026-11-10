@@ -180,3 +180,6 @@ html.gl .jr-card,html.gl .uni-cf .cf-details,html.gl .uni-card,html.gl .st-branc
   html.gl #notes .nb-head{padding:16px 18px}
   html.gl section.contact{margin-top:84px}
 }
+
+/* a lead-in whose label sits on the right (the building is on the left) */
+html.gl .stage-r .stage-sticky{justify-items:end}

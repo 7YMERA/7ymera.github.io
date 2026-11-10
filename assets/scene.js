@@ -218,6 +218,7 @@
     ['notes',.9,-.5,P(0,0,98,130,98,74,.22)],
     ['studied',.14,-.5,function(){return UTP[utpIdx]}],   // UTP: the shot follows the group you pick
     ['studied',.9,-.5,function(){return UTP[utpIdx]}],
+    ['merdekastage',.3,-.5,P(MER[0],MER[1],125,150,6,122,.22)],  // a lead-in all of its own: the tower looming over its label
     ['toolkit',.1,-.5,P(MER[0],MER[1],120,125,5,118,0)],    // Skills: Merdeka 118 between the two columns, base first ...
     ['toolkit',.38,-.5,P(MER[0],MER[1],140,300,95,96,0)], // ... the whole building ...
     ['toolkit',.66,-.5,P(MER[0],MER[1],172,150,150,150,0)],// ... the upper half ...
@@ -263,14 +264,19 @@
   var UX=new T.Vector3(.665,0,.747),WX=new T.Vector3(-.747,0,.665);
   function A(u,w,y){return new T.Vector3(UX.x*u+WX.x*w,y,UX.z*u+WX.z*w)}
   var MC={u:-80,w:-63};                                   // Merdeka 118's axis
-  function arcAt(deg,r,y,ty){var a=deg*Math.PI/180;return [A(MC.u+Math.cos(a)*r,MC.w+Math.sin(a)*r,y),A(MC.u,MC.w,ty)]}
+  var MCD={u:82,w:364},EXD={u:331,w:85};                  // the district puts Merdeka 118 and The Exchange 106 south of KLCC, in (u,w)
+  function arcAt(deg,r,y,ty){var C=DIST?MCD:MC,a=deg*Math.PI/180;return [A(C.u+Math.cos(a)*r,C.w+Math.sin(a)*r,y),A(C.u,C.w,ty)]}
   // [name, camera position, look-at point, slow factor of the stretch that FOLLOWS it (bigger = more scroll spent there)]
-  var KF=null,CAPS=DIST?[['start','front'],['front','over'],['over','out'],['out','end']]:[['start','front'],['front','over'],['over','out'],['out','m4'],['m4','pass'],['pass','end']];
+  var KF=null,CAPS=[['start','front'],['front','over'],['over','out'],['out','m4'],['m4','pass'],['pass','end']];
   function buildKF(){
     var o=orbitPose(1,0),m1=arcAt(90,55,96,112),m2=arcAt(130,55,116,132),m3=arcAt(180,55,138,150),m4=arcAt(230,55,166,178),m5=arcAt(270,55,200,205);
-    if(DIST){KF=[['start',o.pos,o.tgt,1.0],['swing',A(135,-175,96),A(0,0,64),1.4],['side',A(185,-95,88),A(0,0,62),1.4],['front',A(165,-25,72),A(0,0,56),1.4],
+    if(DIST){var E=EXD,C=MCD;KF=[['start',o.pos,o.tgt,1.0],['swing',A(135,-175,96),A(0,0,64),1.4],['side',A(185,-95,88),A(0,0,62),1.4],['front',A(165,-25,72),A(0,0,56),1.4],
       ['bridge',A(70,0,56),A(0,0,50),1.7],['over',A(30,0,66),A(-20,0,66),1.9],['gap',A(0,0,76),A(-60,-10,84),1.7],
-      ['out',A(-34,-6,100),A(-12,285,100),1.6],['end',A(175,-250,330),A(-12,90,60),1.5]];return}
+      ['out',A(-34,-6,100),A(C.u,C.w,130),1.0],
+      ['m0',m1[0],m1[1],2.4],['m1',m2[0],m2[1],2.4],['m2',m3[0],m3[1],2.4],['m3',m4[0],m4[1],2.4],['m4',m5[0],m5[1],2.4],
+      ['turn',A((C.u+E.u)/2,(C.w+E.w)/2,236),A(E.u,E.w,170),1.0],
+      ['pass',A(E.u-70,E.w+55,205),A(E.u,E.w,128),1.8],
+      ['end',A(-120,190,330),A(150,200,90),1.5]];return}
     KF=[
       ['start',o.pos,o.tgt,1.0],
       ['swing',A(135,-175,96),A(0,0,64),1.4],
@@ -308,8 +314,6 @@
     rideU=pchip(CX,CM);
     KI={};KF.forEach(function(k,j){KI[k[0]]=CX[j]});
     for(i=0;i<caps.length&&i<CAPS.length;i++){caps[i].dataset.from=Math.max(.012,KI[CAPS[i][0]]);caps[i].dataset.to=i===CAPS.length-1?1.01:KI[CAPS[i][1]]}
-    if(DIST){var lc=caps[3];if(lc){lc.innerHTML='<b>Four landmarks</b><span>Petronas, Merdeka 118, Menara KL and The Exchange 106, from the compact district model. Scroll back up to fly it again.</span>';lc.dataset.to=1.01}
-      for(i=4;i<caps.length;i++){caps[i].dataset.from=9;caps[i].dataset.to=9}}
     hudBuild()}
   var rideU=function(c){return c};
   // ---- HUD (DOM) ----
