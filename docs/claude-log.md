@@ -24,6 +24,16 @@ where the last chat stopped without re-reading everything.
 - Checked in the browser: `/flight/?bg=district` runs with no console errors, facade shader and beams work, end shot is good; `/` unchanged. `tools/check.js` not run.
 - Open: the leg after the gap flies close past a tower on its way to Menara KL; the route is untuned. Making this the default means rewriting the Merdeka/Exchange captions, which is the owner's call. The mesh has no textures or colours.
 
+## 2026-11-11 · District re-baked from the original, Exchange 106 re-cropped, bigger conveyor
+- Owner pushed the original KL City Centre to branch `kl-poly-design` (`model.dae`, 69 MB SketchUp 8). Nothing from it is on `main`. `tools/bake-district.py` re-bakes it (after `tools/convert-dae-dump.py`): 413k triangles within 1100 m of the towers, entirely-underground faces dropped, duplicate front/back faces removed, welded at 0.8 m (the weld rises until it fits 65535 vertices) instead of the old 3 m weld that dropped thin walls and many whole buildings. New `assets/city/klcc_district.json` is 1.59 MB (was 1.14 MB), 64.5k vertices, 134k triangles. The district material is now double-sided (SketchUp faces have no consistent winding).
+- The ugly Exchange 106 was my own doing: I had clustered it to a 2.5 m grid. Re-cropped at 0.7 m with `tools/convert-dae-crop.py` (now `assets/city/exchange106.json` 765 KB, was 306 KB): clean taper, no shards.
+- Conveyor of screens (behind the towers, follows the camera bearing) is now live and bigger (66 x 40, 7 screens). It was meant to be reviewed first; the owner then asked for it bigger and moved on, so it shipped with this. Cache key `20261111l`.
+- Open: page weight is up about 1 MB. Real-phone frame rate is untested with 134k triangles. The district's own landmarks inside the cut circles (Petronas 150 m, Merdeka 200 m, Exchange 125 m) are still replaced by the hand-made models.
+
+## 2026-11-11 · Conveyor of screens (branch only, awaiting the owner's look)
+- Replaces the removed ring: flat project screens on a belt that always sits behind the towers as the camera sees them (follows the camera bearing, faces it), slides sideways at about 4.5 units/s and fades at the two wrap points. Hidden in the flight. Code: `THE CONVEYOR OF SCREENS` in `assets/scene.js`. Committed to branch `claude/wonderful-galileo-bgrct6` only, not `main`, because the owner asked to see it first.
+- Open: the owner thinks some district buildings look hollow (probably the 3 m weld dropping thin faces). The owner may send the original district folder so it can be re-baked at a finer weld.
+
 ## 2026-11-11 · District map kept, its ugly landmarks swapped for the hand-made models; ring removed
 - Owner: the district looked ugly, but meant only the ugly parts (the blocky landmarks), not the whole map. `assets/scene.js` now cuts the district mesh's own versions of the Petronas Towers (150 m round the midpoint), Merdeka 118 (200 m) and The Exchange 106 (125 m) out when it loads, and stands the hand-made models there (`klcc.json`, `merdeka118.json`, `exchange106.json`); Menara KL and the rest of the district stay as the district has them. `?bg=osm` still gives the full OpenStreetMap city.
 - The ring of screens was removed (bent slivers, one clipping into a tower); the opening's flat spin reel is shown again. Cache key `20261111j`.

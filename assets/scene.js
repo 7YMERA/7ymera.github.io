@@ -88,7 +88,7 @@
         diffuseColor.rgb*=mix(1.0,clamp(dl*1.9,0.0,1.3),wall*0.75);
         totalEmissiveRadiance+=texture2D(uNightTex,fuv).rgb*wall*uNight*1.25;`)};
     return m}
-  var cityM=facade(mat('mid'));
+  var cityM=facade(mat('mid',DIST?{side:T.DoubleSide}:{}));
   facade(bodyM); // all four landmarks share one material and the facade shader, so none is bluer than the rest
   var cityMesh=null;
   fetch(BASE+(DIST?'city/klcc_district.json':'city/kl_city.json')).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
@@ -335,7 +335,32 @@
   var tick=0;
   // the lead-in sections show their label while they are on screen
   if('IntersectionObserver' in window){var stObs=new IntersectionObserver(function(es){es.forEach(function(e){e.target.classList.toggle('on',e.isIntersecting&&e.intersectionRatio>.55)})},{threshold:[0,.55,1]});document.querySelectorAll('.stage').forEach(function(el){stObs.observe(el)})}
-  function ringUpdate(){} // the ring of screens was removed (it turned screens into bent slivers); see docs/claude-log.md
+  // ---- THE CONVEYOR OF SCREENS ----
+  // A slow belt of flat project screens that always sits behind the towers as the camera sees them (so the towers hide each screen as it passes),
+  // slides sideways, and wraps round with a short fade at the two ends. It follows the camera's bearing, so it is a backdrop, not a ring.
+  var BELT=[],belt=new T.Group(),beltImgs=[];
+  try{var reelEl=document.querySelector('.reel');beltImgs=JSON.parse((reelEl&&reelEl.getAttribute('data-reel'))||'[]')}catch(err){beltImgs=[]}
+  if(beltImgs.length){
+    var NB=7,BW=66,BH=40,BSP=88,BY=98,BDIST=105;
+    for(var bi=0;bi<NB;bi++){
+      var btex=loader.load(beltImgs[bi%beltImgs.length]);btex.anisotropy=4;
+      var bmat=new T.MeshBasicMaterial({map:btex,transparent:true,opacity:0,toneMapped:false,fog:false,side:T.DoubleSide,depthWrite:false});
+      var bm=new T.Mesh(new T.PlaneGeometry(BW,BH),bmat);belt.add(bm);BELT.push({m:bm,mat:bmat,u:(bi-NB/2)*BSP})}
+    scene.add(belt)}
+  var beltOff=0,beltLast=0;
+  function ringUpdate(time,inRide){
+    if(!BELT.length)return;
+    if(inRide){belt.visible=false;return}
+    belt.visible=true;
+    var dt=beltLast?Math.min(.05,(time-beltLast)/1000):0;beltLast=time;
+    if(!reduce)beltOff+=dt*4.5;
+    var cl=Math.hypot(cam.position.x,cam.position.z)||1,dx=cam.position.x/cl,dz=cam.position.z/cl,span=NB*BSP,half=span/2;
+    for(var i=0;i<BELT.length;i++){
+      var u=((BELT[i].u+beltOff+half)%span+span)%span-half,m=BELT[i].m;
+      // behind the towers (away from the camera), sideways by u, always facing the camera
+      m.position.set(-dx*BDIST+(-dz)*u,BY,-dz*BDIST+dx*u);
+      m.rotation.set(0,Math.atan2(dx,dz),0);
+      var e=Math.min(1,(half-Math.abs(u))/22);BELT[i].mat.opacity=clamp(e,0,1)*.96}}
   var flying=false;
   function place(time){
     if(enter){var pin=scrollY>=enter.offsetTop-40&&scrollY<=enter.offsetTop+enter.offsetHeight-innerHeight+40;if(pin!==flying){flying=pin;root.classList.toggle('flying',pin)}} // hides the dock while the captions are on screen
