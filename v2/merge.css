@@ -1,0 +1,96 @@
+/* v2 = the home page (assets/site.css) over the 3D Kuala Lumpur scene. This file only re-skins and adds; it loads after site.css.
+   Palette: v2's blues. Light mode is paper-blue, dark mode is v2's night navy. v1's token names are kept, so every v1 component follows. */
+:root{
+  --bg:#f4f8fc;--surface:#fbfdff;--sunk:#e6f1fa;--ink:#0b2a6b;--muted:#3f5b94;--line:#c3dcef;
+  --accent:#1559c9;--accent-ink:#fff;--accent-soft:#dcecfb;--glow:rgba(42,166,232,.14);
+  --shadow:0 1px 2px rgba(11,42,107,.08),0 10px 30px rgba(11,42,107,.10);
+  --fx:#2aa6e8;--hard:#0b2f8a;--f-pix:"Pixelify Sans",ui-monospace,Menlo,Consolas,monospace;
+  /* scene colours, read by v2-3d.js */
+  --sky1:#eaf4fb;--sky2:#cfe6f7;--far:#bcd9ee;--mid:#8fc3e8;--near:#5aa6dc;--glass:#e9f6ff;--orb:#2c63c9;--ring:#8fd2ff;
+  color-scheme:light}
+:root[data-theme="dark"]{
+  --bg:#050912;--surface:#0b1830;--sunk:#08122a;--ink:#d6ecff;--muted:#8fb2d8;--line:#1c3a66;
+  --accent:#7fd3ff;--accent-ink:#04142c;--accent-soft:#12305a;--glow:rgba(127,211,255,.14);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.4);
+  --fx:#3aa0ee;--hard:#000;
+  --sky1:#050a1a;--sky2:#0d1a38;--far:#12264a;--mid:#1a3a70;--near:#235396;--glass:#7fd3ff;--orb:#3d79e0;--ring:#7fd3ff;
+  color-scheme:dark}
+
+/* the scene behind everything */
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:-1;display:none}
+html.gl #gl{display:block}
+html.gl body{background:linear-gradient(var(--sky1),var(--sky2)) fixed}
+.nav-v1{margin-left:6px;border:1.5px solid var(--fx);border-radius:999px;font-family:var(--f-pix);font-weight:600}
+
+/* Readability: every section sits on an opaque paper panel with a hard offset shadow (v2's window look), and the city shows in the gaps.
+   No backdrop-filter: it would sample the moving scene on every frame. */
+html.gl main>section.block,html.gl main>.hero{
+  width:min(calc(100% - 28px),calc(var(--col) + 56px));margin:72px auto;padding-bottom:24px;
+  background:color-mix(in srgb,var(--bg) 93%,transparent);border:2px solid var(--fx);box-shadow:6px 6px 0 var(--hard);border-radius:6px}
+html.gl main>.hero{padding-block:28px 24px}
+html.gl section.block{padding-top:44px}
+html.gl .hero::before{display:none}
+html.gl .top{border-bottom:2px solid var(--fx)}
+html.gl section.contact{margin-top:72px;border-top:2px solid var(--fx)}
+html.gl .dock{border:2px solid var(--fx);box-shadow:4px 4px 0 var(--hard)}
+html.gl .card,html.gl .ent,html.gl .note-card{border-radius:10px}
+@media (max-width:700px){
+  html.gl main>section.block,html.gl main>.hero{width:calc(100% - 16px);margin:28px auto;box-shadow:4px 4px 0 var(--hard)}
+}
+
+/* The opening sits straight on the city: give its words a plate or a halo so they stay readable */
+html.gl .cur-center{background:color-mix(in srgb,var(--bg) 88%,transparent);border:2px solid var(--fx);box-shadow:6px 6px 0 var(--hard);border-radius:6px;padding:20px 26px}
+html.gl .cur-hero .hero-title,html.gl .cur-hero .for,html.gl .cur-hero .lede{text-shadow:0 0 24px var(--bg),0 0 12px var(--bg),0 0 5px var(--bg),0 0 2px var(--bg)}
+html.gl .cur-hero .hero-title .l2{color:var(--accent)}
+
+html.flying .dock{opacity:0;pointer-events:none;transform:translate(-50%,20px)}
+
+/* ---- The flight: a tall scroll section, sticky captions, HUD ---- */
+.enter{display:none}
+html.gl .enter{display:block;height:780vh;position:relative}
+.enter-sticky{position:sticky;top:0;height:100vh;height:100svh;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;padding:0 20px 40px;pointer-events:none}
+.ride-caps{position:relative;width:min(440px,100%);min-height:140px;counter-reset:cap}
+.ride-cap{counter-increment:cap;position:absolute;left:0;bottom:0;margin:0;padding:14px 16px;background:var(--surface);color:var(--ink);border:2px solid var(--fx);box-shadow:5px 5px 0 var(--hard);opacity:0;transform:translateY(14px);transition:opacity .35s,transform .35s}
+.ride-cap.on{opacity:1;transform:none}
+.ride-cap::before{content:"SECTOR " counter(cap,decimal-leading-zero) " / 06";display:block;font:600 11px var(--f-pix);letter-spacing:.16em;color:var(--fx);margin-bottom:6px}
+.ride-cap b{display:block;font:700 1.35rem/1.15 var(--f-display);margin-bottom:4px}
+.ride-cap span{display:block;font-size:.9rem;line-height:1.45;color:var(--muted)}
+.ride-hint{position:absolute;right:20px;bottom:44px;margin:0;font:600 14px var(--f-pix);color:var(--ink);background:var(--surface);border:2px solid var(--fx);padding:6px 12px}
+.fly-skip{position:absolute;left:20px;top:78px;pointer-events:auto;display:inline-flex;align-items:center;min-height:46px;padding:10px 18px;font:600 15px var(--f-pix);text-decoration:none;background:var(--accent);color:var(--accent-ink);border-radius:10px;box-shadow:3px 3px 0 var(--hard)}
+.fly-skip:hover{transform:translate(-1px,-1px)}
+.hud{position:absolute;inset:0;opacity:0;transition:opacity .6s}
+.hud.on{opacity:1}
+.hud-c{position:absolute;width:26px;height:26px;border:0 solid var(--fx);opacity:.85}
+.hud-c.tl{left:14px;top:70px;border-width:2px 0 0 2px}
+.hud-c.tr{right:14px;top:70px;border-width:2px 2px 0 0}
+.hud-c.bl{left:14px;bottom:14px;border-width:0 0 2px 2px}
+.hud-c.br{right:14px;bottom:14px;border-width:0 2px 2px 0}
+.hud-side{position:absolute;right:26px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.hud-read{margin:0;display:flex;gap:8px;align-items:baseline;font:600 13px var(--f-pix);color:var(--ink);background:var(--surface);border:2px solid var(--fx);padding:4px 10px;letter-spacing:.06em}
+.hud-read span:first-child{color:var(--fx)}
+.hud-rail{position:relative;width:4px;height:min(38vh,320px);background:color-mix(in srgb,var(--fx) 25%,transparent);margin-right:6px}
+.hud-fill{position:absolute;inset:0;background:var(--fx);transform-origin:top;transform:scaleY(0)}
+.hud-ticks{list-style:none;margin:0;padding:0;position:absolute;inset:0}
+.hud-ticks li{position:absolute;right:-6px;display:flex;align-items:center;gap:6px;transform:translateY(-50%);flex-direction:row-reverse}
+.hud-ticks i{width:14px;height:14px;background:var(--surface);border:2px solid var(--fx);transform:rotate(45deg)}
+.hud-ticks b{font:600 11px var(--f-pix);color:var(--muted);margin-right:4px}
+.hud-ticks li.on i{background:var(--fx)}
+.hud-ticks li.on b{color:var(--ink)}
+.hud-sec{margin:0;max-width:170px;text-align:right;font:600 12px/1.25 var(--f-pix);letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.hud-tags{position:absolute;inset:0;overflow:hidden}
+.lm-tag{position:absolute;left:0;top:0;opacity:0;transition:opacity .4s;will-change:transform;pointer-events:none}
+.lm-tag.show{opacity:1}
+.lm-tag>*{position:absolute;white-space:nowrap}
+.lm-dot{left:-5px;top:-5px;width:10px;height:10px;border:2px solid var(--fx);background:var(--surface);transform:rotate(45deg)}
+.lm-tag b{left:16px;top:-46px;font:600 13px var(--f-pix);letter-spacing:.05em;color:var(--ink);background:var(--surface);border:2px solid var(--fx);padding:3px 8px}
+.lm-tag span{left:16px;top:-22px;font-size:11px;color:var(--muted);background:var(--surface);padding:1px 6px;border:1px solid var(--fx);border-top:0}
+.lm-tag::before{content:"";position:absolute;left:0;top:-46px;width:2px;height:46px;background:var(--fx)}
+@media (max-width:600px){
+  .enter-sticky{padding:0 16px 32px}
+  .ride-hint{right:16px;bottom:auto;top:128px}
+  .fly-skip{left:16px;top:70px;min-height:44px}
+  .hud-side{right:14px}.hud-sec,.hud-ticks b{display:none}.hud-read{font-size:12px;padding:3px 8px}
+  .hud-rail{height:30vh}
+  .lm-tag b{font-size:11px;padding:2px 6px;top:-40px}.lm-tag span{display:none}.lm-tag::before{height:40px;top:-40px}
+}
+@media (prefers-reduced-motion:reduce){.ride-cap,.hud,.lm-tag{transition:none}}

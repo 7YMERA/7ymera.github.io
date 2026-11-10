@@ -6,7 +6,7 @@ const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 const base = process.argv[2] || 'http://localhost:8765/';
 const root = path.join(__dirname, '..');
-const pages = [''].concat(fs.readdirSync(path.join(root, 'notes')).filter(f => f.endsWith('.html')).map(f => 'notes/' + f));
+const pages = ['', 'v2/'].concat(fs.readdirSync(path.join(root, 'notes')).filter(f => f.endsWith('.html')).map(f => 'notes/' + f));
 (async () => {
   const b = await chromium.launch(); let bad = 0;
   for (const [w, h, theme] of [[1300, 900, 'light'], [390, 844, 'dark']]) {

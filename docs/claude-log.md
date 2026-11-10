@@ -18,6 +18,22 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-10 · /v2/ is now v1 + v2 merged
+- Owner asked for both worlds in one: v1's content, readability, components and way of delivering a portfolio, with v2's 3D city background and look. Info boxes and v2's fonts are not needed.
+- `tools/build-v2.py` generates `v2/index.html` from `index.html` (paths to `../`, canvas instead of the aurora, `merge.css`, flight section, three.js). `v2/merge.css` remaps v1's tokens to v2's blues (light paper-blue, v2's night navy for dark), makes each section an opaque panel with a hard shadow, plates the opening's words, and holds the flight HUD styles. Fonts stay v1's (readable); Pixelify Sans only on the HUD.
+- The flight moved to between Journey and Contact, with a big *Skip the flight* button; the dock hides while it plays. Scene redraws at ~15 fps while only reading. `pulse.js` now finds its data next to itself. Old stand-alone v2 (`v2.css`, `v2.js`, floating windows) removed; it lives at `c5ca5b5`.
+- `tools/check.js` now covers `v2/`: no errors, 404s or sideways scroll at 1300 px and 390 px. Screenshots checked light and dark. Real-phone frame rate and scroll feel still untested.
+- Open: notes pages are still plain v1. The v2 page loads about 3 MB of models on top of v1's images.
+
+## 2026-11-10 · /v2/ flight v8: calmer route, smoother camera, sci-fi layer
+- Owner feedback: Merdeka part too fast, awkward angles, the camera clipped into Suria KLCC near the skybridge, the spin under the bridge and back felt repetitive, only two buildings looked highlighted (Petronas and Exchange used a different material), the motion was rougher than v1.
+- New route (one direction, no loop): swing in, head-on at the skybridge, over the bridge and through the gap, one slow turn up Merdeka 118, over The Exchange 106, wide shot of all four. `#enter` is 780vh. Camera never goes below the bridge level near the towers; raycast sweep: nothing closer than 7 units (the gap itself).
+- Smoothness: spring-damped follow instead of a per-frame lerp, scroll map built from path length x slow factor with a monotone cubic (no speed jumps), gentler banking, in-between look-at waypoint so the view never whips.
+- All four landmarks share one material. The orb moved out of the flight path.
+- Sci-fi layer, inspired by 0z5a.github.io: HUD corners, altitude read-out, progress rail with six sector ticks, landmark tags with distance, beams and halos on each crown, glowing links with pulses, radar ring, floating wireframe shapes.
+- Cache key for `/v2/` is `20261110c`. Checked 1100 px light/dark and 390 px by screenshots, no page errors. Real-phone frame rate still untested. Owner says the models are free to download; authors still unrecorded.
+- Open: Menara KL is only tagged, not flown past. A real scroll-feel check on a phone is still needed.
+
 ## 2026-11-10 · Motion ideas lab (branch only)
 - `lab/ideas/index.html`: one self-contained page with four playgrounds from the dropped rail's mechanics: a spine-out notes shelf (turn-to-front), skill flip cards (lift and flip view), a draggable journey strip (springs and bumping) and swinging status hang-tags. Real notes, skills, journey and project data; no images.
 - Kept on branch `claude/wonderful-galileo-bgrct6` only, not merged to `main`, and not linked from the site. A private artifact copy was published for previewing.

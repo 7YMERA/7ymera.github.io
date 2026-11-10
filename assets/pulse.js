@@ -1,3 +1,4 @@
+var PULSE_BASE=(document.currentScript&&document.currentScript.src||'').replace(/[^\/]*$/,'')||'assets/';
 /* Pulse: status board, 17-week activity map and a live GitHub feed.
    Static snapshot comes from assets/pulse-data.json; the live feed is a public-events call that falls back silently. */
 (function () {
@@ -77,7 +78,7 @@
       .catch(function () {});
   }
 
-  fetch('assets/pulse-data.json?v=20261108b').then(function (r) { return r.json(); }).then(function (d) {
+  fetch(PULSE_BASE+'pulse-data.json?v=20261108b').then(function (r) { return r.json(); }).then(function (d) {
     heat(d.heat); snapshot(d); live(d);
   }).catch(function () { if (feed) feed.appendChild(el('li', 'pl-item', 'Activity is unavailable right now.')); });
   counters();
