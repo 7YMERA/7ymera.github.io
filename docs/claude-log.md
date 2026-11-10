@@ -18,6 +18,12 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-11 · "This is me" card no longer reserves the tallest slide's height
+- Owner's phone screenshots showed a big empty gap under the short slides (the card kept the height of "Why hire me", because hidden slides stayed in layout).
+- Now hidden slides are `display:none`, and `extras.js` (`fit()`) sets `--ms-h` on `.ms-slides` to the height of the short slides (never under about 11em). The longer "Why hire me" slide scrolls inside that box (thin scrollbar, soft fade at the bottom while there is more, `overscroll-behavior: contain`). Scrolling inside a slide pauses the auto-advance like any other touch. Works on the classic page and on `/v2/`: same shared `site.css` and `extras.js`.
+- Checked on the classic page and `/v2/` at 390 px and 1300 px: the box height is the same on all five slides and the hire slide scrolls (396 px of content in a 215 px box on a phone). `tools/check.js`: 30/30 OK. Cache key is now `20261111a`.
+- Open: not yet tried on a real phone (touch scroll inside the card while the page also scrolls).
+
 ## 2026-11-10 · /v2/ is now v1 + v2 merged
 - Owner asked for both worlds in one: v1's content, readability, components and way of delivering a portfolio, with v2's 3D city background and look. Info boxes and v2's fonts are not needed.
 - `tools/build-v2.py` generates `v2/index.html` from `index.html` (paths to `../`, canvas instead of the aurora, `merge.css`, flight section, three.js). `v2/merge.css` remaps v1's tokens to v2's blues (light paper-blue, v2's night navy for dark), makes each section an opaque panel with a hard shadow, plates the opening's words, and holds the flight HUD styles. Fonts stay v1's (readable); Pixelify Sans only on the HUD.
