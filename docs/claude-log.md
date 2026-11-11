@@ -20,6 +20,13 @@ where the last chat stopped without re-reading everything.
 
 
 
+
+---
+
+## 2026-11-14 · One camera (the follower)
+- Owner's idea: make every movement one system so a change of mode can't snap. `scene.js`: the director (before the flight) and the flight each still compute where the camera should be, but a single follower (`followCam`) is now the only thing that moves it: position, rotation, lens and sideways push all chase their target with the same short lag (about 0.14 s) and a top speed of 700 units/s. Snap, reduced motion and the first frame skip the lag.
+- Checked by sampling the real camera every frame while scrolling through the Journey-to-flight entry: no jumps after warm-up. Smoke test clean. Key `20261113e`.
+- Open: owner to feel-test. If the flight feels slightly floaty, raise the 7 in `followCam` (higher = tighter).
 ---
 
 ## 2026-11-14 · Golden-hour finale, thin fog, no barrel roll
