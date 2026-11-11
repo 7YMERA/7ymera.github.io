@@ -504,6 +504,19 @@
     goldC.set(C.sky1).lerp(G1,k);root.style.setProperty('--sky1','#'+goldC.getHexString());
     goldC.set(C.sky2).lerp(G2,k);root.style.setProperty('--sky2','#'+goldC.getHexString());
     if(scene.fog)scene.fog.color.copy(goldC);sun.color.set(0xffffff).lerp(new T.Color('#ffd08a'),k)}
+  // ONE CAMERA. Above, the director (before the flight) and the flight (inside #enter) each only say where the camera should be.
+  // This follower is the only thing that actually moves it: position, rotation, lens and the sideways push all chase their target
+  // with the same short lag and a top speed, so a change between the two systems (or anything else) can never show as a snap.
+  var fInit=true,fP=new T.Vector3(),fQ=new T.Quaternion(),fF=42,fX=0,fY=0,fD=new T.Vector3();
+  function followCam(dt){
+    var vo=cam.view,ox=vo&&vo.enabled?vo.offsetX:0,oy=vo&&vo.enabled?vo.offsetY:0;
+    if(fInit||reduce){fP.copy(cam.position);fQ.copy(cam.quaternion);fF=cam.fov;fX=ox;fY=oy;fInit=false;return}
+    var k=1-Math.exp(-dt*7),L=fD.copy(cam.position).sub(fP).length();
+    if(L>1e-6)fP.addScaledVector(fD,Math.min(L*k,700*dt)/L);
+    fQ.slerp(cam.quaternion,k);fF+=(cam.fov-fF)*k;fX+=(ox-fX)*k;fY+=(oy-fY)*k;
+    cam.position.copy(fP);cam.quaternion.copy(fQ);
+    if(Math.abs(fF-cam.fov)>.005){cam.fov=fF;cam.updateProjectionMatrix()}
+    cam.setViewOffset(W,Hh,fX,fY,W,Hh)}
   function place(time){
     if(enter){var pin=scrollY>=enter.offsetTop-40&&scrollY<=enter.offsetTop+enter.offsetHeight-innerHeight+40;if(pin!==flying){flying=pin;root.classList.toggle('flying',pin)}} // hides the dock while the captions are on screen
     var inRide=cr>.0004&&!!rideP;
@@ -541,13 +554,14 @@
       cam.position.set(q[0]+Math.cos(ang)*q[3],q[4],q[1]+Math.sin(ang)*q[3]);cam.lookAt(q[0],q[5],q[1]);
       cam.setViewOffset(W,Hh,-q[6]*W,-q[7]*Hh,W,Hh);hudUpdate(false)
     }
+    followCam(dtF);
     for(var ci=0;ci<caps.length;ci++){var c=caps[ci],on=cr>=+c.dataset.from&&cr<+c.dataset.to;if(on!==c.classList.contains('on'))c.classList.toggle('on',on)}
     if(spin&&sH){var sy=scrollY-(sTop-innerHeight),sf=sy/Math.max(1,sH),sOn=sf>.18&&sf<.95;if(sOn!==spin.classList.contains('on'))spin.classList.toggle('on',sOn)} // the coordinates tag
     ringUpdate(time,inRide);
     orb.rotation.y=time*.0004;ring.rotation.z=time*.0006;orb.position.y=230+Math.sin(time*.0009)*3;
     specks.rotation.y=time*.00003;fxUpdate(time,reduce);sciUpdate(time,reduce,inRide)}
   var raf=0,run=true,last=0,lastR=0;
-  function snap(){rideQ=null;curPose=tgtPose.slice();cr=tr;px=tx;vr.v=vx.v=0;vPose.forEach(function(v){v.v=0})}
+  function snap(){fInit=true;rideQ=null;curPose=tgtPose.slice();cr=tr;px=tx;vr.v=vx.v=0;vPose.forEach(function(v){v.v=0})}
   function frame(time){
     var dt=clamp((time-last)/1000,.001,.05);last=time;dtF=dt;tick++;
     if(reduce)snap();else{for(var j=0;j<8;j++)curPose[j]=damp(curPose[j],tgtPose[j],vPose[j],.55,dt);var cr0=cr;cr=clamp(damp(cr,tr,vr,.75,dt),0,1);if(flying){var cap=.085*dt;if(cr-cr0>cap){cr=cr0+cap;vr.v=Math.min(vr.v,cap/dt)}else if(cr0-cr>cap){cr=cr0-cap;vr.v=Math.max(vr.v,-cap/dt)}} /* speed limit: a fast flick can't whip the camera */px=damp(px,tx,vx,.6,dt)}
