@@ -27,8 +27,8 @@ where the last chat stopped without re-reading everything.
 ## 2026-11-15 · Night mode: spires, roads, dark blocks
 - Facade shader (`scene.js`): no lit rooms on spires or bare shafts. `LCUT` lists, per landmark, the centre, radius and the height above which rooms stay dark (Petronas 106, Merdeka 148, The Exchange 122; Menara KL lit only on the pod, 78 to 99). About one block in five stands dark (not the landmarks), and street level stays unlit.
 - Aircraft warning lights: red double flash sprites on both Petronas spires, Merdeka 118, The Exchange 106 and Menara KL (`BEAC`, `beaconUpdate`); dimmer by day.
-- Ground shader: dark patches (parks, water) only. A street grid with sodium lights was tried and REMOVED at the owner's request (too ugly, didn't fit the design).
-- Checked light and dark at 1000 px and dark at 390 px, no console errors, smoke test clean. Key `20261113g` (roads removed).
+- Ground: roads with sodium lights and dark patches were tried and both REMOVED at the owner's request (didn't fit the design). The ground is one plain colour again.
+- Checked light and dark at 1000 px and dark at 390 px, no console errors, smoke test clean. Key `20261113h`.
 - Open: `LCUT` heights are estimates from the model tops (Merdeka spire starts about 148, The Exchange about 122); adjust if the owner sees lit rooms on a crown or a dark top floor.
 ---
 

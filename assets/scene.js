@@ -95,16 +95,7 @@
         nl*=smoothstep(1.0,9.0,vWP.y); /* street level stays dark */
         totalEmissiveRadiance+=texture2D(uNightTex,fuv).rgb*nl;`)};
     return m}
-  // The ground: some dark patches (parks, water) so the blocks don't sit on one flat colour. (Roads were tried and removed: owner didn't like them.)
-  ground.onBeforeCompile=function(sh){
-    sh.uniforms.uNight=cityU.uNight;
-    sh.vertexShader=sh.vertexShader.replace('void main() {','varying vec3 vWP;\nvoid main() {').replace('#include <worldpos_vertex>','#include <worldpos_vertex>\n vWP=(modelMatrix*vec4(transformed,1.0)).xyz;');
-    sh.fragmentShader=sh.fragmentShader.replace('void main() {','varying vec3 vWP;uniform float uNight;\nvoid main() {')
-      .replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
-      vec2 gp=vWP.xz;
-      float hp=fract(sin(dot(floor(gp/38.0),vec2(12.9898,78.233)))*43758.5453);float pk=step(0.84,hp);
-      diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(0.45,0.62,0.5),pk*0.7);
-      totalEmissiveRadiance*=1.0-pk*0.8;`)};
+  // The ground stays one plain colour. (Roads and dark patches were tried and removed: owner didn't like them.)
   var cityM=facade(mat('mid',DIST?{side:T.DoubleSide}:{}));
   facade(bodyM); // all four landmarks share one material and the facade shader, so none is bluer than the rest
   var cityMesh=null;
