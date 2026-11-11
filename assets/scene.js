@@ -95,21 +95,15 @@
         nl*=smoothstep(1.0,9.0,vWP.y); /* street level stays dark */
         totalEmissiveRadiance+=texture2D(uNightTex,fuv).rgb*nl;`)};
     return m}
-  // The ground: roads (dark lines, sodium street lights at night) and some dark patches (parks, water), so the blocks stand in a street grid.
+  // The ground: some dark patches (parks, water) so the blocks don't sit on one flat colour. (Roads were tried and removed: owner didn't like them.)
   ground.onBeforeCompile=function(sh){
     sh.uniforms.uNight=cityU.uNight;
     sh.vertexShader=sh.vertexShader.replace('void main() {','varying vec3 vWP;\nvoid main() {').replace('#include <worldpos_vertex>','#include <worldpos_vertex>\n vWP=(modelMatrix*vec4(transformed,1.0)).xyz;');
     sh.fragmentShader=sh.fragmentShader.replace('void main() {','varying vec3 vWP;uniform float uNight;\nvoid main() {')
       .replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
       vec2 gp=vWP.xz;
-      vec2 g1=abs(fract(gp/46.0+0.5)-0.5)*46.0;float r1=1.0-smoothstep(1.4,2.4,min(g1.x,g1.y));
-      vec2 q2=mat2(0.8,0.6,-0.6,0.8)*gp;vec2 g2=abs(fract(q2/120.0+0.5)-0.5)*120.0;float r2=1.0-smoothstep(2.4,3.6,min(g2.x,g2.y));
-      float rd=max(r1*0.85,r2);
       float hp=fract(sin(dot(floor(gp/38.0),vec2(12.9898,78.233)))*43758.5453);float pk=step(0.84,hp);
-      diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*0.42,rd);
-      diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(0.45,0.62,0.5),pk*0.7*(1.0-rd));
-      float along=(g1.y<g1.x)?gp.x:gp.y;float lamp=step(0.78,fract(along/7.0))*r1;
-      totalEmissiveRadiance+=vec3(1.0,0.62,0.26)*uNight*(lamp*0.6+rd*0.05);
+      diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(0.45,0.62,0.5),pk*0.7);
       totalEmissiveRadiance*=1.0-pk*0.8;`)};
   var cityM=facade(mat('mid',DIST?{side:T.DoubleSide}:{}));
   facade(bodyM); // all four landmarks share one material and the facade shader, so none is bluer than the rest
