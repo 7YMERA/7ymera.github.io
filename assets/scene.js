@@ -268,12 +268,12 @@
     fx.forEach(function(m){m.needsUpdate=true});sciStyle(dark)}
   var fogN0=300,fogF0=680; // base fog (set by recolor); the finale pushes it back
   function recolor(){
-    readColors();var dark=root.getAttribute('data-theme')==='dark';
+    root.style.removeProperty('--sky1');root.style.removeProperty('--sky2');goldLast=-1;readColors();var dark=root.getAttribute('data-theme')==='dark';
     mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});
     tower.emissive.set(C.glass);tower.emissiveIntensity=dark?1:.28;glassM.emissive.set(C.ring);glassM.emissiveIntensity=dark?.9:.15;
     cityU.uNight.value=dark?1:0;
     if(glassModelM){glassModelM.emissive.set(C.ring);glassModelM.emissiveIntensity=dark?.8:.12}ringM.color.set(C.ring);specks.material.color.set(C.ring);
-    var f=col('sky2');fogN0=dark?260:300;fogF0=dark?640:680;scene.fog=new T.Fog(f,fogN0,fogF0);
+    var f=col('sky2');fogN0=dark?520:620;fogF0=dark?1500:1700; /* thin fog: it used to hide the city */scene.fog=new T.Fog(f,fogN0,fogF0);
     fxStyle(dark);amb.intensity=dark?.45:.5;sun.intensity=dark?.55:.55;sun.color.set(dark?0x9cc8ff:0xffffff)}
   recolor();window.addEventListener('scenetheme',function(){recolor();need=true});
   new MutationObserver(function(){recolor();need=true}).observe(root,{attributes:true,attributeFilter:['data-theme']}); // the page's own theme button flips data-theme
@@ -434,7 +434,7 @@
     for(i=0;i<caps.length&&i<CAPS.length;i++){caps[i].dataset.from=Math.max(.012,KI[CAPS[i][0]]);caps[i].dataset.to=i===CAPS.length-1?1.01:KI[CAPS[i][1]]}
     hudBuild()}
   var rideU=function(c){return c},rollK=[];
-  function rollAt(u){var n=rollK.length;if(n<2)return 0;var f=clamp(u,0,1)*(n-1),i=Math.min(n-2,Math.floor(f)),t=f-i;t=t*t*(3-2*t);return rollK[i]+(rollK[i+1]-rollK[i])*t}
+  function rollAt(u){return 0; /* no barrel roll (owner's call); the drone still banks into turns */var n=rollK.length;if(n<2)return 0;var f=clamp(u,0,1)*(n-1),i=Math.min(n-2,Math.floor(f)),t=f-i;t=t*t*(3-2*t);return rollK[i]+(rollK[i+1]-rollK[i])*t}
   // ---- HUD (DOM) ----
   var hud=document.getElementById('hud'),hTags=[],hAlt=document.getElementById('h-alt'),hSec=document.getElementById('h-sec'),hFill=document.getElementById('h-fill'),hTicks=[],hLast=-1,hSecLast=-1;
   if(hud){var tg=hud.querySelector('.hud-tags');LM.forEach(function(l){var e=document.createElement('div');e.className='lm-tag';
@@ -495,6 +495,15 @@
   if('IntersectionObserver' in window){var stObs=new IntersectionObserver(function(es){es.forEach(function(e){e.target.classList.toggle('on',e.isIntersecting&&e.intersectionRatio>.55)})},{threshold:[0,.55,1]});document.querySelectorAll('.stage').forEach(function(el){stObs.observe(el)})}
   function ringUpdate(){} // the screens that floated behind the towers (ring, then conveyor) were removed; see docs/claude-log.md
   var flying=false;
+  // Golden hour: for the finale skyline the light turns to a hazy sunrise (reference photo: warm orange sky, golden haze over the towers). Light theme only.
+  var goldLast=-1,goldF=new T.Color(),goldC=new T.Color(),G1=new T.Color('#ffe2a8'),G2=new T.Color('#f3a95a'),G3=new T.Color('#f0b676');
+  function goldHour(k){
+    var dark=root.getAttribute('data-theme')==='dark';if(dark)k=0;k=Math.round(k*50)/50;if(k===goldLast)return;goldLast=k;
+    if(k===0){mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});root.style.removeProperty('--sky1');root.style.removeProperty('--sky2');if(scene.fog)scene.fog.color.set(C.sky2);sun.color.set(dark?0x9cc8ff:0xffffff);return}
+    mats.forEach(function(m){var r=m.userData.role;if(r==='far'||r==='mid'||r==='near')m.color.set(C[r]).lerp(G3,k*.38)}); /* the ground and towers take the warm haze */
+    goldC.set(C.sky1).lerp(G1,k);root.style.setProperty('--sky1','#'+goldC.getHexString());
+    goldC.set(C.sky2).lerp(G2,k);root.style.setProperty('--sky2','#'+goldC.getHexString());
+    if(scene.fog)scene.fog.color.copy(goldC);sun.color.set(0xffffff).lerp(new T.Color('#ffd08a'),k)}
   function place(time){
     if(enter){var pin=scrollY>=enter.offsetTop-40&&scrollY<=enter.offsetTop+enter.offsetHeight-innerHeight+40;if(pin!==flying){flying=pin;root.classList.toggle('flying',pin)}} // hides the dock while the captions are on screen
     var inRide=cr>.0004&&!!rideP;
@@ -518,6 +527,7 @@
       var ke=KI['sweep1']!=null?KI['sweep1']:(KI['pass']!=null?KI['pass']:.7),ke2=KI['end']||HOLD0,fs=clamp((cr-ke-.4*(ke2-ke))/(.6*(ke2-ke)),0,1);fs=fs*fs*(3-2*fs);
       var kk=Math.sin(Math.PI*clamp(cr/.07,0,1)),fv=42+(mobile?30:10)*fs+26*kk*kk; /* kk: a gentle push-in that starts and ends at the normal lens, so entering the flight never snaps */if(Math.abs(fv-cam.fov)>.01){cam.fov=fv;cam.updateProjectionMatrix()}
       if(scene.fog){scene.fog.near=fogN0+260*fs;scene.fog.far=fogF0+560*fs}
+      goldHour(fs);
       // Ease the rotation: the view turns towards where it should look with a short lag (time constant about 0.2 s), so a sharp
       // turn in the route can never show as a jolt. Reset when the flight starts, and when snapping.
       if(!rideQ)rideQ=cam.quaternion.clone();else{rideQ.slerp(cam.quaternion,reduce?1:1-Math.exp(-dtF*5));cam.quaternion.copy(rideQ)}
@@ -526,7 +536,7 @@
       var turn=v1.length()*v2.length()>1e-6?v1.cross(v2).y/(v1.length()*v2.length()):0;roll+=(clamp(-turn*(DIST?7:3),DIST?-.42:-.14,DIST?.42:.14)-roll)*(1-Math.exp(-dtF*3));cam.rotateZ(roll*(1-fs)+rollAt(u)); // drone bank into turns, the scripted barrel roll, and a level horizon for the finale
       hudUpdate(true,u,cr)
     }else{
-      rideQ=null;heroOn=false;if(cam.fov!==42){cam.fov=42;cam.updateProjectionMatrix()}if(scene.fog){scene.fog.near=fogN0;scene.fog.far=fogF0}
+      rideQ=null;heroOn=false;goldHour(0);if(cam.fov!==42){cam.fov=42;cam.updateProjectionMatrix()}if(scene.fog){scene.fog.near=fogN0;scene.fog.far=fogF0}
       var q=curPose,ang=(q[2]+px*7)*Math.PI/180;
       cam.position.set(q[0]+Math.cos(ang)*q[3],q[4],q[1]+Math.sin(ang)*q[3]);cam.lookAt(q[0],q[5],q[1]);
       cam.setViewOffset(W,Hh,-q[6]*W,-q[7]*Hh,W,Hh);hudUpdate(false)

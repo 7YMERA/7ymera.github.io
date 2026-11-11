@@ -19,6 +19,14 @@ where the last chat stopped without re-reading everything.
 
 
 
+
+---
+
+## 2026-11-14 · Golden-hour finale, thin fog, no barrel roll
+- Owner's reference photo (hazy sunrise over KL): the finale skyline in light theme now fades to a golden-hour sky and warm haze (`goldHour()` in `scene.js`, driven by the finale factor `fs`; dark theme untouched).
+- Fog pushed back (near 620 / far 1700, was 300 / 680) because it hid the city. Barrel roll removed (`rollAt` returns 0); the drone still banks into turns.
+- Checked the Journey-to-flight entry: the last pre-flight shot and the first flight frame are the same camera, lens included, and the zoom-out is spread over about 1000 px each way. Idle drift is 28 px/s by formula; software GL here can't show real speed, so the owner should feel-test.
+- The two flight repos the owner linked (AndriiShramko/ShramkoGSFPV, chenlong2019/drone-camera) are full simulators (physics FPV, mission/orbit survey planners). No code to reuse: our scripted path already uses the same ideas (waypoints, spiral orbits, eased follow camera, speed limit). Key `20261113d`.
 ---
 
 ## 2026-11-13 · Flight entry no longer snaps, metro lines as a backdrop, slower idle drift
