@@ -73,21 +73,44 @@
   // Windows come from two facade textures laid on the walls in the shader: a glass grid by day, lit offices at night.
   var loader=new T.TextureLoader();
   function wrapTex(t){t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=4;return t}
-  var cityU={uNight:{value:0},uDay:{value:wrapTex(loader.load(BASE+'city/facade_glass.jpg'))},uNightTex:{value:wrapTex(loader.load(BASE+'city/facade_night.jpg'))}};
+  // Where a building has a spire or a bare shaft, no rooms light up above (or below) these heights: [x, z, radius, light up to y] and the lowest lit y. Landmarks: Petronas, Merdeka 118, The Exchange 106, Menara KL.
+  var LCUT=DIST?[[0,0,34,106],[-206,300,24,148],[158,296,28,122],[-221,181,9,99]]:[[0,0,34,106],[-6,-98,24,148],[61,-130,28,122],[-95,-70,9,99]];
+  var cityU={uCut:{value:LCUT.map(function(c){return new T.Vector4(c[0],c[1],c[2],c[3])})},uLo:{value:[-1,-1,-1,78]},uNight:{value:0},uDay:{value:wrapTex(loader.load(BASE+'city/facade_glass.jpg'))},uNightTex:{value:wrapTex(loader.load(BASE+'city/facade_night.jpg'))}};
   // Facade shader: windows on the walls, in world space, so every building (the OSM city and the landmark models alike) shows its floors.
   function facade(m){
     m.onBeforeCompile=function(sh){
-      sh.uniforms.uNight=cityU.uNight;sh.uniforms.uDay=cityU.uDay;sh.uniforms.uNightTex=cityU.uNightTex;
+      sh.uniforms.uNight=cityU.uNight;sh.uniforms.uCut=cityU.uCut;sh.uniforms.uLo=cityU.uLo;sh.uniforms.uDay=cityU.uDay;sh.uniforms.uNightTex=cityU.uNightTex;
       sh.vertexShader=sh.vertexShader.replace('void main() {','varying vec3 vWP;\nvoid main() {').replace('#include <worldpos_vertex>','#include <worldpos_vertex>\n vWP=(modelMatrix*vec4(transformed,1.0)).xyz;');
-      sh.fragmentShader=sh.fragmentShader.replace('void main() {','varying vec3 vWP;uniform sampler2D uDay;uniform sampler2D uNightTex;uniform float uNight;\nvoid main() {')
+      sh.fragmentShader=sh.fragmentShader.replace('void main() {','varying vec3 vWP;uniform sampler2D uDay;uniform sampler2D uNightTex;uniform float uNight;uniform vec4 uCut[4];uniform float uLo[4];\nvoid main() {')
         .replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
         vec3 fn=normalize(cross(dFdx(vWP),dFdy(vWP)));
         float wall=1.0-smoothstep(0.45,0.75,abs(fn.y));
         vec2 fuv=(abs(fn.z)>abs(fn.x)?vWP.xy:vWP.zy)/6.0;
         float dl=dot(texture2D(uDay,fuv).rgb,vec3(0.333));
         diffuseColor.rgb*=mix(1.0,clamp(dl*1.9,0.0,1.3),wall*0.75);
-        totalEmissiveRadiance+=texture2D(uNightTex,fuv).rgb*wall*uNight*1.25;`)};
+        float nl=wall*uNight*1.25;bool lm=false;
+        for(int i=0;i<4;i++){vec4 c=uCut[i];if(distance(vWP.xz,c.xy)<c.z){lm=true;if(vWP.y>c.w||vWP.y<uLo[i])nl=0.0;}} /* spires and shafts have no floors: no lit rooms there */
+        float hb=fract(sin(dot(floor(vWP.xz/20.0),vec2(12.9898,78.233)))*43758.5453);
+        if(!lm)nl*=mix(1.0,0.1,step(0.8,hb)); /* about one block in five stands dark */
+        nl*=smoothstep(1.0,9.0,vWP.y); /* street level stays dark */
+        totalEmissiveRadiance+=texture2D(uNightTex,fuv).rgb*nl;`)};
     return m}
+  // The ground: roads (dark lines, sodium street lights at night) and some dark patches (parks, water), so the blocks stand in a street grid.
+  ground.onBeforeCompile=function(sh){
+    sh.uniforms.uNight=cityU.uNight;
+    sh.vertexShader=sh.vertexShader.replace('void main() {','varying vec3 vWP;\nvoid main() {').replace('#include <worldpos_vertex>','#include <worldpos_vertex>\n vWP=(modelMatrix*vec4(transformed,1.0)).xyz;');
+    sh.fragmentShader=sh.fragmentShader.replace('void main() {','varying vec3 vWP;uniform float uNight;\nvoid main() {')
+      .replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
+      vec2 gp=vWP.xz;
+      vec2 g1=abs(fract(gp/46.0+0.5)-0.5)*46.0;float r1=1.0-smoothstep(1.4,2.4,min(g1.x,g1.y));
+      vec2 q2=mat2(0.8,0.6,-0.6,0.8)*gp;vec2 g2=abs(fract(q2/120.0+0.5)-0.5)*120.0;float r2=1.0-smoothstep(2.4,3.6,min(g2.x,g2.y));
+      float rd=max(r1*0.85,r2);
+      float hp=fract(sin(dot(floor(gp/38.0),vec2(12.9898,78.233)))*43758.5453);float pk=step(0.84,hp);
+      diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*0.42,rd);
+      diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(0.45,0.62,0.5),pk*0.7*(1.0-rd));
+      float along=(g1.y<g1.x)?gp.x:gp.y;float lamp=step(0.78,fract(along/7.0))*r1;
+      totalEmissiveRadiance+=vec3(1.0,0.62,0.26)*uNight*(lamp*0.6+rd*0.05);
+      totalEmissiveRadiance*=1.0-pk*0.8;`)};
   var cityM=facade(mat('mid',DIST?{side:T.DoubleSide}:{}));
   facade(bodyM); // all four landmarks share one material and the facade shader, so none is bluer than the rest
   var cityMesh=null;
@@ -242,8 +265,14 @@
     carBodyM.color.set(dark?0x1b3d73:0xf6fbff);carWinM.color.set(dark?0xfff1b8:0x0b2a6b);carStripeM.color.set(dark?C.glass:0x1559c9);
     headGlowM.opacity=dark?.95:.5;headGlowM.color.set(dark?0xfff0c0:0xffffff);
     [railM,railM2,headGlowM].forEach(function(m){m.needsUpdate=true})}
+  // Aircraft warning lights: a red double flash on the tip of every landmark (and on both Petronas spires), instead of lit rooms up there.
+  var BEAC=DIST?[[11,134,-10],[-11,134,10],[-206,193,300],[158,136,296],[-221,130,181]]:[[11,134,-10],[-11,134,10],[-6,193,-98],[61,136,-130],[-95,130,-70]];
+  var beacons=BEAC.map(function(b,i){var m=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xff3a2a,fog:false,opacity:0}),sp=new T.Sprite(m);sp.scale.set(i===2?15:10,i===2?15:10,1);sp.position.set(b[0],b[1],b[2]);sp.renderOrder=6;g.add(sp);return{m:m,ph:i*.37}});
+  var beaconDark=beaconDark||false;
+  function beaconUpdate(time){var t=time/1000;beacons.forEach(function(b){var p=((t/1.7+b.ph)%1+1)%1,a=(p<.09||(p>.2&&p<.29))?1:.08;b.m.opacity=a*(beaconDark?1:.45)})}
   var sciPos=new T.Vector3();
   function sciUpdate(time,still,inRide){
+    beaconUpdate(time);
     var t=still?0:time*.001,cl=Math.hypot(cam.position.x,cam.position.z)||1,dx=cam.position.x/cl,dz=cam.position.z/cl;
     stars.rotation.y=t*.004;
     moonG.position.set(-dx*900+(-dz)*260,330+Math.sin(t*.05)*6,-dz*900+dx*260);
@@ -252,6 +281,7 @@
     for(var g=0;g<gyros.length;g++){gyros[g].ring.rotation.z=t*.5*gyros[g].sp;gyros[g].h.rotation.y+=still?0:.0016*gyros[g].sp}
     railUpdate(time,still)}
   function sciStyle(dark){
+    beaconDark=dark;
     starM.color.set(dark?0xffffff:C.near);starM.opacity=dark?.9:.38;starM.blending=T.NormalBlending;
     moonM.color.set(dark?0xe6edff:C.near);moon2M.color.set(dark?0xcfd8f2:C.mid);
     moonHalo.material.color.set(dark?0x9dbbff:0xffffff);moonHalo.material.opacity=dark?.5:.85;
