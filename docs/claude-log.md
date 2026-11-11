@@ -23,6 +23,12 @@ where the last chat stopped without re-reading everything.
 
 
 
+
+---
+
+## 2026-11-16 · Night look for the other landmarks
+- Same idea as Merdeka (`scene.js`): `edgesFor()` draws each landmark's long creases at night (Merdeka magenta, Petronas warm white, The Exchange pale cyan). Shader glow zones: Petronas spires floodlit white above y=106, The Exchange crown warm gold above y=118, Menara KL pod warm amber (y 78 to 99). Red aircraft lights from the earlier entry stay.
+- No reference photos for these three, so colours are from general knowledge of how they are lit. Owner to correct with photos if wanted. Key `20261113j`.
 ---
 
 ## 2026-11-16 · Merdeka 118 at night, from the owner's photos
