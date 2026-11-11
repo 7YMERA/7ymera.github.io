@@ -22,6 +22,13 @@ where the last chat stopped without re-reading everything.
 
 
 
+
+---
+
+## 2026-11-16 · Merdeka 118 at night, from the owner's photos
+- Owner's real photos of Merdeka 118 at night: magenta LED lines tracing its facets, lit office bands, dark spire, yellow Maybank sign on the crown. In `scene.js` (night only): the model's long creases (edges over 16 units, 42 degree threshold, via `EdgesGeometry`, `merEdges`) are drawn as additive magenta lines; a yellow "Maybank" sprite sits on the roof (roof at y about 152, centre -214,295 in district coordinates); Merdeka's lit rooms now stop at 154 (the roof). Shader-based crease detection did not work (normals come from derivatives, constant per pixel quad), hence real line geometry.
+- Roads and ground patches stay removed. Key `20261113i`.
+- Open: the sign is a canvas-text sprite (always faces the camera); the real one is on the faces of the crown.
 ---
 
 ## 2026-11-15 · Night mode: spires, roads, dark blocks
