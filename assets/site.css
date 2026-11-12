@@ -1495,3 +1495,6 @@ html.gl.op-bare .top:focus-within { opacity: 1; transform: none; visibility: vis
 html.gl .op-cue { width: 64px; min-height: 64px; height: 64px; padding: 0; justify-content: center; gap: 0; }
 html.gl .op-cue svg { width: 30px; height: 30px; }
 @media (max-width: 760px) { html.gl .op-cue { width: 60px; height: 60px; min-height: 60px; } }
+
+/* Wide blocks in a note (the Join Atlas) sit above the contents rail, so the rail never shows through them. */
+article.post .ja { position: relative; z-index: 2; }

@@ -26,6 +26,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-12 · Notes screenshots retaken; contents rail no longer shows through the Join Atlas
+
+- **What:** `sql-playground.webp` and `join-atlas.webp` retaken from the notes pages (Original join 1 run; report query 4 selected). Taking them showed the *On this page* rail printing through the wide Join Atlas: `article.post .ja` now sits above the rail (`site.css`). Cache key `20261113x`.
+- **How:** the playground needs sql.js from cdnjs, so launch Chromium with `proxy: {server: process.env.HTTPS_PROXY, bypass: 'localhost'}`.
+
 ## 2026-11-12 · README screenshots retaken
 
 - **What:** twelve images in `docs/screens/` retaken at 1300 x 800 from the current site (opening, the six sections, Journey, three flight shots, two dark opening shots); three captions updated. Not retaken: `sql-playground.webp` and `join-atlas.webp` (notes pages), `2026-10-first-version.webp` (history), and the unreferenced `goals`, `opening`, `phone`.
