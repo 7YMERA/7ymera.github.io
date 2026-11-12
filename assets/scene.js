@@ -127,14 +127,14 @@
   function pumpEdges(){
     if(edgeTimer||!edgeJobs.length)return;
     edgeTimer=setTimeout(function(){edgeTimer=0;var j=edgeJobs.shift();j[0](j[1],j[2]);need=true;pumpEdges()},0)}
-  function edgesFor(color,minLen,op){ // night-only lines along a landmark's long creases (Merdeka magenta, Petronas warm white, The Exchange pale cyan)
+  function edgesFor(color,minLen,op){ // night-only lines along a landmark's long creases (Merdeka ice white, Petronas warm white, The Exchange pale cyan)
     var lm=new T.LineBasicMaterial({color:color,transparent:true,opacity:op,blending:T.AdditiveBlending,depthWrite:false});
     function build(m,out){var eg=new T.EdgesGeometry(m.geometry,42),pa=eg.attributes.position.array,keep=[],SCm=out.scale.x||1;
       for(var e=0;e<pa.length;e+=6){var ex=pa[e+3]-pa[e],ey=pa[e+4]-pa[e+1],ez=pa[e+5]-pa[e+2];if(Math.sqrt(ex*ex+ey*ey+ez*ez)*SCm>minLen)keep.push(pa[e],pa[e+1],pa[e+2],pa[e+3],pa[e+4],pa[e+5])}
       var kg=new T.BufferGeometry();kg.setAttribute('position',new T.Float32BufferAttribute(keep,3));var ln=new T.LineSegments(kg,lm);ln.scale.set(1.006,1,1.006);ln.visible=beaconDark;ln.renderOrder=3;m.parent.add(ln);nightLines.push(ln)}
     return function(out){var ms=[];out.traverse(function(m){if(m.isMesh)ms.push(m)});ms.forEach(function(m){edgeJobs.push([build,m,out])});if(edgesWanted)pumpEdges()}}
   function warmEdges(){edgesWanted=true;pumpEdges()}
-  var merEdges=edgesFor(0xff3ae6,16,.8),klccEdges=edgesFor(0xffe7b0,14,.55),exEdges=edgesFor(0xa8ecff,16,.7);
+  var merEdges=edgesFor(0xd4e9ff,24,.4),klccEdges=edgesFor(0xffe7b0,14,.55),exEdges=edgesFor(0xa8ecff,16,.7);
   // In the district all four landmarks are the hand-made models (the district's own baked Menara KL is cleared out below, see CLEAR/BAKED).
   if(DIST){loadModel(BASE+'city/klcc.json',LAY.klcc[0],LAY.klcc[1],LAY.klcc[2],bodyM,null,klccEdges);loadModel(BASE+'city/menara_kl.json',LAY.kl[0],LAY.kl[1],LAY.kl[2],bodyM,null,null);
     loadModel(BASE+'city/merdeka118.json',LAY.mer[0],LAY.mer[1],LAY.mer[2],bodyM,null,function(o){merEdges(o);placeSign(o)});loadModel(BASE+'city/exchange106.json',LAY.ex[0],LAY.ex[1],LAY.ex[2],bodyM,null,exEdges)}
@@ -181,7 +181,7 @@
         float rr=h21(ck),rc=h21(ck+vec2(5.3,1.1)),rb=h21(ck+vec2(9.1,4.7));
         float rf=h21(vec2(cell.y*2.3+b1*37.0,bk.x*1.7+bk.y*3.1)); /* the same value for every window on one floor of one building: whole floors light up */
         float pl=mix(0.2,0.46,b1),bandT=0.12,wp=mix(0.12,0.95,b2); /* lit share (a quarter to under half), floor-band share, warm share: each building has its own bias */
-        if(li==1){pl=0.1;bandT=0.18;wp=0.5;}
+        if(li==1){pl=0.07;bandT=0.14;wp=0.7;}
         if(li==2){pl=0.08;bandT=0.2;wp=0.0;}
         float lit=step(rr,pl);
         lit=max(lit,step(rf,bandT)*step(rr,0.94));
@@ -202,6 +202,12 @@
           float pon=mix(step(pr,0.9)*(0.7+0.5*pw),0.8,df);
           vec3 pcw=mix(vec3(0.82,0.91,1.0),vec3(1.0,0.9,0.72),step(0.8,pw)*(1.0-df));
           wem=pcw*(0.07+0.78*win*pon)*(0.75+0.6*smoothstep(10.0,106.0,vWP.y))*nl;}
+        if(li==1){ /* Merdeka 118: dark faceted glass. Every floor is a thin, even line of cool light, a few office floors glow warmer, the crown is a bright white lantern, and the spire is lit white, fading upward */
+          float mf=fract(vWP.y/1.5);float mline=mix(smoothstep(0.1,0.3,mf)*(1.0-smoothstep(0.42,0.62,mf)),0.3,df);
+          float mup=smoothstep(20.0,uCut[1].w,vWP.y);
+          float mcr=smoothstep(uCut[1].w-16.0,uCut[1].w-3.0,vWP.y);
+          wem=wem*0.8+vec3(0.72,0.86,1.0)*mline*(0.16+0.26*mup)*nl+vec3(0.95,0.98,1.0)*mcr*(0.35+0.75*mline)*nl;}
+        wem+=vec3(0.92,0.96,1.0)*(li==1?step(uCut[1].w,vWP.y)*(1.0-smoothstep(uCut[1].w,uCut[1].w+44.0,vWP.y)):0.0)*0.75*wall*uNight;
         /* Menara KL, from photos: the shaft floodlit white (the brightest part, faintly fluted, a pink blush at the foot), the pod dark blue-violet with rings of white lamps, a white crown on top of it, the lower antenna lit */
         float kw=li==3?step(vWP.y,uLo[3]):0.0;
         float kang=atan(vWP.z-uCut[3].y,vWP.x-uCut[3].x);

@@ -26,6 +26,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-12 · Merdeka 118 at night, reworked
+
+- **What:** no magenta. In the `facade` shader (`li==1`) every floor is a thin, even line of cool light, a few office floors glow warmer, the crown is a bright white lantern and the spire is lit white, fading upward. The crease lines (`merEdges`) are ice white, fewer (only creases over 24 units) and fainter. Cache key `20261113r`.
+- **Why:** the owner found the magenta lines out of place next to the relit Menara KL and Petronas.
+
 ## 2026-11-12 · Menara KL at night, from the owner's photos
 
 - **What:** the magenta pod is gone. The shaft is floodlit white (faintly fluted, a pink blush at the foot), the pod is dark blue-violet with rings of white lamps and a white crown, the lower antenna is lit. All in the `facade` shader (`li==3`). Cache key `20261113q`.
