@@ -14,12 +14,15 @@
   --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.4);
   --fx:#3aa0ee;--hard:#000;
   --sky1:#050a1a;--sky2:#0d1a38;--far:#12264a;--mid:#1a3a70;--near:#235396;--glass:#7fd3ff;--orb:#3d79e0;--ring:#7fd3ff;
+  /* night sky (scene.js reads --sky3 and the ground/silhouette tones): deep navy, indigo, then the warm light-pollution haze of Kuala Lumpur at the horizon */
+  --sky3:#6a4030;--sky-mid:#141f52;--n-far:#1a1b3a;--n-mid:#10183a;--n-near:#16224d;--n-ground:#0d1230;--n-glass:#0e1838;
   color-scheme:dark}
 
 /* the scene behind everything */
 #gl{position:fixed;inset:0;width:100%;height:100%;z-index:-1;display:none}
 html.gl #gl{display:block}
 html.gl body{background:linear-gradient(var(--sky1),var(--sky2)) fixed}
+:root[data-theme="dark"].gl body{background:linear-gradient(var(--sky1),var(--sky-mid) 58%,var(--sky3)) fixed} /* the haze fades in the lower third; scene.js mirrors these stops in the shader (uSky*, uStop) */
 
 /* Readability: every section sits on a solid paper panel with a hard offset shadow (the hard-shadow window look), and the city shows in the gaps.
    No backdrop-filter: it would sample the moving scene on every frame. */

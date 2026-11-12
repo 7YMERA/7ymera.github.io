@@ -41,23 +41,26 @@
   var M={},C={},mats=[];
   function css(n){return getComputedStyle(root).getPropertyValue(n).trim()}
   function col(k){return new T.Color(C[k])}
-  function readColors(){C.line=css('--fx');['far','mid','near','glass','orb','ring','sky1','sky2'].forEach(function(k){C[k]=css('--'+k)})}
+  function readColors(){C.line=css('--fx');['far','mid','near','glass','orb','ring','sky1','sky2'].forEach(function(k){C[k]=css('--'+k)});
+    var dk=root.getAttribute('data-theme')==='dark'; // night: darker silhouettes and a warm haze (--n-*, --sky3, --sky-mid in scene.css); day: the same colours as always
+    C.ground=dk?css('--n-ground'):C.mid;C.glass2=dk?css('--n-glass'):C.ring;C.skyM=dk?css('--sky-mid'):C.sky2;C.sky3=dk?css('--sky3'):C.sky2;
+    if(dk){C.far=css('--n-far');C.mid=css('--n-mid');C.near=css('--n-near')}}
   readColors();
   function mat(role,opts){var m=new T.MeshLambertMaterial(Object.assign({flatShading:true},opts||{}));m.userData.role=role;m.onBeforeCompile=function(sh){toon(sh)};mats.push(m);return m}
   function bands(){var c=document.createElement('canvas');c.width=8;c.height=64;var x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,8,64);x.fillStyle='#fff';x.fillRect(0,50,8,6);
     var t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;return t}
   var tex=bands();
-  var tower=mat('near',{emissiveMap:tex,emissive:0xffffff}),towerB=mat('near'),podium=mat('mid'),city=mat('mid'),cityF=mat('far'),ground=mat('mid'),glassM=mat('ring',{emissive:0xffffff,emissiveIntensity:.5});
+  var tower=mat('near',{emissiveMap:tex,emissive:0xffffff}),towerB=mat('near'),podium=mat('mid'),city=mat('mid'),cityF=mat('far'),ground=mat('ground'),glassM=mat('ring',{emissive:0xffffff,emissiveIntensity:.5});
   var orbM=mat('orb'),ringM=new T.MeshBasicMaterial({color:C.ring});
   var amb=new T.AmbientLight(0xffffff,.75),sun=new T.DirectionalLight(0xffffff,.8);sun.position.set(80,140,60);scene.add(amb,sun);
   // Three flat tones per face (lit / mid / shade, picked by the face normal against one fixed light) and height-aware haze, both in the existing materials' shaders.
   // The tones are derived from each material's role colour, so the themes and the golden hour keep working. The haze fades towards the CSS sky gradient itself (uSky1/uSky2 at this pixel's screen height), so geometry melts into the sky with no seam.
   var shadeBase=new T.Vector3(.3,.52,.92),hazeBase=.5,GSH=new T.Vector3(.52,.47,.68),TU={uLight:{value:new T.Vector3(-.42,.74,.52).normalize()},uSunC:{value:sun.color},uLitMul:{value:new T.Vector3(1,1,1)},uLitMix:{value:.7},uShadeMul:{value:new T.Vector3(.4,.6,.95)},uMidMul:{value:new T.Vector3(1,1,1)},
-    uSky1:{value:new T.Color()},uSky2:{value:new T.Color()},uRes:{value:new T.Vector2(1,1)},uHazeK:{value:.7},uSunAmt:{value:.5},uEdge:{value:new T.Vector2(620,1250)}};
+    uSky1:{value:new T.Color()},uSky2:{value:new T.Color()},uSky3:{value:new T.Color()},uStop:{value:1},uRes:{value:new T.Vector2(1,1)},uHazeK:{value:.7},uSunAmt:{value:.5},uEdge:{value:new T.Vector2(620,1250)}};
   function toon(sh){
     for(var k in TU)sh.uniforms[k]=TU[k];
     sh.vertexShader=sh.vertexShader.replace('void main() {','varying vec3 vWP;\nvoid main() {').replace('#include <worldpos_vertex>','#include <worldpos_vertex>\n vWP=(modelMatrix*vec4(transformed,1.0)).xyz;');
-    sh.fragmentShader=sh.fragmentShader.replace('void main() {','varying vec3 vWP;uniform vec3 uLight,uSunC,uLitMul,uShadeMul,uMidMul,uSky1,uSky2;uniform float uLitMix,uHazeK,uSunAmt;uniform vec2 uRes,uEdge;\nvoid main() {')
+    sh.fragmentShader=sh.fragmentShader.replace('void main() {','varying vec3 vWP;uniform vec3 uLight,uSunC,uLitMul,uShadeMul,uMidMul,uSky1,uSky2,uSky3;uniform float uStop;uniform float uLitMix,uHazeK,uSunAmt;uniform vec2 uRes,uEdge;\nvoid main() {')
       .replace('#include <aomap_fragment>',`#include <aomap_fragment>
         vec3 tn=normalize(cross(dFdx(vWP),dFdy(vWP)));
         float td=dot(tn,uLight);
@@ -72,7 +75,9 @@
         float hz=smoothstep(260.0,1700.0,distance(vWP,cameraPosition))*uHazeK*mix(0.15,1.0,exp(-hy/100.0));
         float he=smoothstep(uEdge.x,uEdge.y,length(vWP.xz))*exp(-hy/70.0);
         float ht=1.0-(1.0-hf)*(1.0-hz)*(1.0-he);
-        gl_FragColor.rgb=mix(gl_FragColor.rgb,mix(uSky1,uSky2,1.0-gl_FragCoord.y/uRes.y),ht);
+        float sy=1.0-gl_FragCoord.y/uRes.y; /* the CSS gradient: sky1 to sky2 at uStop, then to sky3 (day: uStop is 1, so sky3 never shows) */
+        vec3 skyc=mix(mix(uSky1,uSky2,clamp(sy/uStop,0.0,1.0)),uSky3,clamp((sy-uStop)/max(1.0-uStop,0.0001),0.0,1.0));
+        gl_FragColor.rgb=mix(gl_FragColor.rgb,skyc,ht);
       #endif`);
     return sh}
   var g=new T.Group();scene.add(g);
@@ -98,7 +103,7 @@
   // The real model: a SketchUp export of the Petronas Towers, converted by tools/convert-obj.py into assets/city/klcc.json
   function b64(str,Type){var bin=atob(str),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Type(u.buffer)}
   var SC=H/444.138; // one scale for every landmark, so their real heights compare truthfully
-  var bodyM=mat('near',{side:T.DoubleSide}),glassModelM=mat('ring',{side:T.DoubleSide,emissive:0xffffff,emissiveIntensity:.3});
+  var bodyM=mat('near',{side:T.DoubleSide}),glassModelM=mat('glass2',{side:T.DoubleSide,emissive:0xffffff,emissiveIntensity:.3});
   function loadModel(url,x,z,ry,bm,fallback,done){
     fetch(url).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
       var pos=b64(d.positions,Float32Array),out=new T.Group();
@@ -145,33 +150,78 @@
   var LCUT=(function(){var P=crown('klcc'),Mr=crown('mer'),Ex=crown('ex'),Kl=crown('kl');return [[P[0],P[1],34,106],[Mr[0],Mr[1],24,154],[Ex[0],Ex[1],28,122],[Kl[0],Kl[1],9,99]]})(); // derived from LAY: [crown x, z, radius, light up to y]
   var cityU={uCut:{value:LCUT.map(function(c){return new T.Vector4(c[0],c[1],c[2],c[3])})},uLo:{value:[-1,-1,-1,78]},uNight:{value:0},uDay:{value:wrapTex(loader.load(BASE+'city/facade_glass.jpg'))},uNightTex:{value:wrapTex(loader.load(BASE+'city/facade_night.jpg'))}};
   // Facade shader: windows on the walls, in world space, so every building (the OSM city and the landmark models alike) shows its floors.
-  function facade(m){
+  function facade(m,glass){
     m.onBeforeCompile=function(sh){
-      sh.uniforms.uNight=cityU.uNight;sh.uniforms.uCut=cityU.uCut;sh.uniforms.uLo=cityU.uLo;sh.uniforms.uDay=cityU.uDay;sh.uniforms.uNightTex=cityU.uNightTex;
+      sh.uniforms.uNight=cityU.uNight;sh.uniforms.uCut=cityU.uCut;sh.uniforms.uLo=cityU.uLo;sh.uniforms.uDay=cityU.uDay;sh.uniforms.uNightTex=cityU.uNightTex;sh.uniforms.uGlass={value:glass?1:0};
       toon(sh);
-      sh.fragmentShader=sh.fragmentShader.replace('void main() {','uniform sampler2D uDay;uniform sampler2D uNightTex;uniform float uNight;uniform vec4 uCut[4];uniform float uLo[4];\nvoid main() {')
+      sh.fragmentShader=sh.fragmentShader.replace('void main() {',`uniform sampler2D uDay;uniform sampler2D uNightTex;uniform float uNight,uGlass;uniform vec4 uCut[4];uniform float uLo[4];
+        float h21(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+        float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(h21(i),h21(i+vec2(1.0,0.0)),f.x),mix(h21(i+vec2(0.0,1.0)),h21(i+vec2(1.0,1.0)),f.x),f.y);}
+        void main() {`)
         .replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
         vec3 fn=normalize(cross(dFdx(vWP),dFdy(vWP)));
         float wall=1.0-smoothstep(0.45,0.75,abs(fn.y));
-        vec2 fuv=(abs(fn.z)>abs(fn.x)?vWP.xy:vWP.zy)/6.0;
+        bool onX=abs(fn.z)>abs(fn.x);
+        vec2 fuv=(onX?vWP.xy:vWP.zy)/6.0;
+        float hq=onX?vWP.x:vWP.z;
         float dl=dot(texture2D(uDay,fuv).rgb,vec3(0.333));
-        float gd=distance(vWP,cameraPosition);float gk=mix(0.3*(1.0-smoothstep(70.0,420.0,gd)),0.75*(1.0-0.6*smoothstep(500.0,1200.0,gd)),uNight); /* day: faint grid that clears with distance, so far blocks are clean tones; night keeps its grid */
+        float gd=distance(vWP,cameraPosition);float gk=mix(0.3*(1.0-smoothstep(70.0,420.0,gd)),0.75*(1.0-0.6*smoothstep(500.0,1200.0,gd)),uNight)*(1.0-uGlass); /* day: faint grid that clears with distance, so far blocks are clean tones; night keeps its grid. (The glass parts of the landmarks have no day grid.) */
         diffuseColor.rgb*=mix(1.0,clamp(dl*1.9,0.0,1.3),wall*gk);
-        float nl=wall*uNight*1.25;bool lm=false;
-        for(int i=0;i<4;i++){vec4 c=uCut[i];if(distance(vWP.xz,c.xy)<c.z){lm=true;if(vWP.y>c.w||vWP.y<uLo[i])nl=0.0;}} /* spires and shafts have no floors: no lit rooms there */
-        float hb=fract(sin(dot(floor(vWP.xz/20.0),vec2(12.9898,78.233)))*43758.5453);
-        if(!lm)nl*=mix(1.0,0.1,step(0.8,hb)); /* about one block in five stands dark */
+        /* ---- night: lit windows, per window cell, per building, stable in world space ---- */
+        float al=1.0;int li=-1;
+        for(int i=0;i<4;i++){vec4 c=uCut[i];if(distance(vWP.xz,c.xy)<c.z){li=i;if(vWP.y>c.w||vWP.y<uLo[i])al=0.0;}} /* spires and shafts have no floors: no lit rooms there */
+        float lmF=li>=0?1.0:0.0;
+        vec2 bk=floor(vWP.xz/20.0);
+        float hb=h21(bk+vec2(1.7,4.1));
+        float nl=wall*uNight*al*mix(mix(1.0,0.06,step(0.8,hb)),1.0,lmF); /* about one block in five stands (almost) dark */
         nl*=smoothstep(1.0,9.0,vWP.y); /* street level stays dark */
-        totalEmissiveRadiance+=texture2D(uNightTex,fuv).rgb*nl;
-        /* night glow of the landmarks: floodlit Petronas spires, the lit crown of The Exchange 106, the lit pod of Menara KL */
+        float b1=h21(bk+vec2(3.7,9.2)),b2=h21(bk+vec2(17.9,2.3));
+        vec2 cell=floor(vec2(hq/3.0,vWP.y/1.5)); /* one window = 3 x 1.5 units, two across and four high in each 6-unit tile of the photo */
+        vec2 ck=cell+bk*29.0+(onX?vec2(0.0):vec2(61.0,13.0));
+        float rr=h21(ck),rc=h21(ck+vec2(5.3,1.1)),rb=h21(ck+vec2(9.1,4.7));
+        float rf=h21(vec2(cell.y*2.3+b1*37.0,bk.x*1.7+bk.y*3.1)); /* the same value for every window on one floor of one building: whole floors light up */
+        float pl=mix(0.2,0.46,b1),bandT=0.12,wp=mix(0.12,0.95,b2); /* lit share (a quarter to under half), floor-band share, warm share: each building has its own bias */
+        if(li==1){pl=0.1;bandT=0.18;wp=0.5;}
+        if(li==2){pl=0.08;bandT=0.2;wp=0.0;}
+        float lit=step(rr,pl);
+        lit=max(lit,step(rf,bandT)*step(rr,0.94));
+        lit*=1.0-step(0.9,h21(vec2(cell.y*1.9+b2*13.0,bk.x+bk.y*5.0)))*0.85; /* the odd dark floor */
+        vec3 wc=mix(vec3(0.58,0.84,1.0),vec3(1.0,0.62,0.26),step(rc,wp));
+        float df=smoothstep(140.0,520.0,gd); /* far away the per-window detail gives way to the building's average, so nothing shimmers */
+        float avgp=pl+(1.0-pl)*bandT*0.94;
+        lit=mix(lit,avgp,df);
+        float tl=dot(texture2D(uNightTex,fuv).rgb,vec3(0.3333));
+        float st=mix(clamp(0.2+2.2*tl,0.0,1.5),0.5,df);
+        vec3 wem=wc*(0.55+0.8*rb)*lit*st*nl*1.55;
+        if(li==0){ /* Petronas: every floor floodlit cool silver, evenly, in regular bands */
+          float f=fract(vWP.y/1.9);float band=mix(smoothstep(0.0,0.16,f)*(1.0-smoothstep(0.78,0.97,f)),0.72,df);
+          wem=vec3(0.74,0.82,0.92)*(0.14+0.44*band)*nl*0.9;}
+        /* Menara KL: the shaft is washed with cool light, brighter toward the pod; the pod glows magenta in bands */
+        float kw=li==3?step(vWP.y,uLo[3]):0.0;
+        wem+=vec3(0.72,0.84,1.0)*(0.07+0.5*smoothstep(8.0,78.0,vWP.y))*kw*wall*uNight;
+        float kp=li==3?al:0.0;
+        wem=mix(wem,vec3(1.0,0.26,0.7)*(0.5+0.9*mix(step(0.5,fract(vWP.y/2.0)),0.5,df))*uNight*1.1,kp);
+        /* sodium street light: amber at the feet of buildings and on the ground near them */
+        float low=1.0-smoothstep(0.5,11.0,max(vWP.y,0.0));
+        float gnd=(1.0-wall)*(1.0-step(2.5,vWP.y));
+        float rad=1.0-smoothstep(120.0,820.0,length(vWP.xz+vec2(60.0,60.0)));
+        float pool=smoothstep(0.3,0.9,vn(vWP.xz/16.0))*0.7+0.3*vn(vWP.xz/5.0);
+        float pg=mix(pool,0.45,smoothstep(120.0,500.0,gd));
+        vec3 sod=vec3(1.0,0.5,0.15)*uNight*(wall*low*(0.3+0.45*h21(vec2(floor(hq/4.0),bk.x*3.0+bk.y)))*0.8+gnd*rad*(0.04+0.2*pg));
+        /* red aviation lights on a few of the tall flat roofs */
+        vec2 rc2=floor(vWP.xz/18.0);
+        float rl=step(0.9,fn.y)*step(36.0,vWP.y)*(1.0-lmF)*step(0.8,h21(rc2+vec2(11.3,5.9)))*(1.0-smoothstep(0.7,2.2,length(vWP.xz-(rc2+0.5)*18.0)))*uNight;
+        totalEmissiveRadiance+=wem+sod+vec3(1.0,0.1,0.06)*rl*1.8;
+        /* night glow of the landmarks: floodlit Petronas pinnacles, the lantern crown of The Exchange 106 */
         float gP=(1.0-step(uCut[0].z,distance(vWP.xz,uCut[0].xy)))*step(uCut[0].w,vWP.y);
         float gE=(1.0-step(uCut[2].z,distance(vWP.xz,uCut[2].xy)))*step(uCut[2].w-4.0,vWP.y);
-        float gK=(1.0-step(uCut[3].z,distance(vWP.xz,uCut[3].xy)))*step(uLo[3],vWP.y)*(1.0-step(uCut[3].w,vWP.y));
-        totalEmissiveRadiance+=uNight*(vec3(0.95,0.97,1.0)*gP*0.55+vec3(1.0,0.82,0.48)*gE*0.8+vec3(1.0,0.66,0.28)*gK*0.95);`)};
+        totalEmissiveRadiance+=uNight*(vec3(0.85,0.9,1.0)*gP*0.7+vec3(1.0,0.74,0.86)*gE*(0.5+0.35*mix(step(0.5,fract(vWP.y/2.6)),0.5,df)));`)};
     return m}
   // The ground stays one plain colour. (Roads and dark patches were tried and removed: owner didn't like them.)
   var cityM=facade(mat('mid',DIST?{side:T.DoubleSide}:{}));
   facade(bodyM); // all four landmarks share one material and the facade shader, so none is bluer than the rest
+  facade(glassModelM,1); // their glass parts too (they were a flat cyan at night); the ground takes the shader for its street glow
+  facade(ground);
   // ---- CLEARING THE PLOTS (district only) ----
   // The district is one merged mesh, so a plot is cleared by dropping triangles before the geometry is built (deterministic, one pass over the index buffer):
   //   CLEAR: each landmark's footprint as a circle [model-local centre x, z, radius] (the model's enclosing circle plus a margin), placed through LAY, so it follows the layout.
@@ -270,7 +320,12 @@
   var starGeo=new T.BufferGeometry(),starPos=[],SN=SMALL?420:900;
   for(var si=0;si<SN;si++){var sa=Math.random()*6.2832,se=Math.acos(1-Math.random()*.92),sr=1150;starPos.push(Math.sin(se)*Math.cos(sa)*sr,Math.cos(se)*sr*.8+60,Math.sin(se)*Math.sin(sa)*sr)}
   starGeo.setAttribute('position',new T.Float32BufferAttribute(starPos,3));
-  var starM=new T.PointsMaterial({size:SMALL?2.4:2,sizeAttenuation:false,transparent:true,depthWrite:false,fog:false});
+  // Two colour sets: day all white (the stars look as they always did); night dim, tinted, and fading out towards the horizon, where the haze hides them.
+  var starCL=new Float32Array(SN*3).fill(1),starCD=new Float32Array(SN*3),starSeed=7;
+  for(var sj=0;sj<SN;sj++){starSeed=(starSeed*16807)%2147483647;var sr1=starSeed/2147483647;starSeed=(starSeed*16807)%2147483647;var sr2=starSeed/2147483647,sh=Math.max(0,Math.min(1,(starPos[sj*3+1]-60)/900)),sb=Math.pow(sh,1.3)*(.25+.75*sr1*sr1)*(sr2>.5?1:.7);
+    starCD[sj*3]=sb*(sr2>.5?1:.85);starCD[sj*3+1]=sb*.92;starCD[sj*3+2]=sb*(sr2>.5?.9:1)}
+  var starAL=new T.BufferAttribute(starCL,3),starAD=new T.BufferAttribute(starCD,3);
+  var starM=new T.PointsMaterial({size:SMALL?2.4:2,sizeAttenuation:false,transparent:true,depthWrite:false,fog:false,vertexColors:true});
   var stars=new T.Points(starGeo,starM);stars.renderOrder=-20;stars.frustumCulled=false;sci.add(stars);
   // -- moon: a cratered sphere, a tilted ring, a halo, and a small moon going round it
   function moonTex(){var c=document.createElement('canvas');c.width=256;c.height=128;var x=c.getContext('2d');x.fillStyle='#d8d8d8';x.fillRect(0,0,256,128);
@@ -347,18 +402,32 @@
     [railM,railM2,headGlowM].forEach(function(m){m.needsUpdate=true})}
   // Aircraft warning lights: a red double flash on the tip of every landmark (and on both Petronas spires), instead of lit rooms up there.
   var BEAC=(function(){var a=lp('klcc',11,-10),b=lp('klcc',-11,10),m=crown('mer'),e=crown('ex'),k=crown('kl');return [[a[0],134,a[1]],[b[0],134,b[1]],[m[0],193,m[1]],[e[0],136,e[1]],[k[0],130,k[1]]]})(); // both Petronas spires, then the tips of Merdeka 118, The Exchange 106 and Menara KL
-  var beacons=BEAC.map(function(b,i){var m=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xff3a2a,fog:false,opacity:0}),sp=new T.Sprite(m);sp.scale.set(i===2?15:10,i===2?15:10,1);sp.position.set(b[0],b[1],b[2]);sp.renderOrder=6;g.add(sp);return{m:m,ph:i*.37}});
+  var beacons=BEAC.map(function(b,i){var m=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xff3a2a,fog:false,opacity:0}),sp=new T.Sprite(m);sp.scale.set(i===2?22:14,i===2?22:14,1);sp.position.set(b[0],b[1],b[2]);sp.renderOrder=6;g.add(sp);return{m:m,ph:i*.37}});
   // The yellow sign on the crown of Merdeka 118 (night only), as in the owner's photo.
   var signC=document.createElement('canvas');signC.width=256;signC.height=64;(function(){var x=signC.getContext('2d');x.font='900 46px Arial,Helvetica,sans-serif';x.textAlign='center';x.textBaseline='middle';x.shadowColor='#ffcc00';x.shadowBlur=14;x.fillStyle='#ffd21a';x.fillText('Maybank',128,34)})();
   var signM=new T.SpriteMaterial({map:new T.CanvasTexture(signC),transparent:true,depthWrite:false,fog:false,opacity:.95}),signS=new T.Sprite(signM);
-  signS.scale.set(17,4.25,1);(function(p){signS.position.set(p[0],155.5,p[1])})(lp('mer',-.8,-8.7)); // on the roof of Merdeka 118signS.visible=false;signS.renderOrder=7;g.add(signS);
+  signS.scale.set(24,6,1);(function(p){signS.position.set(p[0],155.5,p[1])})(lp('mer',-.8,-8.7)); // on the roof of Merdeka 118
+  signS.visible=false;signS.renderOrder=7;g.add(signS); // (this line used to be swallowed by the comment above, so the sign was never added to the scene)
   var beaconDark=beaconDark||false;
-  function beaconUpdate(time){var t=time/1000;beacons.forEach(function(b){var p=((t/1.7+b.ph)%1+1)%1,a=(p<.09||(p>.2&&p<.29))?1:.08;b.m.opacity=a*(beaconDark?1:.45)})}
-  var sciPos=new T.Vector3();
+  function beaconUpdate(time){var t=time/1000;beacons.forEach(function(b){var p=((t/1.7+b.ph)%1+1)%1,a=(p<.09||(p>.2&&p<.29))?1:.08;b.m.opacity=a*(beaconDark?1:.45);b.m.blending=beaconDark?T.AdditiveBlending:T.NormalBlending})}
+  // Night moon: put in the clearest part of the picture. Each frame, a few candidate spots on the screen are scored by their distance from the projected landmark tops (and their spires),
+  // the best one wins (with a bias for the current one, so it does not hop), and the moon eases there, 1100 units out along that ray. Day keeps the old fixed placement.
+  var sciPos=new T.Vector3(),MCAND=[[.74,.62],[-.74,.62],[0,.82],[.86,.18],[-.86,.18],[.45,.84],[-.45,.84]],mIdx=0,mX=.74,mY=.62,mP=new T.Vector3(),mTop=[];
+  LM.forEach(function(l){mTop.push(l.top.clone(),l.top.clone().add(new T.Vector3(0,40,0)),l.top.clone().add(new T.Vector3(0,-40,0)))});
+  function moonPlace(still){
+    cam.updateMatrixWorld();var asp=cam.aspect,pts=[],i,j;
+    for(i=0;i<mTop.length;i++){mP.copy(mTop[i]).project(cam);if(mP.z<1)pts.push(mP.x*asp,mP.y)}
+    var best=-1,bi=mIdx;
+    for(j=0;j<MCAND.length;j++){var cx=MCAND[j][0]*asp,cy=MCAND[j][1],sc=9;
+      for(i=0;i<pts.length;i+=2){var d=Math.hypot(pts[i]-cx,pts[i+1]-cy);if(d<sc)sc=d}
+      if(j===mIdx)sc+=.25;if(sc>best){best=sc;bi=j}}
+    mIdx=bi;var k=still?1:.12;mX+=(MCAND[mIdx][0]-mX)*k;mY+=(MCAND[mIdx][1]-mY)*k;
+    mP.set(mX,mY,.5).unproject(cam).sub(cam.position).normalize().multiplyScalar(1100).add(cam.position);moonG.position.copy(mP)}
   function sciUpdate(time,still,inRide){
     beaconUpdate(time);
     var t=still?0:time*.001,cl=Math.hypot(cam.position.x,cam.position.z)||1,dx=cam.position.x/cl,dz=cam.position.z/cl;
     stars.rotation.y=t*.004;
+    if(beaconDark)moonPlace(still);else
     moonG.position.set(-dx*900+(-dz)*300,420+Math.sin(t*.05)*6,-dz*900+dx*300); /* high and to one side: the skyline's tops stay in open sky */
     moon.rotation.y=t*.03;moonRing.rotation.z=t*.02;moonRing2.rotation.z=-t*.015;
     moon2.position.set(Math.cos(t*.22)*170,Math.sin(t*.22)*28,Math.sin(t*.22)*170);
@@ -366,9 +435,9 @@
     railUpdate(time,still)}
   function sciStyle(dark){
     beaconDark=dark;signS.visible=dark;nightLines.forEach(function(l){l.visible=dark});if(dark)warmEdges();
-    starM.color.set(dark?0xffffff:C.near);starM.opacity=dark?.9:.38;starM.blending=T.NormalBlending;
-    moonM.color.set(dark?0xe6edff:C.near);moon2M.color.set(dark?0xcfd8f2:C.mid);
-    moonHalo.material.color.set(dark?0x9dbbff:0xffffff);moonHalo.material.opacity=dark?.5:.85;
+    starM.color.set(dark?0xffffff:C.near);starM.opacity=dark?1:.38;starM.blending=dark?T.AdditiveBlending:T.NormalBlending;starGeo.setAttribute('color',dark?starAD:starAL);
+    moonM.color.set(dark?0xc4cfee:C.near);moon2M.color.set(dark?0xcfd8f2:C.mid);
+    moonHalo.material.color.set(dark?0x9dbbff:0xffffff);moonHalo.material.opacity=dark?.38:.85;
     ringMat.color.set(dark?0xbcd2ff:C.near);ringMat.opacity=dark?.5:.55;
     gyroM.color.set(dark?C.glass:C.line);gyroM.opacity=dark?.85:.75;gyroM.blending=dark?T.AdditiveBlending:T.NormalBlending;
     [starM,ringMat,gyroM,moonHalo.material].forEach(function(m){m.needsUpdate=true});railStyle(dark)}
@@ -380,19 +449,20 @@
     polyM.color.set(c);polyM.blending=bl;polyM.opacity=dark?.8:.7;polyM.needsUpdate=true;
     linkM.color.set(c);linkM.opacity=dark?.5:.6;pulseM.color.set(dark?C.glass:C.line);
     fx.forEach(function(m){m.needsUpdate=true});sciStyle(dark)}
+  function fogColor(){return root.getAttribute('data-theme')==='dark'?col('skyM').lerp(col('sky3'),.5):col('sky2')} // the fog (cars, rails) takes the haze colour at night
   var fogN0=300,fogF0=680; // base fog (set by recolor); the finale pushes it back
   function recolor(){
     root.style.removeProperty('--sky1');root.style.removeProperty('--sky2');goldLast=-1;readColors();var dark=root.getAttribute('data-theme')==='dark';
     mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});
     tower.emissive.set(C.glass);tower.emissiveIntensity=dark?1:.28;glassM.emissive.set(C.ring);glassM.emissiveIntensity=dark?.9:.15;
     cityU.uNight.value=dark?1:0;
-    if(glassModelM){glassModelM.emissive.set(C.ring);glassModelM.emissiveIntensity=dark?.8:.12}ringM.color.set(C.ring);specks.material.color.set(C.ring);
-    var f=col('sky2');fogN0=dark?520:620;fogF0=dark?1500:1700; /* thin fog: it used to hide the city */scene.fog=new T.Fog(f,fogN0,fogF0);
-    TU.uSky1.value.set(C.sky1);TU.uSky2.value.set(C.sky2);
-    if(dark){TU.uLitMul.value.set(.78,.78,.78);TU.uMidMul.value.set(.62,.62,.66);TU.uLitMix.value=0;TU.uShadeMul.value.set(.36,.42,.62);TU.uHazeK.value=.3}
+    if(glassModelM){glassModelM.emissive.set(C.ring);glassModelM.emissiveIntensity=dark?0:.12}ringM.color.set(C.ring);specks.material.color.set(C.ring);
+    var f=fogColor();fogN0=dark?520:620;fogF0=dark?1500:1700; /* thin fog: it used to hide the city */scene.fog=new T.Fog(f,fogN0,fogF0);
+    TU.uSky1.value.set(C.sky1);TU.uSky2.value.set(C.skyM);TU.uSky3.value.set(C.sky3);TU.uStop.value=dark?.58:1;
+    if(dark){TU.uLitMul.value.set(3,3,1.9);TU.uMidMul.value.set(.95,.95,.95);TU.uLitMix.value=0;TU.uShadeMul.value.set(.45,.5,.7);TU.uHazeK.value=.55} /* night: dark blue-violet silhouettes in three tones, the haze takes the warm horizon colour */
     else{TU.uLitMul.value.set(1,1,1);TU.uMidMul.value.set(1,1,1);TU.uLitMix.value=.5;TU.uShadeMul.value.set(.3,.52,.92);TU.uHazeK.value=.5}
     TU.uSunAmt.value=dark?1:.5;shadeBase.copy(TU.uShadeMul.value);hazeBase=TU.uHazeK.value;
-    fxStyle(dark);amb.intensity=dark?.45:.5;sun.intensity=dark?.55:.55;sun.color.set(dark?0x9cc8ff:0xffffff)}
+    fxStyle(dark);amb.intensity=dark?.45:.5;sun.intensity=dark?.55:.55;sun.color.set(dark?0xb0b4ff:0xffffff)}
   recolor();window.addEventListener('scenetheme',function(){recolor();need=true});
   new MutationObserver(function(){recolor();need=true}).observe(root,{attributes:true,attributeFilter:['data-theme']}); // the page's own theme button flips data-theme
   var W=0,Hh=0,mobile=false,need=true,px=0,tx=0,cr=0,tr=0,vr={v:0},vx={v:0},dtF=.016,tgtPose=mob(END),curPose=mob(END),vPose=[{v:0},{v:0},{v:0},{v:0},{v:0},{v:0},{v:0},{v:0}];
@@ -640,8 +710,8 @@
   var goldLast=-1,goldF=new T.Color(),goldC=new T.Color(),G1=new T.Color('#ffe2a8'),G2=new T.Color('#f3a95a'),G3=new T.Color('#f0b676');
   function goldHour(k){
     var dark=root.getAttribute('data-theme')==='dark';if(dark)k=0;k=Math.round(k*50)/50;if(k===goldLast)return;goldLast=k;
-    if(k===0){mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});root.style.removeProperty('--sky1');root.style.removeProperty('--sky2');if(scene.fog)scene.fog.color.set(C.sky2);TU.uSky1.value.set(C.sky1);TU.uSky2.value.set(C.sky2);TU.uShadeMul.value.copy(shadeBase);TU.uHazeK.value=hazeBase;sun.color.set(dark?0x9cc8ff:0xffffff);return}
-    mats.forEach(function(m){var r=m.userData.role;if(r==='far'||r==='mid'||r==='near')m.color.set(C[r]).lerp(G3,k*.38)}); /* the ground and towers take the warm haze */
+    if(k===0){mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});root.style.removeProperty('--sky1');root.style.removeProperty('--sky2');if(scene.fog)scene.fog.color.copy(fogColor());TU.uSky1.value.set(C.sky1);TU.uSky2.value.set(C.skyM);TU.uShadeMul.value.copy(shadeBase);TU.uHazeK.value=hazeBase;sun.color.set(dark?0xb0b4ff:0xffffff);return}
+    mats.forEach(function(m){var r=m.userData.role;if(r==='far'||r==='mid'||r==='near'||r==='ground')m.color.set(C[r]).lerp(G3,k*.38)}); /* the ground and towers take the warm haze */
     goldC.set(C.sky1).lerp(G1,k);root.style.setProperty('--sky1','#'+goldC.getHexString());TU.uSky1.value.copy(goldC);TU.uShadeMul.value.copy(shadeBase).lerp(GSH,k);TU.uHazeK.value=hazeBase*(1-.5*k); /* golden hour: dusky violet shadows, pale cream lit faces, less haze so the skyline stays crisp */
     goldC.set(C.sky2).lerp(G2,k);root.style.setProperty('--sky2','#'+goldC.getHexString());TU.uSky2.value.copy(goldC);
     if(scene.fog)scene.fog.color.copy(goldC);sun.color.set(0xffffff).lerp(new T.Color('#ffd08a'),k)}
