@@ -1467,7 +1467,8 @@ html.gl .op-cue:focus-visible { outline: 3px solid var(--accent); outline-offset
   html.gl .op-cue { min-height: 54px; }
 }
 /* the curtain's scroll length grows by the establishing stretch (extras.js: estLen = 0.9 x window height) */
-html.gl .curtain { height: calc(270svh + 90svh); }
+/* 100svh pinned + 180 bare city + 80 name card held + 220 acts + 110 headline held (EST, HOLD1, ACTS in extras.js) */
+html.gl .curtain { height: 690svh; }
 /* hidden until extras.js drives it; the inline --en wins once it runs. Without html.gl, it all falls back to 1 */
 html.gl .cur-stage { --en: 0; }
 html.gl .cur-col { opacity: var(--en, 1); }

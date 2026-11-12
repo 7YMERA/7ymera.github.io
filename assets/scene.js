@@ -615,8 +615,8 @@
           cT0=dg(C,hEnd)-Math.acos(Math.min(.98,cr0/dist(C,hEnd)))/RAD,cT1=dg(E,C),cSw=wrap(cT0-cT1),cS=pt(C,cT0,cr0),swA=A(lerpUW(hEnd,C,.9).u,lerpUW(hEnd,C,.9).w,70);
       for(i=KF.length-5;i<KF.length;i++)mixAim(i,swA,(i-(KF.length-6))/5*1.1-.3);  // the last halo knots already turn their aim toward Merdeka
       row('sw1',lerpUW(hEnd,cS,.45),64,lerpUW(hEnd,C,.9),70,1.0);
-      for(i=0;i<=10;i++){f=i/10;var cth=(cT0-cSw*f)*RAD,crr=(cr0+(cr1-cr0)*f)*(1-.2*Math.exp(-Math.pow((((cT0-cSw*f+180)%360+360)%360-180+62)/18,2))),cy=26+172*f; // dips inward where a block stands close to the circle (bearing -62 degrees from Merdeka, checked with the clearance oracle)
-        KF.push(['c'+i,A(C.u+Math.cos(cth)*crr,C.w+Math.sin(cth)*crr,cy),A(C.u,C.w,(62+.83*(cy-26))*(1-.22*sm((f-.6)/.4))+.22*sm((f-.6)/.4)*150),2.3,0])} // near the top the aim eases down a little, so the city fills the lower part of the frame
+      for(i=0;i<=10;i++){f=i/10;var cth=(cT0-cSw*f)*RAD,crr=(cr0+(cr1-cr0)*f)*(1-.2*Math.exp(-Math.pow((((cT0-cSw*f+180)%360+360)%360-180+62)/18,2))),cy=74+124*f; // dips inward where a block stands close to the circle (bearing -62 degrees from Merdeka, checked with the clearance oracle)
+        KF.push(['c'+i,A(C.u+Math.cos(cth)*crr,C.w+Math.sin(cth)*crr,cy),A(C.u,C.w,70+.65*(cy-74)),2.3,0])} // near the top the aim eases down a little, so the city fills the lower part of the frame
       row('top0',pt(C,cT1,64),216,C,150,2.0);row('top1',pt(C,cT1,44),236,C,70,2.0);row('top2',pt(C,cT1,20),248,C,0,2.0);
       // tip over and fly to The Exchange, still heading the same way (the camera sits behind Merdeka's axis, looking along the line to The Exchange), the aim coming up from the floor to the horizon
       var fE=function(f){return lerpUW(C,E,f)};
@@ -709,7 +709,7 @@
       kap.push(Math.asin(clamp(cr2,-1,1))/ds);spd.push(V.copy(P[i1]).sub(P[i0]).length()/((i1-i0)*HOLD0/NT))}
     function smooth(arr,w){var o=[];for(var i=0;i<arr.length;i++){var s=0,n=0;for(var j=-w;j<=w;j++){var k=i+j;if(k>=0&&k<arr.length){var wt=w+1-Math.abs(j);s+=arr[k]*wt;n+=wt}}o.push(s/n)}return o}
     var kS=smooth(kap,10),sS=smooth(spd,8),sorted=sS.slice().sort(function(x,y){return x-y}),lo=sorted[Math.floor(NT*.15)],hi=sorted[Math.floor(NT*.92)];
-    for(i=0;i<=NT;i++){bankTab[i]=clamp(kS[i]*20,-.31,.31); // 0.0125 per unit (a circle of radius 80) leans about 14 degrees; at most 18
+    for(i=0;i<=NT;i++){bankTab[i]=clamp(kS[i]*9,-.13,.13); // 0.0125 per unit (a circle of radius 80) leans about 14 degrees; at most 18
       var sp=clamp((sS[i]-lo)/Math.max(1e-6,hi-lo),0,1);fovTab[i]=9*sp*sp*(3-2*sp)}
     bankTab[0]=0;bankTab[NT]=0;fovTab[NT]=0;for(i=0;i<=4;i++)fovTab[i]=fovTab[i]*i/4}
   function rollAt(u){return 0; /* no barrel roll (owner's call); the drone still banks into turns */var n=rollK.length;if(n<2)return 0;var f=clamp(u,0,1)*(n-1),i=Math.min(n-2,Math.floor(f)),t=f-i;t=t*t*(3-2*t);return rollK[i]+(rollK[i+1]-rollK[i])*t}

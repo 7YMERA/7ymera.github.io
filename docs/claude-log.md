@@ -26,6 +26,12 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-12 · Opening slower and eased, flight levelled
+
+- **What:** the opening's scroll budget is now 690svh (`EST`, `HOLD1`, `ACTS` in `extras.js`): 1.2 screens of bare city, the name card held, the acts over 2.2 screens, the headline held about 1.5 screens. The opening eases toward the scroll position (`glide`) instead of jumping per wheel step. Flight bank cut from 18 to about 7 degrees; the Merdeka climb starts at y 74 and looks across, so the skyline is behind the tower. Cache key `20261113o`.
+- **Why:** the owner found the reveal too fast, too short-lived and choppy, and sent a screenshot of a tilted wall of Merdeka.
+- **Open:** the owner has not yet judged the new pacing on a real wheel or phone.
+
 ## 2026-11-12 · Skyline, opening, flight and night (version 2.11), on branch `claude/eager-ride-vi416b`
 
 - **What:** landmarks grouped by a `LAY` table; the page opens on the bare city and the curtain comes in on scroll; the flight is eight beats (`buildKF`), with banking and a speed FOV; night windows, haze and landmark lighting redone from photos; the Maybank sign shows (a `//` comment had swallowed it). Flight captions rewritten, cache key `20261113n`.

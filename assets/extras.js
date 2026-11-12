@@ -46,7 +46,11 @@
     // e: 0 -> 1 across that first stretch (E px); p: 0 -> 1 across the rest, exactly as before.
     var root = document.documentElement, intro = document.getElementById('op-intro'), cue = document.getElementById('op-cue');
     function hasGl() { return root.classList.contains('gl'); }
-    function estLen() { return hasGl() && !calm ? Math.round(innerHeight * .9) : 0; }
+    // Scroll budget of the opening, in screen heights (the CSS height of .curtain is 100svh + their sum):
+    // EST bare city (the curtain comes in over its last third), HOLD1 the name card stays, ACTS the columns part and the
+    // reel and headline arrive, HOLD2 the finished headline stays.
+    var EST = 1.8, HOLD1 = .8, ACTS = 2.2;
+    function estLen() { return hasGl() && !calm ? Math.round(innerHeight * EST) : 0; }
     function measure() {
       Hs = stage.clientHeight; R = reel ? reel.offsetHeight : 0;
       // Centre the reel and the headline as one block, a little above middle.
@@ -88,11 +92,11 @@
         if (o > .05 && title && !title.classList.contains('reveal')) title.classList.add('reveal');
       }
     }
-    cta.addEventListener('click', function () { scrollTo({ top: cur.offsetTop + range() * .98, behavior: calm ? 'auto' : 'smooth' }); });
+    cta.addEventListener('click', function () { scrollTo({ top: cur.offsetTop + (estLen() ? estLen() + innerHeight * (HOLD1 + ACTS + .5) : range() * .98), behavior: calm ? 'auto' : 'smooth' }); });
     // The scroll cue: bring the curtain fully in (end of the establishing stretch).
     function curtainInY() {
       var E = estLen();
-      if (E) return cur.getBoundingClientRect().top + scrollY + E;
+      if (E) return cur.getBoundingClientRect().top + scrollY + E + innerHeight * HOLD1 * .4;
       return stage.getBoundingClientRect().top + scrollY - (header ? header.offsetHeight : 0);
     }
     var header = document.querySelector('.top');
@@ -123,10 +127,25 @@
       var tick = function () {
         busy = false;
         var E = estLen(), s = Math.max(0, -cur.getBoundingClientRect().top), rg = range();
-        var e = E ? clamp(s / E) : 1;
-        var p = clamp((s - E) / ((rg - E) || 1));
+        // the city alone for the first two thirds of EST, then the curtain comes in over the last third
+        var e = E ? clamp((s - E * .66) / (E * .34)) : 1;
+        // with the establishing stage: hold the name card, play the acts (they finish at p = .86), hold the headline
+        var p = E ? .86 * clamp((s - E - innerHeight * HOLD1) / (innerHeight * ACTS)) : clamp(s / (rg || 1));
         if (!hasGl() && intro) intro.classList.add('away');
-        if (Math.abs(p - lastP) < .001 && Math.abs(e - lastE) < .001) return; lastP = p; lastE = e; apply(p, e); cueState(e);
+        tgP = p; tgE = e;
+        if (lastP < 0) { curP = p; curE = e; }   // first frame, resize: no glide
+        if (!gliding) { gliding = true; lastT = 0; requestAnimationFrame(glide); }
+      };
+      // Scroll arrives in steps (a wheel notch, a key press). The opening eases toward the scroll position
+      // instead of jumping to it, so the motion is continuous between steps.
+      var tgP = 0, tgE = 0, curP = 0, curE = 0, gliding = false, lastT = 0;
+      var glide = function (now) {
+        var dt = lastT ? Math.min(64, now - lastT) : 16; lastT = now;
+        var k = 1 - Math.exp(-dt / 130);
+        curP += (tgP - curP) * k; curE += (tgE - curE) * k;
+        if (Math.abs(tgP - curP) < .0004 && Math.abs(tgE - curE) < .0004) { curP = tgP; curE = tgE; gliding = false; }
+        if (Math.abs(curP - lastP) > .0002 || Math.abs(curE - lastE) > .0002 || !gliding) { lastP = curP; lastE = curE; apply(curP, curE); cueState(curE); }
+        if (gliding) requestAnimationFrame(glide);
       };
       addEventListener('scroll', function () { if (!busy) { busy = true; requestAnimationFrame(tick); } }, { passive: true });
       addEventListener('resize', function () { measure(); lastP = -1; tick(); }); tick();
