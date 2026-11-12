@@ -1358,3 +1358,87 @@ section.block { padding-block: 80px 8px; }
 .skip-link { position: fixed; top: 12px; left: 12px; z-index: 100; padding: 14px 24px; border-radius: 999px; background: var(--ink); color: var(--bg); font: 600 1rem var(--f-body); text-decoration: none; box-shadow: 0 8px 30px rgba(0, 0, 0, .35); transform: translateY(-200%); }
 .skip-link:focus, .skip-link:focus-visible { transform: none; outline: 3px solid var(--accent); outline-offset: 3px; }
 #me:focus { outline: none; }
+
+/* =====================================================================
+   READER (assets/reader.js): page transitions, reading progress bar,
+   "On this page" contents, click-to-zoom lightbox. Notes pages only,
+   except the view transition, which both the home page and notes opt in to.
+   --reader-top is the sticky header's real height, set by reader.js.
+   ===================================================================== */
+
+/* Cross-document view transition: a short cross-fade of the whole page. Unsupported browsers ignore it. */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .16s; animation-timing-function: ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
+/* Headings clear the sticky header when jumped to */
+article.post [id] { scroll-margin-top: calc(var(--reader-top, 72px) + 16px); }
+
+/* Progress bar: a full-width strip under the header, scaled from the left */
+.rd-progress { position: fixed; left: 0; right: 0; top: var(--reader-top, 64px); height: 4px; z-index: 17; pointer-events: none; overflow: hidden; }
+.rd-progress-fill { height: 100%; background: var(--fx, var(--accent)); transform: scaleX(0); transform-origin: left center; will-change: transform; }
+
+/* Contents: closed disclosure on narrow screens ... */
+main.wrap > .post { position: relative; }
+.toc-rail { max-width: 46rem; margin: 22px auto 0; }
+.toc-box { background: var(--surface); border: 2px solid var(--fx, var(--line)); border-radius: 6px; box-shadow: 3px 3px 0 var(--hard, transparent); }
+.toc-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 8px 16px; cursor: pointer; list-style: none; font: 600 .75rem var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink); }
+.toc-title::-webkit-details-marker { display: none; }
+.toc-title::after { content: "+"; font: 700 1.25rem/1 var(--f-mono); color: var(--fx, var(--accent)); }
+.toc-box[open] > .toc-title::after { content: "\2212"; }
+.toc-list { list-style: none; margin: 0; padding: 0 8px 10px; display: grid; gap: 2px; counter-reset: toc; }
+.toc-list li { counter-increment: toc; }
+.toc-list a { display: block; padding: 9px 10px; border-left: 3px solid transparent; color: var(--muted); text-decoration: none; font-size: .9375rem; line-height: 1.35; border-radius: 3px; }
+.toc-list a:hover { color: var(--ink); background: var(--sunk, transparent); }
+.toc-list a[aria-current="true"] { color: var(--ink); font-weight: 600; border-left-color: var(--fx, var(--accent)); background: var(--accent-soft, transparent); }
+
+/* ... a sticky list in the card's left margin on wide ones (46rem text column + a ~190px gutter each side needs about 1180px) */
+@media (min-width: 1180px) {
+  .toc-rail { position: absolute; top: 0; bottom: 0; left: 0; width: calc((100% - 46rem) / 2); max-width: none; margin: 0; padding: 44px 14px 28px 20px; pointer-events: none; }
+  .toc { position: sticky; top: calc(var(--reader-top, 72px) + 20px); pointer-events: auto; max-height: calc(100vh - var(--reader-top, 72px) - 40px); overflow-y: auto; overscroll-behavior: contain; }
+  .toc-box { background: none; border: 0; border-radius: 0; box-shadow: none; }
+  .toc-title { min-height: 0; padding: 0 0 8px 3px; cursor: default; pointer-events: none; color: var(--muted); font-size: .6875rem; }
+  .toc-title::after { content: none; }
+  .toc-list { padding: 0; gap: 0; }
+  .toc-list a { padding: 6px 8px; font-size: .8125rem; }
+}
+
+/* Lightbox */
+[data-zoom] { cursor: zoom-in; }
+img[data-zoom]:focus-visible, a[data-zoom]:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.chart-link[data-zoom]::after { content: "Zoom \2922"; }
+html:has(dialog.lb[open]) { overflow: hidden; }
+dialog.lb { margin: 0; padding: 0; border: 0; width: 100%; height: 100%; max-width: none; max-height: none; background: rgba(6, 12, 28, .9); color: #eaf3ff; overscroll-behavior: contain; }
+dialog.lb[open] { display: flex; flex-direction: column; }
+dialog.lb::backdrop { background: rgba(6, 12, 28, .9); }
+@media (prefers-reduced-motion: no-preference) {
+  dialog.lb[open] { animation: lb-in .14s ease-out; }
+  @keyframes lb-in { from { opacity: 0; } to { opacity: 1; } }
+}
+.lb-bar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; padding-top: max(12px, env(safe-area-inset-top, 0px)); }
+.lb-count { flex: 1; font: 500 .875rem var(--f-mono); letter-spacing: .06em; color: #b9d3f2; }
+.lb-btn { min-height: 48px; min-width: 48px; padding: 0 20px; border: 2px solid var(--fx, #2aa6e8); border-radius: 6px; background: var(--bg); color: var(--ink); box-shadow: 4px 4px 0 var(--hard, #000); font: 700 1rem var(--f-body, inherit); cursor: pointer; }
+.lb-btn:hover { background: var(--sunk, var(--bg)); }
+.lb-btn:active { box-shadow: 1px 1px 0 var(--hard, #000); transform: translate(3px, 3px); }
+.lb-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.lb-close { background: var(--accent); color: var(--accent-ink); font-size: 1.0625rem; padding: 0 24px; }
+.lb-close:hover { background: var(--accent); filter: brightness(1.08); }
+.lb-btn[hidden] { display: none !important; }
+.lb-stage { flex: 1 1 auto; min-height: 0; display: flex; overflow: auto; padding: 4px 16px; overscroll-behavior: contain; }
+.lb-stage:focus-visible { outline: 3px solid #fff; outline-offset: -3px; }
+.lb-img { display: block; margin: auto; max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 4px; background: #fff; }
+.is-loading .lb-img { opacity: .35; }
+.lb.is-actual .lb-img { max-width: none; max-height: none; width: auto; height: auto; flex: none; }
+.lb-nav { display: flex; align-items: center; gap: 14px; padding: 12px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom, 0px)); }
+.lb-cap { flex: 1; margin: 0; text-align: center; font-size: .9375rem; line-height: 1.45; color: #eaf3ff; max-height: 5.8em; overflow: auto; }
+.lb-cap[hidden] { display: block !important; visibility: hidden; }
+@media (max-width: 700px) {
+  .lb-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .lb-cap { grid-column: 1 / -1; grid-row: 1; max-height: 4.4em; }
+  .lb-prev, .lb-next { grid-row: 2; }
+  .lb-bar { gap: 8px; }
+  .lb-btn { padding: 0 14px; }
+}
