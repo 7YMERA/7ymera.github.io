@@ -562,47 +562,90 @@
   var MCD=UW(LAY.mer[0],LAY.mer[1]),EXD=UW(LAY.ex[0],LAY.ex[1]),KLD=UW(LAY.kl[0],LAY.kl[1]),ENDC=UW(-15,-11),FB=65,ENDN=UW(Math.cos(FB*Math.PI/180),Math.sin(FB*Math.PI/180)); // the finale looks from the opening's bearing, so the film starts and ends on the same view
   function arcAt(deg,r,y,ty){var C=DIST?MCD:MC,a=deg*Math.PI/180;return [A(C.u+Math.cos(a)*r,C.w+Math.sin(a)*r,y),A(C.u,C.w,ty)]}
   // [name, camera position, look-at point, slow factor of the stretch that FOLLOWS it (bigger = more scroll spent there)]
-  var KF=null,CAPS=DIST?[['start','p14'],['p14','exit'],['exit','kEnd'],['kEnd','eStart'],['eStart','rise'],['rise','end']]:[['start','front'],['front','over'],['over','out'],['out','m4'],['m4','pass'],['pass','end']];
+  var KF=null,CAPS=DIST?[['start','bridge'],['bridge','exit'],['exit','sw1'],['sw1','e0'],['e0','sk0'],['sk0','end']]:[['start','front'],['front','over'],['over','out'],['out','m4'],['m4','pass'],['pass','end']];
+  function railNear(x,z){var b=1e9,s=0,q=new T.Vector3();for(var i=0;i<600;i++){skyCurve.getPointAt(i/600,q);var d=Math.hypot(q.x-x,q.z-z);if(d<b){b=d;s=i/600}}return s} // the sky rail's parameter nearest to a world point (build time only)
   function buildKF(){
     var o=DIST?poseCam(END):orbitPose(1,0),m1=arcAt(90,55,96,112),m2=arcAt(130,55,116,132),m3=arcAt(180,55,138,150),m4=arcAt(230,55,166,178),m5=arcAt(270,55,200,205);
     if(DIST){
-      // THE DRONE FLIGHT. A spiral climb up every landmark (Petronas, Menara KL, Merdeka 118), a spiral dive down The Exchange 106, a barrel roll through the
-      // skybridge gap, tight cruises between them, then a pull-out to the finale. KF rows: [name, camera, look-at, slow factor, roll (radians, cumulative)].
-      // HOW THE ROUTE IS DERIVED (for the next person to redesign it): the Petronas part (dive, spiral, bridge, gap, exit) is fixed to the towers at the origin.
-      // Everything after the exit is built from the landmark positions in (u,w): each spiral arrives on the side the previous landmark is on, and leaves along the line to the next one.
-      // Spiral radii are unchanged (Petronas 34-29, Menara KL 27-21, Merdeka 60-46, The Exchange 44-34); the legs between them are now 40-130 units long instead of 130-370.
-      var E=EXD,C=MCD,K=KLD,P0={u:0,w:0},XIT={u:-46,w:-4},R=[];
+      // THE DRONE FLIGHT, eight beats, each a different kind of move, fast ones between slow ones (the slow factor, last-but-one number, sets the pace: 0.8 fast, 1.4 medium, 2.4 slow):
+      //   1 drop-in (fast)      from the opening pose down to street level, rushing over the blocks toward the Petronas Towers
+      //   2 Petronas rise       a three-quarter turn climbing round both towers, ending head-on at the skybridge
+      //   3 skybridge thread    over the bridge and through the gap (the barrel roll is in the roll column; see BARREL)
+      //   4 halo round Menara KL one level orbit at pod height, far enough out for the pod and the antenna to stand whole, the other landmarks sliding behind
+      //   5 Merdeka crane-up    in low from Menara KL's side, up the face with the aim tilting up, over the spire tip and nearly straight down at the city floor
+      //   6 fall down The Exchange 106 (fast)  from above Merdeka, tip over and dive alongside the glass face, looking down and forward along it
+      //   7 street skim         low along the sky rail (under it) through the middle of the group, the hero train ahead (see the chase in place())
+      //   8 pull-out            backwards and outward on an arc to the finale pose (rows 'sweep1', 'sweep2', 'end' are what the finale code looks for)
+      // Every centre comes from LAY: MCD/EXD/KLD are the model origins, the flight circles the crown axis (crown()). Radii are widened on phones (mr), where the narrow picture crops a subject.
+      var P0={u:0,w:0},XIT={u:-46,w:-4},mr=mobile?1.5:1,i,f,RAD=Math.PI/180;
       function dg(a,b){return Math.atan2(b.w-a.w,b.u-a.u)*180/Math.PI}                 // direction a -> b in the gap frame, degrees
-      function pt(c,th,r){return {u:c.u+Math.cos(th*Math.PI/180)*r,w:c.w+Math.sin(th*Math.PI/180)*r}}
+      function pt(c,th,r){return {u:c.u+Math.cos(th*RAD)*r,w:c.w+Math.sin(th*RAD)*r}}
       function lerpUW(a,b,f){return {u:a.u+(b.u-a.u)*f,w:a.w+(b.w-a.w)*f}}
-      // a spiral round a tower: n+1 knots from angle th0 to th1 (degrees), radius r0 to r1, height y0 to y1, looking at the tower's axis a little above the camera
+      function dist(a,b){return Math.hypot(b.u-a.u,b.w-a.w)}
+      function cUW(k){var c=crown(k);return UW(c[0],c[1])}                              // a landmark's crown axis in (u,w)
+      function wrap(a){return ((a%360)+360)%360}
+      var C=cUW('mer'),E=cUW('ex'),K=cUW('kl');
+      // a spiral round a tower: n+1 knots from angle th0 to th1 (degrees; increasing = counter-clockwise), radius r0 to r1, height y0 to y1, looking at the tower's axis (look: height above the camera, or a function y -> absolute aim height)
       function spiral(pre,c,r0,r1,y0,y1,th0,th1,n,look,slow,bank){
-        for(var i=0;i<=n;i++){var f=i/n,th=(th0+(th1-th0)*f)*Math.PI/180,r=r0+(r1-r0)*f,y=y0+(y1-y0)*f;
-          KF.push([pre+i,A(c.u+Math.cos(th)*r,c.w+Math.sin(th)*r,y),A(c.u,c.w,typeof look==='function'?look(y):y+look),slow,(bank||0)*Math.sin(f*Math.PI)])}}  // look: height above the camera to aim at, or a function y -> absolute aim height
-      KF=[['start',o.pos,o.tgt,1.0,0],['dive',A(46,-128,74),A(0,0,60),1.1,0]];
-      spiral('p',P0,34,29,26,132,-70,650,16,12,2.2,.0);                         // Petronas: two turns up to the crowns
-      KF.push(['bridge',A(70,0,56),A(0,0,50),1.7,0],['over',A(30,0,66),A(-20,0,66),1.9,Math.PI],['gap',A(0,0,76),A(-60,-10,84),1.7,Math.PI*2]); // barrel roll through the gap
-      // out of the gap and down to Menara KL's foot, arriving on the side facing the gap (the spiral starts 5 degrees round from the direct line)
-      var kth=dg(K,XIT)-5,ks=pt(K,kth,27),q1=lerpUW(XIT,ks,.35),q2=lerpUW(XIT,ks,.68),q3=lerpUW(XIT,ks,.9),qa=lerpUW(XIT,K,.55);
-      KF.push(['exit',A(XIT.u,XIT.w,104),A(qa.u,qa.w,104),1.5,Math.PI*2],['turn1',A(q1.u,q1.w,100),A(K.u,K.w,108),1.5,Math.PI*2],['turn2',A(q2.u,q2.w,76),A(K.u,K.w,96),1.4,Math.PI*2],
-              ['out',A(q3.u,q3.w,56),A(K.u,K.w,84),1.1,Math.PI*2]);
-      spiral('k',K,27,21,44,124,kth,kth+720,20,10,2.2,0);KF[KF.length-1][0]='kEnd';KF[KF.length-1][3]=9;                          // Menara KL: two turns up to the pod
-      // Merdeka: start on the side facing Menara KL and go round (counter-clockwise, 2.5 turns) until the camera's direction of travel points at The Exchange, so it flies straight on
-      var dKM=dg(C,K),thE=dg(C,E)-90,sw=((thE-dKM+10)%360+360)%360+720,thM0=dKM-10;
-      spiral('m',C,60,46,96,214,thM0,thM0+sw,24,function(y){return y<150?y+12:y+12-(y-150)*.31},2.4,0); // over the top it levels out to look across the skyline, not up at empty sky
-      (function(){var mEnd=pt(C,thM0+sw,46),eS=pt(E,dg(E,C),44);
-        function mf(f,y,ly){var p=lerpUW(mEnd,eS,f),l=lerpUW(mEnd,E,Math.min(1,f+.45));return [A(p.u,p.w,y),A(l.u,l.w,ly)]}
-        var f1=mf(.3,224,200),f2=mf(.6,214,185),f3=mf(.85,190,160);
-        KF.push(['mfly1',f1[0],f1[1],1.0,0],['mfly2',f2[0],f2[1],1.0,0],['mfly3',f3[0],f3[1],1.0,0])})();
-      spiral('e',E,44,34,168,34,dg(E,C),dg(E,C)+540,14,function(y){return y>140?134:y-10},2.0,0);KF[KF.length-15][0]='eStart';                          // The Exchange 106: a spiral dive from the crown to the base
-      // Pull-out: an arc round the middle of the group (ENDC), from The Exchange's side to the finale camera, widening and descending
-      var bE=dg(ENDC,E),dB=((dg({u:0,w:0},ENDN)-bE+540)%360)-180,rE=Math.hypot(E.u-ENDC.u,E.w-ENDC.w);
-      function arc(f,r,y,ty){var p=pt(ENDC,bE+dB*f,r);return [A(p.u,p.w,y),A(ENDC.u,ENDC.w,ty)]}
-      var ri=arc(.2,rE+70,150,90),s1=arc(.5,300,150,90),s2=arc(.8,265,122,92);
-      KF.push(['rise',ri[0],ri[1],1.2,0],['sweep1',s1[0],s1[1],1.3,0],['sweep2',s2[0],s2[1],1.3,0],
+        for(var i=0;i<=n;i++){var f=i/n,th=(th0+(th1-th0)*f)*RAD,r=r0+(r1-r0)*f,y=y0+(y1-y0)*f;
+          KF.push([pre+i,A(c.u+Math.cos(th)*r,c.w+Math.sin(th)*r,y),A(c.u,c.w,typeof look==='function'?look(y):y+look),slow,(bank||0)*Math.sin(f*Math.PI)])}}
+      function row(name,p,y,a,ay,slow,roll){KF.push([name,A(p.u,p.w,y),A(a.u,a.w,ay),slow,roll||0])}
+      KF=[['start',o.pos,o.tgt,.8,0]];
+      // 1 drop-in: from the opening pose (street side) straight down to street level, then a rush along the free lane at w = -52 (the blocks on both sides streaming past), the towers growing ahead on the right
+      var D1=[[170,-30,62,66],[140,-44,34,64],[108,-52,18,62],[74,-52,16,60],[38,-52,22,60]];
+      for(i=0;i<D1.length;i++)row('dive'+(i+1),{u:D1[i][0],w:D1[i][1]},D1[i][2],P0,D1[i][3],.8);
+      // 2 Petronas rise: three quarters of a turn clockwise (-90 to -330 degrees) round both towers, widening from 50 to 110 and climbing from 36 to 67 (the ring is free of blocks only inside radius 50 at street level), ending at skybridge height on the front side
+      var RS=[[-90,54,38,70],[-120,59,50,72],[-150,63,64,74],[-180,72,74,76],[-210,80,80,78],[-240,90,82,80],[-270,100,82,80],[-300,106,74,78],[-330,110,62,76]];
+      for(i=0;i<RS.length;i++){var rk=1+(mobile?.35:0)*clamp((-RS[i][0]-150)/150,0,1),pp=pt(P0,RS[i][0],RS[i][1]*rk);row('p'+i,pp,RS[i][2],P0,RS[i][3],2.3)}
+      // the turn that lines the camera up with the gap (a right turn of radius about 45, ending head-on on the street side)
+      row('q1',{u:106,w:22},60,P0,64,1.9);row('q2',{u:94,w:-12},58,P0,60,1.9);
+      var Bq={u:66,w:-10};
+      // 3 skybridge thread: head-on, over the bridge, through the gap (roll column: cumulative radians, 0 -> pi -> 2 pi)
+      row('bridge',Bq,56,P0,50,2.0);row('over',{u:30,w:0},66,{u:-20,w:0},66,2.1,Math.PI);row('gap',P0,76,lerpUW(P0,K,.5),90,1.7,Math.PI*2);
+      // 4 halo round Menara KL: the camera enters the circle on the tangent from the gap and leaves on the tangent toward Merdeka, one level orbit (about 300 degrees clockwise) at pod height
+      var hr=62,hz=dist(K,XIT),hTh0=dg(K,XIT)-Math.acos(Math.min(.98,hr/hz))/RAD,
+          hTh1=dg(K,C)+Math.acos(Math.min(.98,hr/dist(K,C)))/RAD,hSw=wrap(hTh0-hTh1),hAim=function(y){return 97};
+      row('exit',XIT,104,lerpUW(XIT,K,.7),104,1.4);
+      var hS=pt(K,hTh0,hr);row('hin1',lerpUW(XIT,hS,.38),103,K,104,1.4);row('hin2',lerpUW(XIT,hS,.7),101,K,104,1.4);
+      function sm(x){x=clamp(x,0,1);return x*x*(3-2*x)}
+      function mixAim(j,v,w){KF[j][2]=KF[j][2].clone().lerp(v,sm(w))}   // slide a knot's aim toward a point (so the view turns gradually into the next beat)
+      spiral('h',K,hr,hr,102,98,hTh0,hTh0-hSw,16,hAim,1.5,0);
+      // 5 Merdeka crane-up: swoop down to a low start on the Menara KL side, climb the face (the aim climbs faster than the camera, so the spire stays in frame) clockwise round the side away from Menara KL (radius about 95), then over the tip and look nearly straight down
+      var cr0=96,cr1=90,hEnd=pt(K,hTh0-hSw,hr),
+          cT0=dg(C,hEnd)-Math.acos(Math.min(.98,cr0/dist(C,hEnd)))/RAD,cT1=dg(E,C),cSw=wrap(cT0-cT1),cS=pt(C,cT0,cr0),swA=A(lerpUW(hEnd,C,.9).u,lerpUW(hEnd,C,.9).w,70);
+      for(i=KF.length-5;i<KF.length;i++)mixAim(i,swA,(i-(KF.length-6))/5*1.1-.3);  // the last halo knots already turn their aim toward Merdeka
+      row('sw1',lerpUW(hEnd,cS,.45),64,lerpUW(hEnd,C,.9),70,1.0);
+      for(i=0;i<=10;i++){f=i/10;var cth=(cT0-cSw*f)*RAD,crr=(cr0+(cr1-cr0)*f)*(1-.2*Math.exp(-Math.pow((((cT0-cSw*f+180)%360+360)%360-180+62)/18,2))),cy=26+172*f; // dips inward where a block stands close to the circle (bearing -62 degrees from Merdeka, checked with the clearance oracle)
+        KF.push(['c'+i,A(C.u+Math.cos(cth)*crr,C.w+Math.sin(cth)*crr,cy),A(C.u,C.w,(62+.83*(cy-26))*(1-.22*sm((f-.6)/.4))+.22*sm((f-.6)/.4)*150),2.3,0])} // near the top the aim eases down a little, so the city fills the lower part of the frame
+      row('top0',pt(C,cT1,64),216,C,150,2.0);row('top1',pt(C,cT1,44),236,C,70,2.0);row('top2',pt(C,cT1,20),248,C,0,2.0);
+      // tip over and fly to The Exchange, still heading the same way (the camera sits behind Merdeka's axis, looking along the line to The Exchange), the aim coming up from the floor to the horizon
+      var fE=function(f){return lerpUW(C,E,f)};
+      row('fl1',fE(.14),246,fE(.34),40,1.0);row('fl2',fE(.3),236,fE(.54),50,.9);row('fl3',fE(.46),222,fE(.7),62,.9);row('fl4',fE(.6),205,fE(.84),78,.9);
+      // 6 fall down The Exchange: clockwise round its glass face from the Merdeka side, radius 100 closing to the rail, height 214 to the street; the aim is ahead and down, turned so the tower stands on the right third of the frame
+      // 7 street skim rows first (the fall ends where the skim starts)
+      var eR=A(pt(E,16,46).u,pt(E,16,46).w,0),sA=railNear(eR.x,eR.z),sB=sA,SK=[],qv=new T.Vector3(),tg=new T.Vector3();
+      for(i=1;i<400;i++){var ss=(sA+i/400)%1;skyCurve.getPointAt(ss,qv);if(Math.hypot(qv.x,qv.z)<=50){sB=sA+i/400;break}}
+      if(sB===sA)sB=sA+.22;
+      chA=sA%1;chB=sB%1;var nS=12;
+      for(i=0;i<=nS;i++){var s0=(sA+(sB-sA)*i/nS)%1,s1=(s0+85/skyLen)%1;skyCurve.getPointAt(s0,qv);skyCurve.getTangentAt(s0,tg);
+        var cp=new T.Vector3(qv.x-tg.z*8,Math.max(30,qv.y-26),qv.z+tg.x*8);skyCurve.getPointAt(s1,qv);
+        SK.push([cp,new T.Vector3(qv.x,qv.y-20,qv.z)])}
+      var s0u=UW(SK[0][0].x,SK[0][0].z),fr=(mobile?1.3:1),fTh0=dg(E,C),fTh1=dg(E,s0u),fSw=wrap(fTh0-fTh1),fR0=100*fr,fR1=dist(E,s0u),nF=10,fk0=KF.length;
+      for(i=0;i<nF;i++){f=i/nF;var th=(fTh0-fSw*f)*RAD,r=fR1+(fR0-fR1)*Math.pow(1-f,1.6),y=SK[0][0].y+(214-SK[0][0].y)*Math.pow(1-f,1.35),phi=26*RAD,Lh=60,pit=Math.atan(.9-.55*f);
+        var cx=E.u+Math.cos(th)*r,cz=E.w+Math.sin(th)*r;
+        KF.push([i?'e'+i:'e0',A(cx,cz,y),A(cx+Lh*(-Math.cos(phi)*Math.cos(th)+Math.sin(phi)*Math.sin(th)),cz+Lh*(-Math.cos(phi)*Math.sin(th)-Math.sin(phi)*Math.cos(th)),Math.max(0,y-Lh*Math.tan(pit))),i<nF-1?.8:1.1,1.2*Math.sin(f*Math.PI)]);
+        mixAim(KF.length-1,SK[0][1],(f-.45)/.5);if(f<.3)mixAim(KF.length-1,KF[fk0-1][2],1-f/.3)}   // the first fall knots keep the aim of the flight in, the last ones turn it to where the skim looks
+      var skEndAim=A(ENDC.u,ENDC.w,90);for(i=nS-4;i<=nS;i++)SK[i][1]=SK[i][1].clone().lerp(skEndAim,sm((i-(nS-5))/5));  // the last skim knots turn their aim toward the group, ready for the pull-out
+      SK.forEach(function(s,j){KF.push([j?(j===nS?'skEnd':'sk'+j):'sk0',s[0],s[1],j===nS?3.4:1.2,0])});
+      // 8 pull-out: from the end of the skim, outward and up on an arc round the middle of the group (ENDC) to the finale camera
+      var sEu=UW(SK[nS][0].x,SK[nS][0].z),bS=dg(ENDC,sEu),dB=((dg(P0,ENDN)-bS+540)%360)-180,rS=dist(ENDC,sEu);
+      function arc(f,r,y,ty){var p=pt(ENDC,bS+dB*f,r);return [A(p.u,p.w,y),A(ENDC.u,ENDC.w,ty)]}
+      var pu=arc(.3,rS+(225-rS)*.4,118,90),s1=arc(.6,185,128,90),s2=arc(.85,208,108,92);
+      KF.push(['pull',pu[0],pu[1],2.3,0],['sweep1',s1[0],s1[1],2.3,0],['sweep2',s2[0],s2[1],1.8,0],
       // The finale. Wide screens: a horizontal shot of the skyline, camera low and far back (on the opening's bearing) so the four landmarks
       // stand in a row across the screen. Portrait phones cannot fit a row, so there it is a full zoom-out: high and far, looking down at the whole group.
               ['end',mobile?A(ENDC.u+ENDN.u*380,ENDC.w+ENDN.w*380,250):A(ENDC.u+ENDN.u*225,ENDC.w+ENDN.w*225,92),A(ENDC.u,ENDC.w,mobile?60:92),1.5,0]);
+      for(i=0;i<KF.length;i++)if(KF[i][0]==='exit'){for(f=i;f<KF.length;f++)KF[f][4]+=Math.PI*2;break} // after the barrel roll the horizon stays level (2 pi is level)
       return}
     KF=[
       ['start',o.pos,o.tgt,1.0],
@@ -638,13 +681,37 @@
     var share=[],tot=0,a,b,k;
     for(i=0;i<n-1;i++){var len=0,prev=rideP.getPoint(i/(n-1));for(k=1;k<=20;k++){var q=rideP.getPoint((i+k/20)/(n-1));len+=q.distanceTo(prev);prev=q}
       share[i]=len*KF[i][3];tot+=share[i]}
+    if(DIST){ // a turn budget: a stretch where the view swings round gets at least enough scroll that the view turns no faster than ROT degrees per unit of scroll (6.5 degrees per 1/400 of it), whatever the slow factors say
+      var ROT=2600,an=[],va=new T.Vector3(),vb=new T.Vector3(),it;
+      for(i=0;i<n-1;i++){va.copy(KF[i][2]).sub(KF[i][1]).normalize();vb.copy(KF[i+1][2]).sub(KF[i+1][1]).normalize();an[i]=Math.acos(clamp(va.dot(vb),-1,1))*180/Math.PI}
+      for(it=0;it<8;it++){tot=0;for(i=0;i<n-1;i++)tot+=share[i];for(i=0;i<n-1;i++){var need=an[i]/ROT/HOLD0*tot;if(share[i]<need)share[i]=need}}
+      tot=0;for(i=0;i<n-1;i++)tot+=share[i]}
     CX=[0];CM=[0];var acc=0;for(i=0;i<n-1;i++){acc+=share[i]/tot;CX.push(acc*HOLD0);CM.push((i+1)/(n-1))} // the last 3% of the scroll holds the final shot
     rideU=pchip(CX,CM);
     rollK=KF.map(function(k){return k[4]||0});
+    flightTabs();
     KI={};KF.forEach(function(k,j){KI[k[0]]=CX[j]});
     for(i=0;i<caps.length&&i<CAPS.length;i++){caps[i].dataset.from=Math.max(.012,KI[CAPS[i][0]]);caps[i].dataset.to=i===CAPS.length-1?1.01:KI[CAPS[i][1]]}
     hudBuild()}
   var rideU=function(c){return c},rollK=[];
+  // BANK AND SPEED TABLES, made once per build (no per-frame work beyond a lookup): over the flight's scroll range, the path's signed horizontal curvature gives the bank angle,
+  // and the path speed (distance per unit of scroll) gives the extra lens width. Both are smoothed so neither can jitter.
+  var NT=480,bankTab=new Float32Array(NT+1),fovTab=new Float32Array(NT+1),chA=0,chB=0;
+  function tabAt(t,c){var x=clamp(c/HOLD0,0,1)*NT,i=Math.min(NT-1,Math.floor(x)),f=x-i;return t[i]+(t[i+1]-t[i])*f}
+  function flightTabs(){
+    var i,j,P=[],V=new T.Vector3(),a=new T.Vector3(),b=new T.Vector3();
+    for(i=0;i<=NT;i++)P.push(rideP.getPoint(rideU(HOLD0*i/NT)));
+    var kap=[],spd=[];
+    for(i=0;i<=NT;i++){var i0=Math.max(0,i-2),i1=Math.min(NT,i+2);
+      a.copy(P[Math.max(0,i-1)]).sub(P[i0]);b.copy(P[i1]).sub(P[Math.min(NT,i+1)]);
+      var la=Math.hypot(a.x,a.z),lb=Math.hypot(b.x,b.z),ds=V.copy(P[i1]).sub(P[i0]).length()/2+1e-6;
+      var cr2=(la>1e-4&&lb>1e-4)?(a.z*b.x-a.x*b.z)/(la*lb):0; // sin of the heading change; > 0 is a turn to the left
+      kap.push(Math.asin(clamp(cr2,-1,1))/ds);spd.push(V.copy(P[i1]).sub(P[i0]).length()/((i1-i0)*HOLD0/NT))}
+    function smooth(arr,w){var o=[];for(var i=0;i<arr.length;i++){var s=0,n=0;for(var j=-w;j<=w;j++){var k=i+j;if(k>=0&&k<arr.length){var wt=w+1-Math.abs(j);s+=arr[k]*wt;n+=wt}}o.push(s/n)}return o}
+    var kS=smooth(kap,10),sS=smooth(spd,8),sorted=sS.slice().sort(function(x,y){return x-y}),lo=sorted[Math.floor(NT*.15)],hi=sorted[Math.floor(NT*.92)];
+    for(i=0;i<=NT;i++){bankTab[i]=clamp(kS[i]*20,-.31,.31); // 0.0125 per unit (a circle of radius 80) leans about 14 degrees; at most 18
+      var sp=clamp((sS[i]-lo)/Math.max(1e-6,hi-lo),0,1);fovTab[i]=9*sp*sp*(3-2*sp)}
+    bankTab[0]=0;bankTab[NT]=0;fovTab[NT]=0;for(i=0;i<=4;i++)fovTab[i]=fovTab[i]*i/4}
   function rollAt(u){return 0; /* no barrel roll (owner's call); the drone still banks into turns */var n=rollK.length;if(n<2)return 0;var f=clamp(u,0,1)*(n-1),i=Math.min(n-2,Math.floor(f)),t=f-i;t=t*t*(3-2*t);return rollK[i]+(rollK[i+1]-rollK[i])*t}
   // ---- HUD (DOM) ----
   var hud=document.getElementById('hud'),hTags=[],hAlt=document.getElementById('h-alt'),hSec=document.getElementById('h-sec'),hFill=document.getElementById('h-fill'),hTicks=[],hLast=-1,hSecLast=-1;
@@ -733,31 +800,30 @@
     var inRide=cr>.0004&&!!rideP;
     if(inRide){
       var u=rideU(cr);
-      cam.position.copy(rideP.getPoint(u));
+      rideP.getPoint(u,cam.position);
       if(cr>HOLD0){ // the hold: the scene drifts slowly sideways as you scroll, so the whole map is shown while the page moves on
-        var hf=clamp((cr-HOLD0)/(1-HOLD0),0,1),tg0=rideT.getPoint(u);tv.copy(tg0).sub(cam.position).normalize();tv.cross(cam.up);cam.position.addScaledVector(tv,(hf-.5)*(mobile?70:150));cam.position.y+=hf*(mobile?-40:14)}
-      // THE CHASE: between the end of the Menara KL climb and the start of the Merdeka climb the "hero" train on the sky line is driven by the scroll
-      // (from the Menara KL stop to the Merdeka stop) and the camera blends onto a chase position behind and above it.
-      var cwA=KI['kEnd'],cwB=KI['m0'],cw=0;heroOn=false;tgtV.copy(rideT.getPoint(u));
+        var hf=clamp((cr-HOLD0)/(1-HOLD0),0,1),tg0=rideT.getPoint(u,chL);tv.copy(tg0).sub(cam.position).normalize();tv.cross(cam.up);cam.position.addScaledVector(tv,(hf-.5*Math.min(1,hf*6))*(mobile?70:150));cam.position.y+=hf*(mobile?-40:14)}
+      // THE CHASE: along the street skim (knots 'sk0' to 'skEnd') the "hero" train on the sky line is driven by the scroll (from chA to chB on the rail)
+      // and the camera blends onto a chase position behind and below it, so the train runs ahead of the camera along the rail overhead.
+      var cwA=KI['sk0'],cwE=KI['skEnd'],cwB=KI['pull'],cw=0;heroOn=false;rideT.getPoint(u,tgtV);
       if(cwA!=null&&cwB!=null&&cr>cwA&&cr<cwB){
-        var cf=(cr-cwA)/(cwB-cwA),csm=function(x){x=clamp(x,0,1);return x*x*(3-2*x)};cw=csm(cf/.3)*csm((1-cf)/.3);
-        var cd=tM-tK;if(cd<0)cd+=1;heroS=((tK+cd*csm(cf))%1+1)%1;heroOn=cw>.02;
+        var cf=clamp((cr-cwA)/(cwE-cwA),0,1),csm=function(x){x=clamp(x,0,1);return x*x*(3-2*x)},cwO=cwE-.15*(cwE-cwA);cw=csm((cr-cwA)/(.25*(cwE-cwA)))*csm((cwB-cr)/(cwB-cwO)); // in over the first quarter of the skim, out between just before its end and the start of the pull-out
+        var cd=chB-chA;if(cd<0)cd+=1;heroS=((chA+cd*(.5*cf+.5*csm(cf)))%1+1)%1;heroOn=cw>.02;
         if(heroOn){skyCurve.getPointAt(heroS,chH);skyCurve.getTangentAt(heroS,chT);chS.crossVectors(chT,cam.up).normalize();
-          chP.copy(chH).addScaledVector(chT,-26).addScaledVector(cam.up,10).addScaledVector(chS,11*Math.sin((time||0)*.0009));
-          chL.copy(chH).addScaledVector(chT,18);
+          skyCurve.getPointAt(((heroS-40/skyLen)%1+1)%1,chP);chP.y-=24;chP.addScaledVector(chS,6*Math.sin((time||0)*.0009)); // 40 units behind the train along the rail (not along its tangent, so a bend in the rail turns the view gradually), 24 below it
+          skyCurve.getPointAt((heroS+90/skyLen)%1,chL);chL.y-=8;                                                              // looking 90 units ahead along the rail
           cam.position.lerp(chP,cw);tgtV.lerp(chL,cw)}}
       cam.lookAt(tgtV);cam.setViewOffset(W,Hh,0,0,W,Hh);
       // finale: widen the view (phones a lot, desktop a little) and push the fog back, so the whole skyline is in frame
       var ke=KI['sweep1']!=null?KI['sweep1']:(KI['pass']!=null?KI['pass']:.7),ke2=KI['end']||HOLD0,fs=clamp((cr-ke-.4*(ke2-ke))/(.6*(ke2-ke)),0,1);fs=fs*fs*(3-2*fs);
-      var kk=Math.sin(Math.PI*clamp(cr/.07,0,1)),fv=42+(mobile?30:10)*fs+26*kk*kk; /* kk: a gentle push-in that starts and ends at the normal lens, so entering the flight never snaps */if(Math.abs(fv-cam.fov)>.01){cam.fov=fv;cam.updateProjectionMatrix()}
+      var kk=Math.sin(Math.PI*clamp(cr/.07,0,1)),fv=42+(mobile?30:10)*fs+26*kk*kk+(reduce?0:tabAt(fovTab,cr)*(1-fs)*(1-kk*kk)); /* speed feel: up to +9 degrees of lens in the fast beats, none at the start, in the finale or in reduced motion */ /* kk: a gentle push-in that starts and ends at the normal lens, so entering the flight never snaps */if(Math.abs(fv-cam.fov)>.01){cam.fov=fv;cam.updateProjectionMatrix()}
       if(scene.fog){scene.fog.near=fogN0+260*fs;scene.fog.far=fogF0+560*fs}
       goldHour(fs);
       // Ease the rotation: the view turns towards where it should look with a short lag (time constant about 0.2 s), so a sharp
       // turn in the route can never show as a jolt. Reset when the flight starts, and when snapping.
       if(!rideQ)rideQ=cam.quaternion.clone();else{rideQ.slerp(cam.quaternion,reduce?1:1-Math.exp(-dtF*5));cam.quaternion.copy(rideQ)}
-      // lean into turns a little, like a drone, never more than 8 degrees
-      var q0=rideP.getPoint(Math.max(0,u-.02)),q1=rideP.getPoint(u),q2=rideP.getPoint(Math.min(1,u+.02)),v1=q1.clone().sub(q0),v2=q2.clone().sub(q1);
-      var turn=v1.length()*v2.length()>1e-6?v1.cross(v2).y/(v1.length()*v2.length()):0;roll+=(clamp(-turn*(DIST?7:3),DIST?-.42:-.14,DIST?.42:.14)-roll)*(1-Math.exp(-dtF*3));cam.rotateZ(roll*(1-fs)+rollAt(u)); // drone bank into turns, the scripted barrel roll, and a level horizon for the finale
+      // lean into turns like a drone: the bank follows the path's horizontal curvature (table made in buildRide, at most 18 degrees), eased; none in reduced motion
+      roll+=((reduce?0:tabAt(bankTab,cr))-roll)*(1-Math.exp(-dtF*3));cam.rotateZ(roll*(1-fs)+rollAt(u)); // drone bank into turns, the scripted barrel roll, and a level horizon for the finale
       hudUpdate(true,u,cr)
     }else{
       rideQ=null;heroOn=false;goldHour(0);if(cam.fov!==42){cam.fov=42;cam.updateProjectionMatrix()}if(scene.fog){scene.fog.near=fogN0;scene.fog.far=fogF0}
@@ -799,7 +865,7 @@
   setTimeout(function(){(window.requestIdleCallback||setTimeout)(warmEdges)},12000); // light theme: build the night lines in idle time, so the first switch to dark has them ready
   root.classList.add('gl'); // first: it makes #enter visible, and the scroll maths below needs its real position
   size();buildRide();layoutKeys();tgtPose=dirPose(scrollY);curPose=tgtPose.slice();tr=cr=rideProg();raf=requestAnimationFrame(frame);
-  if(ONLY||/[?&]dbg/.test(location.search))window.__scene={keys:function(){return KEYS.map(function(k){return k.y})},dirPose:dirPose,scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},lay:LAY,lm:LM,utp:UTP,sky:skyCurve,city:function(){return cityMesh},mob:mob,DIST:DIST,draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam)}};
+  if(ONLY||/[?&]dbg/.test(location.search))window.__scene={keys:function(){return KEYS.map(function(k){return k.y})},dirPose:dirPose,scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},lay:LAY,lm:LM,utp:UTP,sky:skyCurve,city:function(){return cityMesh},mob:mob,DIST:DIST,draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;fInit=true;rideQ=null;dtF=9;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam);dtF=.016}};
   } // start
   // Build the scene after the page's first paint, not before it: the curtain's text and photos come first, the canvas fades in after. (/flight/ is only the scene, so it starts at once.)
   if(!DEFER)start();

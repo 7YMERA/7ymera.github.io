@@ -26,6 +26,12 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-12 · Skyline, opening, flight and night (version 2.11), on branch `claude/eager-ride-vi416b`
+
+- **What:** landmarks grouped by a `LAY` table; the page opens on the bare city and the curtain comes in on scroll; the flight is eight beats (`buildKF`), with banking and a speed FOV; night windows, haze and landmark lighting redone from photos; the Maybank sign shows (a `//` comment had swallowed it). Flight captions rewritten, cache key `20261113n`.
+- **Why:** the owner found the map-true spacing dull, wanted a moment of pure city first, a livelier flight and a night that looks like the real skyline.
+- **Open:** not merged to `main` (owner to approve). Not measured on a real GPU: fps with the new night shader. Weak flight frames: the start of the Merdeka crane is a flat wall, the Exchange fall is only about 1.4x faster than the slow beats. Gold hour is still light-only. The ground edge at night reads as a purple cloud.
+
 ## 2026-11-12 · The polish pass (version 2.10), on branch `claude/eager-ride-vi416b`
 - **Not on `main` yet.** This session was told to work on the branch `claude/eager-ride-vi416b`. The owner should look at it on a real GPU, then merge. Work was split by model: small models audited, mid models edited, the lead reviewed every diff and re-ran the checks.
 - **Background** (`scene.js` `toon()`, end of `scene.css`): three flat tones per face, near-white day sky, height haze with no horizon seam, day facade grid fades by 420 m, fine grain and vignette layers below all content. Inspired by 0z5a.github.io. README section "The look" has the details.
