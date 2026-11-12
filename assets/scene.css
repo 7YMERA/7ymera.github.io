@@ -250,9 +250,9 @@ html.gl.gl-on #gl{opacity:1}
 html.gl #fx-grain,html.gl #fx-vig{display:block}
 html.gl.gl-on #fx-vig{opacity:1}
 #fx-grain{background:var(--grain-l) 0 0/180px 180px repeat}
-html.gl.gl-on #fx-grain{opacity:.55}
+html.gl.gl-on #fx-grain{opacity:.5}
 :root[data-theme="dark"] #fx-grain{background-image:var(--grain-d)}
-:root[data-theme="dark"].gl.gl-on #fx-grain{opacity:.3}
+:root[data-theme="dark"].gl.gl-on #fx-grain{opacity:.4}
 #fx-vig{background:radial-gradient(ellipse 80% 75% at 50% 50%,transparent 58%,rgba(24,64,150,.13) 100%)}
 :root[data-theme="dark"] #fx-vig{background:radial-gradient(ellipse 80% 75% at 50% 50%,transparent 52%,rgba(0,2,12,.4) 100%)}
 @media (prefers-reduced-motion:reduce){#fx-grain,#fx-vig{transition:none}}

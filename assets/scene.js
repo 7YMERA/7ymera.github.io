@@ -18,10 +18,11 @@
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   // Film grain and edge vignette: two fixed, pointer-less layers just above the canvas (see the end of scene.css). The grain tile is drawn once here.
   (function(){
-    function tile(rgb,amax){var c=document.createElement('canvas');c.width=c.height=180;var x=c.getContext('2d'),d=x.createImageData(180,180),i,r=7;
+    var dpr=Math.min(2,Math.max(1,Math.round(devicePixelRatio||1))),TS=180*dpr; // one noise pixel per device pixel
+    function tile(rgb,amax){var c=document.createElement('canvas');c.width=c.height=TS;var x=c.getContext('2d'),d=x.createImageData(TS,TS),i,r=7;
       for(i=0;i<d.data.length;i+=4){r=(r*16807)%2147483647;var n=r/2147483647;d.data[i]=rgb[0];d.data[i+1]=rgb[1];d.data[i+2]=rgb[2];d.data[i+3]=Math.round(n*n*amax)}
       x.putImageData(d,0,0);return 'url('+c.toDataURL('image/png')+')'}
-    try{root.style.setProperty('--grain-l',tile([20,60,140],80));root.style.setProperty('--grain-d',tile([150,200,255],70))}catch(e){}
+    try{root.style.setProperty('--grain-l',tile([20,60,140],38));root.style.setProperty('--grain-d',tile([150,200,255],26))}catch(e){}
     ['fx-grain','fx-vig'].forEach(function(id){if(document.getElementById(id))return;var e=document.createElement('div');e.id=id;e.setAttribute('aria-hidden','true');cv.parentNode.insertBefore(e,cv.nextSibling)})
   })();
   var scene=new T.Scene(),cam=new T.PerspectiveCamera(42,1,.3,1600);
@@ -39,18 +40,18 @@
   var amb=new T.AmbientLight(0xffffff,.75),sun=new T.DirectionalLight(0xffffff,.8);sun.position.set(80,140,60);scene.add(amb,sun);
   // Three flat tones per face (lit / mid / shade, picked by the face normal against one fixed light) and height-aware haze, both in the existing materials' shaders.
   // The tones are derived from each material's role colour, so the themes and the golden hour keep working. The haze fades towards the CSS sky gradient itself (uSky1/uSky2 at this pixel's screen height), so geometry melts into the sky with no seam.
-  var shadeBase=new T.Vector3(.3,.52,.92),hazeBase=.5,GSH=new T.Vector3(.96,.8,.72),TU={uLight:{value:new T.Vector3(-.42,.74,.52).normalize()},uSunC:{value:sun.color},uLitMul:{value:new T.Vector3(1,1,1)},uLitMix:{value:.7},uShadeMul:{value:new T.Vector3(.4,.6,.95)},uMidMul:{value:new T.Vector3(1,1,1)},
-    uSky1:{value:new T.Color()},uSky2:{value:new T.Color()},uRes:{value:new T.Vector2(1,1)},uHazeK:{value:.7},uEdge:{value:new T.Vector2(620,1250)}};
+  var shadeBase=new T.Vector3(.3,.52,.92),hazeBase=.5,GSH=new T.Vector3(.52,.47,.68),TU={uLight:{value:new T.Vector3(-.42,.74,.52).normalize()},uSunC:{value:sun.color},uLitMul:{value:new T.Vector3(1,1,1)},uLitMix:{value:.7},uShadeMul:{value:new T.Vector3(.4,.6,.95)},uMidMul:{value:new T.Vector3(1,1,1)},
+    uSky1:{value:new T.Color()},uSky2:{value:new T.Color()},uRes:{value:new T.Vector2(1,1)},uHazeK:{value:.7},uSunAmt:{value:.5},uEdge:{value:new T.Vector2(620,1250)}};
   function toon(sh){
     for(var k in TU)sh.uniforms[k]=TU[k];
     sh.vertexShader=sh.vertexShader.replace('void main() {','varying vec3 vWP;\nvoid main() {').replace('#include <worldpos_vertex>','#include <worldpos_vertex>\n vWP=(modelMatrix*vec4(transformed,1.0)).xyz;');
-    sh.fragmentShader=sh.fragmentShader.replace('void main() {','varying vec3 vWP;uniform vec3 uLight,uSunC,uLitMul,uShadeMul,uMidMul,uSky1,uSky2;uniform float uLitMix,uHazeK;uniform vec2 uRes,uEdge;\nvoid main() {')
+    sh.fragmentShader=sh.fragmentShader.replace('void main() {','varying vec3 vWP;uniform vec3 uLight,uSunC,uLitMul,uShadeMul,uMidMul,uSky1,uSky2;uniform float uLitMix,uHazeK,uSunAmt;uniform vec2 uRes,uEdge;\nvoid main() {')
       .replace('#include <aomap_fragment>',`#include <aomap_fragment>
         vec3 tn=normalize(cross(dFdx(vWP),dFdy(vWP)));
         float td=dot(tn,uLight);
         float tlit=smoothstep(0.40,0.44,td),tsh=1.0-smoothstep(-0.14,-0.10,td);
         vec3 bc=diffuseColor.rgb;
-        vec3 cLit=mix(bc*uLitMul,vec3(0.97,0.99,1.0),uLitMix)*uSunC;
+        vec3 cLit=mix(bc*uLitMul,vec3(0.97,0.99,1.0),uLitMix)*mix(vec3(1.0),uSunC,uSunAmt);
         reflectedLight.directDiffuse=vec3(0.0);
         reflectedLight.indirectDiffuse=mix(mix(bc*uMidMul,cLit,tlit),bc*uShadeMul,tsh);`)
       .replace('#include <fog_fragment>',`#ifdef USE_FOG
@@ -353,9 +354,9 @@
     if(glassModelM){glassModelM.emissive.set(C.ring);glassModelM.emissiveIntensity=dark?.8:.12}ringM.color.set(C.ring);specks.material.color.set(C.ring);
     var f=col('sky2');fogN0=dark?520:620;fogF0=dark?1500:1700; /* thin fog: it used to hide the city */scene.fog=new T.Fog(f,fogN0,fogF0);
     TU.uSky1.value.set(C.sky1);TU.uSky2.value.set(C.sky2);
-    if(dark){TU.uLitMul.value.set(.95,.95,.95);TU.uMidMul.value.set(.76,.76,.78);TU.uLitMix.value=0;TU.uShadeMul.value.set(.42,.48,.68);TU.uHazeK.value=.5}
+    if(dark){TU.uLitMul.value.set(.78,.78,.78);TU.uMidMul.value.set(.62,.62,.66);TU.uLitMix.value=0;TU.uShadeMul.value.set(.36,.42,.62);TU.uHazeK.value=.3}
     else{TU.uLitMul.value.set(1,1,1);TU.uMidMul.value.set(1,1,1);TU.uLitMix.value=.5;TU.uShadeMul.value.set(.3,.52,.92);TU.uHazeK.value=.5}
-    shadeBase.copy(TU.uShadeMul.value);hazeBase=TU.uHazeK.value;
+    TU.uSunAmt.value=dark?1:.5;shadeBase.copy(TU.uShadeMul.value);hazeBase=TU.uHazeK.value;
     fxStyle(dark);amb.intensity=dark?.45:.5;sun.intensity=dark?.55:.55;sun.color.set(dark?0x9cc8ff:0xffffff)}
   recolor();window.addEventListener('scenetheme',function(){recolor();need=true});
   new MutationObserver(function(){recolor();need=true}).observe(root,{attributes:true,attributeFilter:['data-theme']}); // the page's own theme button flips data-theme
@@ -583,7 +584,7 @@
     var dark=root.getAttribute('data-theme')==='dark';if(dark)k=0;k=Math.round(k*50)/50;if(k===goldLast)return;goldLast=k;
     if(k===0){mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});root.style.removeProperty('--sky1');root.style.removeProperty('--sky2');if(scene.fog)scene.fog.color.set(C.sky2);TU.uSky1.value.set(C.sky1);TU.uSky2.value.set(C.sky2);TU.uShadeMul.value.copy(shadeBase);TU.uHazeK.value=hazeBase;sun.color.set(dark?0x9cc8ff:0xffffff);return}
     mats.forEach(function(m){var r=m.userData.role;if(r==='far'||r==='mid'||r==='near')m.color.set(C[r]).lerp(G3,k*.38)}); /* the ground and towers take the warm haze */
-    goldC.set(C.sky1).lerp(G1,k);root.style.setProperty('--sky1','#'+goldC.getHexString());TU.uSky1.value.copy(goldC);TU.uShadeMul.value.copy(shadeBase).lerp(GSH,k);TU.uHazeK.value=hazeBase+.3*k; /* golden hour: warm shadows and a heavier warm haze */
+    goldC.set(C.sky1).lerp(G1,k);root.style.setProperty('--sky1','#'+goldC.getHexString());TU.uSky1.value.copy(goldC);TU.uShadeMul.value.copy(shadeBase).lerp(GSH,k);TU.uHazeK.value=hazeBase*(1-.5*k); /* golden hour: dusky violet shadows, pale cream lit faces, less haze so the skyline stays crisp */
     goldC.set(C.sky2).lerp(G2,k);root.style.setProperty('--sky2','#'+goldC.getHexString());TU.uSky2.value.copy(goldC);
     if(scene.fog)scene.fog.color.copy(goldC);sun.color.set(0xffffff).lerp(new T.Color('#ffd08a'),k)}
   // ONE CAMERA. Above, the director (before the flight) and the flight (inside #enter) each only say where the camera should be.
