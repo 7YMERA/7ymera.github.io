@@ -7,12 +7,14 @@
 <meta name="description" content="Just the scroll flight over Kuala Lumpur, with nothing on top of it. Press H for the viewing and debugging panel.">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#0b2a6b">
-<link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=64">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/favicon-192.png">
+<link rel="manifest" href="/site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=20261113k">
-<link rel="stylesheet" href="../assets/scene.css?v=20261113k">
+<link rel="stylesheet" href="../assets/site.css?v=20261113l">
+<link rel="stylesheet" href="../assets/scene.css?v=20261113l">
 <style>
 /* Flight-only page: the scene is the page. Nothing but the debug panel (opt-in) sits on top of it. */
 html.gl body{margin:0;background:linear-gradient(var(--sky1),var(--sky2)) fixed}
@@ -34,6 +36,7 @@ html.fp-on .fp{display:grid}
 <body>
 <canvas id="gl" aria-hidden="true"></canvas>
 <main>
+  <h1 class="sr-only">The flight over Kuala Lumpur</h1>
   <section class="enter" id="enter" aria-label="Scroll to fly through Kuala Lumpur">
     <div class="enter-sticky">
       <div class="hud" id="hud" aria-hidden="true">
@@ -73,7 +76,7 @@ html.fp-on .fp{display:grid}
 </aside>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
-<script src="../assets/scene.js?v=20261113k" defer></script>
+<script src="../assets/scene.js?v=20261113l" defer></script>
 <script>
 /* The viewer: everything here is optional. Without it, scrolling flies the route. */
 (function(){
