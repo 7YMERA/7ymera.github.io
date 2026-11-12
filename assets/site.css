@@ -1482,3 +1482,6 @@ html.gl .cur-frame.lit .cur-spot { opacity: var(--en, 1); }
   html.gl .op-cue svg { animation: none; opacity: 1; }
   html.gl .op-cue:hover { transform: none; }
 }
+
+/* In-page links land below the sticky header, not under it. */
+#me, #work, #journey, #contact { scroll-margin-top: 76px; }
