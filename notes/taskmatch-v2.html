@@ -14,6 +14,8 @@
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://7ymera.github.io/notes/taskmatch-v2.html">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://7ymera.github.io/notes/taskmatch-v2.html">
+<link rel="alternate" type="application/rss+xml" title="Alif Najmi · Notes" href="/feed.xml">
 <meta name="theme-color" content="#0b2a6b">
 <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=64">
 <link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=180">
@@ -22,6 +24,22 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="../assets/site.css?v=20261113j">
 <link rel="stylesheet" href="../assets/scene.css?v=20261113j">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BlogPosting",
+ "headline": "Rebuilding my FYP properly",
+ "description": "What I changed when I rebuilt TaskMatch, my final year project, to production standard, and what I would do differently.",
+ "datePublished": "2026-11-05",
+ "author": {
+  "@type": "Person",
+  "name": "Alif Najmi",
+  "url": "https://7ymera.github.io/"
+ },
+ "image": "https://7ymera.github.io/assets/og-taskmatch.jpg",
+ "mainEntityOfPage": "https://7ymera.github.io/notes/taskmatch-v2.html"
+}
+</script>
 </head>
 <body>
 <div class="sky" aria-hidden="true"></div>
@@ -44,7 +62,7 @@
 <main class="wrap">
   <article class="post">
     <div class="post-head">
-      <a class="back" href="../#me">← Back to Alif</a>
+      <span><a class="back" href="../#me">← Back to Alif</a> · <a class="back" href="index.html">All notes</a></span>
       <span class="eyebrow">Notes · Projects</span>
       <h1>Rebuilding my FYP properly</h1>
       <p class="meta">5 November 2026 · 5 min read</p>
@@ -78,17 +96,17 @@
       </ul>
 
       <figure class="shot">
-        <img src="../assets/tm-dashboard-v2.webp" alt="The TaskMatch v2 dashboard with trends and a needs-attention list" width="1200" height="750" loading="lazy">
+        <img src="../assets/tm-dashboard-v2.webp" alt="The TaskMatch v2 dashboard with trends and a needs-attention list" width="1200" height="750" loading="lazy" decoding="async">
         <figcaption>The same data in v2.</figcaption>
       </figure>
 
       <div class="pair">
         <figure class="shot">
-          <img src="../assets/tm-people-v1.webp" alt="The FYP Students page: a plain list of students and skills" width="1200" height="750" loading="lazy">
+          <img src="../assets/tm-people-v1.webp" alt="The FYP Students page: a plain list of students and skills" width="1200" height="750" loading="lazy" decoding="async">
           <figcaption>FYP: the Students page.</figcaption>
         </figure>
         <figure class="shot">
-          <img src="../assets/tm-people-v2.webp" alt="The v2 People page with team load, skill gaps and proven skills" width="1200" height="750" loading="lazy">
+          <img src="../assets/tm-people-v2.webp" alt="The v2 People page with team load, skill gaps and proven skills" width="1200" height="750" loading="lazy" decoding="async">
           <figcaption>v2: People, with who's free, team load and proven skills.</figcaption>
         </figure>
       </div>
@@ -104,7 +122,7 @@
       <p>Two rules keep it honest. People who meet every required skill always come first. And anyone missing a required skill is capped at 54, so being free and reliable can't make someone look like a good fit for work they can't do. When someone doesn't fully fit, the app names a mentor who has the missing skill.</p>
 
       <figure class="shot">
-        <img src="../assets/notes/tm/find.webp" alt="Find a match: three people ranked by fit score, with the score broken into skills, experience, availability and track record" width="1200" height="833" loading="lazy">
+        <img src="../assets/notes/tm/find.webp" alt="Find a match: three people ranked by fit score, with the score broken into skills, experience, availability and track record" width="1200" height="833" loading="lazy" decoding="async">
         <figcaption>Find a match, with the breakdown open. Demo data.</figcaption>
       </figure>
 
@@ -122,22 +140,23 @@
       </ul>
 
       <figure class="shot">
-        <img src="../assets/tm-landing-v2.webp" alt="The TaskMatch v2 landing page" width="1200" height="750" loading="lazy">
+        <img src="../assets/tm-landing-v2.webp" alt="The TaskMatch v2 landing page" width="1200" height="750" loading="lazy" decoding="async">
         <figcaption>TaskMatch today.</figcaption>
       </figure>
 
       <p>Everything is on <a href="https://github.com/7YMERA/taskmatch-v2" target="_blank" rel="noopener">GitHub</a>, with a write-up and before/after screenshots for every release on the wiki.</p>
 
       <a class="try-cta" href="https://taskmatch-umber.vercel.app" target="_blank" rel="noopener">
-        <span class="try-thumbs" aria-hidden="true"><img src="../assets/tm-landing-v2.webp" alt=""><img src="../assets/tm-dashboard-v2.webp" alt=""><img src="../assets/tm-tasks-v2.webp" alt=""></span>
+        <span class="try-thumbs" aria-hidden="true"><img src="../assets/tm-landing-v2.webp" alt="" loading="lazy" decoding="async"><img src="../assets/tm-dashboard-v2.webp" alt="" loading="lazy" decoding="async"><img src="../assets/tm-tasks-v2.webp" alt="" loading="lazy" decoding="async"></span>
         <span class="try-text"><span class="eyebrow">Live demo · no login</span><b>Try TaskMatch yourself</b><span>Opens a demo team as a team lead, in one click.</span></span>
         <span class="try-go" aria-hidden="true">→</span>
       </a>
     </div>
 
     <div class="post-foot">
-      <a class="back" href="slb-power-apps.html">← From reply-all to Power Apps</a>
-      <a class="back" href="../#p-taskmatch">See the project →</a>
+      <a class="back" href="aws-two-departments.html">← One VPC, two departments, $56</a>
+      <a class="back" href="../#p-taskmatch">See the project</a>
+      <a class="back" href="slb-power-apps.html">From reply-all to Power Apps →</a>
     </div>
   </article>
 </main>

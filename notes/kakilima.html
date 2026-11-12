@@ -14,6 +14,8 @@
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://7ymera.github.io/notes/kakilima.html">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://7ymera.github.io/notes/kakilima.html">
+<link rel="alternate" type="application/rss+xml" title="Alif Najmi · Notes" href="/feed.xml">
 <meta name="theme-color" content="#0b2a6b">
 <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=64">
 <link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=180">
@@ -22,6 +24,22 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="../assets/site.css?v=20261113j">
 <link rel="stylesheet" href="../assets/scene.css?v=20261113j">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BlogPosting",
+ "headline": "Accessible first, in four languages",
+ "description": "Building KakiLima, a four-language, accessibility-first hub for reporting unsafe streets in Malaysia.",
+ "datePublished": "2026-11-06",
+ "author": {
+  "@type": "Person",
+  "name": "Alif Najmi",
+  "url": "https://7ymera.github.io/"
+ },
+ "image": "https://7ymera.github.io/assets/og-card.jpg",
+ "mainEntityOfPage": "https://7ymera.github.io/notes/kakilima.html"
+}
+</script>
 </head>
 <body>
 <div class="sky" aria-hidden="true"></div>
@@ -44,7 +62,7 @@
 <main class="wrap">
   <article class="post">
     <div class="post-head">
-      <a class="back" href="../#me">← Back to Alif</a>
+      <span><a class="back" href="../#me">← Back to Alif</a> · <a class="back" href="index.html">All notes</a></span>
       <span class="eyebrow">Notes · Side project</span>
       <h1>Accessible first, in four languages</h1>
       <p class="meta">6 November 2026 · 4 min read</p>
@@ -61,7 +79,7 @@
       <h2>Four languages, properly</h2>
       <p>The site is in English, Bahasa Melayu, Chinese and Tamil. Visitors to the home page are sent to their browser's language, and their choice is remembered. All the text lives in one file per language, and English defines the shape, so TypeScript flags any sentence missing from the others before it ships.</p>
       <figure class="shot">
-        <img src="../assets/notes/kaki/ta-dark.webp" alt="The KakiLima home page in Tamil, dark mode" width="1200" height="778" loading="lazy">
+        <img src="../assets/notes/kaki/ta-dark.webp" alt="The KakiLima home page in Tamil, dark mode" width="1200" height="778" loading="lazy" decoding="async">
         <figcaption>Tamil, in dark mode. Chinese and Tamil fall back to the system Noto fonts.</figcaption>
       </figure>
 
@@ -75,7 +93,7 @@
         <li><strong>Reduced motion respected everywhere.</strong> Animations only mark a change, and nothing moves if your phone asks it not to.</li>
       </ul>
       <figure>
-        <div class="phones"><img src="../assets/notes/kaki/zh-mobile.webp" alt="KakiLima on a phone in Chinese" width="520" height="1125" loading="lazy"><img src="../assets/notes/kaki/larger-text-mobile.webp" alt="KakiLima on a phone with larger text" width="520" height="1125" loading="lazy"><img src="../assets/notes/kaki/contrast-mobile.webp" alt="KakiLima on a phone in high-contrast mode" width="520" height="1125" loading="lazy"></div>
+        <div class="phones"><img src="../assets/notes/kaki/zh-mobile.webp" alt="KakiLima on a phone in Chinese" width="520" height="1125" loading="lazy" decoding="async"><img src="../assets/notes/kaki/larger-text-mobile.webp" alt="KakiLima on a phone with larger text" width="520" height="1125" loading="lazy" decoding="async"><img src="../assets/notes/kaki/contrast-mobile.webp" alt="KakiLima on a phone in high-contrast mode" width="520" height="1125" loading="lazy" decoding="async"></div>
         <figcaption>Chinese on a phone, the larger text size, and high contrast.</figcaption>
       </figure>
 
@@ -86,14 +104,14 @@
         <figcaption>Themes change token values; components only ever use the tokens. <span class="scroll-hint">Swipe sideways to see all of it.</span></figcaption>
       </figure>
       <figure class="shot">
-        <img src="../assets/notes/kaki/focus-ring.webp" alt="The two-tone focus ring on the report page" width="1200" height="675" loading="lazy">
+        <img src="../assets/notes/kaki/focus-ring.webp" alt="The two-tone focus ring on the report page" width="1200" height="675" loading="lazy" decoding="async">
         <figcaption>The focus ring, for people who navigate with a keyboard.</figcaption>
       </figure>
 
       <h2>Where to report</h2>
       <p>The report page lists the official channels, grouped by what you're reporting: roads (MyJalan, Respons Rakyat, SiSPAA) and public transport (Rapid KL, KTMB, APAD), with what each one handles. The names and links live in one data file, separate from the translations, so they're easy to keep current.</p>
       <figure class="shot">
-        <img src="../assets/notes/kaki/report.webp" alt="The report page listing official reporting channels" width="1200" height="837" loading="lazy">
+        <img src="../assets/notes/kaki/report.webp" alt="The report page listing official reporting channels" width="1200" height="837" loading="lazy" decoding="async">
         <figcaption>The report page.</figcaption>
       </figure>
 

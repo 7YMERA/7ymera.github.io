@@ -14,6 +14,8 @@
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://7ymera.github.io/notes/smk-dashboard.html">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://7ymera.github.io/notes/smk-dashboard.html">
+<link rel="alternate" type="application/rss+xml" title="Alif Najmi · Notes" href="/feed.xml">
 <meta name="theme-color" content="#0b2a6b">
 <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=64">
 <link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=180">
@@ -22,6 +24,22 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="../assets/site.css?v=20261113j">
 <link rel="stylesheet" href="../assets/scene.css?v=20261113j">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BlogPosting",
+ "headline": "A dashboard 150 teachers actually open",
+ "description": "How I replaced a school's link page and task spreadsheet with a privacy-first data dashboard.",
+ "datePublished": "2026-11-06",
+ "author": {
+  "@type": "Person",
+  "name": "Alif Najmi",
+  "url": "https://7ymera.github.io/"
+ },
+ "image": "https://7ymera.github.io/assets/og-card.jpg",
+ "mainEntityOfPage": "https://7ymera.github.io/notes/smk-dashboard.html"
+}
+</script>
 </head>
 <body>
 <div class="sky" aria-hidden="true"></div>
@@ -44,7 +62,7 @@
 <main class="wrap">
   <article class="post">
     <div class="post-head">
-      <a class="back" href="../#me">← Back to Alif</a>
+      <span><a class="back" href="../#me">← Back to Alif</a> · <a class="back" href="index.html">All notes</a></span>
       <span class="eyebrow">Notes · Side project</span>
       <h1>A dashboard 150 teachers actually open</h1>
       <p class="meta">6 November 2026 · 5 min read</p>
@@ -71,7 +89,7 @@
       <div class="table-wrap"><table><thead><tr><th></th><th>Public</th><th>Principal</th><th>Data manager</th></tr></thead><tbody><tr><td>Dashboard, counts, charts</td><td>✅</td><td>✅</td><td>✅</td></tr><tr><td>Who hasn't submitted, leave summary</td><td>❌</td><td>✅</td><td>✅</td></tr><tr><td>Sync status, audit log</td><td>❌</td><td>✅</td><td>✅</td></tr><tr><td>Edit links and announcements</td><td>❌</td><td>❌</td><td>✅</td></tr><tr><td>Manage accounts and roles</td><td>❌</td><td>❌</td><td>✅</td></tr></tbody></table></div>
 
       <figure class="shot">
-        <img src="../assets/notes/smk/admin.webp" alt="Panel Admin overview with pending submissions, data problems and recent activity" width="1200" height="988" loading="lazy">
+        <img src="../assets/notes/smk/admin.webp" alt="Panel Admin overview with pending submissions, data problems and recent activity" width="1200" height="988" loading="lazy" decoding="async">
         <figcaption>Panel Admin: who hasn't submitted (with a one-tap "copy for WhatsApp"), data problems to fix, and an activity log.</figcaption>
       </figure>
 
@@ -88,7 +106,7 @@
 
       <h2>Built for phones first</h2>
       <figure>
-        <div class="phones"><img src="../assets/notes/smk/phone-dashboard.webp" alt="The dashboard on a phone" width="520" height="1125" loading="lazy"><img src="../assets/notes/smk/phone-menu.webp" alt="The account menu as a bottom sheet on a phone" width="520" height="1125" loading="lazy"><img src="../assets/notes/smk/phone-login.webp" alt="The login screen on a phone" width="520" height="1125" loading="lazy"></div>
+        <div class="phones"><img src="../assets/notes/smk/phone-dashboard.webp" alt="The dashboard on a phone" width="520" height="1125" loading="lazy" decoding="async"><img src="../assets/notes/smk/phone-menu.webp" alt="The account menu as a bottom sheet on a phone" width="520" height="1125" loading="lazy" decoding="async"><img src="../assets/notes/smk/phone-login.webp" alt="The login screen on a phone" width="520" height="1125" loading="lazy" decoding="async"></div>
         <figcaption>On a phone: the dashboard, the account menu as a bottom sheet, and login. It installs to the home screen with the school crest.</figcaption>
       </figure>
       <p>Most teachers open it on a phone, and early on the header alone took 600 pixels before a single task showed. Version by version it got tighter:</p>
@@ -96,7 +114,7 @@
       <p>Every change ships with a short "what's new" note in plain Malay, inside the app.</p>
 
       <figure class="shot">
-        <img src="../assets/notes/smk/dashboard-dark.webp" alt="The dashboard in dark mode" width="1200" height="1566" loading="lazy">
+        <img src="../assets/notes/smk/dashboard-dark.webp" alt="The dashboard in dark mode" width="1200" height="1566" loading="lazy" decoding="async">
         <figcaption>Dark mode, with hand-drawn SVG charts that work in both themes.</figcaption>
       </figure>
 
