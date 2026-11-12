@@ -26,6 +26,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-12 · README screenshots retaken
+
+- **What:** twelve images in `docs/screens/` retaken at 1300 x 800 from the current site (opening, the six sections, Journey, three flight shots, two dark opening shots); three captions updated. Not retaken: `sql-playground.webp` and `join-atlas.webp` (notes pages), `2026-10-first-version.webp` (history), and the unreferenced `goals`, `opening`, `phone`.
+- **How:** Playwright on `/?dbg`; for flight shots, scroll to the progress and call `__scene.set(p)` so the camera does not take a minute to catch up in software rendering.
+
 ## 2026-11-12 · Floating roof fixed, README brought up to date (version 2.12)
 
 - **What:** `clearPlots` now also drops separate pieces that do not reach the ground and sit over a dropped block, so no roof floats near Merdeka 118. README: version 2.12 row, and the opening, night, flight, moon and light-palette notes rewritten to match today's changes. CLAUDE.md lists the owner's scene colour rules. Cache key `20261113w`.

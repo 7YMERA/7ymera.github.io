@@ -228,8 +228,8 @@ The home page (`index.html`) sits over a WebGL scene of Kuala Lumpur (three.js f
 
 | | |
 |---|---|
-| ![Hero line over the city, dark](docs/screens/city-hero-dark.webp) | ![The flight, head-on at the skybridge, dark](docs/screens/city-flight-bridge.webp) |
-| ![Journey on its panel, light](docs/screens/city-journey-light.webp) | ![The flight's last shot: all four landmarks tagged, light](docs/screens/city-flight-wide.webp) |
+| ![Hero line over the city, dark](docs/screens/city-hero-dark.webp) | ![The flight at night: out of the skybridge gap toward Menara KL](docs/screens/city-flight-bridge.webp) |
+| ![Journey over the city, light](docs/screens/city-journey-light.webp) | ![The flight's finale at gold hour, with the Fly it again button](docs/screens/city-flight-wide.webp) |
 
 - **`assets/scene.css`** re-skins `site.css` by overriding its tokens (`--bg`, `--ink`, `--accent`, ...) with the blues, so every component follows with no per-component work. It also holds the panel style (opaque, a hard offset shadow, 2 px blue border), the opening's plates and the flight/HUD styles.
 - **Readability rules:** sections are opaque panels (93 % paper), no `backdrop-filter`; the opening's words get a plate or a halo because they sit straight on the city.
