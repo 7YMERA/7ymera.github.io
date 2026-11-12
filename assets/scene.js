@@ -202,11 +202,17 @@
           float pon=mix(step(pr,0.9)*(0.7+0.5*pw),0.8,df);
           vec3 pcw=mix(vec3(0.82,0.91,1.0),vec3(1.0,0.9,0.72),step(0.8,pw)*(1.0-df));
           wem=pcw*(0.07+0.78*win*pon)*(0.75+0.6*smoothstep(10.0,106.0,vWP.y))*nl;}
-        /* Menara KL: the shaft is washed with cool light, brighter toward the pod; the pod glows magenta in bands */
+        /* Menara KL, from photos: the shaft floodlit white (the brightest part, faintly fluted, a pink blush at the foot), the pod dark blue-violet with rings of white lamps, a white crown on top of it, the lower antenna lit */
         float kw=li==3?step(vWP.y,uLo[3]):0.0;
-        wem+=vec3(0.72,0.84,1.0)*(0.07+0.5*smoothstep(8.0,78.0,vWP.y))*kw*wall*uNight;
+        float kang=atan(vWP.z-uCut[3].y,vWP.x-uCut[3].x);
+        float kfl=mix(0.84+0.16*step(0.5,fract(kang*24.0/6.2832)),0.92,df);
+        wem+=mix(vec3(1.0,0.7,0.82),vec3(0.9,0.95,1.0),smoothstep(2.0,26.0,vWP.y))*(0.55+0.3*smoothstep(8.0,78.0,vWP.y))*kfl*kw*uNight;
         float kp=li==3?al:0.0;
-        wem=mix(wem,vec3(1.0,0.26,0.7)*(0.5+0.9*mix(step(0.5,fract(vWP.y/2.0)),0.5,df))*uNight*1.1,kp);
+        float kr=fract(vWP.y/2.1),kd=fract(kang*44.0/6.2832);
+        float klamp=mix(smoothstep(0.3,0.5,kr)*(1.0-smoothstep(0.5,0.7,kr))*smoothstep(0.28,0.5,kd)*(1.0-smoothstep(0.5,0.72,kd)),0.16,df);
+        float ktop=smoothstep(uCut[3].w-5.5,uCut[3].w-4.0,vWP.y);
+        wem=mix(wem,(vec3(0.16,0.2,0.62)*0.55+vec3(0.95,0.97,1.0)*(klamp*1.9+ktop*0.9))*uNight,kp);
+        wem+=vec3(0.92,0.96,1.0)*(li==3?step(uCut[3].w,vWP.y)*(1.0-smoothstep(uCut[3].w,uCut[3].w+22.0,vWP.y)):0.0)*0.8*uNight;
         /* sodium street light: amber at the feet of buildings and on the ground near them */
         float low=1.0-smoothstep(0.5,11.0,max(vWP.y,0.0));
         float gnd=(1.0-wall)*(1.0-step(2.5,vWP.y));

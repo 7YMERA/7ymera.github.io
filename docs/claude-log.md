@@ -26,6 +26,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-12 · Menara KL at night, from the owner's photos
+
+- **What:** the magenta pod is gone. The shaft is floodlit white (faintly fluted, a pink blush at the foot), the pod is dark blue-violet with rings of white lamps and a white crown, the lower antenna is lit. All in the `facade` shader (`li==3`). Cache key `20261113q`.
+- **Why:** the owner found the purple pod unrealistic and sent two reference photos.
+
 ## 2026-11-12 · Hold on the city tag, sign on the wall, towers lit, moon locked, fly again
 
 - **What:** `#spin` ("Where I work and build") is 300vh (260vh on phones), twice as long. The Maybank sign is a plane fixed to Merdeka 118's facade by a ray at load (`placeSign`), shown in both themes, no longer a floating sprite. Petronas at night has real windows (floor strips cut by mullions, a few dark or warm rooms, brighter toward the crowns). Light mode gets shade at building feet and soft cloud shadows on the ground (the day side of the night street glow). The moon is locked at one world position. A "Fly it again in dark/light mode" button shows over the finale (`#fly-again`), switches theme and returns to the flight's start. Cache key `20261113p`.
