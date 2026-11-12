@@ -26,6 +26,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-12 · Opening wordmark removed
+
+- **What:** the "Alif Najmi · Portfolio · Kuala Lumpur" line (`.op-mark`) is gone from `index.html`, so the first screen is the city and the chevron cue only. Its CSS rules are left in `site.css`, unused.
+- **Why:** owner's request.
+
 ## 2026-11-12 · Bare opening: no top bar, chevrons for the cue; The Exchange matches Petronas
 
 - **What:** while the city has the first screen to itself, `extras.js` sets `html.op-bare`: the top bar is hidden (it returns as the curtain starts in, or on keyboard focus) and the cue is a 64 px round button with two down chevrons (label kept as `aria-label`). Reduced motion never gets `op-bare`. In light mode the landmarks' glass takes the `near` tone, so The Exchange 106 is as deep as Petronas. Cache key `20261113v`.
