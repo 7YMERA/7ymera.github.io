@@ -116,7 +116,7 @@
   if(!DIST){
   loadModel(BASE+'city/klcc.json',LAY.klcc[0],LAY.klcc[1],LAY.klcc[2],bodyM,procedural,klccEdges);          // Petronas Twin Towers (SketchUp export, see tools/convert-obj.py)
   loadModel(BASE+'city/menara_kl.json',LAY.kl[0],LAY.kl[1],LAY.kl[2],bodyM,null,function(){g.remove(kl)}); // Menara KL; replaces the stand-in cylinder tower below once loaded
-  loadModel(BASE+'city/merdeka118.json',LAY.mer[0],LAY.mer[1],LAY.mer[2],bodyM,null,merEdges);
+  loadModel(BASE+'city/merdeka118.json',LAY.mer[0],LAY.mer[1],LAY.mer[2],bodyM,null,function(o){merEdges(o);placeSign(o)});
   loadModel(BASE+'city/exchange106.json',LAY.ex[0],LAY.ex[1],LAY.ex[2],bodyM,null,exEdges);   // The Exchange 106, cropped and simplified (tools/convert-dae-crop.py)  // Merdeka PNB 118 (SketchUp Collada, see tools/convert-dae.py)
   }
   // In the district, the two landmarks baked into its mesh were welded coarsely and have holes: draw the full-detail models over them (1 % larger, so they sit just outside).
@@ -137,7 +137,7 @@
   var merEdges=edgesFor(0xff3ae6,16,.8),klccEdges=edgesFor(0xffe7b0,14,.55),exEdges=edgesFor(0xa8ecff,16,.7);
   // In the district all four landmarks are the hand-made models (the district's own baked Menara KL is cleared out below, see CLEAR/BAKED).
   if(DIST){loadModel(BASE+'city/klcc.json',LAY.klcc[0],LAY.klcc[1],LAY.klcc[2],bodyM,null,klccEdges);loadModel(BASE+'city/menara_kl.json',LAY.kl[0],LAY.kl[1],LAY.kl[2],bodyM,null,null);
-    loadModel(BASE+'city/merdeka118.json',LAY.mer[0],LAY.mer[1],LAY.mer[2],bodyM,null,merEdges);loadModel(BASE+'city/exchange106.json',LAY.ex[0],LAY.ex[1],LAY.ex[2],bodyM,null,exEdges)}
+    loadModel(BASE+'city/merdeka118.json',LAY.mer[0],LAY.mer[1],LAY.mer[2],bodyM,null,function(o){merEdges(o);placeSign(o)});loadModel(BASE+'city/exchange106.json',LAY.ex[0],LAY.ex[1],LAY.ex[2],bodyM,null,exEdges)}
   var gr=new T.Mesh(new T.CircleGeometry(1400,64),ground);gr.rotation.x=-Math.PI/2;gr.position.y=-.2;g.add(gr);
   // city ring
   var s=11;function rnd(){s=(s*9301+49297)%233280;return s/233280}
@@ -194,8 +194,14 @@
         float st=mix(clamp(0.2+2.2*tl,0.0,1.5),0.5,df);
         vec3 wem=wc*(0.55+0.8*rb)*lit*st*nl*1.55;
         if(li==0){ /* Petronas: every floor floodlit cool silver, evenly, in regular bands */
-          float f=fract(vWP.y/1.9);float band=mix(smoothstep(0.0,0.16,f)*(1.0-smoothstep(0.78,0.97,f)),0.72,df);
-          wem=vec3(0.74,0.82,0.92)*(0.14+0.44*band)*nl*0.9;}
+          /* each floor is a strip of bright windows cut by the steel mullions; a few rooms are dark, a few warm; the light builds toward the crowns */
+          float f=fract(vWP.y/1.9),bx=fract(hq/1.7);
+          float win=mix(smoothstep(0.0,0.14,f)*(1.0-smoothstep(0.6,0.8,f))*smoothstep(0.0,0.14,bx)*(1.0-smoothstep(0.78,0.94,bx)),0.46,df);
+          vec2 pc=vec2(floor(hq/1.7),floor(vWP.y/1.9))+(onX?vec2(0.0):vec2(31.0,7.0));
+          float pr=h21(pc+vec2(2.3,7.7)),pw=h21(pc+vec2(8.1,3.3));
+          float pon=mix(step(pr,0.9)*(0.7+0.5*pw),0.8,df);
+          vec3 pcw=mix(vec3(0.82,0.91,1.0),vec3(1.0,0.9,0.72),step(0.8,pw)*(1.0-df));
+          wem=pcw*(0.07+0.78*win*pon)*(0.75+0.6*smoothstep(10.0,106.0,vWP.y))*nl;}
         /* Menara KL: the shaft is washed with cool light, brighter toward the pod; the pod glows magenta in bands */
         float kw=li==3?step(vWP.y,uLo[3]):0.0;
         wem+=vec3(0.72,0.84,1.0)*(0.07+0.5*smoothstep(8.0,78.0,vWP.y))*kw*wall*uNight;
@@ -208,6 +214,7 @@
         float pool=smoothstep(0.3,0.9,vn(vWP.xz/16.0))*0.7+0.3*vn(vWP.xz/5.0);
         float pg=mix(pool,0.45,smoothstep(120.0,500.0,gd));
         vec3 sod=vec3(1.0,0.5,0.15)*uNight*(wall*low*(0.3+0.45*h21(vec2(floor(hq/4.0),bk.x*3.0+bk.y)))*0.8+gnd*rad*(0.04+0.2*pg));
+        diffuseColor.rgb*=1.0-(1.0-uNight)*(wall*low*0.2+gnd*rad*0.13*pg); /* by day the same shapes are shade, not light: darker feet on every building and soft cloud shadows drifting over the ground */
         /* red aviation lights on a few of the tall flat roofs */
         vec2 rc2=floor(vWP.xz/18.0);
         float rl=step(0.9,fn.y)*step(36.0,vWP.y)*(1.0-lmF)*step(0.8,h21(rc2+vec2(11.3,5.9)))*(1.0-smoothstep(0.7,2.2,length(vWP.xz-(rc2+0.5)*18.0)))*uNight;
@@ -215,7 +222,7 @@
         /* night glow of the landmarks: floodlit Petronas pinnacles, the lantern crown of The Exchange 106 */
         float gP=(1.0-step(uCut[0].z,distance(vWP.xz,uCut[0].xy)))*step(uCut[0].w,vWP.y);
         float gE=(1.0-step(uCut[2].z,distance(vWP.xz,uCut[2].xy)))*step(uCut[2].w-4.0,vWP.y);
-        totalEmissiveRadiance+=uNight*(vec3(0.85,0.9,1.0)*gP*0.7+vec3(1.0,0.74,0.86)*gE*(0.5+0.35*mix(step(0.5,fract(vWP.y/2.6)),0.5,df)));`)};
+        totalEmissiveRadiance+=uNight*(vec3(1.0,0.95,0.86)*gP*0.7+vec3(1.0,0.74,0.86)*gE*(0.5+0.35*mix(step(0.5,fract(vWP.y/2.6)),0.5,df)));`)};
     return m}
   // The ground stays one plain colour. (Roads and dark patches were tried and removed: owner didn't like them.)
   var cityM=facade(mat('mid',DIST?{side:T.DoubleSide}:{}));
@@ -405,8 +412,14 @@
   var beacons=BEAC.map(function(b,i){var m=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xff3a2a,fog:false,opacity:0}),sp=new T.Sprite(m);sp.scale.set(i===2?22:14,i===2?22:14,1);sp.position.set(b[0],b[1],b[2]);sp.renderOrder=6;g.add(sp);return{m:m,ph:i*.37}});
   // The yellow sign on the crown of Merdeka 118 (night only), as in the owner's photo.
   var signC=document.createElement('canvas');signC.width=256;signC.height=64;(function(){var x=signC.getContext('2d');x.font='900 46px Arial,Helvetica,sans-serif';x.textAlign='center';x.textBaseline='middle';x.shadowColor='#ffcc00';x.shadowBlur=14;x.fillStyle='#ffd21a';x.fillText('Maybank',128,34)})();
-  var signM=new T.SpriteMaterial({map:new T.CanvasTexture(signC),transparent:true,depthWrite:false,fog:false,opacity:.95}),signS=new T.Sprite(signM);
-  signS.scale.set(24,6,1);(function(p){signS.position.set(p[0],155.5,p[1])})(lp('mer',-.8,-8.7)); // on the roof of Merdeka 118
+  var signM=new T.MeshBasicMaterial({map:new T.CanvasTexture(signC),transparent:true,depthWrite:false,fog:false,opacity:.95,polygonOffset:true,polygonOffsetFactor:-2}),signS=new T.Mesh(new T.PlaneGeometry(9.6,2.4),signM),signOK=false;
+  // The sign is fixed flat to Merdeka 118's upper facade, on the side facing the Petronas Towers: once the model is in, a ray finds the wall there and the sign takes its place and its slope.
+  function placeSign(model){
+    model.updateMatrixWorld(true);var c=crown('mer'),k=crown('klcc'),ctr=g.localToWorld(new T.Vector3(c[0],146,c[1])),dir=g.localToWorld(new T.Vector3(k[0],146,k[1])).sub(ctr).normalize();
+    var rc=new T.Raycaster(ctr.clone().addScaledVector(dir,70),dir.clone().negate(),0,70),h=rc.intersectObject(model,true)[0];if(!h||!h.face)return;
+    var n=h.face.normal.clone().transformDirection(h.object.matrixWorld);if(n.dot(dir)<0)n.negate();
+    var x=new T.Vector3(0,1,0).cross(n).normalize(),y=n.clone().cross(x),q=new T.Quaternion().setFromRotationMatrix(new T.Matrix4().makeBasis(x,y,n));
+    signS.position.copy(g.worldToLocal(h.point.clone().addScaledVector(n,.25)));signS.quaternion.copy(g.getWorldQuaternion(new T.Quaternion()).invert().multiply(q));signOK=true;signS.visible=true;need=true}
   signS.visible=false;signS.renderOrder=7;g.add(signS); // (this line used to be swallowed by the comment above, so the sign was never added to the scene)
   var beaconDark=beaconDark||false;
   function beaconUpdate(time){var t=time/1000;beacons.forEach(function(b){var p=((t/1.7+b.ph)%1+1)%1,a=(p<.09||(p>.2&&p<.29))?1:.08;b.m.opacity=a*(beaconDark?1:.45);b.m.blending=beaconDark?T.AdditiveBlending:T.NormalBlending})}
@@ -423,18 +436,18 @@
       if(j===mIdx)sc+=.25;if(sc>best){best=sc;bi=j}}
     mIdx=bi;var k=still?1:.12;mX+=(MCAND[mIdx][0]-mX)*k;mY+=(MCAND[mIdx][1]-mY)*k;
     mP.set(mX,mY,.5).unproject(cam).sub(cam.position).normalize().multiplyScalar(1100).add(cam.position);moonG.position.copy(mP)}
+  moonG.position.set(-265,326,-831); // behind the skyline as the page opens, high enough to clear the tops
   function sciUpdate(time,still,inRide){
     beaconUpdate(time);
     var t=still?0:time*.001,cl=Math.hypot(cam.position.x,cam.position.z)||1,dx=cam.position.x/cl,dz=cam.position.z/cl;
     stars.rotation.y=t*.004;
-    if(beaconDark)moonPlace(still);else
-    moonG.position.set(-dx*900+(-dz)*300,420+Math.sin(t*.05)*6,-dz*900+dx*300); /* high and to one side: the skyline's tops stay in open sky */
+    /* the moon is locked to one place in the sky (owner's call: it used to follow the camera and hop between clear spots) */
     moon.rotation.y=t*.03;moonRing.rotation.z=t*.02;moonRing2.rotation.z=-t*.015;
     moon2.position.set(Math.cos(t*.22)*170,Math.sin(t*.22)*28,Math.sin(t*.22)*170);
     for(var g=0;g<gyros.length;g++){gyros[g].ring.rotation.z=t*.5*gyros[g].sp;gyros[g].h.rotation.y+=still?0:.0016*gyros[g].sp}
     railUpdate(time,still)}
   function sciStyle(dark){
-    beaconDark=dark;signS.visible=dark;nightLines.forEach(function(l){l.visible=dark});if(dark)warmEdges();
+    beaconDark=dark;signS.visible=signOK;nightLines.forEach(function(l){l.visible=dark});if(dark)warmEdges();
     starM.color.set(dark?0xffffff:C.near);starM.opacity=dark?1:.38;starM.blending=dark?T.AdditiveBlending:T.NormalBlending;starGeo.setAttribute('color',dark?starAD:starAL);
     moonM.color.set(dark?0xc4cfee:C.near);moon2M.color.set(dark?0xcfd8f2:C.mid);
     moonHalo.material.color.set(dark?0x9dbbff:0xffffff);moonHalo.material.opacity=dark?.38:.85;
@@ -476,6 +489,15 @@
   // Poses are interpolated as bearings and radii, not as straight lines, so the camera sweeps round the building instead of through it.
   // The keys below are placed on the page by section: [section id, fraction down it, viewport offset, pose]. Keys are
   // spaced so a shot holds while its section is read and the move to the next one happens in the gap between them.
+  // "Fly it again in dark mode": shown over the finale; it switches the theme and goes back to the start of the flight.
+  var again=document.getElementById('fly-again'),DBGCR=/[?&]dbg/.test(location.search);
+  if(again){(function(){var H=document.documentElement,lab=again.querySelector('b');
+    function isDark(){return H.getAttribute('data-theme')==='dark'}
+    function label(){if(lab)lab.textContent=isDark()?'Fly it again in light mode':'Fly it again in dark mode'}
+    label();if('MutationObserver' in window)new MutationObserver(label).observe(H,{attributes:true,attributeFilter:['data-theme']});
+    again.addEventListener('click',function(){var tb=document.getElementById('theme-btn');
+      if(tb)tb.click();else{var nx=isDark()?'light':'dark';H.setAttribute('data-theme',nx);try{localStorage.setItem('theme',nx)}catch(e){}}
+      var en=document.getElementById('enter');if(en)scrollTo({top:en.getBoundingClientRect().top+scrollY+innerHeight*.15,behavior:'instant'})})})()}
   var spin=document.getElementById('spin'),SP0=.06,SPW=.28,sTop=0,sH=0; // sTop/sH: the buffer's place (read on layout, not per frame)
   function P(cx,cz,a,r,y,ty,sx,sy,mr){return [cx,cz,a,r,y,ty,sx||0,sy||0,mr||0]} // mr: the radius to use on a phone for a wide shot of the group (0 = the usual 12 % back)
   var MER=[LAY.mer[0],LAY.mer[1]],EXC=[LAY.ex[0],LAY.ex[1]],KLT=[LAY.kl[0],LAY.kl[1]];  // Merdeka 118, The Exchange 106, Menara KL (scene units, Petronas is 0,0), all from LAY
@@ -833,6 +855,7 @@
     }
     followCam(dtF);
     for(var ci=0;ci<caps.length;ci++){var c=caps[ci],on=cr>=+c.dataset.from&&cr<+c.dataset.to;if(on!==c.classList.contains('on'))c.classList.toggle('on',on)}
+    if(again){if(DBGCR)again.dataset.cr=cr.toFixed(3);var aOn=inRide&&cr>.93;if(aOn!==again.classList.contains('on'))again.classList.toggle('on',aOn)}
     if(spin&&sH){var sy=scrollY-(sTop-innerHeight),sf=sy/Math.max(1,sH),sOn=sf>.18&&sf<.95;if(sOn!==spin.classList.contains('on'))spin.classList.toggle('on',sOn)} // the coordinates tag
     ringUpdate(time,inRide);
     orb.rotation.y=time*.0004;ring.rotation.z=time*.0006;orb.position.y=230+Math.sin(time*.0009)*3;

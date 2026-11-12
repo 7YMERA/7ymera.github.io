@@ -109,14 +109,14 @@ main.wrap>.post{margin:44px auto 64px;padding:44px clamp(18px,4vw,44px) 28px;bac
 
 /* ---- The buffer after the opening: no panels, the city turns ---- */
 .spin{display:none}
-html.gl .spin{display:block;height:150vh;position:relative;pointer-events:none}
+html.gl .spin{display:block;height:300vh;position:relative;pointer-events:none}
 .spin-sticky{position:sticky;top:0;height:100vh;height:100svh;display:grid;place-items:end center;padding:0 16px max(120px,16svh)}
 .spin-tag{margin:0;display:grid;gap:3px;text-align:center;padding:12px 20px;background:var(--bg);border:2px solid var(--fx);box-shadow:5px 5px 0 var(--hard);border-radius:6px;opacity:0;transform:translateY(12px);transition:opacity .5s,transform .5s}
 .spin.on .spin-tag{opacity:1;transform:none}
 .spin-tag b{font:600 .75rem var(--f-pix);letter-spacing:.2em;text-transform:uppercase;color:var(--fx)}
 .spin-tag span{font:500 1.05rem var(--f-display);color:var(--ink);letter-spacing:.02em}
 .spin-tag i{font:normal 500 .75rem var(--f-mono);color:var(--muted)}
-@media (max-width:700px){html.gl .spin{height:130vh}}
+@media (max-width:700px){html.gl .spin{height:260vh}}
 @media (prefers-reduced-motion:reduce){.spin-tag{transition:none}}
 
 /* ---- Section shots: panels step aside so the scene shows (wide screens only) ---- */
@@ -259,3 +259,12 @@ html.gl.gl-on #fx-grain{opacity:.5}
 #fx-vig{background:radial-gradient(ellipse 80% 75% at 50% 50%,transparent 58%,rgba(24,64,150,.13) 100%)}
 :root[data-theme="dark"] #fx-vig{background:radial-gradient(ellipse 80% 75% at 50% 50%,transparent 52%,rgba(0,2,12,.4) 100%)}
 @media (prefers-reduced-motion:reduce){#fx-grain,#fx-vig{transition:none}}
+
+/* "Fly it again in dark mode": a big, plain invitation over the flight's finale (scene.js adds .on there) */
+.fly-again{position:absolute;left:50%;bottom:clamp(96px,16svh,150px);transform:translate3d(-50%,14px,0);display:inline-flex;align-items:center;gap:12px;min-height:58px;padding:0 28px;font:700 1.0625rem var(--f-body);color:var(--bg);background:var(--ink);border:2px solid var(--fx);border-radius:999px;box-shadow:4px 4px 0 var(--hard);cursor:pointer;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .4s,transform .4s,visibility 0s .4s;white-space:nowrap}
+.fly-again svg{width:22px;height:22px}
+.fly-again.on{opacity:1;visibility:visible;pointer-events:auto;transform:translate3d(-50%,0,0);transition:opacity .4s,transform .4s}
+.fly-again:hover{transform:translate3d(-50%,-2px,0)}
+.fly-again:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+@media (max-width:700px){.fly-again{bottom:250px;min-height:54px;padding:0 20px;font-size:1rem}}
+@media (prefers-reduced-motion:reduce){.fly-again{transition:none}}

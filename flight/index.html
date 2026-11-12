@@ -13,8 +13,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=20261113o">
-<link rel="stylesheet" href="../assets/scene.css?v=20261113o">
+<link rel="stylesheet" href="../assets/site.css?v=20261113p">
+<link rel="stylesheet" href="../assets/scene.css?v=20261113p">
 <style>
 /* Flight-only page: the scene is the page. Nothing but the debug panel (opt-in) sits on top of it. */
 html.gl body{margin:0;background:linear-gradient(var(--sky1),var(--sky2)) fixed}
@@ -57,6 +57,7 @@ html.fp-on .fp{display:grid}
       <p class="ride-cap" data-from="0.85" data-to="1.01"><b>The whole skyline</b><span>A run beside the train, then pull out and hold. Four landmarks, one city. Scroll on when you are ready.</span></p>
     </div>
       <p class="ride-hint">Keep scrolling</p>
+    <button class="fly-again" id="fly-again" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg><b>Fly it again in dark mode</b></button>
     </div>
   </section>
 </main>
@@ -76,7 +77,7 @@ html.fp-on .fp{display:grid}
 </aside>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
-<script src="../assets/scene.js?v=20261113o" defer></script>
+<script src="../assets/scene.js?v=20261113p" defer></script>
 <script>
 /* The viewer: everything here is optional. Without it, scrolling flies the route. */
 (function(){

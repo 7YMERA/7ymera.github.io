@@ -26,6 +26,12 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-12 · Hold on the city tag, sign on the wall, towers lit, moon locked, fly again
+
+- **What:** `#spin` ("Where I work and build") is 300vh (260vh on phones), twice as long. The Maybank sign is a plane fixed to Merdeka 118's facade by a ray at load (`placeSign`), shown in both themes, no longer a floating sprite. Petronas at night has real windows (floor strips cut by mullions, a few dark or warm rooms, brighter toward the crowns). Light mode gets shade at building feet and soft cloud shadows on the ground (the day side of the night street glow). The moon is locked at one world position. A "Fly it again in dark/light mode" button shows over the finale (`#fly-again`), switches theme and returns to the flight's start. Cache key `20261113p`.
+- **Why:** owner's notes on the live site.
+- **Open:** the button was click-tested but not seen on screen in a headless run (the flight eases too slowly there to reach the finale); the owner should confirm it and the day shade on a real device.
+
 ## 2026-11-12 · Opening slower and eased, flight levelled
 
 - **What:** the opening's scroll budget is now 690svh (`EST`, `HOLD1`, `ACTS` in `extras.js`): 1.2 screens of bare city, the name card held, the acts over 2.2 screens, the headline held about 1.5 screens. The opening eases toward the scroll position (`glide`) instead of jumping per wheel step. Flight bank cut from 18 to about 7 degrees; the Merdeka climb starts at y 74 and looks across, so the skyline is behind the tower. Cache key `20261113o`.
