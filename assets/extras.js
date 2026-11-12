@@ -41,6 +41,12 @@
     var clamp = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
     var ease = function (t) { return t * t * (3 - 2 * t); };
     var Hs = 0, R = 0, endY = 0;
+    // OPENING: establishing stage. On the 3D page the first ~0.9 screen of scroll shows the bare city; the
+    // curtain (cards, name card, reel) comes in over it, driven by the same scroll position as the old acts.
+    // e: 0 -> 1 across that first stretch (E px); p: 0 -> 1 across the rest, exactly as before.
+    var root = document.documentElement, intro = document.getElementById('op-intro'), cue = document.getElementById('op-cue');
+    function hasGl() { return root.classList.contains('gl'); }
+    function estLen() { return hasGl() && !calm ? Math.round(innerHeight * .9) : 0; }
     function measure() {
       Hs = stage.clientHeight; R = reel ? reel.offsetHeight : 0;
       // Centre the reel and the headline as one block, a little above middle.
@@ -53,21 +59,25 @@
     // Progress runs over the time the stage is pinned, so every act plays
     // while it's on screen; the last stretch holds the finished headline.
     function range() { return cur.offsetHeight - innerHeight; }
-    function apply(p) {
+    function apply(p, e) {
       var q = p;
+      if (e === undefined) e = 1;
+      var en = ease(clamp(e)), ex = (1 - en) * innerWidth * .5, ey = (1 - en) * 80;
+      stage.style.setProperty('--en', en.toFixed(3));
       // (No clip: the photo columns run to the screen edges, so nothing gets cut mid-air.)
       var c = ease(clamp(q / .5)), dx = c * innerWidth * .55, sc = 1 + c * .25;
-      colL.style.transform = 'translate3d(' + (-dx) + 'px, 0, 0) rotate(' + (-7 - c * 10) + 'deg) scale(' + sc + ')';
-      colR.style.transform = 'translate3d(' + dx + 'px, 0, 0) rotate(' + (7 + c * 10) + 'deg) scale(' + sc + ')';
+      colL.style.transform = 'translate3d(' + (-dx - ex) + 'px, 0, 0) rotate(' + (-7 - c * 10) + 'deg) scale(' + sc + ')';
+      colR.style.transform = 'translate3d(' + (dx + ex) + 'px, 0, 0) rotate(' + (7 + c * 10) + 'deg) scale(' + sc + ')';
       // The outer columns part a little faster, for depth.
-      if (outL) outL.style.transform = 'translate3d(' + (-dx * 1.35) + 'px, 0, 0) rotate(' + (-5 - c * 8) + 'deg) scale(' + (.86 + c * .2) + ')';
-      if (outR) outR.style.transform = 'translate3d(' + (dx * 1.35) + 'px, 0, 0) rotate(' + (5 + c * 8) + 'deg) scale(' + (.86 + c * .2) + ')';
-      mid.style.opacity = Math.max(0, 1 - q * 4.5);
-      mid.style.transform = 'translate3d(0, ' + (-q * 60) + 'px, 0) scale(' + (1 - q * .08) + ')';
+      if (outL) outL.style.transform = 'translate3d(' + (-dx * 1.35 - ex * 1.3) + 'px, 0, 0) rotate(' + (-5 - c * 8) + 'deg) scale(' + (.86 + c * .2) + ')';
+      if (outR) outR.style.transform = 'translate3d(' + (dx * 1.35 + ex * 1.3) + 'px, 0, 0) rotate(' + (5 + c * 8) + 'deg) scale(' + (.86 + c * .2) + ')';
+      mid.style.opacity = (Math.max(0, 1 - q * 4.5) * en).toFixed(3);
+      mid.style.transform = 'translate3d(0, ' + (-q * 60 + ey) + 'px, 0) scale(' + (1 - q * .08) + ')';
+      mid.style.pointerEvents = en > .6 ? 'auto' : 'none';
       if (reel) {
         var m = ease(clamp((q - .3) / .4));
         // Faint behind the photos from the start, then full strength as it rises.
-        reel.style.opacity = (.32 + .68 * clamp((q - .2) / .24)).toFixed(3);
+        reel.style.opacity = ((.32 + .68 * clamp((q - .2) / .24)) * en).toFixed(3);
         reel.style.transform = 'translate3d(0, ' + (m * endY).toFixed(1) + 'px, 0) scale(' + (1 - .15 * m).toFixed(3) + ')';
       }
       if (ch) {
@@ -79,19 +89,49 @@
       }
     }
     cta.addEventListener('click', function () { scrollTo({ top: cur.offsetTop + range() * .98, behavior: calm ? 'auto' : 'smooth' }); });
+    // The scroll cue: bring the curtain fully in (end of the establishing stretch).
+    function curtainInY() {
+      var E = estLen();
+      if (E) return cur.getBoundingClientRect().top + scrollY + E;
+      return stage.getBoundingClientRect().top + scrollY - (header ? header.offsetHeight : 0);
+    }
+    var header = document.querySelector('.top');
+    if (cue) cue.addEventListener('click', function () { scrollTo({ top: Math.ceil(curtainInY()), behavior: calm ? 'auto' : 'smooth' }); });
+    // Tabbing from the cue into the curtain's own button brings the curtain in, so focus is never on something unseen.
+    mid.addEventListener('focusin', function () {
+      var E = estLen();
+      if (E && scrollY < curtainInY() - 2) scrollTo({ top: Math.ceil(curtainInY()), behavior: 'auto' });
+    });
+    // Cue + wordmark: visible only over the bare city; fades out as the curtain comes in (hidden from tabbing once gone).
+    function cueState(e) {
+      if (!intro) return;
+      var o = clamp(1 - e / .3);
+      intro.style.opacity = o.toFixed(3);
+      var away = o <= 0;
+      if (intro.classList.contains('away') !== away) intro.classList.toggle('away', away);
+    }
     measure();
     if (calm) {
-      // No motion: show the finished state straight away.
-      apply(1); addEventListener('resize', function () { measure(); apply(1); });
+      // No motion: show the finished state straight away. The cue just disappears once you have scrolled off the first screen.
+      apply(1);
+      var cb = false;
+      var calmTick = function () { cb = false; var gone = scrollY > innerHeight * .35; if (intro) { intro.style.opacity = ''; intro.classList.toggle('away', gone); } };
+      addEventListener('scroll', function () { if (!cb) { cb = true; requestAnimationFrame(calmTick); } }, { passive: true });
+      addEventListener('resize', function () { measure(); apply(1); calmTick(); }); calmTick();
     } else {
-      var busy = false, lastP = -1;
+      var busy = false, lastP = -1, lastE = -1;
       var tick = function () {
         busy = false;
-        var p = clamp(-cur.getBoundingClientRect().top / (range() || 1));
-        if (Math.abs(p - lastP) < .001) return; lastP = p; apply(p);
+        var E = estLen(), s = Math.max(0, -cur.getBoundingClientRect().top), rg = range();
+        var e = E ? clamp(s / E) : 1;
+        var p = clamp((s - E) / ((rg - E) || 1));
+        if (!hasGl() && intro) intro.classList.add('away');
+        if (Math.abs(p - lastP) < .001 && Math.abs(e - lastE) < .001) return; lastP = p; lastE = e; apply(p, e); cueState(e);
       };
       addEventListener('scroll', function () { if (!busy) { busy = true; requestAnimationFrame(tick); } }, { passive: true });
       addEventListener('resize', function () { measure(); lastP = -1; tick(); }); tick();
+      // scene.js drops the `gl` class if WebGL turns out to be missing: fall back to the plain curtain.
+      if ('MutationObserver' in window) new MutationObserver(function () { measure(); lastP = -1; tick(); }).observe(root, { attributes: true, attributeFilter: ['class'] });
     }
   }
 

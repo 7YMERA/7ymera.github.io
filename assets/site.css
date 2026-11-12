@@ -1442,3 +1442,43 @@ dialog.lb::backdrop { background: rgba(6, 12, 28, .96); }
   .lb-bar { gap: 8px; }
   .lb-btn { padding: 0 14px; }
 }
+
+/* ==========================================================================
+   OPENING: establishing stage
+   On the 3D page (html.gl) the first view is the bare city plus a scroll cue.
+   The curtain then comes in over it, scroll-driven by assets/extras.js (--en 0 -> 1
+   on .cur-stage, plus transforms set inline). Without html.gl (no JS, no WebGL)
+   none of this applies and the curtain is shown at once, as before.
+   ========================================================================== */
+.op-intro { display: none; }
+html.gl .op-intro { display: grid; justify-items: center; gap: 14px; position: fixed; left: 0; right: 0; z-index: 6; bottom: clamp(30px, 8vh, 72px); padding-inline: 16px; pointer-events: none; text-align: center; }
+html.gl .op-intro.away { visibility: hidden; }
+html.gl .op-mark { position: fixed; left: max(20px, calc((100vw - 1128px) / 2)); top: calc(61px + env(safe-area-inset-top, 0px) + 22px); margin: 0; text-align: left; font: 600 .9375rem var(--f-display); letter-spacing: .05em; color: var(--ink); text-shadow: 0 0 16px var(--bg), 0 0 8px var(--bg), 0 0 3px var(--bg), 0 0 1px var(--bg); }
+html.gl .op-mark i { font-style: normal; color: var(--accent); margin-inline: .4em; }
+html.gl .op-cue { pointer-events: auto; display: inline-flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 26px 0 30px; font: 700 1.0625rem var(--f-body); letter-spacing: .01em; color: var(--ink); cursor: pointer;
+  background: color-mix(in srgb, var(--bg) 72%, transparent); border: 2px solid var(--fx); border-radius: 999px; box-shadow: 3px 3px 0 var(--hard); }
+html.gl .op-cue svg { width: 22px; height: 22px; color: var(--accent); animation: opChev 1.8s ease-in-out infinite; }
+html.gl .op-cue:hover { background: var(--bg); transform: translate3d(-1px, -1px, 0); }
+html.gl .op-cue:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+@keyframes opChev { 0%, 100% { transform: translate3d(0, -2px, 0); opacity: .55; } 50% { transform: translate3d(0, 4px, 0); opacity: 1; } }
+@media (max-width: 760px) {
+  html.gl .op-intro { bottom: calc(112px + env(safe-area-inset-bottom, 0px)); gap: 12px; }
+  html.gl .op-mark { font-size: .8125rem; letter-spacing: .03em; left: 16px; right: 16px; }
+  html.gl .op-cue { min-height: 54px; }
+}
+/* the curtain's scroll length grows by the establishing stretch (extras.js: estLen = 0.9 x window height) */
+html.gl .curtain { height: calc(270svh + 90svh); }
+/* hidden until extras.js drives it; the inline --en wins once it runs. Without html.gl, it all falls back to 1 */
+html.gl .cur-stage { --en: 0; }
+html.gl .cur-col { opacity: var(--en, 1); }
+html.gl .cur-col.outer { opacity: calc(.9 * var(--en, 1)); }
+html.gl .cur-center { opacity: var(--en, 1); pointer-events: none; }
+html.gl .cur-reel { opacity: calc(.32 * var(--en, 1)); }
+html.gl .cur-frame.lit .cur-spot { opacity: var(--en, 1); }
+@media (prefers-reduced-motion: reduce) {
+  /* no scroll-linked motion: a still first screen (city + cue), then the finished curtain, in normal flow */
+  html.gl .curtain { height: auto; }
+  html.gl .cur-stage { position: relative; top: 0; margin-top: calc(100svh - 61px); --en: 1; }
+  html.gl .op-cue svg { animation: none; opacity: 1; }
+  html.gl .op-cue:hover { transform: none; }
+}
