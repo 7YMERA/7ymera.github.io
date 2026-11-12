@@ -351,10 +351,16 @@ Long-form write-ups in `notes/`, linked from the Notes folders and listed at [`/
 
 The note pages share one template. Their themed SVG diagrams (flowcharts, sequence diagrams, ERDs) are inline, so they follow light and dark mode.
 
+**Reading a note** (`assets/reader.js`, styles under the READER banner at the end of `site.css`): a progress bar under the header, a contents list built from the note's `h2` headings (a sticky rail in the card's left gutter from 1180 px, a closed "On this page" block below that), and click-to-zoom on charts and photos in a native `<dialog>` with Previous/Next, arrow keys and a Fit / Actual size toggle. Images inside widgets (the SQL playground, the Join Atlas, the app tour) are left alone. Pages cross-fade into each other with `@view-transition`; browsers without it just navigate.
+
+**Being found:** every page has a canonical link and structured data (`Person` and `WebSite` on the home page, `BlogPosting` on each dated note). `sitemap.xml`, `robots.txt` and `feed.xml` (RSS of the notes) sit at the repo root and are written by hand: **when you add a note, add it to `notes/index.html`, `sitemap.xml` and `feed.xml`, and fix the previous/next links of its neighbours** (they follow the index order, newest first). `tools/check.js` fails if a page is missing from the sitemap.
+
 ## Repository layout
 
 ```
 index.html               the home page (sections listed above)
+404.html                 the "Signal lost" page GitHub Pages serves for a missing URL (root-absolute URLs only)
+sitemap.xml, robots.txt, feed.xml, site.webmanifest   for search engines, feed readers and home-screen icons
 notes/                   the notes, plus notes/index.html
 assets/
   site.css               all site styles, one file, with a comment heading per component
@@ -364,10 +370,12 @@ assets/
   image-stream.js        21st.dev Image Stream Hero port
   coverflow.js           21st.dev Coverflow Carousel port
   folders.js             21st.dev Glassmorphism Folder Cards port
+  reader.js              notes only: reading progress, contents list, click-to-zoom
   db-playground.js       sql.js playground for the database notes
   join-atlas.js / .css   the Join Atlas on the Jom Al-Quran note (its own file, every rule scoped under .ja)
   db/                    the two SQLite databases (personal data replaced with fake values),
                          plus jom-al-quran-drift.json (report attributes vs the built tables)
+  icons/                 favicon and touch icons, made from the avatar by tools/make-icons.py
   me/                    photos
   notes/                 note images, covers, diagrams
   slb-screens/           the SLB click-through
@@ -382,6 +390,8 @@ docs/screens/            screenshots used in this README
 - **After changing any CSS or JS,** bump the `?v=` key in every page, for example `sed -i 's/?v=20261107k/?v=20261107l/g' index.html notes/*.html`. `join-atlas.css` and `join-atlas.js` are only loaded by `notes/jom-al-quran.html` and keep their own key there, so bump that one separately.
 - **Theme colours** are CSS variables on `:root`, redefined for dark mode under both `prefers-color-scheme: dark` and `[data-theme="dark"]`.
 - **Check before pushing:** load the page at 1300 px and 390 px wide, make sure nothing scrolls sideways, and watch the console for errors.
+- **The smoke test does this for you:** `python3 -m http.server 8765 &` then `node tools/check.js`. It loads every page at both widths, then runs a static pass: title and description length, canonical link, one `h1`, heading order, `alt` on every image, a name on every button and link, no duplicate ids, valid structured data, every local link and `#fragment` resolving, one shared `?v=` key, and the sitemap and feed matching the files. `node tools/check.js --static` runs only that pass and takes a few seconds. The rules are a table (`PAGE_RULES`, `SITE_RULES`) so a new one is a few lines.
+- **Screenshots in headless Chromium:** launch with `--use-angle=swiftshader`. With `--use-gl=swiftshader` a flat band appears along the bottom of the viewport; it is a capture artifact, not a page bug.
 
 ## Privacy rules
 
