@@ -26,6 +26,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-12 · Light mode: one blue, three steps
+
+- **What:** the light palette in `scene.css` is one hue (`--far`, `--mid`, `--near`, `--ring`, `--glass` re-picked around the same blue; no cyan). The landmarks' glass takes the `mid` tone instead of the cyan `ring`. In `scene.js` the lit faces are a pale tint of the base (`uLitMix` .42, not near white) and the shade is the same blue deepened (`uShadeMul` .46/.62/.95). Cache key `20261113u`.
+- **Why:** the owner found the mix of cyan glass, grey-blue bodies and white faces patchy, but one flat colour dull: the depth now comes from value steps and haze, not hue.
+
 ## 2026-11-12 · Petronas crowns textured, Maybank sign removed
 
 - **What:** the Petronas crowns (above the window cut-off) keep a window pattern up the tiers instead of a flat white glow; the ball and mast stay lit solid. The Maybank sign on Merdeka 118 is removed entirely (canvas, mesh and `placeSign`). Cache key `20261113t`.
