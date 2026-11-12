@@ -26,6 +26,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-12 · The Exchange 106 at night, from a photo
+
+- **What:** in the `facade` shader (`li==2`) the tower is dark blue glass with offices lit in blocks of floors (cool white, mostly the lower two thirds). The crown is a violet lantern behind a white diamond lattice with a bright white rim under it, replacing the pink bands. Cache key `20261113s`.
+- **Why:** the owner asked for the same rework as Menara KL and Merdeka 118.
+
 ## 2026-11-12 · Merdeka 118 at night, reworked
 
 - **What:** no magenta. In the `facade` shader (`li==1`) every floor is a thin, even line of cool light, a few office floors glow warmer, the crown is a bright white lantern and the spire is lit white, fading upward. The crease lines (`merEdges`) are ice white, fewer (only creases over 24 units) and fainter. Cache key `20261113r`.

@@ -207,6 +207,12 @@
           float mup=smoothstep(20.0,uCut[1].w,vWP.y);
           float mcr=smoothstep(uCut[1].w-16.0,uCut[1].w-3.0,vWP.y);
           wem=wem*0.8+vec3(0.72,0.86,1.0)*mline*(0.16+0.26*mup)*nl+vec3(0.95,0.98,1.0)*mcr*(0.35+0.75*mline)*nl;}
+        if(li==2){ /* The Exchange 106, from a photo: dark blue glass, with the offices lit in blocks of floors (cool white, mostly in the lower half), a faint line on every other floor */
+          float ef=floor(vWP.y/1.5),es=fract(vWP.y/1.5),ebx=fract(hq/1.6);
+          float ezone=smoothstep(0.42,0.56,vn(vec2(ef/7.0,4.3)))*(1.0-smoothstep(uCut[2].w*0.6,uCut[2].w*0.85,vWP.y));
+          float ewin=mix(smoothstep(0.08,0.24,es)*(1.0-smoothstep(0.6,0.8,es))*smoothstep(0.0,0.14,ebx)*(1.0-smoothstep(0.8,0.94,ebx)),0.42,df);
+          float eon=mix(step(h21(vec2(floor(hq/1.6),ef)+(onX?vec2(0.0):vec2(23.0,5.0))),mix(0.04,0.82,ezone)),mix(0.04,0.82,ezone),df);
+          wem=vec3(0.84,0.93,1.0)*ewin*eon*(0.6+0.5*rb)*nl*1.05+vec3(0.5,0.68,1.0)*ewin*0.05*nl;}
         wem+=vec3(0.92,0.96,1.0)*(li==1?step(uCut[1].w,vWP.y)*(1.0-smoothstep(uCut[1].w,uCut[1].w+44.0,vWP.y)):0.0)*0.75*wall*uNight;
         /* Menara KL, from photos: the shaft floodlit white (the brightest part, faintly fluted, a pink blush at the foot), the pod dark blue-violet with rings of white lamps, a white crown on top of it, the lower antenna lit */
         float kw=li==3?step(vWP.y,uLo[3]):0.0;
@@ -234,7 +240,7 @@
         /* night glow of the landmarks: floodlit Petronas pinnacles, the lantern crown of The Exchange 106 */
         float gP=(1.0-step(uCut[0].z,distance(vWP.xz,uCut[0].xy)))*step(uCut[0].w,vWP.y);
         float gE=(1.0-step(uCut[2].z,distance(vWP.xz,uCut[2].xy)))*step(uCut[2].w-4.0,vWP.y);
-        totalEmissiveRadiance+=uNight*(vec3(1.0,0.95,0.86)*gP*0.7+vec3(1.0,0.74,0.86)*gE*(0.5+0.35*mix(step(0.5,fract(vWP.y/2.6)),0.5,df)));`)};
+        totalEmissiveRadiance+=uNight*(vec3(1.0,0.95,0.86)*gP*0.7+gE*(vec3(0.5,0.4,1.0)*0.42+vec3(0.9,0.88,1.0)*mix(max(1.0-smoothstep(0.05,0.12,abs(fract((hq+vWP.y)/3.2)-0.5)),1.0-smoothstep(0.05,0.12,abs(fract((hq-vWP.y)/3.2)-0.5))),0.25,df)*0.85+vec3(1.0)*(1.0-step(uCut[2].w-2.2,vWP.y))*0.9)) /* The Exchange's crown: a violet lantern behind a white diamond lattice, with a bright white rim under it */;`)};
     return m}
   // The ground stays one plain colour. (Roads and dark patches were tried and removed: owner didn't like them.)
   var cityM=facade(mat('mid',DIST?{side:T.DoubleSide}:{}));
