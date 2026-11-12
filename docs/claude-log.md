@@ -26,6 +26,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-12 · Barrel roll back on
+
+- **What:** `rollAt` no longer returns 0: the flight rolls one full turn through the skybridge gap (measured 7, 108, 176, -92, 0 degrees across it, level after). Off in reduced motion. The skybridge caption says so again. Cache key `20261113y`.
+- **Why:** the owner asked for it back.
+
 ## 2026-11-12 · Notes screenshots retaken; contents rail no longer shows through the Join Atlas
 
 - **What:** `sql-playground.webp` and `join-atlas.webp` retaken from the notes pages (Original join 1 run; report query 4 selected). Taking them showed the *On this page* rail printing through the wide Join Atlas: `article.post .ja` now sits above the rail (`site.css`). Cache key `20261113x`.

@@ -749,7 +749,7 @@
     for(i=0;i<=NT;i++){bankTab[i]=clamp(kS[i]*9,-.13,.13); // 0.0125 per unit (a circle of radius 80) leans about 14 degrees; at most 18
       var sp=clamp((sS[i]-lo)/Math.max(1e-6,hi-lo),0,1);fovTab[i]=9*sp*sp*(3-2*sp)}
     bankTab[0]=0;bankTab[NT]=0;fovTab[NT]=0;for(i=0;i<=4;i++)fovTab[i]=fovTab[i]*i/4}
-  function rollAt(u){return 0; /* no barrel roll (owner's call); the drone still banks into turns */var n=rollK.length;if(n<2)return 0;var f=clamp(u,0,1)*(n-1),i=Math.min(n-2,Math.floor(f)),t=f-i;t=t*t*(3-2*t);return rollK[i]+(rollK[i+1]-rollK[i])*t}
+  function rollAt(u){if(reduce)return 0; /* the barrel roll through the skybridge gap (back on, owner's call); none with reduced motion */var n=rollK.length;if(n<2)return 0;var f=clamp(u,0,1)*(n-1),i=Math.min(n-2,Math.floor(f)),t=f-i;t=t*t*(3-2*t);return rollK[i]+(rollK[i+1]-rollK[i])*t}
   // ---- HUD (DOM) ----
   var hud=document.getElementById('hud'),hTags=[],hAlt=document.getElementById('h-alt'),hSec=document.getElementById('h-sec'),hFill=document.getElementById('h-fill'),hTicks=[],hLast=-1,hSecLast=-1;
   if(hud){var tg=hud.querySelector('.hud-tags');LM.forEach(function(l){var e=document.createElement('div');e.className='lm-tag';
