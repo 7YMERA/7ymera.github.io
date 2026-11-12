@@ -1,7 +1,10 @@
 /* KLCC in WebGL. The camera orbits the towers as the page scrolls. three.js comes from cdnjs. */
 (function(){
-  if(!window.THREE)return;
+  if(!window.THREE){document.documentElement.classList.remove('gl');return}
   var CS=document.currentScript; // read now: it is null once the start is deferred
+  var DEFER=!document.documentElement.hasAttribute('data-flight-only');
+  // The page layout for the scene (panels, plate round the name) must not change after the first paint, so `gl` goes on now; start() removes it again if WebGL turns out to be unavailable.
+  if(DEFER)document.documentElement.classList.add('gl');
   function start(){
   var T=THREE,root=document.documentElement,cv=document.getElementById('gl');
   // Where this script lives (assets/), so the models load from any page, whatever its folder.
@@ -11,7 +14,7 @@
   // ?bg=district: the compact one-mesh KLCC district (assets/city/klcc_district.json, tools/convert-klcc-dae.js) replaces the OSM city and the four landmark models.
   var DIST=!/[?&]bg=osm/.test(location.search); // the district is the map; ?bg=osm swaps in the OpenStreetMap city. In the district, the landmarks are the hand-made models, not the district's own blocky ones.
   var renderer;
-  try{renderer=new T.WebGLRenderer({canvas:cv,alpha:true,antialias:true,powerPreference:'low-power'})}catch(e){return}
+  try{renderer=new T.WebGLRenderer({canvas:cv,alpha:true,antialias:true,powerPreference:'low-power'})}catch(e){root.classList.remove('gl');return}
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var scene=new T.Scene(),cam=new T.PerspectiveCamera(42,1,.3,1600);
   var M={},C={},mats=[];
@@ -632,7 +635,7 @@
   if(ONLY||/[?&]dbg/.test(location.search))window.__scene={keys:function(){return KEYS.map(function(k){return k.y})},dirPose:dirPose,scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam)}};
   } // start
   // Build the scene after the page's first paint, not before it: the curtain's text and photos come first, the canvas fades in after. (/flight/ is only the scene, so it starts at once.)
-  if(document.documentElement.hasAttribute('data-flight-only'))start();
+  if(!DEFER)start();
   else{
     var go=function(){setTimeout(function(){(window.requestIdleCallback||function(f){f()})(start,{timeout:600})},0)};
     if(document.readyState==='complete')go();else addEventListener('load',go,{once:true});
