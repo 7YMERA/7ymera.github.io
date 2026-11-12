@@ -26,6 +26,17 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-12 · The polish pass (version 2.10), on branch `claude/eager-ride-vi416b`
+- **Not on `main` yet.** This session was told to work on the branch `claude/eager-ride-vi416b`. The owner should look at it on a real GPU, then merge. Work was split by model: small models audited, mid models edited, the lead reviewed every diff and re-ran the checks.
+- **Background** (`scene.js` `toon()`, end of `scene.css`): three flat tones per face, near-white day sky, height haze with no horizon seam, day facade grid fades by 420 m, fine grain and vignette layers below all content. Inspired by 0z5a.github.io. README section "The look" has the details.
+- **Notes:** `assets/reader.js` (progress bar, contents list, click-to-zoom dialog), page cross-fades, canonical links, BlogPosting data, "All notes" links, index newest first (now lists the app tour), previous/next follow the index. New root files: `sitemap.xml`, `feed.xml`, `robots.txt` (hand-written: update when adding a note).
+- **Home page:** Person/WebSite data, social tags, skip link, full keyboard support on the before/after tabs, focus trap in quick jump, footer landmark, dead script blocks removed, three.js integrity hash. Scene starts after `load` and fades in (phone LCP 3.0 s to 2.3 s, measured throttled).
+- **Plumbing:** `404.html`, local icons in `assets/icons/` with `site.webmanifest`, and `tools/check.js` now has a static pass (titles, canonicals, headings, alt text, names, ids, links, sitemap, one `?v=` key). Key `20261113m`.
+- Open, for the owner to judge on a real screen: grain strength on a high-DPI display; frame rate (not measurable in software GL); golden hour is close to two tones (cream ground, violet buildings); curved landmarks may look faceted under the new shading.
+- Open, facts only the owner knows: `#studied` says "42 subjects across nine semesters" but the cards do not add up to 42; the Jom Al-Quran note says "three typos" then lists a different number of problems; the app tour (`slb-screens.html`) has a card date of 10 Nov 2026 (from its first commit) but no date on the page.
+- Screenshot tip: headless Chromium needs `--use-angle=swiftshader`; `--use-gl=swiftshader` draws a false band along the bottom.
+---
+
 ## 2026-11-16 · Night look for the other landmarks
 - Same idea as Merdeka (`scene.js`): `edgesFor()` draws each landmark's long creases at night (Merdeka magenta, Petronas warm white, The Exchange pale cyan). Shader glow zones: Petronas spires floodlit white above y=106, The Exchange crown warm gold above y=118, Menara KL pod warm amber (y 78 to 99). Red aircraft lights from the earlier entry stay.
 - No reference photos for these three, so colours are from general knowledge of how they are lit. Owner to correct with photos if wanted. Key `20261113j`.

@@ -37,7 +37,7 @@ The REQ-001 card, the "I write the spec. Then I build it." line and the teal-and
 
 ## Version history
 
-**Current version: 2.9.** Numbering: the first number changes when the site changes character (1.0 was a static page, 2.0 became the 3D city). The second number goes up for a major overhaul or a notable new feature. Small fixes and tweaks do not get a number; they live in [`docs/claude-log.md`](docs/claude-log.md). Dates come from the work log. Commit ids are on `main`: `git show <id>`.
+**Current version: 2.10.** Numbering: the first number changes when the site changes character (1.0 was a static page, 2.0 became the 3D city). The second number goes up for a major overhaul or a notable new feature. Small fixes and tweaks do not get a number; they live in [`docs/claude-log.md`](docs/claude-log.md). Dates come from the work log. Commit ids are on `main`: `git show <id>`.
 
 | Version | Date | What changed | Commit |
 |---|---|---|---|
@@ -59,6 +59,7 @@ The REQ-001 card, the "I write the spec. Then I build it." line and the teal-and
 | **2.7** | 13 Nov | **Trains and the chase.** A glowing rail ring round the Petronas Towers and a sky line over the city, with lit trains; the drone chases a train from Menara KL to Merdeka 118. | `fd61fe3` |
 | **2.8** | 13 Nov | **Smoother flight.** The drone flight drifts forward when idle and limits camera speed; sky rail lowered. (A metro-map skill tree was tried and removed at the owner's request.) | `00069d4` |
 | **2.9** | 13 Nov | **Smooth entry to the flight.** The camera no longer snaps out and in when you scroll from Journey into the drone flight; metro lines as a faint backdrop behind the skill tree. | `6d4d631` |
+| **2.10** | 12 Nov | **The polish pass.** The city is shaded in three flat tones under a near-white sky, with height haze, a fine paper grain and a soft vignette (inspired by 0z5a.github.io). Notes get a progress bar, a contents list and click-to-zoom. Under the hood: structured data, a sitemap and RSS feed, a 404 page, local icons, keyboard and screen-reader fixes, a faster first load, and a smoke test that checks all of it. | `a6321ec`, `3ae25af`, `b466bf9` |
 
 Tried and dropped along the way (still in git history): a clothes-rail project gallery (`5c68a02`), a ring and then a conveyor of floating screens, a Masjid Negara you could fly into, and a 5 second phone loading screen. The longer story of the 3D city is in *The 3D city and the flight* below.
 
@@ -296,6 +297,16 @@ A `.skp` file cannot be read here: export it from SketchUp as OBJ, DAE or glTF f
 - **Different route:** edit `KF`. Camera and look-at share the same knots (uniform Catmull-Rom), so they stay in step. Open the page with `?dbg` to get `window.__scene` (camera, scene, `rideP`, `rideU`, `draw(c)`) for checking: sample `rideP` and raycast from each point to measure clearance (the current route stays at least 7 units from every wall; that is the width of the gap).
 - **Where the flight sits:** the `<section class="enter" id="enter">` block in `index.html`, just before `<section class="contact">`. Move the block to move the flight.
 - **Captions and HUD:** the `.ride-cap` paragraphs in `index.html` are matched to the `CAPS` pairs in `scene.js` by order; their `data-from`/`data-to` are filled in by the script. The right-hand rail, the altitude read-out and the landmark tags (`LM`) are built from them.
+
+### The look: three tones, haze, grain
+
+The buildings are not smoothly lit. A helper in `scene.js`, `toon(sh)`, runs in every `mat()` material's `onBeforeCompile` and picks one of three flat tones per face from the face normal against one fixed light direction (the same side the orb sits on): lit, mid and shade, with thresholds 0.42 and -0.12. The tones are derived from each material's role colour in the palette `C`, so theme switching and the golden-hour blend still work: by day lit is the role colour pushed halfway to ice white and shade is a saturated cobalt; at golden hour the shade turns dusky violet; at night the three tones stay close together and dark so the lit windows, crease lines and beacons remain the brightest things. The day sky is near white (`#fcfeff` to `#e4f0fa`, overridden at the end of `scene.css`), which is what makes the pale faces and cobalt shadows read.
+
+Haze is added in the same shader, not as a pass: stronger low down and far away, plus a radial fade at the ground's edge, fading toward the CSS sky gradient at that pixel so the ground meets the sky with no seam. It eases off at golden hour. The day facade grid fades out by 420 m so distant blocks are clean shapes. A fine grain tile (drawn once on a canvas, sized per device pixel) and a radial vignette are two fixed layers right after the canvas, at the canvas's z-index, so they never sit over text or the HUD. No extra render passes; draw calls and shader programs are unchanged.
+
+The idea came from [0z5a.github.io](https://0z5a.github.io), the owner's early inspiration for the building background: three flat tones per face, a near-white sky and visible paper grain. The code here is our own.
+
+The scene now starts after the page's `load` event and fades in, so the text paints first (`/flight/` still starts at once). Measured with a CPU slowed four times on a fast-4G link: largest contentful paint at phone width went from 3.0 s to 2.3 s and the load event from 5.4 s to 2.7 s.
 
 ### Lessons and gotchas
 
