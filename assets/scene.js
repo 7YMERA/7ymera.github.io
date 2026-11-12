@@ -1,9 +1,11 @@
 /* KLCC in WebGL. The camera orbits the towers as the page scrolls. three.js comes from cdnjs. */
 (function(){
   if(!window.THREE)return;
+  var CS=document.currentScript; // read now: it is null once the start is deferred
+  function start(){
   var T=THREE,root=document.documentElement,cv=document.getElementById('gl');
   // Where this script lives (assets/), so the models load from any page, whatever its folder.
-  var BASE=(((document.currentScript||document.querySelector('script[src*="scene.js"]')||{}).src)||'').replace(/scene\.js.*$/,'');
+  var BASE=(((CS||document.querySelector('script[src*="scene.js"]')||{}).src)||'').replace(/scene\.js.*$/,'');
   // data-flight-only on <html> (the /flight/ page): no orbit phase and no page around it, just the flight, driven by scroll.
   var ONLY=root.hasAttribute('data-flight-only');
   // ?bg=district: the compact one-mesh KLCC district (assets/city/klcc_district.json, tools/convert-klcc-dae.js) replaces the OSM city and the four landmark models.
@@ -65,11 +67,19 @@
   }
   // In the district, the two landmarks baked into its mesh were welded coarsely and have holes: draw the full-detail models over them (1 % larger, so they sit just outside).
   var nightLines=[];
+  // The long creases are only drawn at night, and finding them (EdgesGeometry over every landmark mesh) took about 1.1 s of main thread at load. So the work is queued
+  // per mesh and run one mesh per task, and only once it is needed: at once when the page is (or turns) dark, otherwise as idle warm-up long after load (see sciStyle and warmEdges).
+  var edgeJobs=[],edgeTimer=0,edgesWanted=false;
+  function pumpEdges(){
+    if(edgeTimer||!edgeJobs.length)return;
+    edgeTimer=setTimeout(function(){edgeTimer=0;var j=edgeJobs.shift();j[0](j[1],j[2]);need=true;pumpEdges()},0)}
   function edgesFor(color,minLen,op){ // night-only lines along a landmark's long creases (Merdeka magenta, Petronas warm white, The Exchange pale cyan)
     var lm=new T.LineBasicMaterial({color:color,transparent:true,opacity:op,blending:T.AdditiveBlending,depthWrite:false});
-    return function(out){out.traverse(function(m){if(!m.isMesh)return;var eg=new T.EdgesGeometry(m.geometry,42),pa=eg.attributes.position.array,keep=[],SCm=out.scale.x||1;
+    function build(m,out){var eg=new T.EdgesGeometry(m.geometry,42),pa=eg.attributes.position.array,keep=[],SCm=out.scale.x||1;
       for(var e=0;e<pa.length;e+=6){var ex=pa[e+3]-pa[e],ey=pa[e+4]-pa[e+1],ez=pa[e+5]-pa[e+2];if(Math.sqrt(ex*ex+ey*ey+ez*ez)*SCm>minLen)keep.push(pa[e],pa[e+1],pa[e+2],pa[e+3],pa[e+4],pa[e+5])}
-      var kg=new T.BufferGeometry();kg.setAttribute('position',new T.Float32BufferAttribute(keep,3));var ln=new T.LineSegments(kg,lm);ln.scale.set(1.006,1,1.006);ln.visible=false;ln.renderOrder=3;m.parent.add(ln);nightLines.push(ln)});need=true}}
+      var kg=new T.BufferGeometry();kg.setAttribute('position',new T.Float32BufferAttribute(keep,3));var ln=new T.LineSegments(kg,lm);ln.scale.set(1.006,1,1.006);ln.visible=beaconDark;ln.renderOrder=3;m.parent.add(ln);nightLines.push(ln)}
+    return function(out){var ms=[];out.traverse(function(m){if(m.isMesh)ms.push(m)});ms.forEach(function(m){edgeJobs.push([build,m,out])});if(edgesWanted)pumpEdges()}}
+  function warmEdges(){edgesWanted=true;pumpEdges()}
   var merEdges=edgesFor(0xff3ae6,16,.8),klccEdges=edgesFor(0xffe7b0,14,.55),exEdges=edgesFor(0xa8ecff,16,.7);
   if(DIST){loadModel(BASE+'city/klcc.json',0,0,0,bodyM,null,klccEdges);loadModel(BASE+'city/merdeka118.json',-217.4,303.3,-.5,bodyM,null,merEdges);loadModel(BASE+'city/exchange106.json',157.4,304.7,.4,bodyM,null,exEdges)}
   var gr=new T.Mesh(new T.CircleGeometry(1400,64),ground);gr.rotation.x=-Math.PI/2;gr.position.y=-.2;g.add(gr);
@@ -282,7 +292,7 @@
     for(var g=0;g<gyros.length;g++){gyros[g].ring.rotation.z=t*.5*gyros[g].sp;gyros[g].h.rotation.y+=still?0:.0016*gyros[g].sp}
     railUpdate(time,still)}
   function sciStyle(dark){
-    beaconDark=dark;signS.visible=dark;nightLines.forEach(function(l){l.visible=dark});
+    beaconDark=dark;signS.visible=dark;nightLines.forEach(function(l){l.visible=dark});if(dark)warmEdges();
     starM.color.set(dark?0xffffff:C.near);starM.opacity=dark?.9:.38;starM.blending=T.NormalBlending;
     moonM.color.set(dark?0xe6edff:C.near);moon2M.color.set(dark?0xcfd8f2:C.mid);
     moonHalo.material.color.set(dark?0x9dbbff:0xffffff);moonHalo.material.opacity=dark?.5:.85;
@@ -593,6 +603,7 @@
     specks.rotation.y=time*.00003;fxUpdate(time,reduce);sciUpdate(time,reduce,inRide)}
   var raf=0,run=true,last=0,lastR=0;
   function snap(){fInit=true;rideQ=null;curPose=tgtPose.slice();cr=tr;px=tx;vr.v=vx.v=0;vPose.forEach(function(v){v.v=0})}
+  var shown=false; // the canvas fades in once it has drawn (scene.css, html.gl-on)
   function frame(time){
     var dt=clamp((time-last)/1000,.001,.05);last=time;dtF=dt;tick++;
     if(reduce)snap();else{for(var j=0;j<8;j++)curPose[j]=damp(curPose[j],tgtPose[j],vPose[j],.55,dt);var cr0=cr;cr=clamp(damp(cr,tr,vr,.75,dt),0,1);if(flying){var cap=.085*dt;if(cr-cr0>cap){cr=cr0+cap;vr.v=Math.min(vr.v,cap/dt)}else if(cr0-cr>cap){cr=cr0-cap;vr.v=Math.max(vr.v,-cap/dt)}} /* speed limit: a fast flick can't whip the camera */px=damp(px,tx,vx,.6,dt)}
@@ -602,7 +613,7 @@
       if(driftAcc>=1){var dy=Math.floor(driftAcc);driftAcc-=dy;scrollBy({top:dy,behavior:'instant'})}}
     var moving=Math.abs(tr-cr)>(flying?.00002:.0003);for(var j2=0;j2<8;j2++)if(Math.abs(tgtPose[j2]-curPose[j2])>.02){moving=true;break}
     // While the reader is only reading, redraw at about 15 fps (the beams and pulses still drift); while scrolling, every frame.
-    if(moving||need||(!reduce&&time-lastR>66)){place(reduce?0:time);renderer.render(scene,cam);need=false;lastR=time}
+    if(moving||need||(!reduce&&time-lastR>66)){place(reduce?0:time);renderer.render(scene,cam);need=false;lastR=time;if(!shown){shown=true;root.classList.add('gl-on')}}
     raf=run?requestAnimationFrame(frame):0}
   var lastUser=0,driftAcc=0;
   ['wheel','touchstart','touchmove','keydown','pointerdown'].forEach(function(n){addEventListener(n,function(){lastUser=performance.now();driftAcc=0},{passive:true})});
@@ -615,7 +626,15 @@
   addEventListener('resize',function(){size();buildRide();layoutKeys();retarget()});
   addEventListener('pointermove',function(e){tx=e.clientX/innerWidth-.5});
   document.addEventListener('visibilitychange',function(){run=!document.hidden;if(run&&!raf){last=performance.now();raf=requestAnimationFrame(frame)}});
+  setTimeout(function(){(window.requestIdleCallback||setTimeout)(warmEdges)},12000); // light theme: build the night lines in idle time, so the first switch to dark has them ready
   root.classList.add('gl'); // first: it makes #enter visible, and the scroll maths below needs its real position
   size();buildRide();layoutKeys();tgtPose=dirPose(scrollY);curPose=tgtPose.slice();tr=cr=rideProg();raf=requestAnimationFrame(frame);
   if(ONLY||/[?&]dbg/.test(location.search))window.__scene={keys:function(){return KEYS.map(function(k){return k.y})},dirPose:dirPose,scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam)}};
+  } // start
+  // Build the scene after the page's first paint, not before it: the curtain's text and photos come first, the canvas fades in after. (/flight/ is only the scene, so it starts at once.)
+  if(document.documentElement.hasAttribute('data-flight-only'))start();
+  else{
+    var go=function(){setTimeout(function(){(window.requestIdleCallback||function(f){f()})(start,{timeout:600})},0)};
+    if(document.readyState==='complete')go();else addEventListener('load',go,{once:true});
+  }
 })();

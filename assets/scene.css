@@ -237,3 +237,8 @@ html.gl .stage-r .stage-sticky{justify-items:end}
   .k-btn{width:auto;gap:8px;padding-inline:14px}
   .k-btn::after{content:"Menu";font:600 .9rem var(--f-body);color:var(--ink)}
 }
+
+/* The canvas fades in after its first draw instead of popping in (scene.js adds gl-on). Opacity only; reduced motion shows it at once. */
+html.gl #gl{opacity:0;transition:opacity .6s ease-out}
+html.gl.gl-on #gl{opacity:1}
+@media (prefers-reduced-motion:reduce){html.gl #gl{transition:none}}
