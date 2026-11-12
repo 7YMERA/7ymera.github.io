@@ -1486,3 +1486,12 @@ html.gl .cur-frame.lit .cur-spot { opacity: var(--en, 1); }
 
 /* In-page links land below the sticky header, not under it. */
 #me, #work, #journey, #contact { scroll-margin-top: 76px; }
+
+/* OPENING: while the city has the screen to itself (html.op-bare, set by extras.js) the top bar is hidden and the cue is only a pair of chevrons.
+   Everything returns as soon as the curtain starts to come in. Reduced motion never gets op-bare. */
+html.gl .top { transition: opacity .45s ease, transform .45s ease, visibility 0s; }
+html.gl.op-bare .top { opacity: 0; transform: translate3d(0, -100%, 0); visibility: hidden; pointer-events: none; transition: opacity .45s ease, transform .45s ease, visibility 0s .45s; }
+html.gl.op-bare .top:focus-within { opacity: 1; transform: none; visibility: visible; pointer-events: auto; }
+html.gl .op-cue { width: 64px; min-height: 64px; height: 64px; padding: 0; justify-content: center; gap: 0; }
+html.gl .op-cue svg { width: 30px; height: 30px; }
+@media (max-width: 760px) { html.gl .op-cue { width: 60px; height: 60px; min-height: 60px; } }

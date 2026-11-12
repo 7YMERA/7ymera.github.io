@@ -43,7 +43,7 @@
   function col(k){return new T.Color(C[k])}
   function readColors(){C.line=css('--fx');['far','mid','near','glass','orb','ring','sky1','sky2'].forEach(function(k){C[k]=css('--'+k)});
     var dk=root.getAttribute('data-theme')==='dark'; // night: darker silhouettes and a warm haze (--n-*, --sky3, --sky-mid in scene.css); day: the same colours as always
-    C.ground=dk?css('--n-ground'):C.mid;C.glass2=dk?css('--n-glass'):C.mid;C.skyM=dk?css('--sky-mid'):C.sky2;C.sky3=dk?css('--sky3'):C.sky2;
+    C.ground=dk?css('--n-ground'):C.mid;C.glass2=dk?css('--n-glass'):C.near;C.skyM=dk?css('--sky-mid'):C.sky2;C.sky3=dk?css('--sky3'):C.sky2;
     if(dk){C.far=css('--n-far');C.mid=css('--n-mid');C.near=css('--n-near')}}
   readColors();
   function mat(role,opts){var m=new T.MeshLambertMaterial(Object.assign({flatShading:true},opts||{}));m.userData.role=role;m.onBeforeCompile=function(sh){toon(sh)};mats.push(m);return m}
@@ -476,7 +476,7 @@
     mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});
     tower.emissive.set(C.glass);tower.emissiveIntensity=dark?1:.28;glassM.emissive.set(C.ring);glassM.emissiveIntensity=dark?.9:.15;
     cityU.uNight.value=dark?1:0;
-    if(glassModelM){glassModelM.emissive.set(C.ring);glassModelM.emissiveIntensity=dark?0:.1}ringM.color.set(C.ring);specks.material.color.set(C.ring);
+    if(glassModelM){glassModelM.emissive.set(C.ring);glassModelM.emissiveIntensity=dark?0:.04}ringM.color.set(C.ring);specks.material.color.set(C.ring);
     var f=fogColor();fogN0=dark?520:620;fogF0=dark?1500:1700; /* thin fog: it used to hide the city */scene.fog=new T.Fog(f,fogN0,fogF0);
     TU.uSky1.value.set(C.sky1);TU.uSky2.value.set(C.skyM);TU.uSky3.value.set(C.sky3);TU.uStop.value=dark?.58:1;
     if(dark){TU.uLitMul.value.set(3,3,1.9);TU.uMidMul.value.set(.95,.95,.95);TU.uLitMix.value=0;TU.uShadeMul.value.set(.45,.5,.7);TU.uHazeK.value=.55} /* night: dark blue-violet silhouettes in three tones, the haze takes the warm horizon colour */

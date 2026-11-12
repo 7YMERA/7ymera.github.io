@@ -110,6 +110,9 @@
     function cueState(e) {
       if (!intro) return;
       var o = clamp(1 - e / .3);
+      // the top bar stays out of the way while the city has the screen to itself; it returns as the curtain starts in
+      var bare = e <= .02 && hasGl();
+      if (root.classList.contains('op-bare') !== bare) root.classList.toggle('op-bare', bare);
       intro.style.opacity = o.toFixed(3);
       var away = o <= 0;
       if (intro.classList.contains('away') !== away) intro.classList.toggle('away', away);

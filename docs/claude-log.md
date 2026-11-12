@@ -26,6 +26,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-12 · Bare opening: no top bar, chevrons for the cue; The Exchange matches Petronas
+
+- **What:** while the city has the first screen to itself, `extras.js` sets `html.op-bare`: the top bar is hidden (it returns as the curtain starts in, or on keyboard focus) and the cue is a 64 px round button with two down chevrons (label kept as `aria-label`). Reduced motion never gets `op-bare`. In light mode the landmarks' glass takes the `near` tone, so The Exchange 106 is as deep as Petronas. Cache key `20261113v`.
+- **Why:** the owner wanted the opening view free of buttons, and the Exchange still read paler than the rest.
+
 ## 2026-11-12 · Light mode: one blue, three steps
 
 - **What:** the light palette in `scene.css` is one hue (`--far`, `--mid`, `--near`, `--ring`, `--glass` re-picked around the same blue; no cyan). The landmarks' glass takes the `mid` tone instead of the cyan `ring`. In `scene.js` the lit faces are a pale tint of the base (`uLitMix` .42, not near white) and the shade is the same blue deepened (`uShadeMul` .46/.62/.95). Cache key `20261113u`.
