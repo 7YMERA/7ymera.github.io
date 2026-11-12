@@ -16,19 +16,52 @@
   var renderer;
   try{renderer=new T.WebGLRenderer({canvas:cv,alpha:true,antialias:true,powerPreference:'low-power'})}catch(e){root.classList.remove('gl');return}
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Film grain and edge vignette: two fixed, pointer-less layers just above the canvas (see the end of scene.css). The grain tile is drawn once here.
+  (function(){
+    function tile(rgb,amax){var c=document.createElement('canvas');c.width=c.height=180;var x=c.getContext('2d'),d=x.createImageData(180,180),i,r=7;
+      for(i=0;i<d.data.length;i+=4){r=(r*16807)%2147483647;var n=r/2147483647;d.data[i]=rgb[0];d.data[i+1]=rgb[1];d.data[i+2]=rgb[2];d.data[i+3]=Math.round(n*n*amax)}
+      x.putImageData(d,0,0);return 'url('+c.toDataURL('image/png')+')'}
+    try{root.style.setProperty('--grain-l',tile([20,60,140],80));root.style.setProperty('--grain-d',tile([150,200,255],70))}catch(e){}
+    ['fx-grain','fx-vig'].forEach(function(id){if(document.getElementById(id))return;var e=document.createElement('div');e.id=id;e.setAttribute('aria-hidden','true');cv.parentNode.insertBefore(e,cv.nextSibling)})
+  })();
   var scene=new T.Scene(),cam=new T.PerspectiveCamera(42,1,.3,1600);
   var M={},C={},mats=[];
   function css(n){return getComputedStyle(root).getPropertyValue(n).trim()}
   function col(k){return new T.Color(C[k])}
   function readColors(){C.line=css('--fx');['far','mid','near','glass','orb','ring','sky1','sky2'].forEach(function(k){C[k]=css('--'+k)})}
   readColors();
-  function mat(role,opts){var m=new T.MeshLambertMaterial(Object.assign({flatShading:true},opts||{}));m.userData.role=role;mats.push(m);return m}
+  function mat(role,opts){var m=new T.MeshLambertMaterial(Object.assign({flatShading:true},opts||{}));m.userData.role=role;m.onBeforeCompile=function(sh){toon(sh)};mats.push(m);return m}
   function bands(){var c=document.createElement('canvas');c.width=8;c.height=64;var x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,8,64);x.fillStyle='#fff';x.fillRect(0,50,8,6);
     var t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;return t}
   var tex=bands();
   var tower=mat('near',{emissiveMap:tex,emissive:0xffffff}),towerB=mat('near'),podium=mat('mid'),city=mat('mid'),cityF=mat('far'),ground=mat('mid'),glassM=mat('ring',{emissive:0xffffff,emissiveIntensity:.5});
   var orbM=mat('orb'),ringM=new T.MeshBasicMaterial({color:C.ring});
   var amb=new T.AmbientLight(0xffffff,.75),sun=new T.DirectionalLight(0xffffff,.8);sun.position.set(80,140,60);scene.add(amb,sun);
+  // Three flat tones per face (lit / mid / shade, picked by the face normal against one fixed light) and height-aware haze, both in the existing materials' shaders.
+  // The tones are derived from each material's role colour, so the themes and the golden hour keep working. The haze fades towards the CSS sky gradient itself (uSky1/uSky2 at this pixel's screen height), so geometry melts into the sky with no seam.
+  var shadeBase=new T.Vector3(.3,.52,.92),hazeBase=.5,GSH=new T.Vector3(.96,.8,.72),TU={uLight:{value:new T.Vector3(-.42,.74,.52).normalize()},uSunC:{value:sun.color},uLitMul:{value:new T.Vector3(1,1,1)},uLitMix:{value:.7},uShadeMul:{value:new T.Vector3(.4,.6,.95)},uMidMul:{value:new T.Vector3(1,1,1)},
+    uSky1:{value:new T.Color()},uSky2:{value:new T.Color()},uRes:{value:new T.Vector2(1,1)},uHazeK:{value:.7},uEdge:{value:new T.Vector2(620,1250)}};
+  function toon(sh){
+    for(var k in TU)sh.uniforms[k]=TU[k];
+    sh.vertexShader=sh.vertexShader.replace('void main() {','varying vec3 vWP;\nvoid main() {').replace('#include <worldpos_vertex>','#include <worldpos_vertex>\n vWP=(modelMatrix*vec4(transformed,1.0)).xyz;');
+    sh.fragmentShader=sh.fragmentShader.replace('void main() {','varying vec3 vWP;uniform vec3 uLight,uSunC,uLitMul,uShadeMul,uMidMul,uSky1,uSky2;uniform float uLitMix,uHazeK;uniform vec2 uRes,uEdge;\nvoid main() {')
+      .replace('#include <aomap_fragment>',`#include <aomap_fragment>
+        vec3 tn=normalize(cross(dFdx(vWP),dFdy(vWP)));
+        float td=dot(tn,uLight);
+        float tlit=smoothstep(0.40,0.44,td),tsh=1.0-smoothstep(-0.14,-0.10,td);
+        vec3 bc=diffuseColor.rgb;
+        vec3 cLit=mix(bc*uLitMul,vec3(0.97,0.99,1.0),uLitMix)*uSunC;
+        reflectedLight.directDiffuse=vec3(0.0);
+        reflectedLight.indirectDiffuse=mix(mix(bc*uMidMul,cLit,tlit),bc*uShadeMul,tsh);`)
+      .replace('#include <fog_fragment>',`#ifdef USE_FOG
+        float hf=smoothstep(fogNear,fogFar,fogDepth);
+        float hy=max(vWP.y,0.0);
+        float hz=smoothstep(260.0,1700.0,distance(vWP,cameraPosition))*uHazeK*mix(0.15,1.0,exp(-hy/100.0));
+        float he=smoothstep(uEdge.x,uEdge.y,length(vWP.xz))*exp(-hy/70.0);
+        float ht=1.0-(1.0-hf)*(1.0-hz)*(1.0-he);
+        gl_FragColor.rgb=mix(gl_FragColor.rgb,mix(uSky1,uSky2,1.0-gl_FragCoord.y/uRes.y),ht);
+      #endif`);
+    return sh}
   var g=new T.Group();scene.add(g);
   var H=132;
   // Fallback tower, used only if klcc.json can't load: stepped octagons turned 22.5deg so the plan reads as a star
@@ -100,14 +133,15 @@
   function facade(m){
     m.onBeforeCompile=function(sh){
       sh.uniforms.uNight=cityU.uNight;sh.uniforms.uCut=cityU.uCut;sh.uniforms.uLo=cityU.uLo;sh.uniforms.uDay=cityU.uDay;sh.uniforms.uNightTex=cityU.uNightTex;
-      sh.vertexShader=sh.vertexShader.replace('void main() {','varying vec3 vWP;\nvoid main() {').replace('#include <worldpos_vertex>','#include <worldpos_vertex>\n vWP=(modelMatrix*vec4(transformed,1.0)).xyz;');
-      sh.fragmentShader=sh.fragmentShader.replace('void main() {','varying vec3 vWP;uniform sampler2D uDay;uniform sampler2D uNightTex;uniform float uNight;uniform vec4 uCut[4];uniform float uLo[4];\nvoid main() {')
+      toon(sh);
+      sh.fragmentShader=sh.fragmentShader.replace('void main() {','uniform sampler2D uDay;uniform sampler2D uNightTex;uniform float uNight;uniform vec4 uCut[4];uniform float uLo[4];\nvoid main() {')
         .replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
         vec3 fn=normalize(cross(dFdx(vWP),dFdy(vWP)));
         float wall=1.0-smoothstep(0.45,0.75,abs(fn.y));
         vec2 fuv=(abs(fn.z)>abs(fn.x)?vWP.xy:vWP.zy)/6.0;
         float dl=dot(texture2D(uDay,fuv).rgb,vec3(0.333));
-        diffuseColor.rgb*=mix(1.0,clamp(dl*1.9,0.0,1.3),wall*0.75);
+        float gd=distance(vWP,cameraPosition);float gk=mix(0.3*(1.0-smoothstep(70.0,420.0,gd)),0.75*(1.0-0.6*smoothstep(500.0,1200.0,gd)),uNight); /* day: faint grid that clears with distance, so far blocks are clean tones; night keeps its grid */
+        diffuseColor.rgb*=mix(1.0,clamp(dl*1.9,0.0,1.3),wall*gk);
         float nl=wall*uNight*1.25;bool lm=false;
         for(int i=0;i<4;i++){vec4 c=uCut[i];if(distance(vWP.xz,c.xy)<c.z){lm=true;if(vWP.y>c.w||vWP.y<uLo[i])nl=0.0;}} /* spires and shafts have no floors: no lit rooms there */
         float hb=fract(sin(dot(floor(vWP.xz/20.0),vec2(12.9898,78.233)))*43758.5453);
@@ -318,11 +352,15 @@
     cityU.uNight.value=dark?1:0;
     if(glassModelM){glassModelM.emissive.set(C.ring);glassModelM.emissiveIntensity=dark?.8:.12}ringM.color.set(C.ring);specks.material.color.set(C.ring);
     var f=col('sky2');fogN0=dark?520:620;fogF0=dark?1500:1700; /* thin fog: it used to hide the city */scene.fog=new T.Fog(f,fogN0,fogF0);
+    TU.uSky1.value.set(C.sky1);TU.uSky2.value.set(C.sky2);
+    if(dark){TU.uLitMul.value.set(.95,.95,.95);TU.uMidMul.value.set(.76,.76,.78);TU.uLitMix.value=0;TU.uShadeMul.value.set(.42,.48,.68);TU.uHazeK.value=.5}
+    else{TU.uLitMul.value.set(1,1,1);TU.uMidMul.value.set(1,1,1);TU.uLitMix.value=.5;TU.uShadeMul.value.set(.3,.52,.92);TU.uHazeK.value=.5}
+    shadeBase.copy(TU.uShadeMul.value);hazeBase=TU.uHazeK.value;
     fxStyle(dark);amb.intensity=dark?.45:.5;sun.intensity=dark?.55:.55;sun.color.set(dark?0x9cc8ff:0xffffff)}
   recolor();window.addEventListener('scenetheme',function(){recolor();need=true});
   new MutationObserver(function(){recolor();need=true}).observe(root,{attributes:true,attributeFilter:['data-theme']}); // the page's own theme button flips data-theme
   var W=0,Hh=0,mobile=false,need=true,px=0,tx=0,cr=0,tr=0,vr={v:0},vx={v:0},dtF=.016,tgtPose=mob(END),curPose=mob(END),vPose=[{v:0},{v:0},{v:0},{v:0},{v:0},{v:0},{v:0},{v:0}];
-  function size(){W=innerWidth;Hh=innerHeight;mobile=W<=820;renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile?1.5:2));renderer.setSize(W,Hh,false);cam.aspect=W/Hh;cam.updateProjectionMatrix();need=true}
+  function size(){W=innerWidth;Hh=innerHeight;mobile=W<=820;renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile?1.5:2));renderer.setSize(W,Hh,false);renderer.getDrawingBufferSize(TU.uRes.value);cam.aspect=W/Hh;cam.updateProjectionMatrix();need=true}
   var enter=document.getElementById('enter'),caps=enter?enter.querySelectorAll('.ride-cap'):[],roll=0,rideP=null,rideT=null,rideQ=null;
   // The page scroll is split in two: first the orbit round the skyline, then (inside #enter) the flight.
   // ---- THE DIRECTOR ----
@@ -543,10 +581,10 @@
   var goldLast=-1,goldF=new T.Color(),goldC=new T.Color(),G1=new T.Color('#ffe2a8'),G2=new T.Color('#f3a95a'),G3=new T.Color('#f0b676');
   function goldHour(k){
     var dark=root.getAttribute('data-theme')==='dark';if(dark)k=0;k=Math.round(k*50)/50;if(k===goldLast)return;goldLast=k;
-    if(k===0){mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});root.style.removeProperty('--sky1');root.style.removeProperty('--sky2');if(scene.fog)scene.fog.color.set(C.sky2);sun.color.set(dark?0x9cc8ff:0xffffff);return}
+    if(k===0){mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});root.style.removeProperty('--sky1');root.style.removeProperty('--sky2');if(scene.fog)scene.fog.color.set(C.sky2);TU.uSky1.value.set(C.sky1);TU.uSky2.value.set(C.sky2);TU.uShadeMul.value.copy(shadeBase);TU.uHazeK.value=hazeBase;sun.color.set(dark?0x9cc8ff:0xffffff);return}
     mats.forEach(function(m){var r=m.userData.role;if(r==='far'||r==='mid'||r==='near')m.color.set(C[r]).lerp(G3,k*.38)}); /* the ground and towers take the warm haze */
-    goldC.set(C.sky1).lerp(G1,k);root.style.setProperty('--sky1','#'+goldC.getHexString());
-    goldC.set(C.sky2).lerp(G2,k);root.style.setProperty('--sky2','#'+goldC.getHexString());
+    goldC.set(C.sky1).lerp(G1,k);root.style.setProperty('--sky1','#'+goldC.getHexString());TU.uSky1.value.copy(goldC);TU.uShadeMul.value.copy(shadeBase).lerp(GSH,k);TU.uHazeK.value=hazeBase+.3*k; /* golden hour: warm shadows and a heavier warm haze */
+    goldC.set(C.sky2).lerp(G2,k);root.style.setProperty('--sky2','#'+goldC.getHexString());TU.uSky2.value.copy(goldC);
     if(scene.fog)scene.fog.color.copy(goldC);sun.color.set(0xffffff).lerp(new T.Color('#ffd08a'),k)}
   // ONE CAMERA. Above, the director (before the flight) and the flight (inside #enter) each only say where the camera should be.
   // This follower is the only thing that actually moves it: position, rotation, lens and the sideways push all chase their target

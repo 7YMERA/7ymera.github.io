@@ -242,3 +242,17 @@ html.gl .stage-r .stage-sticky{justify-items:end}
 html.gl #gl{opacity:0;transition:opacity .6s ease-out}
 html.gl.gl-on #gl{opacity:1}
 @media (prefers-reduced-motion:reduce){html.gl #gl{transition:none}}
+
+/* ---- Finish (scene.js creates #fx-grain and #fx-vig after the canvas) ----
+   Same z-index as the canvas and later in the document, so they sit above it and below all page content and the HUD. Static, no blend modes, no backdrop-filter. */
+:root:not([data-theme="dark"]){--sky1:#fcfeff;--sky2:#e4f0fa} /* light theme: a near-white sky with a soft pale-blue horizon, so the pale lit faces and cobalt shades read */
+#fx-grain,#fx-vig{position:fixed;inset:0;z-index:-1;pointer-events:none;display:none;opacity:0;transition:opacity .6s ease-out}
+html.gl #fx-grain,html.gl #fx-vig{display:block}
+html.gl.gl-on #fx-vig{opacity:1}
+#fx-grain{background:var(--grain-l) 0 0/180px 180px repeat}
+html.gl.gl-on #fx-grain{opacity:.55}
+:root[data-theme="dark"] #fx-grain{background-image:var(--grain-d)}
+:root[data-theme="dark"].gl.gl-on #fx-grain{opacity:.3}
+#fx-vig{background:radial-gradient(ellipse 80% 75% at 50% 50%,transparent 58%,rgba(24,64,150,.13) 100%)}
+:root[data-theme="dark"] #fx-vig{background:radial-gradient(ellipse 80% 75% at 50% 50%,transparent 52%,rgba(0,2,12,.4) 100%)}
+@media (prefers-reduced-motion:reduce){#fx-grain,#fx-vig{transition:none}}
