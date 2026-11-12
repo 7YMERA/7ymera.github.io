@@ -1401,7 +1401,7 @@ main.wrap > .post { position: relative; }
   .toc { position: sticky; top: calc(var(--reader-top, 72px) + 20px); pointer-events: auto; max-height: calc(100vh - var(--reader-top, 72px) - 40px); overflow-y: auto; overscroll-behavior: contain; }
   .toc-box { background: none; border: 0; border-radius: 0; box-shadow: none; }
   .toc-title { min-height: 0; padding: 0 0 8px 3px; cursor: default; pointer-events: none; color: var(--muted); font-size: .6875rem; }
-  .toc-title::after { content: none; }
+  .toc-title::after, .toc-box[open] > .toc-title::after { content: none; }
   .toc-list { padding: 0; gap: 0; }
   .toc-list a { padding: 6px 8px; font-size: .8125rem; }
 }
@@ -1411,9 +1411,9 @@ main.wrap > .post { position: relative; }
 img[data-zoom]:focus-visible, a[data-zoom]:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 .chart-link[data-zoom]::after { content: "Zoom \2922"; }
 html:has(dialog.lb[open]) { overflow: hidden; }
-dialog.lb { margin: 0; padding: 0; border: 0; width: 100%; height: 100%; max-width: none; max-height: none; background: rgba(6, 12, 28, .9); color: #eaf3ff; overscroll-behavior: contain; }
+dialog.lb { margin: 0; padding: 0; border: 0; width: 100%; height: 100%; max-width: none; max-height: none; background: rgba(6, 12, 28, .96); color: #eaf3ff; overscroll-behavior: contain; }
 dialog.lb[open] { display: flex; flex-direction: column; }
-dialog.lb::backdrop { background: rgba(6, 12, 28, .9); }
+dialog.lb::backdrop { background: rgba(6, 12, 28, .96); }
 @media (prefers-reduced-motion: no-preference) {
   dialog.lb[open] { animation: lb-in .14s ease-out; }
   @keyframes lb-in { from { opacity: 0; } to { opacity: 1; } }
