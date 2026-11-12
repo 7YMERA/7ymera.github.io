@@ -26,6 +26,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-12 · Petronas crowns textured, Maybank sign removed
+
+- **What:** the Petronas crowns (above the window cut-off) keep a window pattern up the tiers instead of a flat white glow; the ball and mast stay lit solid. The Maybank sign on Merdeka 118 is removed entirely (canvas, mesh and `placeSign`). Cache key `20261113t`.
+- **Why:** the owner pointed at the untextured crowns. The sign could not sit cleanly on the model's faceted crown (the real one is a flat box), and the owner decided the yellow does not suit the look. Do not add it back unless asked.
+
 ## 2026-11-12 · The Exchange 106 at night, from a photo
 
 - **What:** in the `facade` shader (`li==2`) the tower is dark blue glass with offices lit in blocks of floors (cool white, mostly the lower two thirds). The crown is a violet lantern behind a white diamond lattice with a bright white rim under it, replacing the pink bands. Cache key `20261113s`.
