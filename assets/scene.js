@@ -265,8 +265,16 @@
         for(c=0;c<circ.length;c++){var dx=px-circ[c][0],dz=pz-circ[c][1];if(dx*dx+dz*dz<circ[c][2]*circ[c][2])inside=true}}
       for(c=0;c<circ.length;c++){var ex=mx-circ[c][0],ez=mz-circ[c][1];if(ex*ex+ez*ez<circ[c][2]*circ[c][2])inside=true}
       if(inside){hit[t]=1;rootHit[r]=1}}
+    // Roofs are often separate pieces that only rest on their walls. When a block is dropped, any piece that does not reach the ground and sits over that block goes with it,
+    // so no roof is left floating over a cleared plot.
+    var y0=new Float32Array(nV).fill(1e9),gone=[],v;
+    for(v=0;v<nV;v++){var rv=f(v);if(pos[v*3+1]<y0[rv])y0[rv]=pos[v*3+1]}
+    function small(q){return Math.max(x1[q]-x0[q],z1[q]-z0[q])<300}
+    for(v=0;v<nV;v++)if(par[v]===v&&rootHit[v]&&small(v)&&x1[v]>=x0[v])gone.push(v);
+    for(v=0;v<nV;v++)if(par[v]===v&&!rootHit[v]&&x1[v]>=x0[v]&&y0[v]>4&&small(v)){var cx=(x0[v]+x1[v])/2,cz=(z0[v]+z1[v])/2;
+      for(k=0;k<gone.length;k++){var gq=gone[k];if(cx>x0[gq]-3&&cx<x1[gq]+3&&cz>z0[gq]-3&&cz<z1[gq]+3){rootHit[v]=1;break}}}
     var keep=[];
-    for(t=0;t<nT;t++){var q=f(ix[t*3]);if(hit[t]||(rootHit[q]&&Math.max(x1[q]-x0[q],z1[q]-z0[q])<300))continue;keep.push(ix[t*3],ix[t*3+1],ix[t*3+2])}
+    for(t=0;t<nT;t++){var q=f(ix[t*3]);if(hit[t]||(rootHit[q]&&small(q)))continue;keep.push(ix[t*3],ix[t*3+1],ix[t*3+2])}
     return new Uint16Array(keep)}
   var cityMesh=null;
   fetch(BASE+(DIST?'city/klcc_district.json':'city/kl_city.json')).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){

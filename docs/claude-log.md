@@ -26,6 +26,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-12 · Floating roof fixed, README brought up to date (version 2.12)
+
+- **What:** `clearPlots` now also drops separate pieces that do not reach the ground and sit over a dropped block, so no roof floats near Merdeka 118. README: version 2.12 row, and the opening, night, flight, moon and light-palette notes rewritten to match today's changes. CLAUDE.md lists the owner's scene colour rules. Cache key `20261113w`.
+- **Open:** the owner has not yet confirmed the *Fly it again* button on screen, or frame rate on a real GPU.
+
 ## 2026-11-12 · Opening wordmark removed
 
 - **What:** the "Alif Najmi · Portfolio · Kuala Lumpur" line (`.op-mark`) is gone from `index.html`, so the first screen is the city and the chevron cue only. Its CSS rules are left in `site.css`, unused.

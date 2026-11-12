@@ -44,6 +44,7 @@ any agent working on this repo, kept short on purpose so it costs little context
 - **`[hidden]` is `display:none !important`** in `site.css`. Overriding it needs `!important`.
 - **Light mode is the default** (`<html data-theme="light">`). Check both themes and 390 px width.
 - **The owner dislikes small hidden buttons** for major features. Make controls big and obvious.
+- **Scene colour rules from the owner:** no magenta or pink lighting, no Maybank sign, the moon stays locked in place, light mode stays one blue family (no cyan glass).
 
 - **The old flat-aurora site** is commit `f3b9f08` (`git checkout f3b9f08`). There is no `/v2/` any more: the 3D city is the home page.
 
