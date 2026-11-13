@@ -26,6 +26,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-18 · Phone: "Why I do this" lost its top part
+- Owner's screen recording (iPhone): while the panel was pinned, its top (heading and the start of card 01) was cut off at a line that moved as they scrolled. Cause (most likely, I cannot run WebKit here): `html.fork-side #why { overflow-x: clip }` also cut off the part of the pinned panel lying above the section's own top edge. The clip now sits on `<main>` (`site.css`), which covers the whole page, so nothing pinned can leave it. Also: a tall panel on a phone is pinned just high enough that its bottom stays on screen (`Tc` in `extras.js`). Checked in Chromium at 390 and 1300 px: no sideways overflow, panel pinned and visible. Key `20261114m`.
+- Open: confirm on the iPhone; if the top is still cut, the next suspect is WebKit and `will-change` on `#why > .wrap`.
+
 ## 2026-11-17 · "Why I do this": centred, fades in, holds
 - Owner: put it in the middle, fade it in (not a plain block), and hold it. `extras.js` fork tick: the panel is pinned at the vertical centre of the screen (top = (viewport - panel height) / 2 + 24, at least 84), slides in from the right while fading 0 to 1 over the first 0.6 of a screen of scrolling, then holds about 600 px of scroll (from 62svh of empty padding above `#why`, `site.css` end) before the page carries it up. Measured at 1300x800: top fixed at 242, left 1370 to 70, opacity 0 to 1, hold from 500 to 1100 px. Key `20261114k`.
 - Not checked on a real phone (panel is taller there).
