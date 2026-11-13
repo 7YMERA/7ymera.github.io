@@ -1610,5 +1610,7 @@ html.gl .op-theme svg { width: 22px; height: 22px; }
 html.gl .op-theme:hover, html.gl .op-theme:focus-visible { opacity: 1; background: color-mix(in srgb, var(--bg) 80%, transparent); }
 html.gl .op-theme:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
 
-/* "Why I do this" holds in the middle of the screen for a while: this empty run-up above it is the scroll distance of the hold (extras.js, fork tick). */
-html.gl.fork-side #why { padding-top: calc(44px + 62svh); }
+/* "Why I do this" is pinned in the middle of the screen with position: sticky; the empty space after it is how long it stays pinned (sticky can only travel as far as its parent is taller than it) (slide-in plus hold). extras.js sets --why-top. */
+html.gl.fork-side #why { display: flow-root; }
+html.gl.fork-side #why > .wrap { position: sticky; top: var(--why-top, 84px); }
+html.gl.fork-side #why::after { content: ""; display: block; height: 120svh; }

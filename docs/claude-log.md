@@ -26,6 +26,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-18 · Phone: "Why I do this" no longer shakes (native sticky)
+- Owner: the panel held well on desktop but shook on the phone while the background moved. Cause: the pinning was done in JS (a `translate` recomputed on every scroll event); iOS scrolls on its compositor thread, so the JS lags a frame behind and the panel jitters. Now the pinning is plain CSS `position: sticky` on `#why > .wrap` (`top: var(--why-top)`, set by `extras.js`), with `#why::after` (120svh of empty space) as the distance it stays pinned (sticky only travels as far as its parent is taller than it; a bottom margin does NOT work, the margin box counts as the element). JS now only does the sideways slide and fade, measured from the moment it pins. The `<main>` clip from the previous fix stays. Key `20261114q`.
+- Checked in Chromium (390 and 1300 px): the panel's top stays fixed (78 / 242) through the slide and hold, then releases; no sideways overflow. Not tested on the iPhone: that is the thing to confirm.
+
 ## 2026-11-18 · Phone: "Why I do this" lost its top part
 - Owner's screen recording (iPhone): while the panel was pinned, its top (heading and the start of card 01) was cut off at a line that moved as they scrolled. Cause (most likely, I cannot run WebKit here): `html.fork-side #why { overflow-x: clip }` also cut off the part of the pinned panel lying above the section's own top edge. The clip now sits on `<main>` (`site.css`), which covers the whole page, so nothing pinned can leave it. Also: a tall panel on a phone is pinned just high enough that its bottom stays on screen (`Tc` in `extras.js`). Checked in Chromium at 390 and 1300 px: no sideways overflow, panel pinned and visible. Key `20261114m`.
 - Open: confirm on the iPhone; if the top is still cut, the next suspect is WebKit and `will-change` on `#why > .wrap`.

@@ -445,16 +445,17 @@
     var p = range > 0 ? Math.min(1, Math.max(0, -r.top / range)) : 0;          // 0 -> 1 while the card is pinned
     var t = Math.min(1, Math.max(0, (p - .58) / .42)); t = t * t * (3 - 2 * t);  // it holds for the first 58 %, then leaves
     card.style.transform = 'translate3d(' + (-t * 115).toFixed(2) + 'vw, 0, 0)'; card.style.opacity = (1 - t * .6).toFixed(3);
-    // "Why I do this": the panel sits in the middle of the screen. It comes in from the right while fading up (no diagonal: it is held at one
-    // height, like a sticky, while it moves sideways), then holds there for a while as the page scrolls on, and finally the page carries it up.
-    // The hold comes from extra empty padding above the section (site.css), so nothing slides under it.
+    // "Why I do this": the panel sits in the middle of the screen. The pinning is plain CSS position: sticky (the browser does it on the
+    // compositor, so it cannot shake on a phone); this only slides it in from the right while fading it up, measured from the moment it
+    // reaches its pinned spot, so the move is purely horizontal. It then holds for a while (the margin below it, site.css) before the page carries it up.
     if (whyWrap) {
-      var w = why.getBoundingClientRect(), pad = parseFloat(getComputedStyle(why).paddingTop) || 0, H = whyWrap.offsetHeight,
+      var w = why.getBoundingClientRect(), padT = parseFloat(getComputedStyle(why).paddingTop) || 0, H = whyWrap.offsetHeight,
           Tc = Math.max(66, Math.min(Math.max(84, (vh - H) / 2 + 24), vh - H - 8)),   // screen top that centres the panel (a tall panel on a phone sits as high as it needs to so its bottom stays on screen)
-          wt = w.top + pad,                                     // where the panel would be with no pinning
-          prog = Math.min(1, Math.max(0, (vh - w.top) / (vh * .6))),   // 0 -> 1 over the first 60 % of a screen of scrolling
+          wt = w.top + padT,                                    // where the panel would be if it were not pinned
+          prog = Math.min(1, Math.max(0, (Tc - wt) / (vh * .6))),   // 0 -> 1 over the first 60 % of a screen of scrolling after it pins
           u = prog * prog * (3 - 2 * prog), f = Math.min(1, prog / .7); f = f * f * (3 - 2 * f);
-      whyWrap.style.transform = 'translate3d(' + ((1 - u) * 100).toFixed(2) + 'vw, ' + Math.min(0, Tc - wt).toFixed(1) + 'px, 0)';
+      whyWrap.style.setProperty('--why-top', Tc.toFixed(1) + 'px');
+      whyWrap.style.transform = 'translate3d(' + ((1 - u) * 100).toFixed(2) + 'vw, 0, 0)';
       whyWrap.style.opacity = f.toFixed(3);
     }
   }
