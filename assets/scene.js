@@ -771,8 +771,8 @@
       hudUpdate(true,u,cr)
     }else{
       rideQ=null;heroOn=false;goldHour(0);if(cam.fov!==42){cam.fov=42;cam.updateProjectionMatrix()}if(scene.fog){scene.fog.near=fogN0;scene.fog.far=fogF0}
-      var q=curPose,ang=(q[2]+px*7)*Math.PI/180;
-      cam.position.set(q[0]+Math.cos(ang)*q[3],q[4],q[1]+Math.sin(ang)*q[3]);cam.lookAt(q[0],q[5],q[1]);
+      var q=curPose,ang=(q[2]+px*7+idleK*3*Math.sin(time*.000314))*Math.PI/180,rk=1+idleK*.014*Math.sin(time*.00024); /* idle drift: a few degrees of swing over about 20 s and a slow breath in and out */
+      cam.position.set(q[0]+Math.cos(ang)*q[3]*rk,q[4],q[1]+Math.sin(ang)*q[3]*rk);cam.lookAt(q[0],q[5],q[1]);
       cam.setViewOffset(W,Hh,-q[6]*W,-q[7]*Hh,W,Hh);hudUpdate(false)
     }
     followCam(dtF);
@@ -792,11 +792,18 @@
     if(flying&&enter&&!reduce&&!document.hidden&&time-lastUser>900&&scrollY<enter.offsetTop+enter.offsetHeight-innerHeight-6){
       driftAcc+=(mobile?20:28)*clamp((time-lastUser-900)/1500,0,1)*dt;
       if(driftAcc>=1){var dy=Math.floor(driftAcc);driftAcc-=dy;scrollBy({top:dy,behavior:'instant'})}}
+    // Background drift: when the reader is idle outside the flight, the camera slowly swings and breathes (the page itself never moves),
+    // drawn at 30 fps. It switches itself off for the session if the device can't keep that up, and never runs with reduced motion,
+    // a hidden tab, the flight (which has its own drift) or the text-only brief.
+    var dOn=!reduce&&!flying&&!driftOff&&!document.hidden&&!root.classList.contains('brief')&&time-lastUser>900;
+    idleK+=((dOn?1:0)-idleK)*Math.min(1,dt*(dOn?.8:4));
+    if(idleK<.002)idleK=0;
+    var iv=idleK>0?33:66;
     var moving=Math.abs(tr-cr)>(flying?.00002:.0003);for(var j2=0;j2<8;j2++)if(Math.abs(tgtPose[j2]-curPose[j2])>.02){moving=true;break}
     // While the reader is only reading, redraw at about 15 fps (the beams and pulses still drift); while scrolling, every frame.
-    if(moving||need||(!reduce&&time-lastR>66)){place(reduce?0:time);renderer.render(scene,cam);need=false;lastR=time;if(!shown){shown=true;root.classList.add('gl-on')}}
+    if(moving||need||(!reduce&&time-lastR>iv)){if(idleK>0&&!moving&&lastR>0){dIv+=time-lastR;if(++dN>=90){if(dIv/dN>48)driftOff=true;dIv=0;dN=0}}place(reduce?0:time);renderer.render(scene,cam);need=false;lastR=time;if(!shown){shown=true;root.classList.add('gl-on')}}
     raf=run?requestAnimationFrame(frame):0}
-  var lastUser=0,driftAcc=0;
+  var lastUser=0,driftAcc=0,idleK=0,driftOff=false,dIv=0,dN=0;
   ['wheel','touchstart','touchmove','keydown','pointerdown'].forEach(function(n){addEventListener(n,function(){lastUser=performance.now();driftAcc=0},{passive:true})});
   function retarget(){if(document.documentElement.scrollHeight!==lastLay)layoutKeys();tgtPose=dirPose(scrollY);tr=rideProg();need=true}
   addEventListener('scroll',retarget,{passive:true});
@@ -810,7 +817,7 @@
   setTimeout(function(){(window.requestIdleCallback||setTimeout)(warmEdges)},12000); // light theme: build the night lines in idle time, so the first switch to dark has them ready
   root.classList.add('gl'); // first: it makes #enter visible, and the scroll maths below needs its real position
   size();buildRide();layoutKeys();tgtPose=dirPose(scrollY);curPose=tgtPose.slice();tr=cr=rideProg();raf=requestAnimationFrame(frame);
-  if(ONLY||/[?&]dbg/.test(location.search))window.__scene={keys:function(){return KEYS.map(function(k){return k.y})},dirPose:dirPose,scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},lay:LAY,lm:LM,utp:UTP,sky:skyCurve,city:function(){return cityMesh},mob:mob,DIST:DIST,draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;fInit=true;rideQ=null;dtF=9;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam);dtF=.016}};
+  if(ONLY||/[?&]dbg/.test(location.search))window.__scene={drift:function(v){if(v===false)driftOff=false;return [Math.round(idleK*100)/100,driftOff]},keys:function(){return KEYS.map(function(k){return k.y})},dirPose:dirPose,scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},lay:LAY,lm:LM,utp:UTP,sky:skyCurve,city:function(){return cityMesh},mob:mob,DIST:DIST,draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;fInit=true;rideQ=null;dtF=9;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam);dtF=.016}};
   } // start
   // Build the scene after the page's first paint, not before it: the curtain's text and photos come first, the canvas fades in after. (/flight/ is only the scene, so it starts at once.)
   if(!DEFER)start();
