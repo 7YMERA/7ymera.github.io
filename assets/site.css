@@ -1491,7 +1491,8 @@ html.gl .cur-frame.lit .cur-spot { opacity: var(--en, 1); }
    Everything returns as soon as the curtain starts to come in. Reduced motion never gets op-bare. */
 html.gl .top { transition: opacity .45s ease, transform .45s ease, visibility 0s; }
 html.gl.op-bare .top { opacity: 0; transform: translate3d(0, -100%, 0); visibility: hidden; pointer-events: none; transition: opacity .45s ease, transform .45s ease, visibility 0s .45s; }
-html.gl.op-bare .top:focus-within { opacity: 1; transform: none; visibility: visible; pointer-events: auto; }
+/* only keyboard focus brings the bar back; a mouse click on a button in it (the theme switch) used to leave it open when scrolling back up */
+html.gl.op-bare .top:has(:focus-visible) { opacity: 1; transform: none; visibility: visible; pointer-events: auto; }
 html.gl .op-cue { width: 64px; min-height: 64px; height: 64px; padding: 0; justify-content: center; gap: 0; }
 html.gl .op-cue svg { width: 30px; height: 30px; }
 @media (max-width: 760px) { html.gl .op-cue { width: 60px; height: 60px; min-height: 60px; } }
@@ -1599,3 +1600,11 @@ html.brief .brief-chip:focus-visible { outline: 3px solid var(--accent); outline
 /* the pixel arrow now sits over buildings on a phone: darker, with a halo of the page colour, so it reads on any of the three blues */
 html.gl .op-cue { color: var(--ink); }
 html.gl .op-cue svg { filter: drop-shadow(0 0 2px var(--bg)) drop-shadow(0 0 7px var(--bg)); }
+
+/* OPENING: a faint day / night switch under the chevrons (assets: index.html #op-theme). */
+.op-theme { display: none; }
+html.gl .op-theme { pointer-events: auto; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; font: 600 .9375rem var(--f-body); color: var(--ink); cursor: pointer;
+  background: color-mix(in srgb, var(--bg) 30%, transparent); border: 1px solid color-mix(in srgb, var(--ink) 28%, transparent); border-radius: 999px; opacity: .55; transition: opacity .25s ease, background .25s ease; }
+html.gl .op-theme svg { width: 18px; height: 18px; }
+html.gl .op-theme:hover, html.gl .op-theme:focus-visible { opacity: 1; background: color-mix(in srgb, var(--bg) 80%, transparent); }
+html.gl .op-theme:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }

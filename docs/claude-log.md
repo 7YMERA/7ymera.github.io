@@ -26,6 +26,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-13 · Top bar stuck after the theme switch; day/night on the landing screen
+- Bug (owner): scroll down, press the day/night button, scroll back up, and the top bar stayed visible over the bare opening. Cause: `html.gl.op-bare .top:focus-within` kept the bar open because the clicked theme button still had focus. Now only keyboard focus (`:has(:focus-visible)`) reopens it, and a mouse click on the theme button blurs it (`index.html`, `site.css`). Checked: switch, scroll up, bar hides again.
+- New: a faint day / night pill (`#op-theme`, under the chevrons) on the opening screen, 55 % opacity, full on hover or focus, fades with the rest of the opening. It presses the same switch as the top bar. Key `20261114d`.
+
 ## 2026-11-14 · Phone opening: from below first, the group behind the name card
 
 - **What:** on a tall screen `topPose()` is now a view from street level looking up at the towers (camera height 22, radius 330), not a zoom. A new director key at 1.8 screens down (`['curtain',0,1.8,cardPose]`) rises and pulls back to the group of four (radius 560), so that is what sits behind the *Alif Najmi* card. Wide screens are unchanged: `cardPose` equals `topPose` there. Cache key `20261114c`.
