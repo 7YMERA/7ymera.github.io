@@ -450,7 +450,7 @@
     // The hold comes from extra empty padding above the section (site.css), so nothing slides under it.
     if (whyWrap) {
       var w = why.getBoundingClientRect(), pad = parseFloat(getComputedStyle(why).paddingTop) || 0, H = whyWrap.offsetHeight,
-          Tc = Math.max(84, (vh - H) / 2 + 24),                 // screen top that centres the panel
+          Tc = Math.max(66, Math.min(Math.max(84, (vh - H) / 2 + 24), vh - H - 8)),   // screen top that centres the panel (a tall panel on a phone sits as high as it needs to so its bottom stays on screen)
           wt = w.top + pad,                                     // where the panel would be with no pinning
           prog = Math.min(1, Math.max(0, (vh - w.top) / (vh * .6))),   // 0 -> 1 over the first 60 % of a screen of scrolling
           u = prog * prog * (3 - 2 * prog), f = Math.min(1, prog / .7); f = f * f * (3 - 2 * f);

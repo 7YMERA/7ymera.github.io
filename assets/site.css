@@ -1587,7 +1587,8 @@ html.gl .fork-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; 
 @keyframes forkSide { 0%, 100% { transform: translate3d(-2px, 0, 0); } 50% { transform: translate3d(6px, 0, 0); } }
 @media (max-width: 640px) { .fork-opts { grid-template-columns: 1fr; } .fork-go, .fork-story { min-height: 0; } }
 @media (prefers-reduced-motion: reduce) { html.gl .fork { height: auto; padding: 40px 16px; } html.gl .fork-sticky { position: static; height: auto; padding: 0; } .fork-go i, .fork-story i { animation: none; } }
-html.fork-side #why { overflow-x: clip; }
+/* The sideways slide-in is clipped on <main>, not on #why: a clip on #why also cut off the part of the panel pinned above the section's own top edge on iPhone (the panel's top was missing). */
+html.fork-side main { overflow-x: clip; }
 html.fork-side #why > .wrap { will-change: transform, opacity; }
 /* highlights mode */
 html.brief #fork, html.brief #why, html.brief #notes, html.brief #studied, html.brief #merdekastage, html.brief #toolkit, html.brief #pulse, html.brief #enter { display: none !important; }
