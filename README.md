@@ -381,6 +381,7 @@ The note pages share one template. Their themed SVG diagrams (flowcharts, sequen
 
 ```
 index.html               the home page (sections listed above)
+resume.html              the on-site résumé, generated from tools/cv/cv.html (do not hand-edit)
 404.html                 the "Signal lost" page GitHub Pages serves for a missing URL (root-absolute URLs only)
 sitemap.xml, robots.txt, feed.xml, site.webmanifest   for search engines, feed readers and home-screen icons
 notes/                   the notes, plus notes/index.html
@@ -401,7 +402,8 @@ assets/
   me/                    photos
   notes/                 note images, covers, diagrams
   slb-screens/           the SLB click-through
-  Muhammad-Alif-Najmi-CV.pdf
+  Muhammad-Alif-Najmi-CV.pdf   built from tools/cv/cv.html
+tools/cv/                cv.html (the one source for the CV), build.py (PDF, needs weasyprint), web.py (resume.html), photo.jpg
 docs/screens/            screenshots used in this README
 ```
 
@@ -422,3 +424,7 @@ docs/screens/            screenshots used in this README
 - Photo metadata (EXIF, GPS) is stripped. Images are re-saved as WebP.
 - The coursework databases have every name, IC number, email and phone number replaced with a consistent fake value, so the joins still work.
 - Classmates' names and student IDs from group work are never published.
+
+## The CV (PDF and `/resume.html`)
+
+One source: `tools/cv/cv.html`. Edit that, then run `pip install weasyprint` (once), `python3 tools/cv/build.py` (writes `assets/Muhammad-Alif-Najmi-CV.pdf`, two Letter pages, Carlito) and `python3 tools/cv/web.py` (writes `resume.html`, the same text in the site's look). Bump the `?v=cv...` key on the CV links in `index.html` and `tools/cv/web.py` after changing the PDF. The Axrail and Handshake entries are the owner's own words from the earlier CV; change them only when asked. The CV's private project (the weekly poster automation) is named without a link and without any school names.

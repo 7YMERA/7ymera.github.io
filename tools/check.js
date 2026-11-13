@@ -17,7 +17,7 @@ const base = args.find(a => !a.startsWith('--')) || 'http://localhost:8765/';
 const rootArg = args.find(a => a.startsWith('--root='));
 const root = rootArg ? path.resolve(rootArg.slice(7)) : path.join(__dirname, '..');
 const ORIGIN = 'https://7ymera.github.io';
-const pages = ['', 'flight/', '404.html'].concat(fs.readdirSync(path.join(root, 'notes')).filter(f => f.endsWith('.html')).map(f => 'notes/' + f));
+const pages = ['', 'flight/', 'resume.html', '404.html'].concat(fs.readdirSync(path.join(root, 'notes')).filter(f => f.endsWith('.html')).map(f => 'notes/' + f));
 
 // ---------- helpers ----------
 const fileOf = u => (u === '' || u.endsWith('/')) ? u + 'index.html' : u;       // 'notes/' -> 'notes/index.html'
