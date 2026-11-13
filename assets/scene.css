@@ -4,7 +4,7 @@
   --bg:#f4f8fc;--surface:#fbfdff;--sunk:#e6f1fa;--ink:#0b2a6b;--muted:#3f5b94;--line:#c3dcef;
   --accent:#1559c9;--accent-ink:#fff;--accent-soft:#dcecfb;--glow:rgba(42,166,232,.14);
   --shadow:0 1px 2px rgba(11,42,107,.08),0 10px 30px rgba(11,42,107,.10);
-  --fx:#2aa6e8;--hard:#0b2f8a;--f-pix:"Pixelify Sans",ui-monospace,Menlo,Consolas,monospace;
+  --fx:#2aa6e8;--hud:#2aa6e8;--hard:#0b2f8a;--f-pix:"Pixelify Sans",ui-monospace,Menlo,Consolas,monospace;
   /* scene colours, read by scene.js */
   --sky1:#eaf4fb;--sky2:#cfe6f7;--far:#b9d0ee;--mid:#8ab2e6;--near:#5c92dc;--glass:#e8f1fd;--orb:#2c63c9;--ring:#a2c3f0;
   color-scheme:light}
@@ -12,7 +12,7 @@
   --bg:#050912;--surface:#0b1830;--sunk:#08122a;--ink:#d6ecff;--muted:#8fb2d8;--line:#1c3a66;
   --accent:#7fd3ff;--accent-ink:#04142c;--accent-soft:#12305a;--glow:rgba(127,211,255,.14);
   --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.4);
-  --fx:#3aa0ee;--hard:#000;
+  --fx:#3aa0ee;--hud:#3aa0ee;--hard:#000;
   --sky1:#050a1a;--sky2:#0d1a38;--far:#12264a;--mid:#1a3a70;--near:#235396;--glass:#7fd3ff;--orb:#3d79e0;--ring:#7fd3ff;
   /* night sky (scene.js reads --sky3 and the ground/silhouette tones): deep navy, indigo, then the warm light-pollution haze of Kuala Lumpur at the horizon */
   --sky3:#6a4030;--sky-mid:#141f52;--n-far:#1a1b3a;--n-mid:#10183a;--n-near:#16224d;--n-ground:#0d1230;--n-glass:#0e1838;
@@ -238,7 +238,7 @@ html.gl .stage-r .stage-sticky{justify-items:end}
 @media (max-width:760px){
   .dock,.dock-show{display:none!important}
   .k-btn{width:auto;gap:8px;padding-inline:14px}
-  .k-btn::after{content:"Menu";font:600 .9rem var(--f-body);color:var(--ink)}
+  .k-btn .k-label{display:inline;font:600 .9rem var(--f-body);color:var(--ink)}
 }
 
 /* The canvas fades in after its first draw instead of popping in (scene.js adds gl-on). Opacity only; reduced motion shows it at once. */
@@ -268,3 +268,37 @@ html.gl.gl-on #fx-grain{opacity:.5}
 .fly-again:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
 @media (max-width:700px){.fly-again{bottom:250px;min-height:54px;padding:0 20px;font-size:1rem}}
 @media (prefers-reduced-motion:reduce){.fly-again{transition:none}}
+
+/* ---- the opening card, redesigned to match the rest of the site: a HUD panel with corner ticks, a status bar, a segmented pixel rule, readout cells ---- */
+.k-label{display:none}
+html.gl .cur-center{--tick:var(--hud);max-width:35rem;gap:12px;padding:16px 26px 24px;border-radius:4px;background:color-mix(in srgb,var(--bg) 90%,transparent);border:2px solid var(--hud);box-shadow:6px 6px 0 var(--hard)}
+html.gl .cur-center::before{content:"";position:absolute;inset:6px;pointer-events:none;
+  background:linear-gradient(var(--tick),var(--tick)) 0 0/14px 2px no-repeat,linear-gradient(var(--tick),var(--tick)) 0 0/2px 14px no-repeat,
+    linear-gradient(var(--tick),var(--tick)) 100% 0/14px 2px no-repeat,linear-gradient(var(--tick),var(--tick)) 100% 0/2px 14px no-repeat,
+    linear-gradient(var(--tick),var(--tick)) 0 100%/14px 2px no-repeat,linear-gradient(var(--tick),var(--tick)) 0 100%/2px 14px no-repeat,
+    linear-gradient(var(--tick),var(--tick)) 100% 100%/14px 2px no-repeat,linear-gradient(var(--tick),var(--tick)) 100% 100%/2px 14px no-repeat}
+html.gl .cur-bar{justify-self:stretch;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:0 0 10px;margin:0 0 2px;border-bottom:1px dashed var(--line);font:500 .6875rem var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+html.gl .cur-live{display:inline-flex;align-items:center;gap:7px;color:var(--ink)}
+html.gl .cur-live i{width:8px;height:8px;background:var(--hud);box-shadow:0 0 0 3px color-mix(in srgb,var(--hud) 25%,transparent);animation:curLive 2s steps(2,end) infinite}
+@keyframes curLive{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){html.gl .cur-live i{animation:none}}
+html.gl .cur-eyebrow{font:600 .8125rem var(--f-pix);letter-spacing:.2em;color:var(--fx-ink,var(--hud))}
+html.gl .cur-rule{width:132px;height:6px;border-radius:0;background:repeating-linear-gradient(90deg,var(--hud) 0 12px,transparent 12px 16px);position:relative}
+html.gl .cur-rule::after{content:"";position:absolute;right:-16px;top:0;width:12px;height:6px;background:var(--gold)}
+html.gl .cur-sub{font-size:1rem;max-width:28rem}
+html.gl .cur-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;width:100%;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+html.gl .cur-facts li{display:grid;gap:3px;justify-items:start;text-align:left;padding:10px 12px;border:0;border-left:1px solid var(--line);border-radius:0;background:transparent;font-size:.9375rem;font-weight:700;line-height:1.25}
+html.gl .cur-facts li:first-child{border-left:0}
+html.gl .cur-facts small{font:500 .625rem var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+html.gl .cur-facts b{font-weight:700}
+html.gl .cur-cta{width:100%;justify-content:center;margin-top:6px;padding:12px 18px;border-radius:4px;border:2px solid var(--hud);background:var(--hud);color:#04121f;font:700 .9375rem var(--f-body);box-shadow:3px 3px 0 var(--hard);transition:transform .15s ease}
+html.gl .cur-cta:hover{transform:translate3d(-1px,-1px,0);border-color:var(--hud)}
+html.gl .cur-cta .mouse{border-color:currentColor}
+html.gl .cur-cta .mouse i{background:currentColor}
+@media (max-width:760px){
+  html.gl .cur-center{max-width:19rem;padding:14px 18px 20px;gap:10px}
+  html.gl .cur-bar{font-size:.625rem;letter-spacing:.1em}
+  html.gl .cur-facts{grid-template-columns:1fr}
+  html.gl .cur-facts li{grid-template-columns:5.2rem 1fr;align-items:baseline;border-left:0;border-top:1px solid var(--line);padding:8px 12px}
+  html.gl .cur-facts li:first-child{border-top:0}
+}
