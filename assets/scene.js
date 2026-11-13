@@ -433,8 +433,12 @@
   ];
   var utpIdx=0;
   var END=P(-15,-11,45,240,95,85,0);                           // where the flight takes over (the flight's first key is built from this, see buildKF)
+  // The opening shot fills the screen whatever its shape. On a wide screen the four landmarks stand in a row. On a tall one (a phone) a row would be tiny, with empty ground under it,
+  // so the camera comes in close and low and looks up: the towers run the height of the screen and the outer landmarks may leave the sides. The page zooms out again as you scroll.
+  var TOPF=window.__topf||{r:234,dr:170,y:100,dy:-30,ty:85,dty:25,cx:-15,dcx:-10,a0:1.3,span:.8};
+  function topPose(){var t=clamp((TOPF.a0-W/Math.max(1,Hh))/TOPF.span,0,1),r=TOPF.r+TOPF.dr*t;return P(TOPF.cx+TOPF.dcx*t,-11,65,r,TOPF.y+TOPF.dy*t,TOPF.ty+TOPF.dty*t,.1*(1-t),0,r)}
   var DIR=[
-    ['top',0,0,P(-15,-11,65,250,100,85,.1,0,680)],                     // the opening
+    ['top',0,0,function(){return topPose()}],                          // the opening: framed for the shape of the screen (see topPose)
     ['spin',0,-1,P(-95,-11,130,230,100,100,0,0,440)],                      // the buffer turns the city about 85 degrees
     ['spin',1,-1,P(-95,-11,150,250,100,100,0,0,390)],
     ['me',.2,-.5,P(-95,-11,150,250,100,100,0,0,390)],

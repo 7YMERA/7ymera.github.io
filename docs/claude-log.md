@@ -26,6 +26,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-14 · The opening shot fills the screen on every shape
+
+- **What:** the opening pose is now `topPose()` in `scene.js`, a function of the screen's width over height. Wide screens keep the row of four landmarks, a little closer (radius 234). Tall screens come in close and low and look up (radius up to 404, camera at 70, aim at 110), so the towers run the height of a phone and blocks fill the bottom; the outer landmarks may leave the sides. The next shots are farther back, so the page zooms out as you scroll. The pixel arrow is darker with a halo, since it now sits over buildings. Cache key `20261114b`.
+- **Why:** on the owner's phone the skyline was a small band with empty ground under it.
+- **Checked:** screenshots at 360x780, 390x844, 430x932, 768x1024, 820x1180, 1024x768, 1280x720, 1366x768, 1536x864, 1920x1080 (light theme).
 ## 2026-11-14 · CV updated to today, shown on the site
 
 - **What:** new two-page CV built from `tools/cv/cv.html` (WeasyPrint, same look as before). Added: Weekly Poster Automation (private repo), MyLokalEvent 2.0, KakiLima, Jom Al-Quran Join Atlas, this portfolio, TaskMatch at 14 releases, SMK dashboard at v2.20, Roblox as a side interest. Axrail, Handshake, SLB, education and certifications are unchanged.

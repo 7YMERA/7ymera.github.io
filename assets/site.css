@@ -1595,3 +1595,7 @@ html.brief .brief-chip { display: inline-flex; align-items: center; gap: 10px; p
 html.brief .brief-chip b { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 html.brief .brief-chip:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 @media (max-width: 760px) { html.brief .brief-chip { bottom: calc(92px + env(safe-area-inset-bottom, 0px)); } }
+
+/* the pixel arrow now sits over buildings on a phone: darker, with a halo of the page colour, so it reads on any of the three blues */
+html.gl .op-cue { color: var(--ink); }
+html.gl .op-cue svg { filter: drop-shadow(0 0 2px var(--bg)) drop-shadow(0 0 7px var(--bg)); }
