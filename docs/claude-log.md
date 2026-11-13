@@ -26,6 +26,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-15 · Landing day/night switch is icon-only
+- `#op-theme` on the opening is now a 48 px round icon (moon in day, sun in night), still faint, `aria-label` kept. Key `20261114h`.
+- Owner asked whether visitors could leave a "review". Answered in chat (needs an outside service; options Giscus, Supabase, a form service). Nothing built yet.
+
 ## 2026-11-14 · Opening card redesign, Menu label, skip link
 - The curtain card (name and details) now matches the HUD look of the rest of the site: corner ticks, an ONLINE status bar with KLCC coordinates, pixel-font eyebrow, a segmented pixel rule, a Role / Focus / Shipped readout table, and a solid CTA bar (`scene.css`, end of file; markup in `index.html`). Gotcha: `--fx` is a LENGTH inside `.cur-frame` (site.css), so colours there use the new `--hud` variable. The old card's `var(--fx)` border was silently invalid for that reason.
 - Phone "Menu" label was clipping over the search icon: the `.icon-btn::after` hit-area rule clashed with `.k-btn::after{content:"Menu"}`. Now a real `<span class="k-label">` (index.html) shown at 760 px and below; the notes pages no longer get a stray "Menu" on their theme button.

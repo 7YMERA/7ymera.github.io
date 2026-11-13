@@ -1603,8 +1603,8 @@ html.gl .op-cue svg { filter: drop-shadow(0 0 2px var(--bg)) drop-shadow(0 0 7px
 
 /* OPENING: a faint day / night switch under the chevrons (assets: index.html #op-theme). */
 .op-theme { display: none; }
-html.gl .op-theme { pointer-events: auto; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; font: 600 .9375rem var(--f-body); color: var(--ink); cursor: pointer;
+html.gl .op-theme { pointer-events: auto; display: inline-grid; place-items: center; width: 48px; height: 48px; padding: 0; font: 600 .9375rem var(--f-body); color: var(--ink); cursor: pointer;
   background: color-mix(in srgb, var(--bg) 30%, transparent); border: 1px solid color-mix(in srgb, var(--ink) 28%, transparent); border-radius: 999px; opacity: .55; transition: opacity .25s ease, background .25s ease; }
-html.gl .op-theme svg { width: 18px; height: 18px; }
+html.gl .op-theme svg { width: 22px; height: 22px; }
 html.gl .op-theme:hover, html.gl .op-theme:focus-visible { opacity: 1; background: color-mix(in srgb, var(--bg) 80%, transparent); }
 html.gl .op-theme:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
