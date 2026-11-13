@@ -28,7 +28,7 @@ where the last chat stopped without re-reading everything.
 
 ## 2026-11-13 · New share image, no photo
 
-- **What:** `assets/og-skyline.jpg` (1200 x 630): the site's whole night skyline, all four landmarks, full width, with the wordmark, "I write the spec. Then I build it.", the one-line role and the address. It replaces `og-card.jpg` (the convocation photo) on the home page and on every note that used the home card; notes with their own card keep it. `og-card.jpg` stays in the repo, unused.
+- **What:** `assets/og-skyline-2.jpg` (1200 x 630): the site's whole night skyline, all four landmarks, full width, with the pixel mark, "Alif Najmi Portfolio", the one-line role and the address (the owner did not want the spec headline on it). It replaces `og-card.jpg` (the convocation photo) on the home page and on every note that used the home card; notes with their own card keep it. `og-card.jpg` stays in the repo, unused.
 - **Why:** the owner wanted a more modern thumbnail without his photo.
 - **How:** a 2x capture of `/flight/` at `draw(0)` in dark, then an HTML card (the first attempt, `og-city.jpg`, cropped to Petronas behind the text; the owner wanted the whole skyline, so it was replaced and deleted) (Bricolage Grotesque, JetBrains Mono) rendered by Playwright. Sources are not in the repo.
 - **Open:** social sites cache previews; the old one may show until they re-fetch.
