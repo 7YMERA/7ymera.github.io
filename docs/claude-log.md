@@ -26,6 +26,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-14 · Phone opening: from below first, the group behind the name card
+
+- **What:** on a tall screen `topPose()` is now a view from street level looking up at the towers (camera height 22, radius 330), not a zoom. A new director key at 1.8 screens down (`['curtain',0,1.8,cardPose]`) rises and pulls back to the group of four (radius 560), so that is what sits behind the *Alif Najmi* card. Wide screens are unchanged: `cardPose` equals `topPose` there. Cache key `20261114c`.
+- **Why:** the owner wanted either a zoom or a view from below at the start, and the name card over the full skyline, not over a far zoom-out.
+
 ## 2026-11-14 · The opening shot fills the screen on every shape
 
 - **What:** the opening pose is now `topPose()` in `scene.js`, a function of the screen's width over height. Wide screens keep the row of four landmarks, a little closer (radius 234). Tall screens come in close and low and look up (radius up to 404, camera at 70, aim at 110), so the towers run the height of a phone and blocks fill the bottom; the outer landmarks may leave the sides. The next shots are farther back, so the page zooms out as you scroll. The pixel arrow is darker with a halo, since it now sits over buildings. Cache key `20261114b`.

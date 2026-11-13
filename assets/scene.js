@@ -434,11 +434,14 @@
   var utpIdx=0;
   var END=P(-15,-11,45,240,95,85,0);                           // where the flight takes over (the flight's first key is built from this, see buildKF)
   // The opening shot fills the screen whatever its shape. On a wide screen the four landmarks stand in a row. On a tall one (a phone) a row would be tiny, with empty ground under it,
-  // so the camera comes in close and low and looks up: the towers run the height of the screen and the outer landmarks may leave the sides. The page zooms out again as you scroll.
-  var TOPF=window.__topf||{r:234,dr:170,y:100,dy:-30,ty:85,dty:25,cx:-15,dcx:-10,a0:1.3,span:.8};
+  // so the camera starts close to the ground and looks up at the towers. As the name card comes in it rises and pulls back to the group (cardPose).
+  var TOPF=window.__topf||{r:234,dr:96,y:100,dy:-78,ty:85,dty:22,cx:-15,dcx:6,a0:1.3,span:.8,cr:560,cy:112,cty:80};
+  // Behind the name card: on a wide screen the opening shot itself (no move); on a tall one the group of four from higher and farther back, though not so far that it is small.
+  function cardPose(){var t=clamp((TOPF.a0-W/Math.max(1,Hh))/TOPF.span,0,1),p=topPose();if(t<=0)return p;var q=P(-15,-11,65,TOPF.cr,TOPF.cy,TOPF.cty,0,0,TOPF.cr);for(var i=0;i<9;i++)q[i]=p[i]+(q[i]-p[i])*t;q[8]=q[3];return q}
   function topPose(){var t=clamp((TOPF.a0-W/Math.max(1,Hh))/TOPF.span,0,1),r=TOPF.r+TOPF.dr*t;return P(TOPF.cx+TOPF.dcx*t,-11,65,r,TOPF.y+TOPF.dy*t,TOPF.ty+TOPF.dty*t,.1*(1-t),0,r)}
   var DIR=[
     ['top',0,0,function(){return topPose()}],                          // the opening: framed for the shape of the screen (see topPose)
+    ['curtain',0,1.8,function(){return cardPose()}],                   // as the name card comes in (1.8 screens down, EST in extras.js): on a tall screen the camera has risen and pulled back to the whole group
     ['spin',0,-1,P(-95,-11,130,230,100,100,0,0,440)],                      // the buffer turns the city about 85 degrees
     ['spin',1,-1,P(-95,-11,150,250,100,100,0,0,390)],
     ['me',.2,-.5,P(-95,-11,150,250,100,100,0,0,390)],
