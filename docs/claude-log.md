@@ -26,6 +26,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-16 · Idle drift for the background camera (whole site)
+- `scene.js`: outside the flight, after 0.9 s without input the background camera swings about 3 degrees (period about 20 s) and breathes about 1.4 % in radius; the page itself never moves. Idle redraw goes from about 15 to 30 fps while it runs (`idleK`, `iv` in `frame()`). Safeguards: off with reduced motion, hidden tab, the flight (its own drift), or the text-only brief; and it switches itself off for the session if the average idle frame takes over 48 ms (`driftOff`, checked every 90 frames). Debug hook `__scene.drift()`. Key `20261114j`.
+- Checked in the browser: the camera moves while `scrollY` stays put, and a wheel event ramps it down. Not tested on a real phone (battery and heat are the thing to watch). To tune: amplitude is the `3` and period the `.000314` in `place()`.
+
 ## 2026-11-16 · "Why I do this" slides straight in from the right
 - Owner: the reveal had an entry angle and faded in ghosted. Cause (`extras.js`, the fork tick): the section slid in sideways from 60vw while the page was also scrolling it up from below (a diagonal), with opacity 0 to 1. Now it is held at one height (like a sticky, 84 px from the top) while it slides in from the right edge of the screen at full opacity, then the normal scroll carries it up. Measured: panel top constant at 84 while its left goes 1370 to 70. Key `20261114i`.
 - Not checked on a real phone; reduced-motion visitors still get no slide.
