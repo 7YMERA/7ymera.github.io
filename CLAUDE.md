@@ -24,14 +24,17 @@ any agent working on this repo, kept short on purpose so it costs little context
 | Join Atlas (Jom Al-Quran note) | `assets/join-atlas.js`, `.css` |
 | Notes (blog posts) | `notes/*.html`, listed in `notes/index.html`. Edit the HTML directly. |
 | README screenshots | `docs/screens/` |
-| 3D city, scroll flight, HUD | scene `assets/scene.js`, styles `assets/scene.css` (also skins the notes pages), models and textures `assets/city/` (the page itself is `index.html`) |
+| 3D city, scroll flight, HUD | scene `assets/scene.js`, its shader text `assets/scene-glsl.js` (load it first), styles `assets/scene.css` (also skins the notes pages), models and textures `assets/city/` (the page itself is `index.html`) |
 | Flight on its own (view and debug) | `/flight/`: `flight/index.html`, panel on **H**. Keep its `#enter` block in step with `index.html`. |
-| Smoke test | `tools/check.js` |
+| Notes reading aids (progress, contents, zoom) | `assets/reader.js`, styles under the READER banner at the end of `site.css` |
+| Search and feeds (hand-written: update when you add a note) | `sitemap.xml`, `feed.xml`, `robots.txt` |
+| 404 page, icons | `404.html` (root-absolute URLs only), `assets/icons/` (`tools/make-icons.py`) |
+| Smoke test (pages, then SEO, accessibility and link rules; `--static` for the rules alone) | `tools/check.js` |
 
 ## Rules that bite
 
 - **Cache key:** every CSS/JS link carries `?v=YYYYMMDDx`. After any CSS/JS change, bump it everywhere:
-  `grep -rl 'v=OLD' index.html notes | xargs sed -i 's/v=OLD/v=NEW/g'`.
+  `grep -rl 'v=OLD' index.html notes flight 404.html | xargs sed -i 's/v=OLD/v=NEW/g'`.
   When you replace an image, give it a new file name (e.g. `cover-2.webp`).
 - **Performance:** animate only `transform` and `opacity`. No `backdrop-filter` over the moving aurora.
   No `mask-image` or rounded `clip-path` around 3D content. Pause off-screen work with
@@ -41,6 +44,7 @@ any agent working on this repo, kept short on purpose so it costs little context
 - **`[hidden]` is `display:none !important`** in `site.css`. Overriding it needs `!important`.
 - **Light mode is the default** (`<html data-theme="light">`). Check both themes and 390 px width.
 - **The owner dislikes small hidden buttons** for major features. Make controls big and obvious.
+- **Scene colour rules from the owner:** no magenta or pink lighting, no Maybank sign, the moon stays locked in place, light mode stays one blue family (no cyan glass), no barrel roll in the flight, no golden hour (it stuttered on phones).
 
 - **The old flat-aurora site** is commit `f3b9f08` (`git checkout f3b9f08`). There is no `/v2/` any more: the 3D city is the home page.
 

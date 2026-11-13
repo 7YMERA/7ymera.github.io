@@ -6,7 +6,7 @@
   --shadow:0 1px 2px rgba(11,42,107,.08),0 10px 30px rgba(11,42,107,.10);
   --fx:#2aa6e8;--hard:#0b2f8a;--f-pix:"Pixelify Sans",ui-monospace,Menlo,Consolas,monospace;
   /* scene colours, read by scene.js */
-  --sky1:#eaf4fb;--sky2:#cfe6f7;--far:#bcd9ee;--mid:#8fc3e8;--near:#5aa6dc;--glass:#e9f6ff;--orb:#2c63c9;--ring:#8fd2ff;
+  --sky1:#eaf4fb;--sky2:#cfe6f7;--far:#b9d0ee;--mid:#8ab2e6;--near:#5c92dc;--glass:#e8f1fd;--orb:#2c63c9;--ring:#a2c3f0;
   color-scheme:light}
 :root[data-theme="dark"]{
   --bg:#050912;--surface:#0b1830;--sunk:#08122a;--ink:#d6ecff;--muted:#8fb2d8;--line:#1c3a66;
@@ -14,12 +14,15 @@
   --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.4);
   --fx:#3aa0ee;--hard:#000;
   --sky1:#050a1a;--sky2:#0d1a38;--far:#12264a;--mid:#1a3a70;--near:#235396;--glass:#7fd3ff;--orb:#3d79e0;--ring:#7fd3ff;
+  /* night sky (scene.js reads --sky3 and the ground/silhouette tones): deep navy, indigo, then the warm light-pollution haze of Kuala Lumpur at the horizon */
+  --sky3:#6a4030;--sky-mid:#141f52;--n-far:#1a1b3a;--n-mid:#10183a;--n-near:#16224d;--n-ground:#0d1230;--n-glass:#0e1838;
   color-scheme:dark}
 
 /* the scene behind everything */
 #gl{position:fixed;inset:0;width:100%;height:100%;z-index:-1;display:none}
 html.gl #gl{display:block}
 html.gl body{background:linear-gradient(var(--sky1),var(--sky2)) fixed}
+:root[data-theme="dark"].gl body{background:linear-gradient(var(--sky1),var(--sky-mid) 58%,var(--sky3)) fixed} /* the haze fades in the lower third; scene.js mirrors these stops in the shader (uSky*, uStop) */
 
 /* Readability: every section sits on a solid paper panel with a hard offset shadow (the hard-shadow window look), and the city shows in the gaps.
    No backdrop-filter: it would sample the moving scene on every frame. */
@@ -106,14 +109,14 @@ main.wrap>.post{margin:44px auto 64px;padding:44px clamp(18px,4vw,44px) 28px;bac
 
 /* ---- The buffer after the opening: no panels, the city turns ---- */
 .spin{display:none}
-html.gl .spin{display:block;height:150vh;position:relative;pointer-events:none}
+html.gl .spin{display:block;height:300vh;position:relative;pointer-events:none}
 .spin-sticky{position:sticky;top:0;height:100vh;height:100svh;display:grid;place-items:end center;padding:0 16px max(120px,16svh)}
 .spin-tag{margin:0;display:grid;gap:3px;text-align:center;padding:12px 20px;background:var(--bg);border:2px solid var(--fx);box-shadow:5px 5px 0 var(--hard);border-radius:6px;opacity:0;transform:translateY(12px);transition:opacity .5s,transform .5s}
 .spin.on .spin-tag{opacity:1;transform:none}
 .spin-tag b{font:600 .75rem var(--f-pix);letter-spacing:.2em;text-transform:uppercase;color:var(--fx)}
 .spin-tag span{font:500 1.05rem var(--f-display);color:var(--ink);letter-spacing:.02em}
 .spin-tag i{font:normal 500 .75rem var(--f-mono);color:var(--muted)}
-@media (max-width:700px){html.gl .spin{height:130vh}}
+@media (max-width:700px){html.gl .spin{height:260vh}}
 @media (prefers-reduced-motion:reduce){.spin-tag{transition:none}}
 
 /* ---- Section shots: panels step aside so the scene shows (wide screens only) ---- */
@@ -237,3 +240,31 @@ html.gl .stage-r .stage-sticky{justify-items:end}
   .k-btn{width:auto;gap:8px;padding-inline:14px}
   .k-btn::after{content:"Menu";font:600 .9rem var(--f-body);color:var(--ink)}
 }
+
+/* The canvas fades in after its first draw instead of popping in (scene.js adds gl-on). Opacity only; reduced motion shows it at once. */
+html.gl #gl{opacity:0;transition:opacity .6s ease-out}
+html.gl.gl-on #gl{opacity:1}
+@media (prefers-reduced-motion:reduce){html.gl #gl{transition:none}}
+
+/* ---- Finish (scene.js creates #fx-grain and #fx-vig after the canvas) ----
+   Same z-index as the canvas and later in the document, so they sit above it and below all page content and the HUD. Static, no blend modes, no backdrop-filter. */
+:root:not([data-theme="dark"]){--sky1:#fcfeff;--sky2:#e4f0fa} /* light theme: a near-white sky with a soft pale-blue horizon, so the pale lit faces and cobalt shades read */
+#fx-grain,#fx-vig{position:fixed;inset:0;z-index:-1;pointer-events:none;display:none;opacity:0;transition:opacity .6s ease-out}
+html.gl #fx-grain,html.gl #fx-vig{display:block}
+html.gl.gl-on #fx-vig{opacity:1}
+#fx-grain{background:var(--grain-l) 0 0/180px 180px repeat}
+html.gl.gl-on #fx-grain{opacity:.5}
+:root[data-theme="dark"] #fx-grain{background-image:var(--grain-d)}
+:root[data-theme="dark"].gl.gl-on #fx-grain{opacity:.4}
+#fx-vig{background:radial-gradient(ellipse 80% 75% at 50% 50%,transparent 58%,rgba(24,64,150,.13) 100%)}
+:root[data-theme="dark"] #fx-vig{background:radial-gradient(ellipse 80% 75% at 50% 50%,transparent 52%,rgba(0,2,12,.4) 100%)}
+@media (prefers-reduced-motion:reduce){#fx-grain,#fx-vig{transition:none}}
+
+/* "Fly it again in dark mode": a big, plain invitation over the flight's finale (scene.js adds .on there) */
+.fly-again{position:absolute;left:50%;bottom:clamp(96px,16svh,150px);transform:translate3d(-50%,14px,0);display:inline-flex;align-items:center;gap:12px;min-height:58px;padding:0 28px;font:700 1.0625rem var(--f-body);color:var(--bg);background:var(--ink);border:2px solid var(--fx);border-radius:999px;box-shadow:4px 4px 0 var(--hard);cursor:pointer;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .4s,transform .4s,visibility 0s .4s;white-space:nowrap}
+.fly-again svg{width:22px;height:22px}
+.fly-again.on{opacity:1;visibility:visible;pointer-events:auto;transform:translate3d(-50%,0,0);transition:opacity .4s,transform .4s}
+.fly-again:hover{transform:translate3d(-50%,-2px,0)}
+.fly-again:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+@media (max-width:700px){.fly-again{bottom:250px;min-height:54px;padding:0 20px;font-size:1rem}}
+@media (prefers-reduced-motion:reduce){.fly-again{transition:none}}

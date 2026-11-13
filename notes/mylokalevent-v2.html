@@ -7,28 +7,48 @@
 <meta name="description" content="Rebuilding MyLokalEvent, a local events platform, from university coursework into a secure, bilingual product.">
 <meta property="og:title" content="From coursework to something people could trust">
 <meta property="og:description" content="Rebuilding a coursework project to production standard.">
-<meta property="og:image" content="https://7ymera.github.io/assets/og-card.jpg">
+<meta property="og:image" content="https://7ymera.github.io/assets/og-skyline-3.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Alif Najmi">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://7ymera.github.io/notes/mylokalevent-v2.html">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://7ymera.github.io/notes/mylokalevent-v2.html">
+<link rel="alternate" type="application/rss+xml" title="Alif Najmi · Notes" href="/feed.xml">
 <meta name="theme-color" content="#0b2a6b">
-<link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=64">
-<link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=180">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/favicon-192.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=20261113j">
-<link rel="stylesheet" href="../assets/scene.css?v=20261113j">
+<link rel="stylesheet" href="../assets/site.css?v=20261114c">
+<link rel="stylesheet" href="../assets/scene.css?v=20261114c">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BlogPosting",
+ "headline": "From coursework to something people could trust",
+ "description": "Rebuilding MyLokalEvent, a local events platform, from university coursework into a secure, bilingual product.",
+ "datePublished": "2026-11-06",
+ "author": {
+  "@type": "Person",
+  "name": "Alif Najmi",
+  "url": "https://7ymera.github.io/"
+ },
+ "image": "https://7ymera.github.io/assets/og-skyline-3.jpg",
+ "mainEntityOfPage": "https://7ymera.github.io/notes/mylokalevent-v2.html"
+}
+</script>
 </head>
 <body>
 <div class="sky" aria-hidden="true"></div>
 
 <header class="top">
   <div class="wrap">
-    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge av"><img src="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=96" alt="" width="32" height="32" decoding="async"></span>Alif Najmi</a>
+    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge av"><img src="/assets/icons/favicon-192.png" alt="" width="32" height="32" decoding="async"></span>Alif Najmi</a>
     <nav class="nav" aria-label="Sections">
       <a href="../#me">Me</a>
       <a href="../#work">Work</a>
@@ -44,7 +64,7 @@
 <main class="wrap">
   <article class="post">
     <div class="post-head">
-      <a class="back" href="../#me">← Back to Alif</a>
+      <span><a class="back" href="../#me">← Back to Alif</a> · <a class="back" href="index.html">All notes</a></span>
       <span class="eyebrow">Notes · Rebuild</span>
       <h1>From coursework to something people could trust</h1>
       <p class="meta">6 November 2026 · 6 min read</p>
@@ -55,7 +75,7 @@
 
       <div class="pair">
         <figure class="shot"><img src="../assets/mle-home-v1.webp" alt="MyLokalEvent v1 home page" width="1200" height="750" loading="lazy"><figcaption>v1, for the course.</figcaption></figure>
-        <figure class="shot"><img src="../assets/mle-home-v2.webp" alt="MyLokalEvent v2 home page" width="1200" height="750" loading="lazy"><figcaption>v2, rebuilt from scratch.</figcaption></figure>
+        <figure class="shot"><img src="../assets/mle-home-v2.webp" alt="MyLokalEvent v2 home page" width="1200" height="750" loading="lazy" decoding="async"><figcaption>v2, rebuilt from scratch.</figcaption></figure>
       </div>
 
       <h2>1. Security came first</h2>
@@ -79,18 +99,18 @@
       <h2>4. It looks like a product</h2>
       <p>v1 used Bootstrap defaults and one blue for nearly everything. v2 has its own design system: deep sea teal, sunset coral, warm sand, a colour for each event category and a wau bulan logo. Every colour has a light and a dark value, and a test checks 60 text and background pairs against WCAG AA in both themes, so text can't vanish when you switch.</p>
       <figure class="shot">
-        <img src="../assets/notes/mle/design-system.webp" alt="The v2 design system in light and dark themes" width="1200" height="1188" loading="lazy">
+        <img src="../assets/notes/mle/design-system.webp" alt="The v2 design system in light and dark themes" width="1200" height="1188" loading="lazy" decoding="async">
         <figcaption>The design system, light and dark side by side.</figcaption>
       </figure>
 
       <h2>5. It speaks BM first</h2>
       <p>v1 was English only, while much of its audience reads Bahasa Melayu first. v2 opens in BM unless your browser prefers English, has a switcher on every page, and puts the language in the URL so shared links open in the right one. The build fails if any translation is missing.</p>
       <figure>
-        <div class="phones"><img src="../assets/notes/mle/v1-home-mobile.webp" alt="v1 on a phone" width="520" height="1125" loading="lazy"><img src="../assets/notes/mle/home-ms-mobile.webp" alt="v2 on a phone in Bahasa Melayu" width="520" height="1125" loading="lazy"><img src="../assets/notes/mle/home-en-dark-mobile.webp" alt="v2 on a phone in English, dark mode" width="520" height="1125" loading="lazy"></div>
+        <div class="phones"><img src="../assets/notes/mle/v1-home-mobile.webp" alt="v1 on a phone" width="520" height="1125" loading="lazy" decoding="async"><img src="../assets/notes/mle/home-ms-mobile.webp" alt="v2 on a phone in Bahasa Melayu" width="520" height="1125" loading="lazy" decoding="async"><img src="../assets/notes/mle/home-en-dark-mobile.webp" alt="v2 on a phone in English, dark mode" width="520" height="1125" loading="lazy" decoding="async"></div>
         <figcaption>v1 on a phone, then v2 in BM, then v2 in English and dark mode.</figcaption>
       </figure>
       <figure class="shot">
-        <img src="../assets/notes/mle/errors-ms.webp" alt="The sign-up form showing validation errors in Bahasa Melayu" width="1200" height="750" loading="lazy">
+        <img src="../assets/notes/mle/errors-ms.webp" alt="The sign-up form showing validation errors in Bahasa Melayu" width="1200" height="750" loading="lazy" decoding="async">
         <figcaption>Form errors in BM.</figcaption>
       </figure>
 
@@ -122,5 +142,6 @@
   });
 })();
 </script>
+<script src="../assets/reader.js?v=20261114c" defer></script>
 </body>
 </html>

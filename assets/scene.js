@@ -1,29 +1,70 @@
 /* KLCC in WebGL. The camera orbits the towers as the page scrolls. three.js comes from cdnjs. */
 (function(){
-  if(!window.THREE)return;
+  if(!window.THREE){document.documentElement.classList.remove('gl');return}
+  var CS=document.currentScript; // read now: it is null once the start is deferred
+  var DEFER=!document.documentElement.hasAttribute('data-flight-only');
+  // The page layout for the scene (panels, plate round the name) must not change after the first paint, so `gl` goes on now; start() removes it again if WebGL turns out to be unavailable.
+  if(DEFER)document.documentElement.classList.add('gl');
+  function start(){
   var T=THREE,root=document.documentElement,cv=document.getElementById('gl');
   // Where this script lives (assets/), so the models load from any page, whatever its folder.
-  var BASE=(((document.currentScript||document.querySelector('script[src*="scene.js"]')||{}).src)||'').replace(/scene\.js.*$/,'');
+  var BASE=(((CS||document.querySelector('script[src*="scene.js"]')||{}).src)||'').replace(/scene\.js.*$/,'');
   // data-flight-only on <html> (the /flight/ page): no orbit phase and no page around it, just the flight, driven by scroll.
   var ONLY=root.hasAttribute('data-flight-only');
   // ?bg=district: the compact one-mesh KLCC district (assets/city/klcc_district.json, tools/convert-klcc-dae.js) replaces the OSM city and the four landmark models.
   var DIST=!/[?&]bg=osm/.test(location.search); // the district is the map; ?bg=osm swaps in the OpenStreetMap city. In the district, the landmarks are the hand-made models, not the district's own blocky ones.
+  // ===== LAYOUT: the one table every position in this file derives from =====
+  // LAY.<landmark> = [x, z, rotation.y] in world units (1 unit = 3.42 m); each model stands on y = 0 at that point. Petronas Twin Towers are the origin.
+  // The district (default) is a COMPOSED skyline, not the map: Menara KL, Merdeka 118 and The Exchange 106 are brought in to 110-180 units of the towers,
+  // all on the far side of the skybridge gap (the side the flight leaves by), at different bearings and depths so their tops do not line up from the opening view.
+  // Each landmark's plot is cleared in the district at load time (CLEAR, below). ?bg=osm keeps the real map positions.
+  // Everything else is derived from LAY: model calls, LCUT, glow zones, BEAC, beacons, crease lines, sign, gyros, rail, labels, director shots and flight waypoints
+  // (their (u,w) coordinates come from UW(), the gap frame defined by the flight code).
+  // CROWN = where each model's crown/spire axis stands, in model-local x,z (before rotation), so the lights and glow follow the model when LAY changes.
+  var LAY=/[?&]bg=osm/.test(location.search)?{klcc:[0,0,0],kl:[-95,-70,0],mer:[-10,-95,-.5],ex:[60,-125,.4]}:{klcc:[0,0,0],kl:[-134,9,0],mer:[-124,-83,-.5],ex:[38,-129,.4]};
+  var CROWN={klcc:[0,0],kl:[0,0],mer:[8.4,-8.5],ex:[3.9,-7.8]};
+  function lp(k,lx,lz){var L=LAY[k],c=Math.cos(L[2]),s=Math.sin(L[2]);return [L[0]+lx*c+lz*s,L[1]-lx*s+lz*c]} // a model-local point in world x,z
+  function crown(k){return lp(k,CROWN[k][0],CROWN[k][1])}
   var renderer;
-  try{renderer=new T.WebGLRenderer({canvas:cv,alpha:true,antialias:true,powerPreference:'low-power'})}catch(e){return}
+  try{renderer=new T.WebGLRenderer({canvas:cv,alpha:true,antialias:true,powerPreference:'low-power'})}catch(e){root.classList.remove('gl');return}
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Film grain and edge vignette: two fixed, pointer-less layers just above the canvas (see the end of scene.css). The grain tile is drawn once here.
+  (function(){
+    var dpr=Math.min(2,Math.max(1,Math.round(devicePixelRatio||1))),TS=180*dpr; // one noise pixel per device pixel
+    function tile(rgb,amax){var c=document.createElement('canvas');c.width=c.height=TS;var x=c.getContext('2d'),d=x.createImageData(TS,TS),i,r=7;
+      for(i=0;i<d.data.length;i+=4){r=(r*16807)%2147483647;var n=r/2147483647;d.data[i]=rgb[0];d.data[i+1]=rgb[1];d.data[i+2]=rgb[2];d.data[i+3]=Math.round(n*n*amax)}
+      x.putImageData(d,0,0);return 'url('+c.toDataURL('image/png')+')'}
+    try{root.style.setProperty('--grain-l',tile([20,60,140],38));root.style.setProperty('--grain-d',tile([150,200,255],26))}catch(e){}
+    ['fx-grain','fx-vig'].forEach(function(id){if(document.getElementById(id))return;var e=document.createElement('div');e.id=id;e.setAttribute('aria-hidden','true');cv.parentNode.insertBefore(e,cv.nextSibling)})
+  })();
   var scene=new T.Scene(),cam=new T.PerspectiveCamera(42,1,.3,1600);
   var M={},C={},mats=[];
   function css(n){return getComputedStyle(root).getPropertyValue(n).trim()}
   function col(k){return new T.Color(C[k])}
-  function readColors(){C.line=css('--fx');['far','mid','near','glass','orb','ring','sky1','sky2'].forEach(function(k){C[k]=css('--'+k)})}
+  function readColors(){C.line=css('--fx');['far','mid','near','glass','orb','ring','sky1','sky2'].forEach(function(k){C[k]=css('--'+k)});
+    var dk=root.getAttribute('data-theme')==='dark'; // night: darker silhouettes and a warm haze (--n-*, --sky3, --sky-mid in scene.css); day: the same colours as always
+    C.ground=dk?css('--n-ground'):C.mid;C.glass2=dk?css('--n-glass'):C.near;C.skyM=dk?css('--sky-mid'):C.sky2;C.sky3=dk?css('--sky3'):C.sky2;
+    if(dk){C.far=css('--n-far');C.mid=css('--n-mid');C.near=css('--n-near')}}
   readColors();
-  function mat(role,opts){var m=new T.MeshLambertMaterial(Object.assign({flatShading:true},opts||{}));m.userData.role=role;mats.push(m);return m}
+  function mat(role,opts){var m=new T.MeshLambertMaterial(Object.assign({flatShading:true},opts||{}));m.userData.role=role;m.onBeforeCompile=function(sh){toon(sh)};mats.push(m);return m}
   function bands(){var c=document.createElement('canvas');c.width=8;c.height=64;var x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,8,64);x.fillStyle='#fff';x.fillRect(0,50,8,6);
     var t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;return t}
   var tex=bands();
-  var tower=mat('near',{emissiveMap:tex,emissive:0xffffff}),towerB=mat('near'),podium=mat('mid'),city=mat('mid'),cityF=mat('far'),ground=mat('mid'),glassM=mat('ring',{emissive:0xffffff,emissiveIntensity:.5});
+  var tower=mat('near',{emissiveMap:tex,emissive:0xffffff}),towerB=mat('near'),podium=mat('mid'),city=mat('mid'),cityF=mat('far'),ground=mat('ground'),glassM=mat('ring',{emissive:0xffffff,emissiveIntensity:.5});
   var orbM=mat('orb'),ringM=new T.MeshBasicMaterial({color:C.ring});
   var amb=new T.AmbientLight(0xffffff,.75),sun=new T.DirectionalLight(0xffffff,.8);sun.position.set(80,140,60);scene.add(amb,sun);
+  // Three flat tones per face (lit / mid / shade, picked by the face normal against one fixed light) and height-aware haze, both in the existing materials' shaders.
+  // The tones are derived from each material's role colour, so the themes and the golden hour keep working. The haze fades towards the CSS sky gradient itself (uSky1/uSky2 at this pixel's screen height), so geometry melts into the sky with no seam.
+  var shadeBase=new T.Vector3(.3,.52,.92),hazeBase=.5,GSH=new T.Vector3(.52,.47,.68),TU={uLight:{value:new T.Vector3(-.42,.74,.52).normalize()},uSunC:{value:sun.color},uLitMul:{value:new T.Vector3(1,1,1)},uLitMix:{value:.7},uShadeMul:{value:new T.Vector3(.4,.6,.95)},uMidMul:{value:new T.Vector3(1,1,1)},
+    uSky1:{value:new T.Color()},uSky2:{value:new T.Color()},uSky3:{value:new T.Color()},uStop:{value:1},uRes:{value:new T.Vector2(1,1)},uHazeK:{value:.7},uSunAmt:{value:.5},uEdge:{value:new T.Vector2(620,1250)}};
+  var GLSL=window.SCENE_GLSL; // the shader text lives in assets/scene-glsl.js (loaded just before this file), so it can be read and edited as GLSL
+  function toon(sh){
+    for(var k in TU)sh.uniforms[k]=TU[k];
+    sh.vertexShader=sh.vertexShader.replace('void main() {','varying vec3 vWP;\nvoid main() {').replace('#include <worldpos_vertex>','#include <worldpos_vertex>\n vWP=(modelMatrix*vec4(transformed,1.0)).xyz;');
+    sh.fragmentShader=sh.fragmentShader.replace('void main() {','varying vec3 vWP;uniform vec3 uLight,uSunC,uLitMul,uShadeMul,uMidMul,uSky1,uSky2,uSky3;uniform float uStop;uniform float uLitMix,uHazeK,uSunAmt;uniform vec2 uRes,uEdge;\nvoid main() {')
+      .replace('#include <aomap_fragment>',GLSL.toonShade)
+      .replace('#include <fog_fragment>',GLSL.toonHaze);
+    return sh}
   var g=new T.Group();scene.add(g);
   var H=132;
   // Fallback tower, used only if klcc.json can't load: stepped octagons turned 22.5deg so the plan reads as a star
@@ -47,7 +88,7 @@
   // The real model: a SketchUp export of the Petronas Towers, converted by tools/convert-obj.py into assets/city/klcc.json
   function b64(str,Type){var bin=atob(str),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Type(u.buffer)}
   var SC=H/444.138; // one scale for every landmark, so their real heights compare truthfully
-  var bodyM=mat('near',{side:T.DoubleSide}),glassModelM=mat('ring',{side:T.DoubleSide,emissive:0xffffff,emissiveIntensity:.3});
+  var bodyM=mat('near',{side:T.DoubleSide}),glassModelM=mat('glass2',{side:T.DoubleSide,emissive:0xffffff,emissiveIntensity:.3});
   function loadModel(url,x,z,ry,bm,fallback,done){
     fetch(url).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
       var pos=b64(d.positions,Float32Array),out=new T.Group();
@@ -58,20 +99,30 @@
     }).catch(function(){if(fallback)fallback();recolor();need=true});
   }
   if(!DIST){
-  loadModel(BASE+'city/klcc.json',0,0,0,bodyM,procedural,klccEdges);          // Petronas Twin Towers (SketchUp export, see tools/convert-obj.py)
-  loadModel(BASE+'city/menara_kl.json',-95,-70,0,bodyM,null,function(){g.remove(kl)}); // Menara KL; replaces the stand-in cylinder tower below once loaded
-  loadModel(BASE+'city/merdeka118.json',-10,-95,-.5,bodyM,null,merEdges);
-  loadModel(BASE+'city/exchange106.json',60,-125,.4,bodyM,null,exEdges);   // The Exchange 106, cropped and simplified (tools/convert-dae-crop.py)  // Merdeka PNB 118 (SketchUp Collada, see tools/convert-dae.py)
+  loadModel(BASE+'city/klcc.json',LAY.klcc[0],LAY.klcc[1],LAY.klcc[2],bodyM,procedural,klccEdges);          // Petronas Twin Towers (SketchUp export, see tools/convert-obj.py)
+  loadModel(BASE+'city/menara_kl.json',LAY.kl[0],LAY.kl[1],LAY.kl[2],bodyM,null,function(){g.remove(kl)}); // Menara KL; replaces the stand-in cylinder tower below once loaded
+  loadModel(BASE+'city/merdeka118.json',LAY.mer[0],LAY.mer[1],LAY.mer[2],bodyM,null,merEdges);
+  loadModel(BASE+'city/exchange106.json',LAY.ex[0],LAY.ex[1],LAY.ex[2],bodyM,null,exEdges);   // The Exchange 106, cropped and simplified (tools/convert-dae-crop.py)  // Merdeka PNB 118 (SketchUp Collada, see tools/convert-dae.py)
   }
   // In the district, the two landmarks baked into its mesh were welded coarsely and have holes: draw the full-detail models over them (1 % larger, so they sit just outside).
   var nightLines=[];
-  function edgesFor(color,minLen,op){ // night-only lines along a landmark's long creases (Merdeka magenta, Petronas warm white, The Exchange pale cyan)
+  // The long creases are only drawn at night, and finding them (EdgesGeometry over every landmark mesh) took about 1.1 s of main thread at load. So the work is queued
+  // per mesh and run one mesh per task, and only once it is needed: at once when the page is (or turns) dark, otherwise as idle warm-up long after load (see sciStyle and warmEdges).
+  var edgeJobs=[],edgeTimer=0,edgesWanted=false;
+  function pumpEdges(){
+    if(edgeTimer||!edgeJobs.length)return;
+    edgeTimer=setTimeout(function(){edgeTimer=0;var j=edgeJobs.shift();j[0](j[1],j[2]);need=true;pumpEdges()},0)}
+  function edgesFor(color,minLen,op){ // night-only lines along a landmark's long creases (Merdeka ice white, Petronas warm white, The Exchange pale cyan)
     var lm=new T.LineBasicMaterial({color:color,transparent:true,opacity:op,blending:T.AdditiveBlending,depthWrite:false});
-    return function(out){out.traverse(function(m){if(!m.isMesh)return;var eg=new T.EdgesGeometry(m.geometry,42),pa=eg.attributes.position.array,keep=[],SCm=out.scale.x||1;
+    function build(m,out){var eg=new T.EdgesGeometry(m.geometry,42),pa=eg.attributes.position.array,keep=[],SCm=out.scale.x||1;
       for(var e=0;e<pa.length;e+=6){var ex=pa[e+3]-pa[e],ey=pa[e+4]-pa[e+1],ez=pa[e+5]-pa[e+2];if(Math.sqrt(ex*ex+ey*ey+ez*ez)*SCm>minLen)keep.push(pa[e],pa[e+1],pa[e+2],pa[e+3],pa[e+4],pa[e+5])}
-      var kg=new T.BufferGeometry();kg.setAttribute('position',new T.Float32BufferAttribute(keep,3));var ln=new T.LineSegments(kg,lm);ln.scale.set(1.006,1,1.006);ln.visible=false;ln.renderOrder=3;m.parent.add(ln);nightLines.push(ln)});need=true}}
-  var merEdges=edgesFor(0xff3ae6,16,.8),klccEdges=edgesFor(0xffe7b0,14,.55),exEdges=edgesFor(0xa8ecff,16,.7);
-  if(DIST){loadModel(BASE+'city/klcc.json',0,0,0,bodyM,null,klccEdges);loadModel(BASE+'city/merdeka118.json',-217.4,303.3,-.5,bodyM,null,merEdges);loadModel(BASE+'city/exchange106.json',157.4,304.7,.4,bodyM,null,exEdges)}
+      var kg=new T.BufferGeometry();kg.setAttribute('position',new T.Float32BufferAttribute(keep,3));var ln=new T.LineSegments(kg,lm);ln.scale.set(1.006,1,1.006);ln.visible=beaconDark;ln.renderOrder=3;m.parent.add(ln);nightLines.push(ln)}
+    return function(out){var ms=[];out.traverse(function(m){if(m.isMesh)ms.push(m)});ms.forEach(function(m){edgeJobs.push([build,m,out])});if(edgesWanted)pumpEdges()}}
+  function warmEdges(){edgesWanted=true;pumpEdges()}
+  var merEdges=edgesFor(0xd4e9ff,24,.4),klccEdges=edgesFor(0xffe7b0,14,.55),exEdges=edgesFor(0xa8ecff,16,.7);
+  // In the district all four landmarks are the hand-made models (the district's own baked Menara KL is cleared out below, see CLEAR/BAKED).
+  if(DIST){loadModel(BASE+'city/klcc.json',LAY.klcc[0],LAY.klcc[1],LAY.klcc[2],bodyM,null,klccEdges);loadModel(BASE+'city/menara_kl.json',LAY.kl[0],LAY.kl[1],LAY.kl[2],bodyM,null,null);
+    loadModel(BASE+'city/merdeka118.json',LAY.mer[0],LAY.mer[1],LAY.mer[2],bodyM,null,merEdges);loadModel(BASE+'city/exchange106.json',LAY.ex[0],LAY.ex[1],LAY.ex[2],bodyM,null,exEdges)}
   var gr=new T.Mesh(new T.CircleGeometry(1400,64),ground);gr.rotation.x=-Math.PI/2;gr.position.y=-.2;g.add(gr);
   // city ring
   var s=11;function rnd(){s=(s*9301+49297)%233280;return s/233280}
@@ -81,51 +132,61 @@
   var loader=new T.TextureLoader();
   function wrapTex(t){t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=4;return t}
   // Where a building has a spire or a bare shaft, no rooms light up above (or below) these heights: [x, z, radius, light up to y] and the lowest lit y. Landmarks: Petronas, Merdeka 118, The Exchange 106, Menara KL.
-  var LCUT=DIST?[[0,0,34,106],[-206,300,24,154],[158,296,28,122],[-221,181,9,99]]:[[0,0,34,106],[-6,-98,24,154],[61,-130,28,122],[-95,-70,9,99]];
+  var LCUT=(function(){var P=crown('klcc'),Mr=crown('mer'),Ex=crown('ex'),Kl=crown('kl');return [[P[0],P[1],34,106],[Mr[0],Mr[1],24,154],[Ex[0],Ex[1],28,122],[Kl[0],Kl[1],9,99]]})(); // derived from LAY: [crown x, z, radius, light up to y]
   var cityU={uCut:{value:LCUT.map(function(c){return new T.Vector4(c[0],c[1],c[2],c[3])})},uLo:{value:[-1,-1,-1,78]},uNight:{value:0},uDay:{value:wrapTex(loader.load(BASE+'city/facade_glass.jpg'))},uNightTex:{value:wrapTex(loader.load(BASE+'city/facade_night.jpg'))}};
   // Facade shader: windows on the walls, in world space, so every building (the OSM city and the landmark models alike) shows its floors.
-  function facade(m){
+  function facade(m,glass){
     m.onBeforeCompile=function(sh){
-      sh.uniforms.uNight=cityU.uNight;sh.uniforms.uCut=cityU.uCut;sh.uniforms.uLo=cityU.uLo;sh.uniforms.uDay=cityU.uDay;sh.uniforms.uNightTex=cityU.uNightTex;
-      sh.vertexShader=sh.vertexShader.replace('void main() {','varying vec3 vWP;\nvoid main() {').replace('#include <worldpos_vertex>','#include <worldpos_vertex>\n vWP=(modelMatrix*vec4(transformed,1.0)).xyz;');
-      sh.fragmentShader=sh.fragmentShader.replace('void main() {','varying vec3 vWP;uniform sampler2D uDay;uniform sampler2D uNightTex;uniform float uNight;uniform vec4 uCut[4];uniform float uLo[4];\nvoid main() {')
-        .replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
-        vec3 fn=normalize(cross(dFdx(vWP),dFdy(vWP)));
-        float wall=1.0-smoothstep(0.45,0.75,abs(fn.y));
-        vec2 fuv=(abs(fn.z)>abs(fn.x)?vWP.xy:vWP.zy)/6.0;
-        float dl=dot(texture2D(uDay,fuv).rgb,vec3(0.333));
-        diffuseColor.rgb*=mix(1.0,clamp(dl*1.9,0.0,1.3),wall*0.75);
-        float nl=wall*uNight*1.25;bool lm=false;
-        for(int i=0;i<4;i++){vec4 c=uCut[i];if(distance(vWP.xz,c.xy)<c.z){lm=true;if(vWP.y>c.w||vWP.y<uLo[i])nl=0.0;}} /* spires and shafts have no floors: no lit rooms there */
-        float hb=fract(sin(dot(floor(vWP.xz/20.0),vec2(12.9898,78.233)))*43758.5453);
-        if(!lm)nl*=mix(1.0,0.1,step(0.8,hb)); /* about one block in five stands dark */
-        nl*=smoothstep(1.0,9.0,vWP.y); /* street level stays dark */
-        totalEmissiveRadiance+=texture2D(uNightTex,fuv).rgb*nl;
-        /* night glow of the landmarks: floodlit Petronas spires, the lit crown of The Exchange 106, the lit pod of Menara KL */
-        float gP=(1.0-step(uCut[0].z,distance(vWP.xz,uCut[0].xy)))*step(uCut[0].w,vWP.y);
-        float gE=(1.0-step(uCut[2].z,distance(vWP.xz,uCut[2].xy)))*step(uCut[2].w-4.0,vWP.y);
-        float gK=(1.0-step(uCut[3].z,distance(vWP.xz,uCut[3].xy)))*step(uLo[3],vWP.y)*(1.0-step(uCut[3].w,vWP.y));
-        totalEmissiveRadiance+=uNight*(vec3(0.95,0.97,1.0)*gP*0.55+vec3(1.0,0.82,0.48)*gE*0.8+vec3(1.0,0.66,0.28)*gK*0.95);`)};
+      sh.uniforms.uNight=cityU.uNight;sh.uniforms.uCut=cityU.uCut;sh.uniforms.uLo=cityU.uLo;sh.uniforms.uDay=cityU.uDay;sh.uniforms.uNightTex=cityU.uNightTex;sh.uniforms.uGlass={value:glass?1:0};
+      toon(sh);
+      sh.fragmentShader=sh.fragmentShader.replace('void main() {',GLSL.facadeHead)
+        .replace('#include <emissivemap_fragment>',GLSL.facadeBody)};
     return m}
   // The ground stays one plain colour. (Roads and dark patches were tried and removed: owner didn't like them.)
   var cityM=facade(mat('mid',DIST?{side:T.DoubleSide}:{}));
   facade(bodyM); // all four landmarks share one material and the facade shader, so none is bluer than the rest
+  facade(glassModelM,1); // their glass parts too (they were a flat cyan at night); the ground takes the shader for its street glow
+  facade(ground);
+  // ---- CLEARING THE PLOTS (district only) ----
+  // The district is one merged mesh, so a plot is cleared by dropping triangles before the geometry is built (deterministic, one pass over the index buffer):
+  //   CLEAR: each landmark's footprint as a circle [model-local centre x, z, radius] (the model's enclosing circle plus a margin), placed through LAY, so it follows the layout.
+  //   BAKED: where the district's own coarse versions stand (world x, z, radius): Merdeka 118 and The Exchange 106 (welded coarsely, with holes) and Menara KL. They are cut out, the hand-made models stand elsewhere.
+  // A small block (under 300 m across) touched by a circle is dropped whole, so no half buildings are left; the three big merged slabs only lose the triangles inside.
+  var CLEAR=[['klcc',12.5,12.7,45],['kl',0,0,14],['mer',-2.3,1.9,59],['ex',-.1,-1.7,33]],BAKED=[[-217.4,303.3,59],[157.4,304.7,37],[-221.3,181.6,12]];
+  function clearPlots(pos,ix){ // pos in metres (the mesh is scaled by SC afterwards)
+    var circ=CLEAR.map(function(c){var p=lp(c[0],c[1],c[2]);return [p[0]/SC,p[1]/SC,c[3]/SC]}).concat(BAKED.map(function(c){return [c[0]/SC,c[1]/SC,c[2]/SC]})),
+      nV=pos.length/3,nT=ix.length/3,par=new Int32Array(nV),t,k,c;
+    for(k=0;k<nV;k++)par[k]=k;
+    function f(a){while(par[a]!==a){par[a]=par[par[a]];a=par[a]}return a}
+    for(t=0;t<nT;t++){var a=f(ix[t*3]);k=f(ix[t*3+1]);if(k!==a)par[k]=a;c=f(ix[t*3+2]);a=f(ix[t*3]);if(c!==a)par[c]=a}
+    var x0=new Float32Array(nV).fill(1e9),x1=new Float32Array(nV).fill(-1e9),z0=new Float32Array(nV).fill(1e9),z1=new Float32Array(nV).fill(-1e9),rootHit=new Uint8Array(nV),hit=new Uint8Array(nT),i3;
+    for(t=0;t<nT;t++){var r=f(ix[t*3]),inside=false,mx=0,mz=0;
+      for(k=0;k<3;k++){i3=ix[t*3+k]*3;var px=pos[i3],pz=pos[i3+2];mx+=px/3;mz+=pz/3;if(px<x0[r])x0[r]=px;if(px>x1[r])x1[r]=px;if(pz<z0[r])z0[r]=pz;if(pz>z1[r])z1[r]=pz;
+        for(c=0;c<circ.length;c++){var dx=px-circ[c][0],dz=pz-circ[c][1];if(dx*dx+dz*dz<circ[c][2]*circ[c][2])inside=true}}
+      for(c=0;c<circ.length;c++){var ex=mx-circ[c][0],ez=mz-circ[c][1];if(ex*ex+ez*ez<circ[c][2]*circ[c][2])inside=true}
+      if(inside){hit[t]=1;rootHit[r]=1}}
+    // Roofs are often separate pieces that only rest on their walls. When a block is dropped, any piece that does not reach the ground and sits over that block goes with it,
+    // so no roof is left floating over a cleared plot.
+    var y0=new Float32Array(nV).fill(1e9),gone=[],v;
+    for(v=0;v<nV;v++){var rv=f(v);if(pos[v*3+1]<y0[rv])y0[rv]=pos[v*3+1]}
+    function small(q){return Math.max(x1[q]-x0[q],z1[q]-z0[q])<300}
+    for(v=0;v<nV;v++)if(par[v]===v&&rootHit[v]&&small(v)&&x1[v]>=x0[v])gone.push(v);
+    for(v=0;v<nV;v++)if(par[v]===v&&!rootHit[v]&&x1[v]>=x0[v]&&y0[v]>4&&small(v)){var cx=(x0[v]+x1[v])/2,cz=(z0[v]+z1[v])/2;
+      for(k=0;k<gone.length;k++){var gq=gone[k];if(cx>x0[gq]-3&&cx<x1[gq]+3&&cz>z0[gq]-3&&cz<z1[gq]+3){rootHit[v]=1;break}}}
+    var keep=[];
+    for(t=0;t<nT;t++){var q=f(ix[t*3]);if(hit[t]||(rootHit[q]&&small(q)))continue;keep.push(ix[t*3],ix[t*3+1],ix[t*3+2])}
+    return new Uint16Array(keep)}
   var cityMesh=null;
   fetch(BASE+(DIST?'city/klcc_district.json':'city/kl_city.json')).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
     var q=new Int16Array(b64(d.positions,Uint8Array).buffer),pos=new Float32Array(q.length);for(var k=0;k<q.length;k++)pos[k]=q[k]*d.scale;
     var geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));var ix=b64(d.indices,Uint16Array);
-    if(DIST){ // cut the district's own versions of the four landmarks out of the mesh (metres from the Petronas midpoint: x east, z south); the hand-made models stand there instead
-      var CUT=[[0,0,150],[-730,1020,200],[530,1026,125]],keep=[];
-      for(var t=0;t<ix.length;t+=3){var ia=ix[t]*3,ib=ix[t+1]*3,ic=ix[t+2]*3,mx=(pos[ia]+pos[ib]+pos[ic])/3,mz=(pos[ia+2]+pos[ib+2]+pos[ic+2])/3,cut=false;
-        for(var c=0;c<CUT.length;c++){var dx=mx-CUT[c][0],dz=mz-CUT[c][1];if(dx*dx+dz*dz<CUT[c][2]*CUT[c][2]){cut=true;break}}
-        if(!cut)keep.push(ix[t],ix[t+1],ix[t+2])}
-      ix=new Uint16Array(keep)}
+    if(DIST)ix=clearPlots(pos,ix); // make room: the landmarks' plots, and the district's own coarse landmarks, are cut out of the mesh
     geo.setIndex(new T.BufferAttribute(ix,1));
     geo=geo.toNonIndexed();geo.computeVertexNormals(); // flat normals: the lighting needs them
     cityMesh=new T.Mesh(geo,cityM);cityMesh.scale.setScalar(SC);g.add(cityMesh);need=true;
   }).catch(function(){});
   // KL Tower
-  var kl=new T.Group();kl.position.set(-95,0,-70);
+  var kl=new T.Group();kl.position.set(LAY.kl[0],0,LAY.kl[1]); // stand-in, ?bg=osm only (the district always has the model)
   var shaft=new T.Mesh(new T.CylinderGeometry(2,3.4,120,8),towerB);shaft.position.y=60;
   var pod=new T.Mesh(new T.CylinderGeometry(9,6,9,10),glassM);pod.position.y=118;
   var ant=new T.Mesh(new T.CylinderGeometry(.3,1,50,6),towerB);ant.position.y=148;
@@ -142,11 +203,10 @@
   // and a radar ring that sweeps out from the Petronas Towers. Light mode uses normal blending, dark mode adds the light on.
   var KU=3.42; // metres per world unit (Petronas Towers 132 units = about 452 m)
   var LM=[
-    {name:'Petronas Twin Towers',real:452,top:new T.Vector3(0,134,0)},
-    {name:'Merdeka PNB 118',real:679,top:new T.Vector3(-6,194,-102)},
-    {name:'Menara Kuala Lumpur',real:421,top:new T.Vector3(-95,130,-70)},
-    {name:'The Exchange 106',real:445,top:new T.Vector3(61,136,-132)}];
-  if(DIST){LM[1].top.set(-217,194,303);LM[2].top.set(-221,127,181);LM[3].top.set(157,132,304)} // the district model puts the landmarks just south of the district, at 60 % of their real offsets
+    {name:'Petronas Twin Towers',real:452,top:new T.Vector3(crown('klcc')[0],134,crown('klcc')[1])},
+    {name:'Merdeka PNB 118',real:679,top:new T.Vector3(crown('mer')[0],194,crown('mer')[1])},
+    {name:'Menara Kuala Lumpur',real:421,top:new T.Vector3(crown('kl')[0],DIST?127:130,crown('kl')[1])},
+    {name:'The Exchange 106',real:445,top:new T.Vector3(crown('ex')[0],DIST?132:136,crown('ex')[1])}]; // tops derived from LAY (crown axis, height as before)
   var fx=[],fxGroup=new T.Group();scene.add(fxGroup);
   function fade(){var c=document.createElement('canvas');c.width=4;c.height=64;var x=c.getContext('2d'),gr=x.createLinearGradient(0,64,0,0);
     gr.addColorStop(0,'#fff');gr.addColorStop(.35,'#9a9a9a');gr.addColorStop(1,'#000');x.fillStyle=gr;x.fillRect(0,0,4,64);return new T.CanvasTexture(c)}
@@ -193,7 +253,12 @@
   var starGeo=new T.BufferGeometry(),starPos=[],SN=SMALL?420:900;
   for(var si=0;si<SN;si++){var sa=Math.random()*6.2832,se=Math.acos(1-Math.random()*.92),sr=1150;starPos.push(Math.sin(se)*Math.cos(sa)*sr,Math.cos(se)*sr*.8+60,Math.sin(se)*Math.sin(sa)*sr)}
   starGeo.setAttribute('position',new T.Float32BufferAttribute(starPos,3));
-  var starM=new T.PointsMaterial({size:SMALL?2.4:2,sizeAttenuation:false,transparent:true,depthWrite:false,fog:false});
+  // Two colour sets: day all white (the stars look as they always did); night dim, tinted, and fading out towards the horizon, where the haze hides them.
+  var starCL=new Float32Array(SN*3).fill(1),starCD=new Float32Array(SN*3),starSeed=7;
+  for(var sj=0;sj<SN;sj++){starSeed=(starSeed*16807)%2147483647;var sr1=starSeed/2147483647;starSeed=(starSeed*16807)%2147483647;var sr2=starSeed/2147483647,sh=Math.max(0,Math.min(1,(starPos[sj*3+1]-60)/900)),sb=Math.pow(sh,1.3)*(.25+.75*sr1*sr1)*(sr2>.5?1:.7);
+    starCD[sj*3]=sb*(sr2>.5?1:.85);starCD[sj*3+1]=sb*.92;starCD[sj*3+2]=sb*(sr2>.5?.9:1)}
+  var starAL=new T.BufferAttribute(starCL,3),starAD=new T.BufferAttribute(starCD,3);
+  var starM=new T.PointsMaterial({size:SMALL?2.4:2,sizeAttenuation:false,transparent:true,depthWrite:false,fog:false,vertexColors:true});
   var stars=new T.Points(starGeo,starM);stars.renderOrder=-20;stars.frustumCulled=false;sci.add(stars);
   // -- moon: a cratered sphere, a tilted ring, a halo, and a small moon going round it
   function moonTex(){var c=document.createElement('canvas');c.width=256;c.height=128;var x=c.getContext('2d');x.fillStyle='#d8d8d8';x.fillRect(0,0,256,128);
@@ -217,13 +282,19 @@
       var ring=new T.Mesh(new T.TorusGeometry(d[0],.32,6,96),gyroM),holder=new T.Group();holder.rotation.set(d[1],d[2],0);holder.add(ring);
       var bead=new T.Mesh(new T.SphereGeometry(1.5,10,8),gyroM);bead.position.set(d[0],0,0);ring.add(bead);g.add(holder);gyros.push({h:holder,ring:ring,sp:d[3]*speed})});
     sci.add(g);return g}
-  addGyro(new T.Vector3(0,128,0),22,1);
+  addGyro(new T.Vector3(crown('klcc')[0],128,crown('klcc')[1]),22,1);
   addGyro(LM[1].top.clone().add(new T.Vector3(0,-14,0)),12,1.4);
   // ===== RAIL: a sky line through the landmarks and a ring round the Petronas Towers, with trains =====
   // Both lines were checked with raycasts against the whole district: nothing within 4.5 units at these heights.
   // The sky line runs Petronas > Menara KL > Merdeka 118 > The Exchange 106 > back. One "hero" train on it is driven by the scroll during the drone
   // flight, so the camera can chase it from Menara KL to Merdeka (see place()); every other train runs on time.
-  var skyCurve=new T.CatmullRomCurve3([[41,0,88],[20,100,88],[-30,190,58],[-40,270,58],[10,340,58],[110,330,58],[200,260,58],[290,150,58],[300,60,58],[200,0,58],[100,-20,58]].map(function(p){return A0(p[0],p[1],p[2])}),true,'catmullrom',.5);
+  // The sky line is a closed loop through (u,w,y) points in the gap frame (A0): over the street side of the skybridge, out round the left of the towers, then past each landmark
+  // on the side facing the towers (Menara KL at 38 units from its axis, Merdeka 118 at 72, The Exchange 106 at 55: clear of their footprints), and home round the other side.
+  // The landmark points come from LAY, so the line follows the layout. Checked against every district and model vertex: the loop stays more than 12 units clear (the old line kept 4.5).
+  function UW0(x,z){return [.665*x+.747*z,-.747*x+.665*z]}
+  function toward(c,d){var L=Math.hypot(c[0],c[1])||1;return [c[0]-c[0]/L*d,c[1]-c[1]/L*d]} // d units from c towards the towers
+  var kU=UW0(LAY.kl[0],LAY.kl[1]),mU=UW0(LAY.mer[0],LAY.mer[1]),eU=UW0(LAY.ex[0],LAY.ex[1]),kP=toward(kU,38),mP=toward(mU,72),eP=toward(eU,55);
+  var skyCurve=new T.CatmullRomCurve3([[41,0,88],[10,95,78],[kP[0],kP[1],58],[mP[0],mP[1],58],[eP[0],eP[1],58],[-20,-105,66],[40,-70,76]].map(function(p){return A0(p[0],p[1],p[2])}),true,'catmullrom',.5);
   var ringPts=[];for(var rgi=0;rgi<12;rgi++){var rga=rgi/12*6.2832;ringPts.push(A0(Math.cos(rga)*41,Math.sin(rga)*41,17))}
   var ringCurve=new T.CatmullRomCurve3(ringPts,true,'catmullrom',.5);
   var skyLen=skyCurve.getLength(),ringLen=ringCurve.getLength();
@@ -245,7 +316,7 @@
   carBody.frustumCulled=carWin.frustumCulled=carStripe.frustumCulled=false;scene.add(carBody,carWin,carStripe);
   var headGlowM=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xfff0c0,opacity:.9}),headGlows=trains.map(function(){var sp=new T.Sprite(headGlowM);sp.scale.set(15,15,1);scene.add(sp);return sp});
   var trD=new T.Object3D(),trP=new T.Vector3(),trT=new T.Vector3(),trTarget=new T.Vector3(),heroS=0,heroOn=false;
-  var tK=0,tM=0;(function(){var kp=A0(-12,285,58),mp=A0(82,364,58),bk=1e9,bm=1e9,q=new T.Vector3();for(var i=0;i<400;i++){skyCurve.getPointAt(i/400,q);var dk=Math.hypot(q.x-kp.x,q.z-kp.z),dm=Math.hypot(q.x-mp.x,q.z-mp.z);if(dk<bk){bk=dk;tK=i/400}if(dm<bm){bm=dm;tM=i/400}}})();
+  var tK=0,tM=0;(function(){var kp=A0(kU[0],kU[1],58),mp=A0(mU[0],mU[1],58),bk=1e9,bm=1e9,q=new T.Vector3();for(var i=0;i<400;i++){skyCurve.getPointAt(i/400,q);var dk=Math.hypot(q.x-kp.x,q.z-kp.z),dm=Math.hypot(q.x-mp.x,q.z-mp.z);if(dk<bk){bk=dk;tK=i/400}if(dm<bm){bm=dm;tM=i/400}}})();
   function railUpdate(time,still){
     var t=still?0:time*.001;
     for(var k=0;k<trains.length;k++){var tr=trains[k];if(tr.hero&&!heroOn){headGlows[k].visible=false;for(var z=0;z<tr.cars;z++){trD.position.set(0,-9999,0);trD.updateMatrix();carBody.setMatrixAt(tr.i0+z,trD.matrix);carWin.setMatrixAt(tr.i0+z,trD.matrix);carStripe.setMatrixAt(tr.i0+z,trD.matrix)}continue}
@@ -263,29 +334,38 @@
     headGlowM.opacity=dark?.95:.5;headGlowM.color.set(dark?0xfff0c0:0xffffff);
     [railM,railM2,headGlowM].forEach(function(m){m.needsUpdate=true})}
   // Aircraft warning lights: a red double flash on the tip of every landmark (and on both Petronas spires), instead of lit rooms up there.
-  var BEAC=DIST?[[11,134,-10],[-11,134,10],[-206,193,300],[158,136,296],[-221,130,181]]:[[11,134,-10],[-11,134,10],[-6,193,-98],[61,136,-130],[-95,130,-70]];
-  var beacons=BEAC.map(function(b,i){var m=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xff3a2a,fog:false,opacity:0}),sp=new T.Sprite(m);sp.scale.set(i===2?15:10,i===2?15:10,1);sp.position.set(b[0],b[1],b[2]);sp.renderOrder=6;g.add(sp);return{m:m,ph:i*.37}});
-  // The yellow sign on the crown of Merdeka 118 (night only), as in the owner's photo.
-  var signC=document.createElement('canvas');signC.width=256;signC.height=64;(function(){var x=signC.getContext('2d');x.font='900 46px Arial,Helvetica,sans-serif';x.textAlign='center';x.textBaseline='middle';x.shadowColor='#ffcc00';x.shadowBlur=14;x.fillStyle='#ffd21a';x.fillText('Maybank',128,34)})();
-  var signM=new T.SpriteMaterial({map:new T.CanvasTexture(signC),transparent:true,depthWrite:false,fog:false,opacity:.95}),signS=new T.Sprite(signM);
-  signS.scale.set(17,4.25,1);signS.position.set(DIST?-214:-7,155.5,DIST?295:-103);signS.visible=false;signS.renderOrder=7;g.add(signS);
+  var BEAC=(function(){var a=lp('klcc',11,-10),b=lp('klcc',-11,10),m=crown('mer'),e=crown('ex'),k=crown('kl');return [[a[0],134,a[1]],[b[0],134,b[1]],[m[0],193,m[1]],[e[0],136,e[1]],[k[0],130,k[1]]]})(); // both Petronas spires, then the tips of Merdeka 118, The Exchange 106 and Menara KL
+  var beacons=BEAC.map(function(b,i){var m=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xff3a2a,fog:false,opacity:0}),sp=new T.Sprite(m);sp.scale.set(i===2?22:14,i===2?22:14,1);sp.position.set(b[0],b[1],b[2]);sp.renderOrder=6;g.add(sp);return{m:m,ph:i*.37}});
   var beaconDark=beaconDark||false;
-  function beaconUpdate(time){var t=time/1000;beacons.forEach(function(b){var p=((t/1.7+b.ph)%1+1)%1,a=(p<.09||(p>.2&&p<.29))?1:.08;b.m.opacity=a*(beaconDark?1:.45)})}
-  var sciPos=new T.Vector3();
+  function beaconUpdate(time){var t=time/1000;beacons.forEach(function(b){var p=((t/1.7+b.ph)%1+1)%1,a=(p<.09||(p>.2&&p<.29))?1:.08;b.m.opacity=a*(beaconDark?1:.45);b.m.blending=beaconDark?T.AdditiveBlending:T.NormalBlending})}
+  // Night moon: put in the clearest part of the picture. Each frame, a few candidate spots on the screen are scored by their distance from the projected landmark tops (and their spires),
+  // the best one wins (with a bias for the current one, so it does not hop), and the moon eases there, 1100 units out along that ray. Day keeps the old fixed placement.
+  var sciPos=new T.Vector3(),MCAND=[[.74,.62],[-.74,.62],[0,.82],[.86,.18],[-.86,.18],[.45,.84],[-.45,.84]],mIdx=0,mX=.74,mY=.62,mP=new T.Vector3(),mTop=[];
+  LM.forEach(function(l){mTop.push(l.top.clone(),l.top.clone().add(new T.Vector3(0,40,0)),l.top.clone().add(new T.Vector3(0,-40,0)))});
+  function moonPlace(still){
+    cam.updateMatrixWorld();var asp=cam.aspect,pts=[],i,j;
+    for(i=0;i<mTop.length;i++){mP.copy(mTop[i]).project(cam);if(mP.z<1)pts.push(mP.x*asp,mP.y)}
+    var best=-1,bi=mIdx;
+    for(j=0;j<MCAND.length;j++){var cx=MCAND[j][0]*asp,cy=MCAND[j][1],sc=9;
+      for(i=0;i<pts.length;i+=2){var d=Math.hypot(pts[i]-cx,pts[i+1]-cy);if(d<sc)sc=d}
+      if(j===mIdx)sc+=.25;if(sc>best){best=sc;bi=j}}
+    mIdx=bi;var k=still?1:.12;mX+=(MCAND[mIdx][0]-mX)*k;mY+=(MCAND[mIdx][1]-mY)*k;
+    mP.set(mX,mY,.5).unproject(cam).sub(cam.position).normalize().multiplyScalar(1100).add(cam.position);moonG.position.copy(mP)}
+  moonG.position.set(-265,326,-831); // behind the skyline as the page opens, high enough to clear the tops
   function sciUpdate(time,still,inRide){
     beaconUpdate(time);
     var t=still?0:time*.001,cl=Math.hypot(cam.position.x,cam.position.z)||1,dx=cam.position.x/cl,dz=cam.position.z/cl;
     stars.rotation.y=t*.004;
-    moonG.position.set(-dx*900+(-dz)*260,330+Math.sin(t*.05)*6,-dz*900+dx*260);
+    /* the moon is locked to one place in the sky (owner's call: it used to follow the camera and hop between clear spots) */
     moon.rotation.y=t*.03;moonRing.rotation.z=t*.02;moonRing2.rotation.z=-t*.015;
     moon2.position.set(Math.cos(t*.22)*170,Math.sin(t*.22)*28,Math.sin(t*.22)*170);
     for(var g=0;g<gyros.length;g++){gyros[g].ring.rotation.z=t*.5*gyros[g].sp;gyros[g].h.rotation.y+=still?0:.0016*gyros[g].sp}
     railUpdate(time,still)}
   function sciStyle(dark){
-    beaconDark=dark;signS.visible=dark;nightLines.forEach(function(l){l.visible=dark});
-    starM.color.set(dark?0xffffff:C.near);starM.opacity=dark?.9:.38;starM.blending=T.NormalBlending;
-    moonM.color.set(dark?0xe6edff:C.near);moon2M.color.set(dark?0xcfd8f2:C.mid);
-    moonHalo.material.color.set(dark?0x9dbbff:0xffffff);moonHalo.material.opacity=dark?.5:.85;
+    beaconDark=dark;nightLines.forEach(function(l){l.visible=dark});if(dark)warmEdges();
+    starM.color.set(dark?0xffffff:C.near);starM.opacity=dark?1:.38;starM.blending=dark?T.AdditiveBlending:T.NormalBlending;starGeo.setAttribute('color',dark?starAD:starAL);
+    moonM.color.set(dark?0xc4cfee:C.near);moon2M.color.set(dark?0xcfd8f2:C.mid);
+    moonHalo.material.color.set(dark?0x9dbbff:0xffffff);moonHalo.material.opacity=dark?.38:.85;
     ringMat.color.set(dark?0xbcd2ff:C.near);ringMat.opacity=dark?.5:.55;
     gyroM.color.set(dark?C.glass:C.line);gyroM.opacity=dark?.85:.75;gyroM.blending=dark?T.AdditiveBlending:T.NormalBlending;
     [starM,ringMat,gyroM,moonHalo.material].forEach(function(m){m.needsUpdate=true});railStyle(dark)}
@@ -297,19 +377,24 @@
     polyM.color.set(c);polyM.blending=bl;polyM.opacity=dark?.8:.7;polyM.needsUpdate=true;
     linkM.color.set(c);linkM.opacity=dark?.5:.6;pulseM.color.set(dark?C.glass:C.line);
     fx.forEach(function(m){m.needsUpdate=true});sciStyle(dark)}
+  function fogColor(){return root.getAttribute('data-theme')==='dark'?col('skyM').lerp(col('sky3'),.5):col('sky2')} // the fog (cars, rails) takes the haze colour at night
   var fogN0=300,fogF0=680; // base fog (set by recolor); the finale pushes it back
   function recolor(){
     root.style.removeProperty('--sky1');root.style.removeProperty('--sky2');goldLast=-1;readColors();var dark=root.getAttribute('data-theme')==='dark';
     mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});
     tower.emissive.set(C.glass);tower.emissiveIntensity=dark?1:.28;glassM.emissive.set(C.ring);glassM.emissiveIntensity=dark?.9:.15;
     cityU.uNight.value=dark?1:0;
-    if(glassModelM){glassModelM.emissive.set(C.ring);glassModelM.emissiveIntensity=dark?.8:.12}ringM.color.set(C.ring);specks.material.color.set(C.ring);
-    var f=col('sky2');fogN0=dark?520:620;fogF0=dark?1500:1700; /* thin fog: it used to hide the city */scene.fog=new T.Fog(f,fogN0,fogF0);
-    fxStyle(dark);amb.intensity=dark?.45:.5;sun.intensity=dark?.55:.55;sun.color.set(dark?0x9cc8ff:0xffffff)}
+    if(glassModelM){glassModelM.emissive.set(C.ring);glassModelM.emissiveIntensity=dark?0:.04}ringM.color.set(C.ring);specks.material.color.set(C.ring);
+    var f=fogColor();fogN0=dark?520:620;fogF0=dark?1500:1700; /* thin fog: it used to hide the city */scene.fog=new T.Fog(f,fogN0,fogF0);
+    TU.uSky1.value.set(C.sky1);TU.uSky2.value.set(C.skyM);TU.uSky3.value.set(C.sky3);TU.uStop.value=dark?.58:1;
+    if(dark){TU.uLitMul.value.set(3,3,1.9);TU.uMidMul.value.set(.95,.95,.95);TU.uLitMix.value=0;TU.uShadeMul.value.set(.45,.5,.7);TU.uHazeK.value=.55} /* night: dark blue-violet silhouettes in three tones, the haze takes the warm horizon colour */
+    else{TU.uLitMul.value.set(1,1,1);TU.uMidMul.value.set(1,1,1);TU.uLitMix.value=.42;TU.uShadeMul.value.set(.46,.62,.95);TU.uHazeK.value=.5} /* day: one blue, three steps of it. Lit faces are a pale tint of the base (not white), shade is the same blue deepened, so every building sits in one family and the steps give the depth */
+    TU.uSunAmt.value=dark?1:.5;shadeBase.copy(TU.uShadeMul.value);hazeBase=TU.uHazeK.value;
+    fxStyle(dark);amb.intensity=dark?.45:.5;sun.intensity=dark?.55:.55;sun.color.set(dark?0xb0b4ff:0xffffff)}
   recolor();window.addEventListener('scenetheme',function(){recolor();need=true});
   new MutationObserver(function(){recolor();need=true}).observe(root,{attributes:true,attributeFilter:['data-theme']}); // the page's own theme button flips data-theme
   var W=0,Hh=0,mobile=false,need=true,px=0,tx=0,cr=0,tr=0,vr={v:0},vx={v:0},dtF=.016,tgtPose=mob(END),curPose=mob(END),vPose=[{v:0},{v:0},{v:0},{v:0},{v:0},{v:0},{v:0},{v:0}];
-  function size(){W=innerWidth;Hh=innerHeight;mobile=W<=820;renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile?1.5:2));renderer.setSize(W,Hh,false);cam.aspect=W/Hh;cam.updateProjectionMatrix();need=true}
+  function size(){W=innerWidth;Hh=innerHeight;mobile=W<=820;renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile?1.5:2));renderer.setSize(W,Hh,false);renderer.getDrawingBufferSize(TU.uRes.value);cam.aspect=W/Hh;cam.updateProjectionMatrix();need=true}
   var enter=document.getElementById('enter'),caps=enter?enter.querySelectorAll('.ride-cap'):[],roll=0,rideP=null,rideT=null,rideQ=null;
   // The page scroll is split in two: first the orbit round the skyline, then (inside #enter) the flight.
   // ---- THE DIRECTOR ----
@@ -319,47 +404,69 @@
   // Poses are interpolated as bearings and radii, not as straight lines, so the camera sweeps round the building instead of through it.
   // The keys below are placed on the page by section: [section id, fraction down it, viewport offset, pose]. Keys are
   // spaced so a shot holds while its section is read and the move to the next one happens in the gap between them.
+  // "Fly it again in dark mode": shown over the finale; it switches the theme and goes back to the start of the flight.
+  var again=document.getElementById('fly-again'),DBGCR=/[?&]dbg/.test(location.search);
+  if(again){(function(){var H=document.documentElement,lab=again.querySelector('b');
+    function isDark(){return H.getAttribute('data-theme')==='dark'}
+    function label(){if(lab)lab.textContent=isDark()?'Fly it again in light mode':'Fly it again in dark mode'}
+    label();if('MutationObserver' in window)new MutationObserver(label).observe(H,{attributes:true,attributeFilter:['data-theme']});
+    again.addEventListener('click',function(){var tb=document.getElementById('theme-btn');
+      if(tb)tb.click();else{var nx=isDark()?'light':'dark';H.setAttribute('data-theme',nx);try{localStorage.setItem('theme',nx)}catch(e){}}
+      var en=document.getElementById('enter');if(en)scrollTo({top:en.getBoundingClientRect().top+scrollY+innerHeight*.15,behavior:'instant'})})})()}
   var spin=document.getElementById('spin'),SP0=.06,SPW=.28,sTop=0,sH=0; // sTop/sH: the buffer's place (read on layout, not per frame)
-  function P(cx,cz,a,r,y,ty,sx,sy){return [cx,cz,a,r,y,ty,sx||0,sy||0]}
-  var MER=DIST?[-217,303]:[-10,-95],EXC=DIST?[157,304]:[60,-125],KLT=DIST?[-221,181]:[-95,-70];           // Merdeka 118, The Exchange 106, Menara KL (scene units, Petronas is 0,0)
+  function P(cx,cz,a,r,y,ty,sx,sy,mr){return [cx,cz,a,r,y,ty,sx||0,sy||0,mr||0]} // mr: the radius to use on a phone for a wide shot of the group (0 = the usual 12 % back)
+  var MER=[LAY.mer[0],LAY.mer[1]],EXC=[LAY.ex[0],LAY.ex[1]],KLT=[LAY.kl[0],LAY.kl[1]];  // Merdeka 118, The Exchange 106, Menara KL (scene units, Petronas is 0,0), all from LAY
+  // GC: the middle of the four landmarks (the finale arc and the wide HUD views look at it). The wide shots below were fitted so all four tops stay on screen:
+  // each is [look-at centre x, z, bearing, radius, camera height, look-at height, push, ..., phone radius] (see P). Landmarks stand 100-170 units out, so a wide shot sits 240-300 back.
+  var GC=[(LAY.klcc[0]+LAY.kl[0]+LAY.mer[0]+LAY.ex[0])/4,(LAY.klcc[1]+LAY.kl[1]+LAY.mer[1]+LAY.ex[1])/4];
   var GAP=48.3;                                            // bearing of the gap between the towers (street side)
+  // Bearings (degrees, world x toward z): Menara KL stands at about 176 from the towers, Merdeka 118 at 214 and The Exchange 106 at 287, so shots that look at the towers from
+  // those sides would put the camera inside them (the old UTP 'far side' shot did). The wide shots use bearings where the four silhouettes stay apart (60-65, 130-150, 190, 235; found by scoring every 10 degrees).
   var UTP=[                                                // UTP: one shot per group in the coverflow, in the order of its cards
     P(0,0,40,235,85,66,.24),                               // 0 Languages: the whole of the towers
     P(0,0,62,112,122,118,.24),                             // 1 Programming: the crowns
-    P(0,0,GAP+180,150,52,56,.24),                          // 2 Computer systems: side-on at the skybridge, from the far side
+    P(0,0,GAP+90,150,52,56,.24),                           // 2 Computer systems: along the skybridge, from the south-west
     P(0,0,45,78,14,100,.24),                               // 3 Maths: the foot of the towers, looking up
-    P(0,0,225,118,172,56,.24),                             // 4 Data & AI: down on them from above
+    P(0,0,125,118,172,56,.24),                             // 4 Data & AI: down on them from above
     P(0,0,100,175,62,46,.24),                              // 5 Business & people: the podium and Suria KLCC from the south
-    P(0,0,335,310,125,82,.24)                              // 6 The big ones: back to take in the skyline
+    P(-15,-91,25,310,100,85,.24,0,750)                                   // 6 The big ones: back to take in the skyline
   ];
   var utpIdx=0;
-  var END=P(0,0,337.5,250,100,69,0);                       // where the flight takes over (what orbitPose(1) was)
+  var END=P(-15,-11,45,240,95,85,0);                           // where the flight takes over (the flight's first key is built from this, see buildKF)
+  // The opening shot fills the screen whatever its shape. On a wide screen the four landmarks stand in a row. On a tall one (a phone) a row would be tiny, with empty ground under it,
+  // so the camera starts close to the ground and looks up at the towers. As the name card comes in it rises and pulls back to the group (cardPose).
+  var TOPF=window.__topf||{r:234,dr:96,y:100,dy:-78,ty:85,dty:22,cx:-15,dcx:6,a0:1.3,span:.8,cr:560,cy:112,cty:80};
+  // Behind the name card: on a wide screen the opening shot itself (no move); on a tall one the group of four from higher and farther back, though not so far that it is small.
+  function cardPose(){var t=clamp((TOPF.a0-W/Math.max(1,Hh))/TOPF.span,0,1),p=topPose();if(t<=0)return p;var q=P(-15,-11,65,TOPF.cr,TOPF.cy,TOPF.cty,0,0,TOPF.cr);for(var i=0;i<9;i++)q[i]=p[i]+(q[i]-p[i])*t;q[8]=q[3];return q}
+  function topPose(){var t=clamp((TOPF.a0-W/Math.max(1,Hh))/TOPF.span,0,1),r=TOPF.r+TOPF.dr*t;return P(TOPF.cx+TOPF.dcx*t,-11,65,r,TOPF.y+TOPF.dy*t,TOPF.ty+TOPF.dty*t,.1*(1-t),0,r)}
   var DIR=[
-    ['top',0,0,P(0,0,31.5,250,100,69,.2)],                 // the opening
-    ['spin',0,-1,P(0,0,50,250,110,66,0)],                  // the buffer turns the city about 85 degrees
-    ['spin',1,-1,P(0,0,135,224,150,55,0)],
-    ['me',.2,-.5,P(0,0,150,236,128,60,0)],
-    ['why',.5,-.5,P(0,0,168,240,118,62,0)],
+    ['top',0,0,function(){return topPose()}],                          // the opening: framed for the shape of the screen (see topPose)
+    ['curtain',0,1.8,function(){return cardPose()}],                   // as the name card comes in (1.8 screens down, EST in extras.js): on a tall screen the camera has risen and pulled back to the whole group
+    ['spin',0,-1,P(-95,-11,130,230,100,100,0,0,440)],                      // the buffer turns the city about 85 degrees
+    ['spin',1,-1,P(-95,-11,150,250,100,100,0,0,390)],
+    ['me',.2,-.5,P(-95,-11,150,250,100,100,0,0,390)],
+    ['why',.5,-.5,P(-95,-91,190,290,100,100,0,0,550)],
     ['notes',.14,-.5,P(0,0,45,76,12,100,.22)],            // Notes: under the towers, looking up ...
     ['notes',.52,-.5,P(0,0,72,86,50,88,.22)],             // ... then climbing as you read
     ['notes',.9,-.5,P(0,0,98,130,98,74,.22)],
     ['studied',.14,-.5,function(){return UTP[utpIdx]}],   // UTP: the shot follows the group you pick
     ['studied',.9,-.5,function(){return UTP[utpIdx]}],
-    ['merdekastage',.3,-.5,P(MER[0],MER[1],128,135,16,78,-.2)],  // a lead-in all of its own: the tower looming over its label
-    ['toolkit',.1,-.5,P(MER[0],MER[1],120,125,5,118,0)],    // Skills: Merdeka 118 between the two columns, base first ...
-    ['toolkit',.38,-.5,P(MER[0],MER[1],140,300,95,96,0)], // ... the whole building ...
-    ['toolkit',.66,-.5,P(MER[0],MER[1],172,150,150,150,0)],// ... the upper half ...
-    ['toolkit',.92,-.5,P(MER[0],MER[1],205,240,215,172,0)],// ... and the spire
-    ['workstage',.3,-.5,P(KLT[0],KLT[1],20,205,72,66,.2)],// Work: Menara KL
-    ['work',.5,-.5,P(KLT[0],KLT[1],64,215,82,66,.1)],
-    ['pulse',.5,-.5,P(0,0,200,250,110,66,0)],
-    ['journey',.1,-.5,P(EXC[0],EXC[1],140,78,8,76,-.22)], // Journey: The Exchange 106, climbing as the years go by
-    ['journey',.3,-.5,P(EXC[0],EXC[1],176,118,96,122,-.22)],
-    ['journey',.62,0,P(0,0,320,500,300,50,0)],                 // pull right back (zoom out) ...
+    // The shots at one landmark look at it from the side away from the group (bearing from the group's middle to the landmark), so the others stand behind it.
+    ['merdekastage',.3,-.5,P(MER[0],MER[1],160,135,16,78,-.2)],  // a lead-in all of its own: the tower looming over its label
+    ['toolkit',.1,-.5,P(MER[0],MER[1],150,125,5,118,0)],    // Skills: Merdeka 118 between the two columns, base first ...
+    ['toolkit',.38,-.5,P(MER[0],MER[1],175,300,95,96,0)], // ... the whole building ...
+    ['toolkit',.66,-.5,P(MER[0],MER[1],205,150,150,150,0)],// ... the upper half ...
+    ['toolkit',.92,-.5,P(MER[0],MER[1],235,240,215,172,0)],// ... and the spire
+    ['workstage',.3,-.5,P(KLT[0],KLT[1],215,205,72,66,.2)],// Work: Menara KL
+    ['work',.5,-.5,P(KLT[0],KLT[1],255,215,82,66,.1)],
+    ['pulse',.5,-.5,P(-95,-91,235,280,100,100,0,0,700)],
+    ['journey',.1,-.5,P(EXC[0],EXC[1],300,78,8,76,-.22)], // Journey: The Exchange 106, climbing as the years go by
+    ['journey',.3,-.5,P(EXC[0],EXC[1],335,118,96,122,-.22)],
+    ['journey',.62,0,P(-25,9,60,360,190,70,0,0,900)],                 // pull right back (zoom out) ...
     ['enter',0,-1,END]                                         // ... then in to where the flight starts (zoom in)                                     // the flight starts here
   ];
   var KEYS=[],lastLay=-1;
-  function mob(p){if(!mobile)return p;var q=p.slice();q[6]=0;q[3]*=1.12;q[4]*=1.08;return q}
+  function mob(p){if(!mobile)return p;var q=p.slice(0,8);q[6]=0;if(p[8]){q[3]=p[8]}else{q[3]*=1.12;q[4]*=1.08}return q} // a portrait screen is only 0.49 of its height wide: a wide shot of the group stands much farther back there (p[8])
   function layoutKeys(){
     var vh=innerHeight,k=[];
     if(spin){sTop=spin.offsetTop;sH=spin.offsetHeight}
@@ -382,6 +489,7 @@
   function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
   // Critically damped follow (no overshoot, no jump when a wheel notch lands): the camera glides to where the scroll bar is.
   function damp(c,t,v,st,dt){var o=2/st,x=o*dt,e=1/(1+x+.48*x*x+.235*x*x*x),ch=c-t,tmp=(v.v+o*ch)*dt;v.v=(v.v-o*tmp)*e;return t+(ch+tmp)*e}
+  function poseCam(p){p=mob(p);var a=p[2]*Math.PI/180;return{pos:new T.Vector3(p[0]+Math.cos(a)*p[3],p[4],p[1]+Math.sin(a)*p[3]),tgt:new T.Vector3(p[0],p[5],p[1])}} // camera of a director pose
   function orbitPose(p,pxv){var e=Math.sin(p*Math.PI),ang=.55+p*Math.PI*1.7+pxv*.12*(1-p),rad=(mobile?290:250)-e*30,hgt=(mobile?112:100)+e*60;
     return{pos:new T.Vector3(Math.cos(ang)*rad,hgt,Math.sin(ang)*rad),tgt:new T.Vector3(0,H*(mobile?.5:.52)-e*18,0)}}
 
@@ -391,38 +499,97 @@
   // Waypoints are written in (u, w, y): u runs along the gap between the towers (toward the street side), w across it, y up. World units.
   var UX=new T.Vector3(.665,0,.747),WX=new T.Vector3(-.747,0,.665);
   function A(u,w,y){return new T.Vector3(UX.x*u+WX.x*w,y,UX.z*u+WX.z*w)}
-  var MC={u:-80,w:-63};                                   // Merdeka 118's axis
-  var ENDC={u:120,w:205},ENDN={u:-.5,w:-.866};            // the middle of the four landmarks, and the direction from it to the finale camera
-  var MCD={u:82,w:364},EXD={u:331,w:85};                  // the district puts Merdeka 118 and The Exchange 106 south of KLCC, in (u,w)
+  var MC={u:-80,w:-63};                                   // ?bg=osm only: Merdeka 118's axis on the real map
+  // THE LANDMARKS IN THE GAP FRAME. Every flight waypoint below is written relative to these, which come from LAY, so moving a landmark in LAY re-aims its spiral and the legs to it.
+  //   MCD / EXD / KLD = Merdeka 118, The Exchange 106 and Menara KL (model origin = tower axis); ENDC = what the finale looks at (fitted so all four tops stay in frame, see the wide shots); ENDN = unit direction from ENDC to the finale camera (bearing FB).
+  function UW(x,z){return {u:UX.x*x+UX.z*z,w:WX.x*x+WX.z*z}}  // world x,z -> (u,w); a direction maps the same way
+  var MCD=UW(LAY.mer[0],LAY.mer[1]),EXD=UW(LAY.ex[0],LAY.ex[1]),KLD=UW(LAY.kl[0],LAY.kl[1]),ENDC=UW(-15,-11),FB=65,ENDN=UW(Math.cos(FB*Math.PI/180),Math.sin(FB*Math.PI/180)); // the finale looks from the opening's bearing, so the film starts and ends on the same view
   function arcAt(deg,r,y,ty){var C=DIST?MCD:MC,a=deg*Math.PI/180;return [A(C.u+Math.cos(a)*r,C.w+Math.sin(a)*r,y),A(C.u,C.w,ty)]}
   // [name, camera position, look-at point, slow factor of the stretch that FOLLOWS it (bigger = more scroll spent there)]
-  var KF=null,CAPS=DIST?[['start','p14'],['p14','exit'],['exit','kEnd'],['kEnd','eStart'],['eStart','rise'],['rise','end']]:[['start','front'],['front','over'],['over','out'],['out','m4'],['m4','pass'],['pass','end']];
+  var KF=null,CAPS=DIST?[['start','bridge'],['bridge','exit'],['exit','sw1'],['sw1','e0'],['e0','sk0'],['sk0','end']]:[['start','front'],['front','over'],['over','out'],['out','m4'],['m4','pass'],['pass','end']];
+  function railNear(x,z){var b=1e9,s=0,q=new T.Vector3();for(var i=0;i<600;i++){skyCurve.getPointAt(i/600,q);var d=Math.hypot(q.x-x,q.z-z);if(d<b){b=d;s=i/600}}return s} // the sky rail's parameter nearest to a world point (build time only)
   function buildKF(){
-    var o=orbitPose(1,0),m1=arcAt(90,55,96,112),m2=arcAt(130,55,116,132),m3=arcAt(180,55,138,150),m4=arcAt(230,55,166,178),m5=arcAt(270,55,200,205);
+    var o=DIST?poseCam(END):orbitPose(1,0),m1=arcAt(90,55,96,112),m2=arcAt(130,55,116,132),m3=arcAt(180,55,138,150),m4=arcAt(230,55,166,178),m5=arcAt(270,55,200,205);
     if(DIST){
-      // THE DRONE FLIGHT. A spiral climb up every landmark (Petronas, Menara KL, Merdeka 118), a spiral dive down The Exchange 106, a barrel roll through the
-      // skybridge gap, tight cruises between them, then a pull-out to the finale. KF rows: [name, camera, look-at, slow factor, roll (radians, cumulative)].
-      var E=EXD,C=MCD,K={u:-12,w:285},P0={u:0,w:0},R=[];
-      // a spiral round a tower: n+1 knots from angle th0 to th1 (degrees), radius r0 to r1, height y0 to y1, looking at the tower's axis a little above the camera
+      // THE DRONE FLIGHT, eight beats, each a different kind of move, fast ones between slow ones (the slow factor, last-but-one number, sets the pace: 0.8 fast, 1.4 medium, 2.4 slow):
+      //   1 drop-in (fast)      from the opening pose down to street level, rushing over the blocks toward the Petronas Towers
+      //   2 Petronas rise       a three-quarter turn climbing round both towers, ending head-on at the skybridge
+      //   3 skybridge thread    over the bridge and through the gap (the barrel roll is in the roll column; see BARREL)
+      //   4 halo round Menara KL one level orbit at pod height, far enough out for the pod and the antenna to stand whole, the other landmarks sliding behind
+      //   5 Merdeka crane-up    in low from Menara KL's side, up the face with the aim tilting up, over the spire tip and nearly straight down at the city floor
+      //   6 fall down The Exchange 106 (fast)  from above Merdeka, tip over and dive alongside the glass face, looking down and forward along it
+      //   7 street skim         low along the sky rail (under it) through the middle of the group, the hero train ahead (see the chase in place())
+      //   8 pull-out            backwards and outward on an arc to the finale pose (rows 'sweep1', 'sweep2', 'end' are what the finale code looks for)
+      // Every centre comes from LAY: MCD/EXD/KLD are the model origins, the flight circles the crown axis (crown()). Radii are widened on phones (mr), where the narrow picture crops a subject.
+      var P0={u:0,w:0},XIT={u:-46,w:-4},mr=mobile?1.5:1,i,f,RAD=Math.PI/180;
+      function dg(a,b){return Math.atan2(b.w-a.w,b.u-a.u)*180/Math.PI}                 // direction a -> b in the gap frame, degrees
+      function pt(c,th,r){return {u:c.u+Math.cos(th*RAD)*r,w:c.w+Math.sin(th*RAD)*r}}
+      function lerpUW(a,b,f){return {u:a.u+(b.u-a.u)*f,w:a.w+(b.w-a.w)*f}}
+      function dist(a,b){return Math.hypot(b.u-a.u,b.w-a.w)}
+      function cUW(k){var c=crown(k);return UW(c[0],c[1])}                              // a landmark's crown axis in (u,w)
+      function wrap(a){return ((a%360)+360)%360}
+      var C=cUW('mer'),E=cUW('ex'),K=cUW('kl');
+      // a spiral round a tower: n+1 knots from angle th0 to th1 (degrees; increasing = counter-clockwise), radius r0 to r1, height y0 to y1, looking at the tower's axis (look: height above the camera, or a function y -> absolute aim height)
       function spiral(pre,c,r0,r1,y0,y1,th0,th1,n,look,slow,bank){
-        for(var i=0;i<=n;i++){var f=i/n,th=(th0+(th1-th0)*f)*Math.PI/180,r=r0+(r1-r0)*f,y=y0+(y1-y0)*f;
-          KF.push([pre+i,A(c.u+Math.cos(th)*r,c.w+Math.sin(th)*r,y),A(c.u,c.w,y+look),slow,(bank||0)*Math.sin(f*Math.PI)])}}
-      KF=[['start',o.pos,o.tgt,1.0,0],['dive',A(46,-128,74),A(0,0,60),1.1,0]];
-      spiral('p',P0,34,29,26,132,-70,650,16,12,2.2,.0);                         // Petronas: two turns up to the crowns
-      KF.push(['bridge',A(70,0,56),A(0,0,50),1.7,0],['over',A(30,0,66),A(-20,0,66),1.9,Math.PI],['gap',A(0,0,76),A(-60,-10,84),1.7,Math.PI*2]); // barrel roll through the gap
-      KF.push(['exit',A(-46,-4,104),A(-92,34,104),1.5,Math.PI*2],['turn1',A(-72,28,132),A(-84,110,126),1.5,Math.PI*2],['turn2',A(-70,96,160),A(-40,200,140),1.4,Math.PI*2],
-              ['out',A(-30,190,170),A(K.u,K.w,120),1.1,Math.PI*2]);
-      spiral('k',K,27,21,44,124,-100,620,20,10,2.2,0);KF[KF.length-1][0]='kEnd';KF[KF.length-1][3]=9;                          // Menara KL: two turns up to the pod
-      // Merdeka: arrive from the near side (230 deg) and go round clockwise until the camera's direction of travel points at The Exchange (42 deg), so it flies straight on
-      spiral('m',C,60,46,96,214,230,-678,24,12,2.4,0);
-      (function(){var th=42*Math.PI/180,rx=Math.cos(th),rz=Math.sin(th),tx=Math.sin(th),tz=-Math.cos(th);
-        function at(rr,tt,y){return A(C.u+rx*rr+tx*tt,C.w+rz*rr+tz*tt,y)}
-        KF.push(['mfly1',at(50,60,222),at(10,95,200),1.0,0],['mfly2',at(44,170,230),at(30,260,190),1.0,0],['mfly3',A((C.u+E.u)/2+10,(C.w+E.w)/2,226),A(E.u,E.w,170),1.0,0])})();
-      spiral('e',E,44,34,168,34,132,672,14,-10,2.0,0);KF[KF.length-15][0]='eStart';                          // The Exchange 106: a spiral dive from the crown to the base
-      KF.push(['rise',A(E.u+92,E.w-58,150),A(ENDC.u,ENDC.w,90),1.2,0],['sweep1',A(E.u+0,E.w-300,170),A(ENDC.u,ENDC.w,90),1.3,0],['sweep2',A(ENDC.u+150,ENDC.w-460,140),A(ENDC.u,ENDC.w,92),1.3,0],
-      // The finale. Wide screens: a horizontal shot of the skyline, camera low and far back on the street side so the four landmarks
-      // line up across the screen. Portrait phones cannot fit a row, so there it is a full zoom-out: high and far, looking down at the whole district.
-              ['end',mobile?A(ENDC.u+ENDN.u*560,ENDC.w+ENDN.w*560,400):A(ENDC.u+ENDN.u*600,ENDC.w+ENDN.w*600,92),A(ENDC.u,ENDC.w,mobile?30:96),1.5,0]);
+        for(var i=0;i<=n;i++){var f=i/n,th=(th0+(th1-th0)*f)*RAD,r=r0+(r1-r0)*f,y=y0+(y1-y0)*f;
+          KF.push([pre+i,A(c.u+Math.cos(th)*r,c.w+Math.sin(th)*r,y),A(c.u,c.w,typeof look==='function'?look(y):y+look),slow,(bank||0)*Math.sin(f*Math.PI)])}}
+      function row(name,p,y,a,ay,slow,roll){KF.push([name,A(p.u,p.w,y),A(a.u,a.w,ay),slow,roll||0])}
+      KF=[['start',o.pos,o.tgt,.8,0]];
+      // 1 drop-in: from the opening pose (street side) straight down to street level, then a rush along the free lane at w = -52 (the blocks on both sides streaming past), the towers growing ahead on the right
+      var D1=[[170,-30,62,66],[140,-44,34,64],[108,-52,18,62],[74,-52,16,60],[38,-52,22,60]];
+      for(i=0;i<D1.length;i++)row('dive'+(i+1),{u:D1[i][0],w:D1[i][1]},D1[i][2],P0,D1[i][3],.8);
+      // 2 Petronas rise: three quarters of a turn clockwise (-90 to -330 degrees) round both towers, widening from 50 to 110 and climbing from 36 to 67 (the ring is free of blocks only inside radius 50 at street level), ending at skybridge height on the front side
+      var RS=[[-90,54,38,70],[-120,59,50,72],[-150,63,64,74],[-180,72,74,76],[-210,80,80,78],[-240,90,82,80],[-270,100,82,80],[-300,106,74,78],[-330,110,62,76]];
+      for(i=0;i<RS.length;i++){var rk=1+(mobile?.35:0)*clamp((-RS[i][0]-150)/150,0,1),pp=pt(P0,RS[i][0],RS[i][1]*rk);row('p'+i,pp,RS[i][2],P0,RS[i][3],2.3)}
+      // the turn that lines the camera up with the gap (a right turn of radius about 45, ending head-on on the street side)
+      row('q1',{u:106,w:22},60,P0,64,1.9);row('q2',{u:94,w:-12},58,P0,60,1.9);
+      var Bq={u:66,w:-10};
+      // 3 skybridge thread: head-on, over the bridge, through the gap (roll column: cumulative radians, 0 -> pi -> 2 pi)
+      row('bridge',Bq,56,P0,50,2.0);row('over',{u:30,w:0},66,{u:-20,w:0},66,2.1,Math.PI);row('gap',P0,76,lerpUW(P0,K,.5),90,1.7,Math.PI*2);
+      // 4 halo round Menara KL: the camera enters the circle on the tangent from the gap and leaves on the tangent toward Merdeka, one level orbit (about 300 degrees clockwise) at pod height
+      var hr=62,hz=dist(K,XIT),hTh0=dg(K,XIT)-Math.acos(Math.min(.98,hr/hz))/RAD,
+          hTh1=dg(K,C)+Math.acos(Math.min(.98,hr/dist(K,C)))/RAD,hSw=wrap(hTh0-hTh1),hAim=function(y){return 97};
+      row('exit',XIT,104,lerpUW(XIT,K,.7),104,1.4);
+      var hS=pt(K,hTh0,hr);row('hin1',lerpUW(XIT,hS,.38),103,K,104,1.4);row('hin2',lerpUW(XIT,hS,.7),101,K,104,1.4);
+      function sm(x){x=clamp(x,0,1);return x*x*(3-2*x)}
+      function mixAim(j,v,w){KF[j][2]=KF[j][2].clone().lerp(v,sm(w))}   // slide a knot's aim toward a point (so the view turns gradually into the next beat)
+      spiral('h',K,hr,hr,102,98,hTh0,hTh0-hSw,16,hAim,1.5,0);
+      // 5 Merdeka crane-up: swoop down to a low start on the Menara KL side, climb the face (the aim climbs faster than the camera, so the spire stays in frame) clockwise round the side away from Menara KL (radius about 95), then over the tip and look nearly straight down
+      var cr0=96,cr1=90,hEnd=pt(K,hTh0-hSw,hr),
+          cT0=dg(C,hEnd)-Math.acos(Math.min(.98,cr0/dist(C,hEnd)))/RAD,cT1=dg(E,C),cSw=wrap(cT0-cT1),cS=pt(C,cT0,cr0),swA=A(lerpUW(hEnd,C,.9).u,lerpUW(hEnd,C,.9).w,70);
+      for(i=KF.length-5;i<KF.length;i++)mixAim(i,swA,(i-(KF.length-6))/5*1.1-.3);  // the last halo knots already turn their aim toward Merdeka
+      row('sw1',lerpUW(hEnd,cS,.45),64,lerpUW(hEnd,C,.9),70,1.0);
+      for(i=0;i<=10;i++){f=i/10;var cth=(cT0-cSw*f)*RAD,crr=(cr0+(cr1-cr0)*f)*(1-.2*Math.exp(-Math.pow((((cT0-cSw*f+180)%360+360)%360-180+62)/18,2))),cy=74+124*f; // dips inward where a block stands close to the circle (bearing -62 degrees from Merdeka, checked with the clearance oracle)
+        KF.push(['c'+i,A(C.u+Math.cos(cth)*crr,C.w+Math.sin(cth)*crr,cy),A(C.u,C.w,70+.65*(cy-74)),2.3,0])} // near the top the aim eases down a little, so the city fills the lower part of the frame
+      row('top0',pt(C,cT1,64),216,C,150,2.0);row('top1',pt(C,cT1,44),236,C,70,2.0);row('top2',pt(C,cT1,20),248,C,0,2.0);
+      // tip over and fly to The Exchange, still heading the same way (the camera sits behind Merdeka's axis, looking along the line to The Exchange), the aim coming up from the floor to the horizon
+      var fE=function(f){return lerpUW(C,E,f)};
+      row('fl1',fE(.14),246,fE(.34),40,1.0);row('fl2',fE(.3),236,fE(.54),50,.9);row('fl3',fE(.46),222,fE(.7),62,.9);row('fl4',fE(.6),205,fE(.84),78,.9);
+      // 6 fall down The Exchange: clockwise round its glass face from the Merdeka side, radius 100 closing to the rail, height 214 to the street; the aim is ahead and down, turned so the tower stands on the right third of the frame
+      // 7 street skim rows first (the fall ends where the skim starts)
+      var eR=A(pt(E,16,46).u,pt(E,16,46).w,0),sA=railNear(eR.x,eR.z),sB=sA,SK=[],qv=new T.Vector3(),tg=new T.Vector3();
+      for(i=1;i<400;i++){var ss=(sA+i/400)%1;skyCurve.getPointAt(ss,qv);if(Math.hypot(qv.x,qv.z)<=50){sB=sA+i/400;break}}
+      if(sB===sA)sB=sA+.22;
+      chA=sA%1;chB=sB%1;var nS=12;
+      for(i=0;i<=nS;i++){var s0=(sA+(sB-sA)*i/nS)%1,s1=(s0+85/skyLen)%1;skyCurve.getPointAt(s0,qv);skyCurve.getTangentAt(s0,tg);
+        var cp=new T.Vector3(qv.x-tg.z*8,Math.max(30,qv.y-26),qv.z+tg.x*8);skyCurve.getPointAt(s1,qv);
+        SK.push([cp,new T.Vector3(qv.x,qv.y-20,qv.z)])}
+      var s0u=UW(SK[0][0].x,SK[0][0].z),fr=(mobile?1.3:1),fTh0=dg(E,C),fTh1=dg(E,s0u),fSw=wrap(fTh0-fTh1),fR0=100*fr,fR1=dist(E,s0u),nF=10,fk0=KF.length;
+      for(i=0;i<nF;i++){f=i/nF;var th=(fTh0-fSw*(1-Math.pow(1-f,2.1)))*RAD,r=fR1+(fR0-fR1)*Math.pow(1-f,1.6),y=SK[0][0].y+(214-SK[0][0].y)*(1-Math.pow(f,1.7)), /* the turn round the tower comes first, while still high; then the height goes all at once, on a nearly straight line, so it reads as a fall and the turn limit does not slow it */ phi=26*RAD,Lh=60,pit=Math.atan(.9-.55*f);
+        var cx=E.u+Math.cos(th)*r,cz=E.w+Math.sin(th)*r;
+        KF.push([i?'e'+i:'e0',A(cx,cz,y),A(cx+Lh*(-Math.cos(phi)*Math.cos(th)+Math.sin(phi)*Math.sin(th)),cz+Lh*(-Math.cos(phi)*Math.sin(th)-Math.sin(phi)*Math.cos(th)),Math.max(0,y-Lh*Math.tan(pit))),i<nF-1?.5:1.0,1.2*Math.sin(f*Math.PI)]);
+        mixAim(KF.length-1,SK[0][1],(f-.45)/.5);if(f<.3)mixAim(KF.length-1,KF[fk0-1][2],1-f/.3)}   // the first fall knots keep the aim of the flight in, the last ones turn it to where the skim looks
+      var skEndAim=A(ENDC.u,ENDC.w,90);for(i=nS-4;i<=nS;i++)SK[i][1]=SK[i][1].clone().lerp(skEndAim,sm((i-(nS-5))/5));  // the last skim knots turn their aim toward the group, ready for the pull-out
+      SK.forEach(function(s,j){KF.push([j?(j===nS?'skEnd':'sk'+j):'sk0',s[0],s[1],j===nS?3.4:1.2,0])});
+      // 8 pull-out: from the end of the skim, outward and up on an arc round the middle of the group (ENDC) to the finale camera
+      var sEu=UW(SK[nS][0].x,SK[nS][0].z),bS=dg(ENDC,sEu),dB=((dg(P0,ENDN)-bS+540)%360)-180,rS=dist(ENDC,sEu);
+      function arc(f,r,y,ty){var p=pt(ENDC,bS+dB*f,r);return [A(p.u,p.w,y),A(ENDC.u,ENDC.w,ty)]}
+      var pu=arc(.3,rS+(225-rS)*.4,118,90),s1=arc(.6,185,128,90),s2=arc(.85,208,108,92);
+      KF.push(['pull',pu[0],pu[1],2.3,0],['sweep1',s1[0],s1[1],2.3,0],['sweep2',s2[0],s2[1],1.8,0],
+      // The finale. Wide screens: a horizontal shot of the skyline, camera low and far back (on the opening's bearing) so the four landmarks
+      // stand in a row across the screen. Portrait phones cannot fit a row, so there it is a full zoom-out: high and far, looking down at the whole group.
+              ['end',mobile?A(ENDC.u+ENDN.u*380,ENDC.w+ENDN.w*380,250):A(ENDC.u+ENDN.u*225,ENDC.w+ENDN.w*225,92),A(ENDC.u,ENDC.w,mobile?60:92),1.5,0]);
+      for(i=0;i<KF.length;i++)if(KF[i][0]==='exit'){for(f=i;f<KF.length;f++)KF[f][4]+=Math.PI*2;break} // after the barrel roll the horizon stays level (2 pi is level)
       return}
     KF=[
       ['start',o.pos,o.tgt,1.0],
@@ -458,14 +625,38 @@
     var share=[],tot=0,a,b,k;
     for(i=0;i<n-1;i++){var len=0,prev=rideP.getPoint(i/(n-1));for(k=1;k<=20;k++){var q=rideP.getPoint((i+k/20)/(n-1));len+=q.distanceTo(prev);prev=q}
       share[i]=len*KF[i][3];tot+=share[i]}
+    if(DIST){ // a turn budget: a stretch where the view swings round gets at least enough scroll that the view turns no faster than ROT degrees per unit of scroll (6.5 degrees per 1/400 of it), whatever the slow factors say
+      var ROT=2600,an=[],va=new T.Vector3(),vb=new T.Vector3(),it;
+      for(i=0;i<n-1;i++){va.copy(KF[i][2]).sub(KF[i][1]).normalize();vb.copy(KF[i+1][2]).sub(KF[i+1][1]).normalize();an[i]=Math.acos(clamp(va.dot(vb),-1,1))*180/Math.PI}
+      for(it=0;it<8;it++){tot=0;for(i=0;i<n-1;i++)tot+=share[i];for(i=0;i<n-1;i++){var need=an[i]/ROT/HOLD0*tot;if(share[i]<need)share[i]=need}}
+      tot=0;for(i=0;i<n-1;i++)tot+=share[i]}
     CX=[0];CM=[0];var acc=0;for(i=0;i<n-1;i++){acc+=share[i]/tot;CX.push(acc*HOLD0);CM.push((i+1)/(n-1))} // the last 3% of the scroll holds the final shot
     rideU=pchip(CX,CM);
     rollK=KF.map(function(k){return k[4]||0});
+    flightTabs();
     KI={};KF.forEach(function(k,j){KI[k[0]]=CX[j]});
     for(i=0;i<caps.length&&i<CAPS.length;i++){caps[i].dataset.from=Math.max(.012,KI[CAPS[i][0]]);caps[i].dataset.to=i===CAPS.length-1?1.01:KI[CAPS[i][1]]}
     hudBuild()}
   var rideU=function(c){return c},rollK=[];
-  function rollAt(u){return 0; /* no barrel roll (owner's call); the drone still banks into turns */var n=rollK.length;if(n<2)return 0;var f=clamp(u,0,1)*(n-1),i=Math.min(n-2,Math.floor(f)),t=f-i;t=t*t*(3-2*t);return rollK[i]+(rollK[i+1]-rollK[i])*t}
+  // BANK AND SPEED TABLES, made once per build (no per-frame work beyond a lookup): over the flight's scroll range, the path's signed horizontal curvature gives the bank angle,
+  // and the path speed (distance per unit of scroll) gives the extra lens width. Both are smoothed so neither can jitter.
+  var NT=480,bankTab=new Float32Array(NT+1),fovTab=new Float32Array(NT+1),chA=0,chB=0;
+  function tabAt(t,c){var x=clamp(c/HOLD0,0,1)*NT,i=Math.min(NT-1,Math.floor(x)),f=x-i;return t[i]+(t[i+1]-t[i])*f}
+  function flightTabs(){
+    var i,j,P=[],V=new T.Vector3(),a=new T.Vector3(),b=new T.Vector3();
+    for(i=0;i<=NT;i++)P.push(rideP.getPoint(rideU(HOLD0*i/NT)));
+    var kap=[],spd=[];
+    for(i=0;i<=NT;i++){var i0=Math.max(0,i-2),i1=Math.min(NT,i+2);
+      a.copy(P[Math.max(0,i-1)]).sub(P[i0]);b.copy(P[i1]).sub(P[Math.min(NT,i+1)]);
+      var la=Math.hypot(a.x,a.z),lb=Math.hypot(b.x,b.z),ds=V.copy(P[i1]).sub(P[i0]).length()/2+1e-6;
+      var cr2=(la>1e-4&&lb>1e-4)?(a.z*b.x-a.x*b.z)/(la*lb):0; // sin of the heading change; > 0 is a turn to the left
+      kap.push(Math.asin(clamp(cr2,-1,1))/ds);spd.push(V.copy(P[i1]).sub(P[i0]).length()/((i1-i0)*HOLD0/NT))}
+    function smooth(arr,w){var o=[];for(var i=0;i<arr.length;i++){var s=0,n=0;for(var j=-w;j<=w;j++){var k=i+j;if(k>=0&&k<arr.length){var wt=w+1-Math.abs(j);s+=arr[k]*wt;n+=wt}}o.push(s/n)}return o}
+    var kS=smooth(kap,10),sS=smooth(spd,8),sorted=sS.slice().sort(function(x,y){return x-y}),lo=sorted[Math.floor(NT*.15)],hi=sorted[Math.floor(NT*.92)];
+    for(i=0;i<=NT;i++){bankTab[i]=clamp(kS[i]*9,-.13,.13); // 0.0125 per unit (a circle of radius 80) leans about 14 degrees; at most 18
+      var sp=clamp((sS[i]-lo)/Math.max(1e-6,hi-lo),0,1);fovTab[i]=9*sp*sp*(3-2*sp)}
+    bankTab[0]=0;bankTab[NT]=0;fovTab[NT]=0;for(i=0;i<=4;i++)fovTab[i]=fovTab[i]*i/4}
+  function rollAt(u){return 0; /* no barrel roll: the owner tried it twice and turned it off twice. Do not turn it back on unless asked. The drone still banks into turns. */var n=rollK.length;if(n<2)return 0;var f=clamp(u,0,1)*(n-1),i=Math.min(n-2,Math.floor(f)),t=f-i;t=t*t*(3-2*t);return rollK[i]+(rollK[i+1]-rollK[i])*t}
   // ---- HUD (DOM) ----
   var hud=document.getElementById('hud'),hTags=[],hAlt=document.getElementById('h-alt'),hSec=document.getElementById('h-sec'),hFill=document.getElementById('h-fill'),hTicks=[],hLast=-1,hSecLast=-1;
   if(hud){var tg=hud.querySelector('.hud-tags');LM.forEach(function(l){var e=document.createElement('div');e.className='lm-tag';
@@ -529,11 +720,11 @@
   // Golden hour: for the finale skyline the light turns to a hazy sunrise (reference photo: warm orange sky, golden haze over the towers). Light theme only.
   var goldLast=-1,goldF=new T.Color(),goldC=new T.Color(),G1=new T.Color('#ffe2a8'),G2=new T.Color('#f3a95a'),G3=new T.Color('#f0b676');
   function goldHour(k){
-    var dark=root.getAttribute('data-theme')==='dark';if(dark)k=0;k=Math.round(k*50)/50;if(k===goldLast)return;goldLast=k;
-    if(k===0){mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});root.style.removeProperty('--sky1');root.style.removeProperty('--sky2');if(scene.fog)scene.fog.color.set(C.sky2);sun.color.set(dark?0x9cc8ff:0xffffff);return}
-    mats.forEach(function(m){var r=m.userData.role;if(r==='far'||r==='mid'||r==='near')m.color.set(C[r]).lerp(G3,k*.38)}); /* the ground and towers take the warm haze */
-    goldC.set(C.sky1).lerp(G1,k);root.style.setProperty('--sky1','#'+goldC.getHexString());
-    goldC.set(C.sky2).lerp(G2,k);root.style.setProperty('--sky2','#'+goldC.getHexString());
+    var dark=root.getAttribute('data-theme')==='dark';k=0; /* the golden hour is off (owner's call): it rewrote the page's sky gradient and every material colour on each step, which made the finale stutter on phones in light mode. The reset path below is all that runs. */if(k===goldLast)return;goldLast=k;
+    if(k===0){mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});root.style.removeProperty('--sky1');root.style.removeProperty('--sky2');if(scene.fog)scene.fog.color.copy(fogColor());TU.uSky1.value.set(C.sky1);TU.uSky2.value.set(C.skyM);TU.uShadeMul.value.copy(shadeBase);TU.uHazeK.value=hazeBase;sun.color.set(dark?0xb0b4ff:0xffffff);return}
+    mats.forEach(function(m){var r=m.userData.role;if(r==='far'||r==='mid'||r==='near'||r==='ground')m.color.set(C[r]).lerp(G3,k*.38)}); /* the ground and towers take the warm haze */
+    goldC.set(C.sky1).lerp(G1,k);root.style.setProperty('--sky1','#'+goldC.getHexString());TU.uSky1.value.copy(goldC);TU.uShadeMul.value.copy(shadeBase).lerp(GSH,k);TU.uHazeK.value=hazeBase*(1-.5*k); /* golden hour: dusky violet shadows, pale cream lit faces, less haze so the skyline stays crisp */
+    goldC.set(C.sky2).lerp(G2,k);root.style.setProperty('--sky2','#'+goldC.getHexString());TU.uSky2.value.copy(goldC);
     if(scene.fog)scene.fog.color.copy(goldC);sun.color.set(0xffffff).lerp(new T.Color('#ffd08a'),k)}
   // ONE CAMERA. Above, the director (before the flight) and the flight (inside #enter) each only say where the camera should be.
   // This follower is the only thing that actually moves it: position, rotation, lens and the sideways push all chase their target
@@ -553,31 +744,30 @@
     var inRide=cr>.0004&&!!rideP;
     if(inRide){
       var u=rideU(cr);
-      cam.position.copy(rideP.getPoint(u));
+      rideP.getPoint(u,cam.position);
       if(cr>HOLD0){ // the hold: the scene drifts slowly sideways as you scroll, so the whole map is shown while the page moves on
-        var hf=clamp((cr-HOLD0)/(1-HOLD0),0,1),tg0=rideT.getPoint(u);tv.copy(tg0).sub(cam.position).normalize();tv.cross(cam.up);cam.position.addScaledVector(tv,(hf-.5)*(mobile?70:150));cam.position.y+=hf*(mobile?-40:14)}
-      // THE CHASE: between the end of the Menara KL climb and the start of the Merdeka climb the "hero" train on the sky line is driven by the scroll
-      // (from the Menara KL stop to the Merdeka stop) and the camera blends onto a chase position behind and above it.
-      var cwA=KI['kEnd'],cwB=KI['m0'],cw=0;heroOn=false;tgtV.copy(rideT.getPoint(u));
+        var hf=clamp((cr-HOLD0)/(1-HOLD0),0,1),tg0=rideT.getPoint(u,chL);tv.copy(tg0).sub(cam.position).normalize();tv.cross(cam.up);cam.position.addScaledVector(tv,(hf-.5*Math.min(1,hf*6))*(mobile?70:150));cam.position.y+=hf*(mobile?-40:14)}
+      // THE CHASE: along the street skim (knots 'sk0' to 'skEnd') the "hero" train on the sky line is driven by the scroll (from chA to chB on the rail)
+      // and the camera blends onto a chase position behind and below it, so the train runs ahead of the camera along the rail overhead.
+      var cwA=KI['sk0'],cwE=KI['skEnd'],cwB=KI['pull'],cw=0;heroOn=false;rideT.getPoint(u,tgtV);
       if(cwA!=null&&cwB!=null&&cr>cwA&&cr<cwB){
-        var cf=(cr-cwA)/(cwB-cwA),csm=function(x){x=clamp(x,0,1);return x*x*(3-2*x)};cw=csm(cf/.3)*csm((1-cf)/.3);
-        var cd=tM-tK;if(cd<0)cd+=1;heroS=((tK+cd*csm(cf))%1+1)%1;heroOn=cw>.02;
+        var cf=clamp((cr-cwA)/(cwE-cwA),0,1),csm=function(x){x=clamp(x,0,1);return x*x*(3-2*x)},cwO=cwE-.15*(cwE-cwA);cw=csm((cr-cwA)/(.25*(cwE-cwA)))*csm((cwB-cr)/(cwB-cwO)); // in over the first quarter of the skim, out between just before its end and the start of the pull-out
+        var cd=chB-chA;if(cd<0)cd+=1;heroS=((chA+cd*(.5*cf+.5*csm(cf)))%1+1)%1;heroOn=cw>.02;
         if(heroOn){skyCurve.getPointAt(heroS,chH);skyCurve.getTangentAt(heroS,chT);chS.crossVectors(chT,cam.up).normalize();
-          chP.copy(chH).addScaledVector(chT,-26).addScaledVector(cam.up,10).addScaledVector(chS,11*Math.sin((time||0)*.0009));
-          chL.copy(chH).addScaledVector(chT,18);
+          skyCurve.getPointAt(((heroS-40/skyLen)%1+1)%1,chP);chP.y-=24;chP.addScaledVector(chS,6*Math.sin((time||0)*.0009)); // 40 units behind the train along the rail (not along its tangent, so a bend in the rail turns the view gradually), 24 below it
+          skyCurve.getPointAt((heroS+90/skyLen)%1,chL);chL.y-=8;                                                              // looking 90 units ahead along the rail
           cam.position.lerp(chP,cw);tgtV.lerp(chL,cw)}}
       cam.lookAt(tgtV);cam.setViewOffset(W,Hh,0,0,W,Hh);
       // finale: widen the view (phones a lot, desktop a little) and push the fog back, so the whole skyline is in frame
       var ke=KI['sweep1']!=null?KI['sweep1']:(KI['pass']!=null?KI['pass']:.7),ke2=KI['end']||HOLD0,fs=clamp((cr-ke-.4*(ke2-ke))/(.6*(ke2-ke)),0,1);fs=fs*fs*(3-2*fs);
-      var kk=Math.sin(Math.PI*clamp(cr/.07,0,1)),fv=42+(mobile?30:10)*fs+26*kk*kk; /* kk: a gentle push-in that starts and ends at the normal lens, so entering the flight never snaps */if(Math.abs(fv-cam.fov)>.01){cam.fov=fv;cam.updateProjectionMatrix()}
+      var kk=Math.sin(Math.PI*clamp(cr/.07,0,1)),fv=42+(mobile?30:10)*fs+26*kk*kk+(reduce?0:tabAt(fovTab,cr)*(1-fs)*(1-kk*kk)); /* speed feel: up to +9 degrees of lens in the fast beats, none at the start, in the finale or in reduced motion */ /* kk: a gentle push-in that starts and ends at the normal lens, so entering the flight never snaps */if(Math.abs(fv-cam.fov)>.01){cam.fov=fv;cam.updateProjectionMatrix()}
       if(scene.fog){scene.fog.near=fogN0+260*fs;scene.fog.far=fogF0+560*fs}
       goldHour(fs);
       // Ease the rotation: the view turns towards where it should look with a short lag (time constant about 0.2 s), so a sharp
       // turn in the route can never show as a jolt. Reset when the flight starts, and when snapping.
       if(!rideQ)rideQ=cam.quaternion.clone();else{rideQ.slerp(cam.quaternion,reduce?1:1-Math.exp(-dtF*5));cam.quaternion.copy(rideQ)}
-      // lean into turns a little, like a drone, never more than 8 degrees
-      var q0=rideP.getPoint(Math.max(0,u-.02)),q1=rideP.getPoint(u),q2=rideP.getPoint(Math.min(1,u+.02)),v1=q1.clone().sub(q0),v2=q2.clone().sub(q1);
-      var turn=v1.length()*v2.length()>1e-6?v1.cross(v2).y/(v1.length()*v2.length()):0;roll+=(clamp(-turn*(DIST?7:3),DIST?-.42:-.14,DIST?.42:.14)-roll)*(1-Math.exp(-dtF*3));cam.rotateZ(roll*(1-fs)+rollAt(u)); // drone bank into turns, the scripted barrel roll, and a level horizon for the finale
+      // lean into turns like a drone: the bank follows the path's horizontal curvature (table made in buildRide, at most 18 degrees), eased; none in reduced motion
+      roll+=((reduce?0:tabAt(bankTab,cr))-roll)*(1-Math.exp(-dtF*3));cam.rotateZ(roll*(1-fs)+rollAt(u)); // drone bank into turns, the scripted barrel roll, and a level horizon for the finale
       hudUpdate(true,u,cr)
     }else{
       rideQ=null;heroOn=false;goldHour(0);if(cam.fov!==42){cam.fov=42;cam.updateProjectionMatrix()}if(scene.fog){scene.fog.near=fogN0;scene.fog.far=fogF0}
@@ -587,12 +777,14 @@
     }
     followCam(dtF);
     for(var ci=0;ci<caps.length;ci++){var c=caps[ci],on=cr>=+c.dataset.from&&cr<+c.dataset.to;if(on!==c.classList.contains('on'))c.classList.toggle('on',on)}
+    if(again){if(DBGCR)again.dataset.cr=cr.toFixed(3);var aOn=inRide&&cr>.93;if(aOn!==again.classList.contains('on'))again.classList.toggle('on',aOn)}
     if(spin&&sH){var sy=scrollY-(sTop-innerHeight),sf=sy/Math.max(1,sH),sOn=sf>.18&&sf<.95;if(sOn!==spin.classList.contains('on'))spin.classList.toggle('on',sOn)} // the coordinates tag
     ringUpdate(time,inRide);
     orb.rotation.y=time*.0004;ring.rotation.z=time*.0006;orb.position.y=230+Math.sin(time*.0009)*3;
     specks.rotation.y=time*.00003;fxUpdate(time,reduce);sciUpdate(time,reduce,inRide)}
   var raf=0,run=true,last=0,lastR=0;
   function snap(){fInit=true;rideQ=null;curPose=tgtPose.slice();cr=tr;px=tx;vr.v=vx.v=0;vPose.forEach(function(v){v.v=0})}
+  var shown=false; // the canvas fades in once it has drawn (scene.css, html.gl-on)
   function frame(time){
     var dt=clamp((time-last)/1000,.001,.05);last=time;dtF=dt;tick++;
     if(reduce)snap();else{for(var j=0;j<8;j++)curPose[j]=damp(curPose[j],tgtPose[j],vPose[j],.55,dt);var cr0=cr;cr=clamp(damp(cr,tr,vr,.75,dt),0,1);if(flying){var cap=.085*dt;if(cr-cr0>cap){cr=cr0+cap;vr.v=Math.min(vr.v,cap/dt)}else if(cr0-cr>cap){cr=cr0-cap;vr.v=Math.max(vr.v,-cap/dt)}} /* speed limit: a fast flick can't whip the camera */px=damp(px,tx,vx,.6,dt)}
@@ -602,7 +794,7 @@
       if(driftAcc>=1){var dy=Math.floor(driftAcc);driftAcc-=dy;scrollBy({top:dy,behavior:'instant'})}}
     var moving=Math.abs(tr-cr)>(flying?.00002:.0003);for(var j2=0;j2<8;j2++)if(Math.abs(tgtPose[j2]-curPose[j2])>.02){moving=true;break}
     // While the reader is only reading, redraw at about 15 fps (the beams and pulses still drift); while scrolling, every frame.
-    if(moving||need||(!reduce&&time-lastR>66)){place(reduce?0:time);renderer.render(scene,cam);need=false;lastR=time}
+    if(moving||need||(!reduce&&time-lastR>66)){place(reduce?0:time);renderer.render(scene,cam);need=false;lastR=time;if(!shown){shown=true;root.classList.add('gl-on')}}
     raf=run?requestAnimationFrame(frame):0}
   var lastUser=0,driftAcc=0;
   ['wheel','touchstart','touchmove','keydown','pointerdown'].forEach(function(n){addEventListener(n,function(){lastUser=performance.now();driftAcc=0},{passive:true})});
@@ -615,7 +807,15 @@
   addEventListener('resize',function(){size();buildRide();layoutKeys();retarget()});
   addEventListener('pointermove',function(e){tx=e.clientX/innerWidth-.5});
   document.addEventListener('visibilitychange',function(){run=!document.hidden;if(run&&!raf){last=performance.now();raf=requestAnimationFrame(frame)}});
+  setTimeout(function(){(window.requestIdleCallback||setTimeout)(warmEdges)},12000); // light theme: build the night lines in idle time, so the first switch to dark has them ready
   root.classList.add('gl'); // first: it makes #enter visible, and the scroll maths below needs its real position
   size();buildRide();layoutKeys();tgtPose=dirPose(scrollY);curPose=tgtPose.slice();tr=cr=rideProg();raf=requestAnimationFrame(frame);
-  if(ONLY||/[?&]dbg/.test(location.search))window.__scene={keys:function(){return KEYS.map(function(k){return k.y})},dirPose:dirPose,scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam)}};
+  if(ONLY||/[?&]dbg/.test(location.search))window.__scene={keys:function(){return KEYS.map(function(k){return k.y})},dirPose:dirPose,scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},lay:LAY,lm:LM,utp:UTP,sky:skyCurve,city:function(){return cityMesh},mob:mob,DIST:DIST,draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;fInit=true;rideQ=null;dtF=9;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam);dtF=.016}};
+  } // start
+  // Build the scene after the page's first paint, not before it: the curtain's text and photos come first, the canvas fades in after. (/flight/ is only the scene, so it starts at once.)
+  if(!DEFER)start();
+  else{
+    var go=function(){setTimeout(function(){(window.requestIdleCallback||function(f){f()})(start,{timeout:600})},0)};
+    if(document.readyState==='complete')go();else addEventListener('load',go,{once:true});
+  }
 })();

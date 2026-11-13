@@ -7,28 +7,48 @@
 <meta name="description" content="A university database that models a company from the CEO down, rebuilt in SQLite so you can run the queries in your browser.">
 <meta property="og:title" content="A whole company in 49 tables">
 <meta property="og:description" content="A company database from the CEO down, with a live SQL playground.">
-<meta property="og:image" content="https://7ymera.github.io/assets/og-card.jpg">
+<meta property="og:image" content="https://7ymera.github.io/assets/og-skyline-3.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Alif Najmi">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://7ymera.github.io/notes/database.html">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://7ymera.github.io/notes/database.html">
+<link rel="alternate" type="application/rss+xml" title="Alif Najmi · Notes" href="/feed.xml">
 <meta name="theme-color" content="#0b2a6b">
-<link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=64">
-<link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=180">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/favicon-192.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=20261113j">
-<link rel="stylesheet" href="../assets/scene.css?v=20261113j">
+<link rel="stylesheet" href="../assets/site.css?v=20261114c">
+<link rel="stylesheet" href="../assets/scene.css?v=20261114c">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BlogPosting",
+ "headline": "A whole company in 49 tables",
+ "description": "A university database that models a company from the CEO down, rebuilt in SQLite so you can run the queries in your browser.",
+ "datePublished": "2026-11-06",
+ "author": {
+  "@type": "Person",
+  "name": "Alif Najmi",
+  "url": "https://7ymera.github.io/"
+ },
+ "image": "https://7ymera.github.io/assets/og-skyline-3.jpg",
+ "mainEntityOfPage": "https://7ymera.github.io/notes/database.html"
+}
+</script>
 </head>
 <body>
 <div class="sky" aria-hidden="true"></div>
 
 <header class="top">
   <div class="wrap">
-    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge av"><img src="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=96" alt="" width="32" height="32" decoding="async"></span>Alif Najmi</a>
+    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge av"><img src="/assets/icons/favicon-192.png" alt="" width="32" height="32" decoding="async"></span>Alif Najmi</a>
     <nav class="nav" aria-label="Sections">
       <a href="../#me">Me</a>
       <a href="../#work">Work</a>
@@ -44,7 +64,7 @@
 <main class="wrap">
   <article class="post">
     <div class="post-head">
-      <a class="back" href="../#me">← Back to Alif</a>
+      <span><a class="back" href="../#me">← Back to Alif</a> · <a class="back" href="index.html">All notes</a></span>
       <span class="eyebrow">Notes · Coursework</span>
       <h1>A whole company in 49 tables</h1>
       <p class="meta">6 November 2026 · 4 min read</p>
@@ -58,14 +78,14 @@
       <h2>How the company is organised</h2>
       <p>Everyone starts as a row in <code>Employee</code>. A CEO, CFO, COO or CTO is an employee with extra details in their own table, and each department hangs off the executive who runs it.</p>
       <figure>
-        <div class="diagram"><svg class="dg" viewBox="0 0 1000 440" role="img"><title>How the company database is organised</title><desc>Employee is the base table. CEO, CFO, COO, CTO, Executive Assistant and Customer Service each extend it. The CFO runs Finance and Treasury, the COO runs Human Resource, PMO and Project, and the CTO runs IT and Computer Engineering.</desc><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ahd"/></marker></defs><path class="ed" d="M500 68V100H95V128" marker-end="url(#ah)"/><path class="ed" d="M500 100H260V128" marker-end="url(#ah)"/><path class="ed" d="M500 100H425V128" marker-end="url(#ah)"/><path class="ed" d="M500 100H590V128" marker-end="url(#ah)"/><path class="ed" d="M500 100H755V128" marker-end="url(#ah)"/><path class="ed" d="M500 100H920V128" marker-end="url(#ah)"/><path class="ed" d="M195 180V248H185" marker-end="url(#ah)"/><path class="ed" d="M195 248V308H185" marker-end="url(#ah)"/><path class="ed" d="M360 180V248H350" marker-end="url(#ah)"/><path class="ed" d="M360 248V308H350" marker-end="url(#ah)"/><path class="ed" d="M360 308V368H350" marker-end="url(#ah)"/><path class="ed" d="M525 180V248H515" marker-end="url(#ah)"/><path class="ed" d="M525 248V308H515" marker-end="url(#ah)"/><g class="n db"><path d="M420 24v36a80.0 8 0 0 0 160 0v-36a80.0 8 0 0 0 -160 0a80.0 8 0 0 0 160 0"/><text class="t" x="500.0" y="42.0" text-anchor="middle">Employee</text><text class="s" x="500.0" y="58.0" text-anchor="middle">everyone starts here</text></g><g class="n main"><rect x="20" y="130" width="150" height="50" rx="10"/><text class="t" x="95.0" y="159.0" text-anchor="middle">CEO</text></g><g class="n main"><rect x="185" y="130" width="150" height="50" rx="10"/><text class="t" x="260.0" y="159.0" text-anchor="middle">CFO</text></g><g class="n main"><rect x="350" y="130" width="150" height="50" rx="10"/><text class="t" x="425.0" y="159.0" text-anchor="middle">COO</text></g><g class="n main"><rect x="515" y="130" width="150" height="50" rx="10"/><text class="t" x="590.0" y="159.0" text-anchor="middle">CTO</text></g><g class="n "><rect x="680" y="130" width="150" height="50" rx="10"/><text class="t" x="755.0" y="151.0" text-anchor="middle">Executive</text><text class="t" x="755.0" y="167.0" text-anchor="middle">Assistant</text></g><g class="n "><rect x="845" y="130" width="150" height="50" rx="10"/><text class="t" x="920.0" y="151.0" text-anchor="middle">Customer</text><text class="t" x="920.0" y="167.0" text-anchor="middle">Service</text></g><g class="n soft"><rect x="185" y="226" width="150" height="44" rx="10"/><text class="t" x="260.0" y="252.0" text-anchor="middle">Finance</text></g><g class="n soft"><rect x="185" y="286" width="150" height="44" rx="10"/><text class="t" x="260.0" y="312.0" text-anchor="middle">Treasury</text></g><g class="n soft"><rect x="350" y="226" width="150" height="44" rx="10"/><text class="t" x="425.0" y="252.0" text-anchor="middle">Human Resource</text></g><g class="n soft"><rect x="350" y="286" width="150" height="44" rx="10"/><text class="t" x="425.0" y="312.0" text-anchor="middle">PMO</text></g><g class="n soft"><rect x="350" y="346" width="150" height="44" rx="10"/><text class="t" x="425.0" y="372.0" text-anchor="middle">Project</text></g><g class="n soft"><rect x="515" y="226" width="150" height="44" rx="10"/><text class="t" x="590.0" y="252.0" text-anchor="middle">IT</text></g><g class="n soft"><rect x="515" y="286" width="150" height="44" rx="10"/><text class="t" x="590.0" y="304.0" text-anchor="middle">Computer</text><text class="t" x="590.0" y="320.0" text-anchor="middle">Engineering</text></g></svg></div>
+        <div class="diagram" role="region" aria-label="Diagram, scrolls sideways" tabindex="0"><svg class="dg" viewBox="0 0 1000 440" role="img"><title>How the company database is organised</title><desc>Employee is the base table. CEO, CFO, COO, CTO, Executive Assistant and Customer Service each extend it. The CFO runs Finance and Treasury, the COO runs Human Resource, PMO and Project, and the CTO runs IT and Computer Engineering.</desc><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ahd"/></marker></defs><path class="ed" d="M500 68V100H95V128" marker-end="url(#ah)"/><path class="ed" d="M500 100H260V128" marker-end="url(#ah)"/><path class="ed" d="M500 100H425V128" marker-end="url(#ah)"/><path class="ed" d="M500 100H590V128" marker-end="url(#ah)"/><path class="ed" d="M500 100H755V128" marker-end="url(#ah)"/><path class="ed" d="M500 100H920V128" marker-end="url(#ah)"/><path class="ed" d="M195 180V248H185" marker-end="url(#ah)"/><path class="ed" d="M195 248V308H185" marker-end="url(#ah)"/><path class="ed" d="M360 180V248H350" marker-end="url(#ah)"/><path class="ed" d="M360 248V308H350" marker-end="url(#ah)"/><path class="ed" d="M360 308V368H350" marker-end="url(#ah)"/><path class="ed" d="M525 180V248H515" marker-end="url(#ah)"/><path class="ed" d="M525 248V308H515" marker-end="url(#ah)"/><g class="n db"><path d="M420 24v36a80.0 8 0 0 0 160 0v-36a80.0 8 0 0 0 -160 0a80.0 8 0 0 0 160 0"/><text class="t" x="500.0" y="42.0" text-anchor="middle">Employee</text><text class="s" x="500.0" y="58.0" text-anchor="middle">everyone starts here</text></g><g class="n main"><rect x="20" y="130" width="150" height="50" rx="10"/><text class="t" x="95.0" y="159.0" text-anchor="middle">CEO</text></g><g class="n main"><rect x="185" y="130" width="150" height="50" rx="10"/><text class="t" x="260.0" y="159.0" text-anchor="middle">CFO</text></g><g class="n main"><rect x="350" y="130" width="150" height="50" rx="10"/><text class="t" x="425.0" y="159.0" text-anchor="middle">COO</text></g><g class="n main"><rect x="515" y="130" width="150" height="50" rx="10"/><text class="t" x="590.0" y="159.0" text-anchor="middle">CTO</text></g><g class="n "><rect x="680" y="130" width="150" height="50" rx="10"/><text class="t" x="755.0" y="151.0" text-anchor="middle">Executive</text><text class="t" x="755.0" y="167.0" text-anchor="middle">Assistant</text></g><g class="n "><rect x="845" y="130" width="150" height="50" rx="10"/><text class="t" x="920.0" y="151.0" text-anchor="middle">Customer</text><text class="t" x="920.0" y="167.0" text-anchor="middle">Service</text></g><g class="n soft"><rect x="185" y="226" width="150" height="44" rx="10"/><text class="t" x="260.0" y="252.0" text-anchor="middle">Finance</text></g><g class="n soft"><rect x="185" y="286" width="150" height="44" rx="10"/><text class="t" x="260.0" y="312.0" text-anchor="middle">Treasury</text></g><g class="n soft"><rect x="350" y="226" width="150" height="44" rx="10"/><text class="t" x="425.0" y="252.0" text-anchor="middle">Human Resource</text></g><g class="n soft"><rect x="350" y="286" width="150" height="44" rx="10"/><text class="t" x="425.0" y="312.0" text-anchor="middle">PMO</text></g><g class="n soft"><rect x="350" y="346" width="150" height="44" rx="10"/><text class="t" x="425.0" y="372.0" text-anchor="middle">Project</text></g><g class="n soft"><rect x="515" y="226" width="150" height="44" rx="10"/><text class="t" x="590.0" y="252.0" text-anchor="middle">IT</text></g><g class="n soft"><rect x="515" y="286" width="150" height="44" rx="10"/><text class="t" x="590.0" y="304.0" text-anchor="middle">Computer</text><text class="t" x="590.0" y="320.0" text-anchor="middle">Engineering</text></g></svg></div>
         <figcaption>From Employee down to the departments. <span class="scroll-hint">Swipe sideways to see all of it.</span></figcaption>
       </figure>
 
       <h2>Projects tie it all together</h2>
       <p><code>Project</code> is the busiest table: it points at eleven others. And whenever two things relate many-to-many, like which client deals with which department, the relationship gets its own link table. There are 27 of those, such as <code>CTO Project</code> and <code>Finance Sale</code>.</p>
       <figure>
-        <div class="diagram"><svg class="dg" viewBox="0 0 1000 400" role="img"><title>Project ties eleven tables together</title><desc>Project points to Client, Sale, Marketing, Finance, Treasury, PMO, COO, Customer Service and Executive Assistant, and Product and Service point back to it.</desc><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ahd"/></marker></defs><path class="ed" d="M500 72L500 166" marker-end="url(#ah)"/><path class="ed" d="M690 83L563 181" marker-end="url(#ah)"/><path class="ed" d="M834 139L572 192" marker-end="url(#ah)"/><path class="ed" d="M865 218L573 199" marker-end="url(#ah)"/><path class="ed" d="M773 288L570 207" marker-end="url(#ah)"/><path class="ed" d="M594 323L545 223" marker-end="url(#ah)"/><path class="ed" d="M405 323L454 223" marker-end="url(#ah)"/><path class="ed" d="M226 288L429 207" marker-end="url(#ah)"/><path class="ed" d="M134 218L426 199" marker-end="url(#ah)"/><path class="ed" d="M165 139L427 192" marker-end="url(#ah)"/><path class="ed" d="M309 83L436 181" marker-end="url(#ah)"/><g class="n db"><path d="M430 178v40a70.0 8 0 0 0 140 0v-40a70.0 8 0 0 0 -140 0a70.0 8 0 0 0 140 0"/><text class="t" x="500.0" y="198.0" text-anchor="middle">Project</text><text class="s" x="500.0" y="214.0" text-anchor="middle">the hub</text></g><g class="n soft"><rect x="435" y="26" width="130" height="44" rx="10"/><text class="t" x="500.0" y="52.0" text-anchor="middle">Client</text></g><g class="n soft"><rect x="651" y="50" width="130" height="44" rx="10"/><text class="t" x="716.0" y="76.0" text-anchor="middle">Sale</text></g><g class="n soft"><rect x="799" y="114" width="130" height="44" rx="10"/><text class="t" x="864.0" y="140.0" text-anchor="middle">Marketing</text></g><g class="n soft"><rect x="831" y="197" width="130" height="44" rx="10"/><text class="t" x="896.0" y="223.0" text-anchor="middle">Finance</text></g><g class="n soft"><rect x="737" y="274" width="130" height="44" rx="10"/><text class="t" x="802.0" y="300.0" text-anchor="middle">Treasury</text></g><g class="n soft"><rect x="548" y="320" width="130" height="44" rx="10"/><text class="t" x="613.0" y="346.0" text-anchor="middle">PMO</text></g><g class="n soft"><rect x="322" y="320" width="130" height="44" rx="10"/><text class="t" x="387.0" y="346.0" text-anchor="middle">COO</text></g><g class="n soft"><rect x="133" y="274" width="130" height="44" rx="10"/><text class="t" x="198.0" y="292.0" text-anchor="middle">Customer</text><text class="t" x="198.0" y="308.0" text-anchor="middle">Service</text></g><g class="n soft"><rect x="39" y="197" width="130" height="44" rx="10"/><text class="t" x="104.0" y="215.0" text-anchor="middle">Executive</text><text class="t" x="104.0" y="231.0" text-anchor="middle">Assistant</text></g><g class="n soft"><rect x="71" y="114" width="130" height="44" rx="10"/><text class="t" x="136.0" y="140.0" text-anchor="middle">Product</text></g><g class="n soft"><rect x="219" y="50" width="130" height="44" rx="10"/><text class="t" x="284.0" y="76.0" text-anchor="middle">Service</text></g></svg></div>
+        <div class="diagram" role="region" aria-label="Diagram, scrolls sideways" tabindex="0"><svg class="dg" viewBox="0 0 1000 400" role="img"><title>Project ties eleven tables together</title><desc>Project points to Client, Sale, Marketing, Finance, Treasury, PMO, COO, Customer Service and Executive Assistant, and Product and Service point back to it.</desc><defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ahd"/></marker></defs><path class="ed" d="M500 72L500 166" marker-end="url(#ah2)"/><path class="ed" d="M690 83L563 181" marker-end="url(#ah2)"/><path class="ed" d="M834 139L572 192" marker-end="url(#ah2)"/><path class="ed" d="M865 218L573 199" marker-end="url(#ah2)"/><path class="ed" d="M773 288L570 207" marker-end="url(#ah2)"/><path class="ed" d="M594 323L545 223" marker-end="url(#ah2)"/><path class="ed" d="M405 323L454 223" marker-end="url(#ah2)"/><path class="ed" d="M226 288L429 207" marker-end="url(#ah2)"/><path class="ed" d="M134 218L426 199" marker-end="url(#ah2)"/><path class="ed" d="M165 139L427 192" marker-end="url(#ah2)"/><path class="ed" d="M309 83L436 181" marker-end="url(#ah2)"/><g class="n db"><path d="M430 178v40a70.0 8 0 0 0 140 0v-40a70.0 8 0 0 0 -140 0a70.0 8 0 0 0 140 0"/><text class="t" x="500.0" y="198.0" text-anchor="middle">Project</text><text class="s" x="500.0" y="214.0" text-anchor="middle">the hub</text></g><g class="n soft"><rect x="435" y="26" width="130" height="44" rx="10"/><text class="t" x="500.0" y="52.0" text-anchor="middle">Client</text></g><g class="n soft"><rect x="651" y="50" width="130" height="44" rx="10"/><text class="t" x="716.0" y="76.0" text-anchor="middle">Sale</text></g><g class="n soft"><rect x="799" y="114" width="130" height="44" rx="10"/><text class="t" x="864.0" y="140.0" text-anchor="middle">Marketing</text></g><g class="n soft"><rect x="831" y="197" width="130" height="44" rx="10"/><text class="t" x="896.0" y="223.0" text-anchor="middle">Finance</text></g><g class="n soft"><rect x="737" y="274" width="130" height="44" rx="10"/><text class="t" x="802.0" y="300.0" text-anchor="middle">Treasury</text></g><g class="n soft"><rect x="548" y="320" width="130" height="44" rx="10"/><text class="t" x="613.0" y="346.0" text-anchor="middle">PMO</text></g><g class="n soft"><rect x="322" y="320" width="130" height="44" rx="10"/><text class="t" x="387.0" y="346.0" text-anchor="middle">COO</text></g><g class="n soft"><rect x="133" y="274" width="130" height="44" rx="10"/><text class="t" x="198.0" y="292.0" text-anchor="middle">Customer</text><text class="t" x="198.0" y="308.0" text-anchor="middle">Service</text></g><g class="n soft"><rect x="39" y="197" width="130" height="44" rx="10"/><text class="t" x="104.0" y="215.0" text-anchor="middle">Executive</text><text class="t" x="104.0" y="231.0" text-anchor="middle">Assistant</text></g><g class="n soft"><rect x="71" y="114" width="130" height="44" rx="10"/><text class="t" x="136.0" y="140.0" text-anchor="middle">Product</text></g><g class="n soft"><rect x="219" y="50" width="130" height="44" rx="10"/><text class="t" x="284.0" y="76.0" text-anchor="middle">Service</text></g></svg></div>
         <figcaption>Project and the tables around it. <span class="scroll-hint">Swipe sideways to see all of it.</span></figcaption>
       </figure>
 
@@ -145,8 +165,8 @@ SELECT * FROM &quot;COO project&quot;;</template>
     </div>
 
     <div class="post-foot">
-      <a class="back" href="aws-two-departments.html">← One VPC, two departments, $56</a>
-      <a class="back" href="jom-al-quran.html">Jom Al-Quran: 56 tables, back from Oracle →</a>
+      <a class="back" href="jumaatfinder.html">← Where can I solat Jumaat from here?</a>
+      <a class="back" href="aws-two-departments.html">One VPC, two departments, $56 →</a>
     </div>
   </article>
 </main>
@@ -163,6 +183,7 @@ SELECT * FROM &quot;COO project&quot;;</template>
   });
 })();
 </script>
-<script src="../assets/db-playground.js?v=20261113j" defer></script>
+<script src="../assets/db-playground.js?v=20261114c" defer></script>
+<script src="../assets/reader.js?v=20261114c" defer></script>
 </body>
 </html>

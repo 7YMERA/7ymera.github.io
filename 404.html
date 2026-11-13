@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Signal lost · Alif Najmi</title>
+<meta name="description" content="404: no such waypoint. This page does not exist, but the rest of the flight plan does.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0b2a6b">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/favicon-192.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@500;600&display=swap">
+<link rel="stylesheet" href="/assets/site.css?v=20261114c">
+<link rel="stylesheet" href="/assets/scene.css?v=20261114c">
+<script>
+  /* same stored-theme read as the notes pages, run early so there is no flash */
+  try { var saved = localStorage.getItem('theme'); if (saved) document.documentElement.setAttribute('data-theme', saved); } catch (e) {}
+</script>
+<style>
+  .lost { min-height: calc(100vh - 120px); display: grid; place-items: center; padding-block: 40px 64px; }
+  .lost { overflow-x: clip; padding-inline: 20px; }
+  .lost-card { position: relative; width: 100%; max-width: 720px; padding: 40px 36px 36px; background: var(--surface); border: 2px solid var(--fx); box-shadow: 8px 8px 0 var(--hard); border-radius: 6px; }
+  .lost-card .hud-c { position: absolute; width: 22px; height: 22px; border: 0 solid var(--fx); }
+  .lost-card .tl { left: -12px; top: -12px; border-width: 3px 0 0 3px; }
+  .lost-card .tr { right: -12px; top: -12px; border-width: 3px 3px 0 0; }
+  .lost-card .bl { left: -12px; bottom: -12px; border-width: 0 0 3px 3px; }
+  .lost-card .br { right: -12px; bottom: -12px; border-width: 0 3px 3px 0; }
+  .lost-sector { display: block; font: 600 12px var(--f-pix); letter-spacing: .16em; color: var(--fx); margin-bottom: 10px; }
+  .lost-code { margin: 0; font: 600 clamp(4.5rem, 20vw, 9rem)/.9 var(--f-pix); color: var(--ink); letter-spacing: .02em; text-shadow: 4px 4px 0 var(--fx); }
+  .lost h1 { margin: 20px 0 8px; font-family: var(--f-display); font-weight: 800; font-size: clamp(1.75rem, 6vw, 2.5rem); line-height: 1.1; color: var(--ink); }
+  .lost p.sub { margin: 0; color: var(--muted); font-size: 1.0625rem; max-width: 34em; }
+  .readouts { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; padding: 0; list-style: none; }
+  .readouts li { display: flex; gap: 8px; align-items: baseline; font: 600 13px var(--f-pix); letter-spacing: .06em; color: var(--ink); background: var(--bg); border: 2px solid var(--fx); padding: 4px 10px; }
+  .readouts li span { color: var(--fx); }
+  .readouts .bad b { color: #d9362b; }
+  :root[data-theme="dark"] .readouts .bad b { color: #ff7a70; }
+  .goto { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 30px; }
+  .goto a { display: flex; flex-direction: column; justify-content: center; gap: 4px; min-height: 84px; padding: 14px 18px; text-decoration: none; color: var(--ink); background: var(--bg); border: 2px solid var(--fx); box-shadow: 5px 5px 0 var(--hard); border-radius: 6px; font: 800 1.375rem var(--f-display); transition: transform .12s, box-shadow .12s; }
+  .goto a small { font: 600 11px var(--f-pix); letter-spacing: .14em; color: var(--fx); text-transform: uppercase; }
+  .goto a:hover, .goto a:focus-visible { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--hard); }
+  .goto a:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  .goto a.primary { background: var(--ink); color: var(--bg); }
+  @media (max-width: 640px) {
+    .lost-card .tl { left: -8px; top: -8px; } .lost-card .tr { right: -8px; top: -8px; } .lost-card .bl { left: -8px; bottom: -8px; } .lost-card .br { right: -8px; bottom: -8px; }
+    .lost-card { padding: 30px 20px 26px; box-shadow: 5px 5px 0 var(--hard); }
+    .goto { grid-template-columns: 1fr; gap: 14px; }
+    .goto a { min-height: 72px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .goto a { transition: none; } }
+</style>
+</head>
+<body>
+<div class="sky" aria-hidden="true"></div>
+
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="/" aria-label="Alif Najmi, home"><span class="badge av"><img src="/assets/icons/favicon-192.png" alt="" width="32" height="32" decoding="async"></span>Alif Najmi</a>
+  </div>
+</header>
+
+<main class="wrap lost">
+  <section class="lost-card" aria-labelledby="lost-h">
+    <i class="hud-c tl"></i><i class="hud-c tr"></i><i class="hud-c bl"></i><i class="hud-c br"></i>
+    <span class="lost-sector">SECTOR 404 / OFF THE MAP</span>
+    <p class="lost-code" aria-hidden="true">404</p>
+    <h1 id="lost-h">Signal lost. No such waypoint.</h1>
+    <p class="sub">This page does not exist. The link may be old or mistyped, so pick a heading below and the flight resumes.</p>
+    <ul class="readouts" aria-hidden="true">
+      <li><span>HDG</span><b>---</b></li>
+      <li><span>ALT</span><b>0 m</b></li>
+      <li class="bad"><span>GPS</span><b>NO FIX</b></li>
+    </ul>
+    <nav class="goto" aria-label="Where to next">
+      <a class="primary" href="/"><small>Return to base</small>Home</a>
+      <a href="/notes/"><small>Flight log</small>Notes</a>
+      <a href="/#work"><small>Cargo</small>Work</a>
+    </nav>
+  </section>
+</main>
+</body>
+</html>

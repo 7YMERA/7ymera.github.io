@@ -7,28 +7,48 @@
 <meta name="description" content="How I replaced a school's link page and task spreadsheet with a privacy-first data dashboard.">
 <meta property="og:title" content="A dashboard 150 teachers actually open">
 <meta property="og:description" content="Building a privacy-first data dashboard for a real school.">
-<meta property="og:image" content="https://7ymera.github.io/assets/og-card.jpg">
+<meta property="og:image" content="https://7ymera.github.io/assets/og-skyline-3.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Alif Najmi">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://7ymera.github.io/notes/smk-dashboard.html">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://7ymera.github.io/notes/smk-dashboard.html">
+<link rel="alternate" type="application/rss+xml" title="Alif Najmi · Notes" href="/feed.xml">
 <meta name="theme-color" content="#0b2a6b">
-<link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=64">
-<link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=180">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/favicon-192.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=20261113j">
-<link rel="stylesheet" href="../assets/scene.css?v=20261113j">
+<link rel="stylesheet" href="../assets/site.css?v=20261114c">
+<link rel="stylesheet" href="../assets/scene.css?v=20261114c">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BlogPosting",
+ "headline": "A dashboard 150 teachers actually open",
+ "description": "How I replaced a school's link page and task spreadsheet with a privacy-first data dashboard.",
+ "datePublished": "2026-11-06",
+ "author": {
+  "@type": "Person",
+  "name": "Alif Najmi",
+  "url": "https://7ymera.github.io/"
+ },
+ "image": "https://7ymera.github.io/assets/og-skyline-3.jpg",
+ "mainEntityOfPage": "https://7ymera.github.io/notes/smk-dashboard.html"
+}
+</script>
 </head>
 <body>
 <div class="sky" aria-hidden="true"></div>
 
 <header class="top">
   <div class="wrap">
-    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge av"><img src="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=96" alt="" width="32" height="32" decoding="async"></span>Alif Najmi</a>
+    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge av"><img src="/assets/icons/favicon-192.png" alt="" width="32" height="32" decoding="async"></span>Alif Najmi</a>
     <nav class="nav" aria-label="Sections">
       <a href="../#me">Me</a>
       <a href="../#work">Work</a>
@@ -44,7 +64,7 @@
 <main class="wrap">
   <article class="post">
     <div class="post-head">
-      <a class="back" href="../#me">← Back to Alif</a>
+      <span><a class="back" href="../#me">← Back to Alif</a> · <a class="back" href="index.html">All notes</a></span>
       <span class="eyebrow">Notes · Side project</span>
       <h1>A dashboard 150 teachers actually open</h1>
       <p class="meta">6 November 2026 · 5 min read</p>
@@ -71,14 +91,14 @@
       <div class="table-wrap"><table><thead><tr><th></th><th>Public</th><th>Principal</th><th>Data manager</th></tr></thead><tbody><tr><td>Dashboard, counts, charts</td><td>✅</td><td>✅</td><td>✅</td></tr><tr><td>Who hasn't submitted, leave summary</td><td>❌</td><td>✅</td><td>✅</td></tr><tr><td>Sync status, audit log</td><td>❌</td><td>✅</td><td>✅</td></tr><tr><td>Edit links and announcements</td><td>❌</td><td>❌</td><td>✅</td></tr><tr><td>Manage accounts and roles</td><td>❌</td><td>❌</td><td>✅</td></tr></tbody></table></div>
 
       <figure class="shot">
-        <img src="../assets/notes/smk/admin.webp" alt="Panel Admin overview with pending submissions, data problems and recent activity" width="1200" height="988" loading="lazy">
+        <img src="../assets/notes/smk/admin.webp" alt="Panel Admin overview with pending submissions, data problems and recent activity" width="1200" height="988" loading="lazy" decoding="async">
         <figcaption>Panel Admin: who hasn't submitted (with a one-tap "copy for WhatsApp"), data problems to fix, and an activity log.</figcaption>
       </figure>
 
       <h2>Privacy, at every layer</h2>
       <p>Teachers' names and leave records are personal data under Malaysia's PDPA, so I didn't want privacy to depend on one check somewhere. Each layer assumes the one before it might fail.</p>
       <figure>
-        <div class="diagram"><svg class="dg" viewBox="0 0 900 140" role="img"><title>Privacy in four layers</title><desc>Four layers in order: the sync sends only totals to public tables; the database has no policy on private tables; the API checks the role on every request; the page is noindex and never logs tokens.</desc><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ahd"/></marker></defs><path class="ed" d="M210 70H238" marker-end="url(#ah)"/><path class="ed" d="M440 70H468" marker-end="url(#ah)"/><path class="ed" d="M670 70H698" marker-end="url(#ah)"/><g class="n soft"><rect x="10" y="30" width="200" height="80" rx="10"/><text class="t" x="110.0" y="58.0" text-anchor="middle">1 · Sync</text><text class="s" x="110.0" y="74.0" text-anchor="middle">only totals reach</text><text class="s" x="110.0" y="90.0" text-anchor="middle">public tables</text></g><g class="n soft"><rect x="240" y="30" width="200" height="80" rx="10"/><text class="t" x="340.0" y="58.0" text-anchor="middle">2 · Database</text><text class="s" x="340.0" y="74.0" text-anchor="middle">private tables have</text><text class="s" x="340.0" y="90.0" text-anchor="middle">no RLS policy at all</text></g><g class="n soft"><rect x="470" y="30" width="200" height="80" rx="10"/><text class="t" x="570.0" y="58.0" text-anchor="middle">3 · API</text><text class="s" x="570.0" y="74.0" text-anchor="middle">role checked on</text><text class="s" x="570.0" y="90.0" text-anchor="middle">every request</text></g><g class="n soft"><rect x="700" y="30" width="190" height="80" rx="10"/><text class="t" x="795.0" y="58.0" text-anchor="middle">4 · Page</text><text class="s" x="795.0" y="74.0" text-anchor="middle">noindex · no-referrer</text><text class="s" x="795.0" y="90.0" text-anchor="middle">no tokens in analytics</text></g></svg></div>
+        <div class="diagram"><svg class="dg" viewBox="0 0 900 140" role="img"><title>Privacy in four layers</title><desc>Four layers in order: the sync sends only totals to public tables; the database has no policy on private tables; the API checks the role on every request; the page is noindex and never logs tokens.</desc><defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ahd"/></marker></defs><path class="ed" d="M210 70H238" marker-end="url(#ah2)"/><path class="ed" d="M440 70H468" marker-end="url(#ah2)"/><path class="ed" d="M670 70H698" marker-end="url(#ah2)"/><g class="n soft"><rect x="10" y="30" width="200" height="80" rx="10"/><text class="t" x="110.0" y="58.0" text-anchor="middle">1 · Sync</text><text class="s" x="110.0" y="74.0" text-anchor="middle">only totals reach</text><text class="s" x="110.0" y="90.0" text-anchor="middle">public tables</text></g><g class="n soft"><rect x="240" y="30" width="200" height="80" rx="10"/><text class="t" x="340.0" y="58.0" text-anchor="middle">2 · Database</text><text class="s" x="340.0" y="74.0" text-anchor="middle">private tables have</text><text class="s" x="340.0" y="90.0" text-anchor="middle">no RLS policy at all</text></g><g class="n soft"><rect x="470" y="30" width="200" height="80" rx="10"/><text class="t" x="570.0" y="58.0" text-anchor="middle">3 · API</text><text class="s" x="570.0" y="74.0" text-anchor="middle">role checked on</text><text class="s" x="570.0" y="90.0" text-anchor="middle">every request</text></g><g class="n soft"><rect x="700" y="30" width="190" height="80" rx="10"/><text class="t" x="795.0" y="58.0" text-anchor="middle">4 · Page</text><text class="s" x="795.0" y="74.0" text-anchor="middle">noindex · no-referrer</text><text class="s" x="795.0" y="90.0" text-anchor="middle">no tokens in analytics</text></g></svg></div>
         <figcaption>Each layer protects the data on its own. <span class="scroll-hint">Swipe sideways to see all of it.</span></figcaption>
       </figure>
       <p>Two details I'm happy with. Teachers check their own leave through a personal secret link instead of typing an IC number, which is easy to guess. And new admins never get a password from me: they get a one-time link, valid for 24 hours, sent through Telegram, the app the teachers actually use. The database stores only a hash of it.</p>
@@ -88,7 +108,7 @@
 
       <h2>Built for phones first</h2>
       <figure>
-        <div class="phones"><img src="../assets/notes/smk/phone-dashboard.webp" alt="The dashboard on a phone" width="520" height="1125" loading="lazy"><img src="../assets/notes/smk/phone-menu.webp" alt="The account menu as a bottom sheet on a phone" width="520" height="1125" loading="lazy"><img src="../assets/notes/smk/phone-login.webp" alt="The login screen on a phone" width="520" height="1125" loading="lazy"></div>
+        <div class="phones"><img src="../assets/notes/smk/phone-dashboard.webp" alt="The dashboard on a phone" width="520" height="1125" loading="lazy" decoding="async"><img src="../assets/notes/smk/phone-menu.webp" alt="The account menu as a bottom sheet on a phone" width="520" height="1125" loading="lazy" decoding="async"><img src="../assets/notes/smk/phone-login.webp" alt="The login screen on a phone" width="520" height="1125" loading="lazy" decoding="async"></div>
         <figcaption>On a phone: the dashboard, the account menu as a bottom sheet, and login. It installs to the home screen with the school crest.</figcaption>
       </figure>
       <p>Most teachers open it on a phone, and early on the header alone took 600 pixels before a single task showed. Version by version it got tighter:</p>
@@ -96,7 +116,7 @@
       <p>Every change ships with a short "what's new" note in plain Malay, inside the app.</p>
 
       <figure class="shot">
-        <img src="../assets/notes/smk/dashboard-dark.webp" alt="The dashboard in dark mode" width="1200" height="1566" loading="lazy">
+        <img src="../assets/notes/smk/dashboard-dark.webp" alt="The dashboard in dark mode" width="1200" height="1566" loading="lazy" decoding="async">
         <figcaption>Dark mode, with hand-drawn SVG charts that work in both themes.</figcaption>
       </figure>
 
@@ -128,5 +148,6 @@
   });
 })();
 </script>
+<script src="../assets/reader.js?v=20261114c" defer></script>
 </body>
 </html>

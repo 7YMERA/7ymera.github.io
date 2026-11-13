@@ -14,21 +14,41 @@
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://7ymera.github.io/notes/slb-power-apps.html">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://7ymera.github.io/notes/slb-power-apps.html">
+<link rel="alternate" type="application/rss+xml" title="Alif Najmi · Notes" href="/feed.xml">
 <meta name="theme-color" content="#0b2a6b">
-<link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=64">
-<link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=180">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/favicon-192.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=20261113j">
-<link rel="stylesheet" href="../assets/scene.css?v=20261113j">
+<link rel="stylesheet" href="../assets/site.css?v=20261114c">
+<link rel="stylesheet" href="../assets/scene.css?v=20261114c">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BlogPosting",
+ "headline": "From reply-all to Power Apps",
+ "description": "How I replaced an Excel and email-chain e-waste process at SLB with a Power Apps app during my internship.",
+ "datePublished": "2026-11-04",
+ "author": {
+  "@type": "Person",
+  "name": "Alif Najmi",
+  "url": "https://7ymera.github.io/"
+ },
+ "image": "https://7ymera.github.io/assets/og-slb.jpg",
+ "mainEntityOfPage": "https://7ymera.github.io/notes/slb-power-apps.html"
+}
+</script>
 </head>
 <body>
 <div class="sky" aria-hidden="true"></div>
 
 <header class="top">
   <div class="wrap">
-    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge av"><img src="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=96" alt="" width="32" height="32" decoding="async"></span>Alif Najmi</a>
+    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge av"><img src="/assets/icons/favicon-192.png" alt="" width="32" height="32" decoding="async"></span>Alif Najmi</a>
     <nav class="nav" aria-label="Sections">
       <a href="../#me">Me</a>
       <a href="../#work">Work</a>
@@ -44,7 +64,7 @@
 <main class="wrap">
   <article class="post">
     <div class="post-head">
-      <a class="back" href="../#me">← Back to Alif</a>
+      <span><a class="back" href="../#me">← Back to Alif</a> · <a class="back" href="index.html">All notes</a></span>
       <span class="eyebrow">Notes · Internship</span>
       <h1>From reply-all to Power Apps</h1>
       <p class="meta">4 November 2026 · 5 min read</p>
@@ -64,7 +84,7 @@
       <p>It worked, but it didn't scale. The data lived in spreadsheets, inboxes and shared drives. If you wanted to know where a request stood, you scrolled through a reply-all chain. Nobody was told when something changed. And when an auditor asked for the record, it had to be stitched together from three places.</p>
 
       <figure class="shot">
-        <img src="../assets/slb-approve-v1.webp" alt="An approval email thread, with names and contact details blurred" width="1200" height="750" loading="lazy">
+        <img src="../assets/slb-approve-v1.webp" alt="An approval email thread, with names and contact details blurred" width="1200" height="750" loading="lazy" decoding="async">
         <figcaption>"This is approved." The whole approval, buried in a thread. Names blurred.</figcaption>
       </figure>
 
@@ -72,17 +92,17 @@
       <p>Before touching Power Apps I mapped the existing process step by step, then sketched the screens on paper and talked them through with SLB's in-house GoDigital developers. That session gave the app its four roles: requestor, IT Manager, Finance Controller and admin. I also drew the data model and normalised it to third normal form, so each fact lives in one place.</p>
 
       <figure class="shot">
-        <img src="../assets/notes/slb/sketch.webp" alt="Hand-drawn sketches of the login, new request and view request screens" width="1200" height="874" loading="lazy">
+        <img src="../assets/notes/slb/sketch.webp" alt="Hand-drawn sketches of the login, new request and view request screens" width="1200" height="874" loading="lazy" decoding="async">
         <figcaption>The first sketch: logging in, a new request, and viewing a case.</figcaption>
       </figure>
 
       <div class="pair">
         <figure class="shot">
-          <img src="../assets/notes/slb/sketch-2.webp" alt="A notebook sketch of the view request screen with approval status" width="800" height="1164" loading="lazy">
+          <img src="../assets/notes/slb/sketch-2.webp" alt="A notebook sketch of the view request screen with approval status" width="800" height="1164" loading="lazy" decoding="async">
           <figcaption>A later notebook page, adding approval status.</figcaption>
         </figure>
         <figure class="shot">
-          <img src="../assets/notes/slb/erd.webp" alt="An early entity-relationship diagram for the app" width="1000" height="774" loading="lazy">
+          <img src="../assets/notes/slb/erd.webp" alt="An early entity-relationship diagram for the app" width="1000" height="774" loading="lazy" decoding="async">
           <figcaption>The first data model.</figcaption>
         </figure>
       </div>
@@ -91,19 +111,19 @@
       <p>The app runs on Power Apps, with SharePoint lists as the database and Power Automate sending the emails. A requestor picks their base, adds items, and saves a case. The approvers for that base fill in automatically, so nobody has to remember who signs off where.</p>
 
       <figure class="shot">
-        <img src="../assets/notes/slb/login.webp" alt="The app's login screen with Requestor, Approver and Admin buttons" width="1200" height="675" loading="lazy">
+        <img src="../assets/notes/slb/login.webp" alt="The app's login screen with Requestor, Approver and Admin buttons" width="1200" height="675" loading="lazy" decoding="async">
         <figcaption>Pick your role. Most people only ever see Requestor.</figcaption>
       </figure>
 
       <p>From there a case moves through clear states: draft, waiting for the IT Manager, waiting for the Finance Controller, approved, disposed. Each approver sees only the cases waiting for them, with two buttons. If either one rejects it, the case turns red and goes back to the requestor to fix and resubmit.</p>
 
       <figure class="shot">
-        <img src="../assets/slb-approve-v2.webp" alt="The approver screen with the item list and Approve and Reject buttons" width="1200" height="750" loading="lazy">
+        <img src="../assets/slb-approve-v2.webp" alt="The approver screen with the item list and Approve and Reject buttons" width="1200" height="750" loading="lazy" decoding="async">
         <figcaption>The approver's view: the case, its items, and two buttons.</figcaption>
       </figure>
 
       <figure class="shot">
-        <img src="../assets/notes/slb/rejected.webp" alt="A rejected case shown in red in the requestor's list" width="1200" height="675" loading="lazy">
+        <img src="../assets/notes/slb/rejected.webp" alt="A rejected case shown in red in the requestor's list" width="1200" height="675" loading="lazy" decoding="async">
         <figcaption>Rejected cases come back to the requestor in red.</figcaption>
       </figure>
 
@@ -126,7 +146,7 @@
       <p>Looking back, this is also where I worked out what I like doing: sitting between the people who use a process and the system that runs it. That's more or less my job now as a business analyst.</p>
 
       <figure class="shot">
-        <img src="../assets/slb-track-v2.webp" alt="The app's case list, colour-coded by status" width="1200" height="750" loading="lazy">
+        <img src="../assets/slb-track-v2.webp" alt="The app's case list, colour-coded by status" width="1200" height="750" loading="lazy" decoding="async">
         <figcaption>Every case in one place, coloured by where it is.</figcaption>
       </figure>
 
@@ -135,15 +155,15 @@
       <p>The flowcharts, ERDs and final data model behind it have their own note: <a href="slb-design.html">Nine charts before one screen</a>.</p>
 
       <a class="try-cta" href="slb-screens.html">
-        <span class="try-thumbs" aria-hidden="true"><img src="../assets/slb-screens/022-000.webp" alt=""><img src="../assets/slb-screens/044-033.webp" alt=""><img src="../assets/slb-screens/056-049.webp" alt=""></span>
+        <span class="try-thumbs" aria-hidden="true"><img src="../assets/slb-screens/022-000.webp" alt="" loading="lazy" decoding="async"><img src="../assets/slb-screens/044-033.webp" alt="" loading="lazy" decoding="async"><img src="../assets/slb-screens/056-049.webp" alt="" loading="lazy" decoding="async"></span>
         <span class="try-text"><span class="eyebrow">26 screens · about 2 minutes</span><b>Click through the app yourself</b><span>Follow one disposal case from draft to disposed.</span></span>
         <span class="try-go" aria-hidden="true">→</span>
       </a>
     </div>
 
     <div class="post-foot">
-      <a class="back" href="convocation-2026.html">← Four years, one walk across the stage</a>
-      <a class="back" href="taskmatch-v2.html">Rebuilding my FYP properly →</a>
+      <a class="back" href="taskmatch-v2.html">← Rebuilding my FYP properly</a>
+      <a class="back" href="convocation-2026.html">Four years, one walk across the stage →</a>
     </div>
   </article>
 </main>
@@ -160,5 +180,6 @@
   });
 })();
 </script>
+<script src="../assets/reader.js?v=20261114c" defer></script>
 </body>
 </html>

@@ -41,6 +41,16 @@
     var clamp = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
     var ease = function (t) { return t * t * (3 - 2 * t); };
     var Hs = 0, R = 0, endY = 0;
+    // OPENING: establishing stage. On the 3D page the first ~0.9 screen of scroll shows the bare city; the
+    // curtain (cards, name card, reel) comes in over it, driven by the same scroll position as the old acts.
+    // e: 0 -> 1 across that first stretch (E px); p: 0 -> 1 across the rest, exactly as before.
+    var root = document.documentElement, intro = document.getElementById('op-intro'), cue = document.getElementById('op-cue');
+    function hasGl() { return root.classList.contains('gl'); }
+    // Scroll budget of the opening, in screen heights (the CSS height of .curtain is 100svh + their sum):
+    // EST bare city (the curtain comes in over its last third), HOLD1 the name card stays, ACTS the columns part and the
+    // reel and headline arrive, HOLD2 the finished headline stays.
+    var EST = 1.8, HOLD1 = .8, ACTS = 2.2;
+    function estLen() { return hasGl() && !calm ? Math.round(innerHeight * EST) : 0; }
     function measure() {
       Hs = stage.clientHeight; R = reel ? reel.offsetHeight : 0;
       // Centre the reel and the headline as one block, a little above middle.
@@ -53,21 +63,25 @@
     // Progress runs over the time the stage is pinned, so every act plays
     // while it's on screen; the last stretch holds the finished headline.
     function range() { return cur.offsetHeight - innerHeight; }
-    function apply(p) {
+    function apply(p, e) {
       var q = p;
+      if (e === undefined) e = 1;
+      var en = ease(clamp(e)), ex = (1 - en) * innerWidth * .5, ey = (1 - en) * 80;
+      stage.style.setProperty('--en', en.toFixed(3));
       // (No clip: the photo columns run to the screen edges, so nothing gets cut mid-air.)
       var c = ease(clamp(q / .5)), dx = c * innerWidth * .55, sc = 1 + c * .25;
-      colL.style.transform = 'translate3d(' + (-dx) + 'px, 0, 0) rotate(' + (-7 - c * 10) + 'deg) scale(' + sc + ')';
-      colR.style.transform = 'translate3d(' + dx + 'px, 0, 0) rotate(' + (7 + c * 10) + 'deg) scale(' + sc + ')';
+      colL.style.transform = 'translate3d(' + (-dx - ex) + 'px, 0, 0) rotate(' + (-7 - c * 10) + 'deg) scale(' + sc + ')';
+      colR.style.transform = 'translate3d(' + (dx + ex) + 'px, 0, 0) rotate(' + (7 + c * 10) + 'deg) scale(' + sc + ')';
       // The outer columns part a little faster, for depth.
-      if (outL) outL.style.transform = 'translate3d(' + (-dx * 1.35) + 'px, 0, 0) rotate(' + (-5 - c * 8) + 'deg) scale(' + (.86 + c * .2) + ')';
-      if (outR) outR.style.transform = 'translate3d(' + (dx * 1.35) + 'px, 0, 0) rotate(' + (5 + c * 8) + 'deg) scale(' + (.86 + c * .2) + ')';
-      mid.style.opacity = Math.max(0, 1 - q * 4.5);
-      mid.style.transform = 'translate3d(0, ' + (-q * 60) + 'px, 0) scale(' + (1 - q * .08) + ')';
+      if (outL) outL.style.transform = 'translate3d(' + (-dx * 1.35 - ex * 1.3) + 'px, 0, 0) rotate(' + (-5 - c * 8) + 'deg) scale(' + (.86 + c * .2) + ')';
+      if (outR) outR.style.transform = 'translate3d(' + (dx * 1.35 + ex * 1.3) + 'px, 0, 0) rotate(' + (5 + c * 8) + 'deg) scale(' + (.86 + c * .2) + ')';
+      mid.style.opacity = (Math.max(0, 1 - q * 4.5) * en).toFixed(3);
+      mid.style.transform = 'translate3d(0, ' + (-q * 60 + ey) + 'px, 0) scale(' + (1 - q * .08) + ')';
+      mid.style.pointerEvents = en > .6 ? 'auto' : 'none';
       if (reel) {
         var m = ease(clamp((q - .3) / .4));
         // Faint behind the photos from the start, then full strength as it rises.
-        reel.style.opacity = (.32 + .68 * clamp((q - .2) / .24)).toFixed(3);
+        reel.style.opacity = ((.32 + .68 * clamp((q - .2) / .24)) * en).toFixed(3);
         reel.style.transform = 'translate3d(0, ' + (m * endY).toFixed(1) + 'px, 0) scale(' + (1 - .15 * m).toFixed(3) + ')';
       }
       if (ch) {
@@ -78,20 +92,69 @@
         if (o > .05 && title && !title.classList.contains('reveal')) title.classList.add('reveal');
       }
     }
-    cta.addEventListener('click', function () { scrollTo({ top: cur.offsetTop + range() * .98, behavior: calm ? 'auto' : 'smooth' }); });
+    cta.addEventListener('click', function () { scrollTo({ top: cur.offsetTop + (estLen() ? estLen() + innerHeight * (HOLD1 + ACTS + .5) : range() * .98), behavior: calm ? 'auto' : 'smooth' }); });
+    // The scroll cue: bring the curtain fully in (end of the establishing stretch).
+    function curtainInY() {
+      var E = estLen();
+      if (E) return cur.getBoundingClientRect().top + scrollY + E + innerHeight * HOLD1 * .4;
+      return stage.getBoundingClientRect().top + scrollY - (header ? header.offsetHeight : 0);
+    }
+    var header = document.querySelector('.top');
+    if (cue) cue.addEventListener('click', function () { scrollTo({ top: Math.ceil(curtainInY()), behavior: calm ? 'auto' : 'smooth' }); });
+    // Tabbing from the cue into the curtain's own button brings the curtain in, so focus is never on something unseen.
+    mid.addEventListener('focusin', function () {
+      var E = estLen();
+      if (E && scrollY < curtainInY() - 2) scrollTo({ top: Math.ceil(curtainInY()), behavior: 'auto' });
+    });
+    // Cue + wordmark: visible only over the bare city; fades out as the curtain comes in (hidden from tabbing once gone).
+    function cueState(e) {
+      if (!intro) return;
+      var o = clamp(1 - e / .3);
+      // the top bar stays out of the way while the city has the screen to itself; it returns as the curtain starts in
+      var bare = e <= .02 && hasGl();
+      if (root.classList.contains('op-bare') !== bare) root.classList.toggle('op-bare', bare);
+      intro.style.opacity = o.toFixed(3);
+      var away = o <= 0;
+      if (intro.classList.contains('away') !== away) intro.classList.toggle('away', away);
+    }
     measure();
     if (calm) {
-      // No motion: show the finished state straight away.
-      apply(1); addEventListener('resize', function () { measure(); apply(1); });
+      // No motion: show the finished state straight away. The cue just disappears once you have scrolled off the first screen.
+      apply(1);
+      var cb = false;
+      var calmTick = function () { cb = false; var gone = scrollY > innerHeight * .35; if (intro) { intro.style.opacity = ''; intro.classList.toggle('away', gone); } };
+      addEventListener('scroll', function () { if (!cb) { cb = true; requestAnimationFrame(calmTick); } }, { passive: true });
+      addEventListener('resize', function () { measure(); apply(1); calmTick(); }); calmTick();
     } else {
-      var busy = false, lastP = -1;
+      var busy = false, lastP = -1, lastE = -1;
       var tick = function () {
         busy = false;
-        var p = clamp(-cur.getBoundingClientRect().top / (range() || 1));
-        if (Math.abs(p - lastP) < .001) return; lastP = p; apply(p);
+        var E = estLen(), s = Math.max(0, -cur.getBoundingClientRect().top), rg = range();
+        // the city alone for the first two thirds of EST, then the curtain comes in over the last third
+        var e = E ? clamp((s - E * .66) / (E * .34)) : 1;
+        // with the establishing stage: hold the name card, play the acts (they finish at p = .86), hold the headline
+        var p = E ? .86 * clamp((s - E - innerHeight * HOLD1) / (innerHeight * ACTS)) : clamp(s / (rg || 1));
+        if (!hasGl() && intro) intro.classList.add('away');
+        tgP = p; tgE = e;
+        if (lastP < 0 || Math.abs(s - lastS) > innerHeight * 1.2) { curP = p; curE = e; }   // first frame, resize, or a jump (a link to a section): no glide
+        lastS = s;
+        if (!gliding) { gliding = true; lastT = 0; requestAnimationFrame(glide); }
+      };
+      // Scroll arrives in steps (a wheel notch, a key press). The opening eases toward the scroll position
+      // instead of jumping to it, so the motion is continuous between steps.
+      var tgP = 0, tgE = 0, curP = 0, curE = 0, gliding = false, lastT = 0, lastS = 0;
+      var glide = function (now) {
+        var dt = lastT ? Math.min(250, now - lastT) : 16; lastT = now;   // by the clock, so a slow device eases over the same time, not over more frames
+        var k = 1 - Math.exp(-dt / 130);
+        curP += (tgP - curP) * k; curE += (tgE - curE) * k;
+        if (Math.abs(tgP - curP) < .0004 && Math.abs(tgE - curE) < .0004) { curP = tgP; curE = tgE; gliding = false; }
+        if (Math.abs(curP - lastP) > .0002 || Math.abs(curE - lastE) > .0002 || !gliding) { lastP = curP; lastE = curE; apply(curP, curE); cueState(curE); }
+        if (gliding) requestAnimationFrame(glide);
       };
       addEventListener('scroll', function () { if (!busy) { busy = true; requestAnimationFrame(tick); } }, { passive: true });
       addEventListener('resize', function () { measure(); lastP = -1; tick(); }); tick();
+      // scene.js drops the `gl` class if WebGL turns out to be missing: fall back to the plain curtain.
+      if ('MutationObserver' in window) new MutationObserver(function () { measure(); lastP = -1; tick(); }).observe(root, { attributes: true, attributeFilter: ['class'] });
     }
   }
 
@@ -338,3 +401,53 @@
   addEventListener('hashchange', fromHash);
 })();
 
+
+/* THE FORK (after "This is me"): two routes through the page.
+   Story: keep scrolling. The card slides off to the left and the next section comes in from the right, so the page reads as turning aside into the detail.
+   Highlights: the button sets html.brief, which removes the story-only sections (site.css), then goes down to the work. A chip brings everything back. */
+(function () {
+  var root = document.documentElement, fork = document.getElementById('fork'), card = document.getElementById('fork-card'),
+      go = document.getElementById('fork-go'), exit = document.getElementById('brief-exit'), why = document.getElementById('why');
+  if (!fork || !card || !go) return;
+  var calm = matchMedia('(prefers-reduced-motion: reduce)').matches, whyWrap = why && why.querySelector('.wrap');
+  function relayout() { dispatchEvent(new Event('resize')); }   // scene.js re-reads where each section is
+  function setBrief(on, then) {
+    if (root.classList.contains('brief') === on) { if (then) then(); return; }
+    root.classList.toggle('brief', on); relayout();
+    requestAnimationFrame(function () { relayout(); if (then) then(); });
+  }
+  function goTo(el, smooth) { if (el) scrollTo({ top: el.getBoundingClientRect().top + scrollY - 70, behavior: smooth && !calm ? 'smooth' : 'instant' }); }
+  go.addEventListener('click', function () { setBrief(true, function () { goTo(document.getElementById('work'), true); }); });
+  if (exit) exit.addEventListener('click', function () {
+    // stay on the section being read
+    var ids = ['contact', 'journey', 'work', 'workstage', 'me'], cur = null, i, e;
+    for (i = 0; i < ids.length; i++) { e = document.getElementById(ids[i]); if (e && e.getBoundingClientRect().top < innerHeight * .6) { cur = e; break; } }
+    var off = cur ? cur.getBoundingClientRect().top : 0;
+    setBrief(false, function () { if (cur) scrollTo({ top: cur.getBoundingClientRect().top + scrollY - off, behavior: 'instant' }); });
+  });
+  // a link to a section that highlights mode has removed brings everything back first
+  function hidden(id) { var e = id && document.getElementById(id); return !!e && e.offsetHeight === 0; }
+  document.addEventListener('click', function (ev) {
+    var a = ev.target.closest && ev.target.closest('a[href^="#"]'); if (!a || !root.classList.contains('brief')) return;
+    var id = a.getAttribute('href').slice(1); if (!hidden(id)) return;
+    ev.preventDefault(); setBrief(false, function () { goTo(document.getElementById(id), false); history.replaceState(null, '', '#' + id); });
+  }, true);
+  addEventListener('hashchange', function () { var id = location.hash.slice(1); if (root.classList.contains('brief') && hidden(id)) setBrief(false, function () { goTo(document.getElementById(id), false); }); });
+  // the sideways move, driven by the scroll through the fork
+  if (calm) return;
+  var busy = false, on = false;
+  function tick() {
+    busy = false;
+    if (!root.classList.contains('gl') || root.classList.contains('brief')) { if (on) { on = false; root.classList.remove('fork-side'); card.style.transform = ''; card.style.opacity = ''; if (whyWrap) { whyWrap.style.transform = ''; whyWrap.style.opacity = ''; } } return; }
+    if (!on) { on = true; root.classList.add('fork-side'); }
+    var r = fork.getBoundingClientRect(), vh = innerHeight, range = r.height - vh;
+    if (r.bottom < -vh || r.top > vh * 2) return;
+    var p = range > 0 ? Math.min(1, Math.max(0, -r.top / range)) : 0;          // 0 -> 1 while the card is pinned
+    var t = Math.min(1, Math.max(0, (p - .58) / .42)); t = t * t * (3 - 2 * t);  // it holds for the first 58 %, then leaves
+    card.style.transform = 'translate3d(' + (-t * 115).toFixed(2) + 'vw, 0, 0)'; card.style.opacity = (1 - t * .6).toFixed(3);
+    if (whyWrap) { var w = why.getBoundingClientRect(), u = Math.min(1, Math.max(0, (vh - w.top) / (vh * .7))); u = u * u * (3 - 2 * u);
+      whyWrap.style.transform = 'translate3d(' + ((1 - u) * 60).toFixed(2) + 'vw, 0, 0)'; whyWrap.style.opacity = u.toFixed(3); }
+  }
+  addEventListener('scroll', function () { if (!busy) { busy = true; requestAnimationFrame(tick); } }, { passive: true });
+  addEventListener('resize', tick); tick();
+})();

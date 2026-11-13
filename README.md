@@ -37,7 +37,7 @@ The REQ-001 card, the "I write the spec. Then I build it." line and the teal-and
 
 ## Version history
 
-**Current version: 2.9.** Numbering: the first number changes when the site changes character (1.0 was a static page, 2.0 became the 3D city). The second number goes up for a major overhaul or a notable new feature. Small fixes and tweaks do not get a number; they live in [`docs/claude-log.md`](docs/claude-log.md). Dates come from the work log. Commit ids are on `main`: `git show <id>`.
+**Current version: 2.10.** Numbering: the first number changes when the site changes character (1.0 was a static page, 2.0 became the 3D city). The second number goes up for a major overhaul or a notable new feature. Small fixes and tweaks do not get a number; they live in [`docs/claude-log.md`](docs/claude-log.md). Dates come from the work log. Commit ids are on `main`: `git show <id>`.
 
 | Version | Date | What changed | Commit |
 |---|---|---|---|
@@ -59,6 +59,10 @@ The REQ-001 card, the "I write the spec. Then I build it." line and the teal-and
 | **2.7** | 13 Nov | **Trains and the chase.** A glowing rail ring round the Petronas Towers and a sky line over the city, with lit trains; the drone chases a train from Menara KL to Merdeka 118. | `fd61fe3` |
 | **2.8** | 13 Nov | **Smoother flight.** The drone flight drifts forward when idle and limits camera speed; sky rail lowered. (A metro-map skill tree was tried and removed at the owner's request.) | `00069d4` |
 | **2.9** | 13 Nov | **Smooth entry to the flight.** The camera no longer snaps out and in when you scroll from Journey into the drone flight; metro lines as a faint backdrop behind the skill tree. | `6d4d631` |
+| **2.10** | 12 Nov | **The polish pass.** The city is shaded in three flat tones under a near-white sky, with height haze, a fine paper grain and a soft vignette (inspired by 0z5a.github.io). Notes get a progress bar, a contents list and click-to-zoom. Under the hood: structured data, a sitemap and RSS feed, a 404 page, local icons, keyboard and screen-reader fixes, a faster first load, and a smoke test that checks all of it. | `a6321ec`, `3ae25af`, `b466bf9` |
+| **2.11** | 12 Nov | **One skyline, a clean opening, a new flight, a real night.** The four landmarks stand in one group (a `LAY` table, no longer their map positions). The page opens on the city alone; the curtain comes in on scroll. The flight is eight different beats instead of four spirals, with banking and a wider view at speed. Night is lit from photos of Kuala Lumpur: scattered warm and cool windows, a warm horizon haze, each landmark with its own lighting. | `4db598a`, `e878183`, `1e808e6` |
+| **2.12** | 12 Nov | **The owner's notes pass.** The opening is longer, held and eased, and its first screen is the bare city with only a chevron cue (no top bar until you scroll). Each landmark is relit at night from photos: Petronas with real windows up to its crowns, Menara KL white with a lamp-ringed pod, Merdeka 118 in thin floor lines with a white crown and spire, The Exchange 106 with office blocks and a violet lattice crown. Light mode is one blue in three steps. The moon is locked in place, a *Fly it again in dark mode* button sits over the finale, the flight banks less and frames Merdeka against the skyline. | `d8cc850` to `319a6cd` |
+| **2.13** | 13 Nov | **Two routes.** After *This is me* the page offers the full story (keep scrolling) or just the highlights (work, journey, contact). The first screen carries only the handle `/7ymera`, lit like a sign, and a pixel arrow; the golden hour and the barrel roll removed (the first for phone frame rate); a new share image of the skyline with no photo; the shaders moved to their own file; an accessibility pass; the UTP subjects checked against the transcript. | see log |
 
 Tried and dropped along the way (still in git history): a clothes-rail project gallery (`5c68a02`), a ring and then a conveyor of floating screens, a Masjid Negara you could fly into, and a 5 second phone loading screen. The longer story of the 3D city is in *The 3D city and the flight* below.
 
@@ -217,6 +221,7 @@ The home page (`index.html`) sits over a WebGL scene of Kuala Lumpur (three.js f
 |---|---|
 | The page (all sections, the flight markup, the `<canvas id="gl">`) | `index.html`, edited by hand (nothing is generated) |
 | Scene, flight, HUD | `assets/scene.js` |
+| Shader text (GLSL) for the scene, loaded just before it | `assets/scene-glsl.js` |
 | Flight on its own, with a viewer panel | `flight/index.html` |
 | Palette, section panels, opening plates, flight and HUD styles; loads after `site.css` | `assets/scene.css` |
 | Landmark models, the city, facade textures | `assets/city/` |
@@ -225,8 +230,8 @@ The home page (`index.html`) sits over a WebGL scene of Kuala Lumpur (three.js f
 
 | | |
 |---|---|
-| ![Hero line over the city, dark](docs/screens/city-hero-dark.webp) | ![The flight, head-on at the skybridge, dark](docs/screens/city-flight-bridge.webp) |
-| ![Journey on its panel, light](docs/screens/city-journey-light.webp) | ![The flight's last shot: all four landmarks tagged, light](docs/screens/city-flight-wide.webp) |
+| ![Hero line over the city, dark](docs/screens/city-hero-dark.webp) | ![The flight at night: out of the skybridge gap toward Menara KL](docs/screens/city-flight-bridge.webp) |
+| ![Journey over the city, light](docs/screens/city-journey-light.webp) | ![The flight's finale, with the Fly it again button](docs/screens/city-flight-wide.webp) |
 
 - **`assets/scene.css`** re-skins `site.css` by overriding its tokens (`--bg`, `--ink`, `--accent`, ...) with the blues, so every component follows with no per-component work. It also holds the panel style (opaque, a hard offset shadow, 2 px blue border), the opening's plates and the flight/HUD styles.
 - **Readability rules:** sections are opaque panels (93 % paper), no `backdrop-filter`; the opening's words get a plate or a halo because they sit straight on the city.
@@ -267,7 +272,13 @@ Things tried and dropped along the way, still in git history: a clothes-rail com
 ### How it works
 
 - **The city is the district by default** (`assets/city/klcc_district.json`, built with `tools/convert-klcc-dae.js`): one mesh, KLCC and its surroundings. Its own Petronas Towers, Merdeka 118 and The Exchange 106 were blocky, so `scene.js` cuts them out of the mesh on load and stands the hand-made models there. `?bg=osm` loads the OpenStreetMap city instead.
-- **The sci-fi layer** (`scene.js`, block `THE SCI-FI LAYER`): stars (`stars`), a ringed moon with a small moon of its own, both kept behind the city as seen from the camera (`moonG`, `sciUpdate`); gyroscope rings round the Petronas crowns and the top of Merdeka 118 (`addGyro`); the dragon of light that was here cost frame rate and was removed. Fewer stars on screens 820 px or narrower. Light and dark are styled in `sciStyle`.
+- **The landmarks are composed, not mapped.** `LAY` at the top of `scene.js` gives each landmark `[x, z, rotation]`; Menara KL, Merdeka 118 and The Exchange 106 sit within 150 units of the Petronas Towers so all four read as one skyline. The window cut-offs, beacons, crease lines, the sky rail, the director shots and the flight all derive from `LAY`; `CLEAR` removes district blocks under each plot. One exception: the Merdeka crane-up dodges a block at a fixed bearing, so re-run the flight clearance check if `LAY` changes. When a block is dropped, any separate piece that does not reach the ground and sits over it (a roof) goes too, so nothing is left floating.
+- **The flight, beat by beat** (`buildKF`): a street-level rush in, a climb round the Petronas Towers, the skybridge gap, one level orbit of Menara KL's pod, a crane up Merdeka 118 to a look straight down, a fall down The Exchange 106, a run beside the hero train, the pull-out. The climb round Petronas passes over the sky rail (it once flew through its glow), and the Merdeka climb starts at y 74 looking across, so the skyline is behind the tower. The camera banks by path curvature (about 7 degrees at most; 18 read as a tilted mess) and widens its view by up to 9 degrees at speed; both are off in reduced motion. There is no barrel roll (`rollAt` returns 0): the owner tried it twice and turned it off twice. There is no golden hour either (`goldHour` always resets): on phones in light mode it made the finale stutter, because each step rewrote the page's sky gradient and every material colour. The fall down The Exchange turns first, while high, then loses its height in one nearly straight drop, so the turn limit does not slow it. Over the finale a large button, `#fly-again`, offers *Fly it again in dark mode* (or light): it switches the theme and jumps back to the start of the flight.
+- **Night** (the `facade` shader, dark theme only): each window is a hash cell in world space, with a lit share and a warm/cool bias per building, fading to an average with distance so nothing shimmers. Each landmark has its own branch, keyed by `li` and worked from photos. *Petronas* (`li==0`): floor strips cut by the steel mullions, a few dark and a few warm rooms, brighter toward the crowns, and the crowns keep a smaller window pattern up their tiers. *Merdeka 118* (`li==1`): a thin, even line of cool light on every floor, a bright white crown, a white spire fading upward; its crease lines (`merEdges`) are ice white and faint. *The Exchange 106* (`li==2`): dark glass, offices lit in blocks of floors, a violet crown behind a white diamond lattice with a white rim. *Menara KL* (`li==3`): a white floodlit shaft, a dark blue-violet pod with rings of white lamps, a white crown and lit antenna. No magenta or pink anywhere: the owner removed both. The dark sky is three stops ending in a warm haze (`--sky3` in `scene.css`). There is no Maybank sign: it could not sit cleanly on the model's faceted crown and the owner had it removed.
+- **The opening shot** (`topPose` in `scene.js`) depends on the screen's shape: a row of four landmarks on a wide screen; from street level looking up on a tall one, so the towers fill a phone. As the name card comes in, `cardPose` rises and pulls back to the group of four (tall screens only). Tune both with the numbers in `TOPF`.
+- **The opening** (`#op-intro`, `extras.js`): the first screen is the city alone. While it is, `html.op-bare` hides the top bar and the only things on it are the handle `/7ymera` in the pixel font, top left (`.op-id`: it comes on like a rooftop sign, a few stutters and then steady, with a rare soft flicker), and a small pixel arrow at the bottom (`#op-cue`, a real button labelled *Scroll to begin*, with no button chrome); the bar returns as the curtain starts in. The scroll budget is 690svh, set by three numbers in `extras.js`: `EST` 1.8 screens of city (the curtain comes in over the last third), `HOLD1` 0.8 with the name card held, `ACTS` 2.2 for the columns, reel and headline, and the rest holds the headline. The opening does not jump to the scroll position; it eases toward it (`glide`), so a wheel notch does not show as a step. Without WebGL or JavaScript the curtain shows at once; reduced motion keeps the top bar and skips the animation. The buffer after it (`#spin`, *Where I work and build*) is 300vh so the tag holds while the city turns. A jump of more than 1.2 screens (a link to a section) snaps instead of easing, and the easing runs by the clock, so a slow device takes the same time, not more frames.
+- **The fork** (`#fork`, after *This is me*; `extras.js`, last block): the page pins for a moment and offers two routes. *The full story* is the default: keep scrolling, the card slides off to the left and the next section comes in from the right. *Just the highlights* sets `html.brief`, which hides the story-only sections in CSS (`#why`, `#notes`, `#studied`, `#merdekastage`, `#toolkit`, `#pulse`, `#enter`), so the page runs straight down through work, journey and contact; a chip, *Show everything*, undoes it, and so does any link to a hidden section. After each switch the code fires a `resize` so `scene.js` re-reads where the sections are (`layoutKeys` skips sections with no height).
+- **The sci-fi layer** (`scene.js`, block `THE SCI-FI LAYER`): stars (`stars`), a ringed moon with a small moon of its own, locked at one place in the sky (`moonG`; it used to follow the camera, and the owner asked for it to stay put); gyroscope rings round the Petronas crowns and the top of Merdeka 118 (`addGyro`); the dragon of light that was here cost frame rate and was removed. Fewer stars on screens 820 px or narrower. Light and dark are styled in `sciStyle`.
 - **Fallback:** `scene.js` adds `html.gl` only when WebGL and three.js load. Without it the page is the plain site on a flat background and `#enter` (the flight) is hidden.
 - **The buffer after the opening (`#spin`).** A 150vh (130vh on phones) section with no panel, right after the opening and before *This is me*. While it is on screen the orbit turns about 85° (`SP0` and `SPW` in `scene.js`: the orbit is 6 % done when it starts and 28 % of it happens inside, eased in and out), and a small "Kuala Lumpur" coordinates tag fades in. Change its length with `height` on `html.gl .spin` in `scene.css`, the amount of turn with `SPW`. Without WebGL it is hidden. `/flight/` does not have it.
 - **Two scroll phases.** From the top of the page to just before `#enter`, the camera follows the section director (`DIR`, one shot per section). Inside `#enter` (a 1250vh section with sticky captions) it flies the drone route (`buildRide()`, `KF` rows `[name, camera, look-at, slow factor, roll]`). The route (district version): dive in, a two-turn spiral up the Petronas Towers (`p0`..`p16`), a barrel roll through the skybridge gap (the `roll` column, cumulative radians), a cruise rising out of the gap, a two-turn spiral up Menara KL (`k0`..), two and a half turns up Merdeka 118 (`m0`..), a spiral dive down The Exchange 106 (`e0`..), then a sweep out round the district to the finale. The `spiral()` helper writes a spiral's knots. The first 86 % of the scroll (`HOLD0`) is the flight; the last 14 % holds the finale, drifting slowly sideways. Scroll is mapped to the path by length times the slow factors, with a monotone cubic.
@@ -296,6 +307,18 @@ A `.skp` file cannot be read here: export it from SketchUp as OBJ, DAE or glTF f
 - **Different route:** edit `KF`. Camera and look-at share the same knots (uniform Catmull-Rom), so they stay in step. Open the page with `?dbg` to get `window.__scene` (camera, scene, `rideP`, `rideU`, `draw(c)`) for checking: sample `rideP` and raycast from each point to measure clearance (the current route stays at least 7 units from every wall; that is the width of the gap).
 - **Where the flight sits:** the `<section class="enter" id="enter">` block in `index.html`, just before `<section class="contact">`. Move the block to move the flight.
 - **Captions and HUD:** the `.ride-cap` paragraphs in `index.html` are matched to the `CAPS` pairs in `scene.js` by order; their `data-from`/`data-to` are filled in by the script. The right-hand rail, the altitude read-out and the landmark tags (`LM`) are built from them.
+
+### The look: three tones, haze, grain
+
+The buildings are not smoothly lit. A helper in `scene.js`, `toon(sh)`, runs in every `mat()` material's `onBeforeCompile` and picks one of three flat tones per face from the face normal against one fixed light direction (the same side the orb sits on): lit, mid and shade, with thresholds 0.42 and -0.12. The tones are derived from each material's role colour in the palette `C`, so theme switching and the golden-hour blend still work: by day lit is the role colour pushed halfway to ice white and shade is a saturated cobalt; at golden hour the shade turns dusky violet; at night the three tones stay close together and dark so the lit windows, crease lines and beacons remain the brightest things. The day sky is near white (`#fcfeff` to `#e4f0fa`, overridden at the end of `scene.css`), which is what makes the pale faces and cobalt shadows read.
+
+Haze is added in the same shader, not as a pass: stronger low down and far away, plus a radial fade at the ground's edge, fading toward the CSS sky gradient at that pixel so the ground meets the sky with no seam. It eases off at golden hour. The day facade grid fades out by 420 m so distant blocks are clean shapes. A fine grain tile (drawn once on a canvas, sized per device pixel) and a radial vignette are two fixed layers right after the canvas, at the canvas's z-index, so they never sit over text or the HUD. No extra render passes; draw calls and shader programs are unchanged.
+
+**Light mode is one blue in three steps.** The palette in `scene.css` (`--far`, `--mid`, `--near`, `--ring`, `--glass`) is picked round a single hue, and the landmarks' glass uses the `near` tone, so no building is cyan next to a grey-blue neighbour. Lit faces are a pale tint of the base (`uLitMix` .42), not white, and shade is the same blue deepened (`uShadeMul` .46/.62/.95). Depth comes from those steps and the haze, not from changing hue. By day the facade shader also darkens the feet of buildings and lays soft cloud shadows on the ground: the daytime counterpart of the night street glow.
+
+The idea came from [0z5a.github.io](https://0z5a.github.io), the owner's early inspiration for the building background: three flat tones per face, a near-white sky and visible paper grain. The code here is our own.
+
+The scene now starts after the page's `load` event and fades in, so the text paints first (`/flight/` still starts at once). Measured with a CPU slowed four times on a fast-4G link: largest contentful paint at phone width went from 3.0 s to 2.3 s and the load event from 5.4 s to 2.7 s.
 
 ### Lessons and gotchas
 
@@ -351,10 +374,17 @@ Long-form write-ups in `notes/`, linked from the Notes folders and listed at [`/
 
 The note pages share one template. Their themed SVG diagrams (flowcharts, sequence diagrams, ERDs) are inline, so they follow light and dark mode.
 
+**Reading a note** (`assets/reader.js`, styles under the READER banner at the end of `site.css`): a progress bar under the header, a contents list built from the note's `h2` headings (a sticky rail in the card's left gutter from 1180 px, a closed "On this page" block below that), and click-to-zoom on charts and photos in a native `<dialog>` with Previous/Next, arrow keys and a Fit / Actual size toggle. Images inside widgets (the SQL playground, the Join Atlas, the app tour) are left alone. Pages cross-fade into each other with `@view-transition`; browsers without it just navigate.
+
+**Being found:** every page has a canonical link and structured data (`Person` and `WebSite` on the home page, `BlogPosting` on each dated note). `sitemap.xml`, `robots.txt` and `feed.xml` (RSS of the notes) sit at the repo root and are written by hand: **when you add a note, add it to `notes/index.html`, `sitemap.xml` and `feed.xml`, and fix the previous/next links of its neighbours** (they follow the index order, newest first). `tools/check.js` fails if a page is missing from the sitemap.
+
 ## Repository layout
 
 ```
 index.html               the home page (sections listed above)
+resume.html              the on-site résumé, generated from tools/cv/cv.html (do not hand-edit)
+404.html                 the "Signal lost" page GitHub Pages serves for a missing URL (root-absolute URLs only)
+sitemap.xml, robots.txt, feed.xml, site.webmanifest   for search engines, feed readers and home-screen icons
 notes/                   the notes, plus notes/index.html
 assets/
   site.css               all site styles, one file, with a comment heading per component
@@ -364,14 +394,17 @@ assets/
   image-stream.js        21st.dev Image Stream Hero port
   coverflow.js           21st.dev Coverflow Carousel port
   folders.js             21st.dev Glassmorphism Folder Cards port
+  reader.js              notes only: reading progress, contents list, click-to-zoom
   db-playground.js       sql.js playground for the database notes
   join-atlas.js / .css   the Join Atlas on the Jom Al-Quran note (its own file, every rule scoped under .ja)
   db/                    the two SQLite databases (personal data replaced with fake values),
                          plus jom-al-quran-drift.json (report attributes vs the built tables)
+  icons/                 favicon and touch icons, made from the avatar by tools/make-icons.py
   me/                    photos
   notes/                 note images, covers, diagrams
   slb-screens/           the SLB click-through
-  Muhammad-Alif-Najmi-CV.pdf
+  Muhammad-Alif-Najmi-CV.pdf   built from tools/cv/cv.html
+tools/cv/                cv.html (the one source for the CV), build.py (PDF, needs weasyprint), web.py (resume.html), photo.jpg
 docs/screens/            screenshots used in this README
 ```
 
@@ -382,6 +415,8 @@ docs/screens/            screenshots used in this README
 - **After changing any CSS or JS,** bump the `?v=` key in every page, for example `sed -i 's/?v=20261107k/?v=20261107l/g' index.html notes/*.html`. `join-atlas.css` and `join-atlas.js` are only loaded by `notes/jom-al-quran.html` and keep their own key there, so bump that one separately.
 - **Theme colours** are CSS variables on `:root`, redefined for dark mode under both `prefers-color-scheme: dark` and `[data-theme="dark"]`.
 - **Check before pushing:** load the page at 1300 px and 390 px wide, make sure nothing scrolls sideways, and watch the console for errors.
+- **The smoke test does this for you:** `python3 -m http.server 8765 &` then `node tools/check.js`. It loads every page at both widths, then runs a static pass: title and description length, canonical link, one `h1`, heading order, `alt` on every image, a name on every button and link, no duplicate ids, valid structured data, every local link and `#fragment` resolving, one shared `?v=` key, and the sitemap and feed matching the files. `node tools/check.js --static` runs only that pass and takes a few seconds. The rules are a table (`PAGE_RULES`, `SITE_RULES`) so a new one is a few lines.
+- **Screenshots in headless Chromium:** launch with `--use-angle=swiftshader`. With `--use-gl=swiftshader` a flat band appears along the bottom of the viewport; it is a capture artifact, not a page bug.
 
 ## Privacy rules
 
@@ -390,3 +425,7 @@ docs/screens/            screenshots used in this README
 - Photo metadata (EXIF, GPS) is stripped. Images are re-saved as WebP.
 - The coursework databases have every name, IC number, email and phone number replaced with a consistent fake value, so the joins still work.
 - Classmates' names and student IDs from group work are never published.
+
+## The CV (PDF and `/resume.html`)
+
+One source: `tools/cv/cv.html`. Edit that, then run `pip install weasyprint` (once), `python3 tools/cv/build.py` (writes `assets/Muhammad-Alif-Najmi-CV.pdf`, two Letter pages, Carlito) and `python3 tools/cv/web.py` (writes `resume.html`, the same text in the site's look). Bump the `?v=cv...` key on the CV links in `index.html` and `tools/cv/web.py` after changing the PDF. The Axrail and Handshake entries are the owner's own words from the earlier CV; change them only when asked. The CV's private project (the weekly poster automation) is named without a link and without any school names.

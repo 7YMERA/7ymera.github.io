@@ -1352,3 +1352,250 @@ section.block { padding-block: 80px 8px; }
 .mm-bg circle{fill:var(--bg);stroke:var(--ink);stroke-width:3}
 .mm-bg .x{stroke-width:4}
 @media (max-width:900px){.mm-bgs{display:none}}
+
+/* Accessibility: skip link and screen-reader-only text */
+.sr-only { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+.skip-link { position: fixed; top: 12px; left: 12px; z-index: 100; padding: 14px 24px; border-radius: 999px; background: var(--ink); color: var(--bg); font: 600 1rem var(--f-body); text-decoration: none; box-shadow: 0 8px 30px rgba(0, 0, 0, .35); transform: translateY(-200%); }
+.skip-link:focus, .skip-link:focus-visible { transform: none; outline: 3px solid var(--accent); outline-offset: 3px; }
+#me:focus { outline: none; }
+
+/* =====================================================================
+   READER (assets/reader.js): page transitions, reading progress bar,
+   "On this page" contents, click-to-zoom lightbox. Notes pages only,
+   except the view transition, which both the home page and notes opt in to.
+   --reader-top is the sticky header's real height, set by reader.js.
+   ===================================================================== */
+
+/* Cross-document view transition: a short cross-fade of the whole page. Unsupported browsers ignore it. */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .16s; animation-timing-function: ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
+/* Headings clear the sticky header when jumped to */
+article.post [id] { scroll-margin-top: calc(var(--reader-top, 72px) + 16px); }
+
+/* Progress bar: a full-width strip under the header, scaled from the left */
+.rd-progress { position: fixed; left: 0; right: 0; top: var(--reader-top, 64px); height: 4px; z-index: 17; pointer-events: none; overflow: hidden; }
+.rd-progress-fill { height: 100%; background: var(--fx, var(--accent)); transform: scaleX(0); transform-origin: left center; will-change: transform; }
+
+/* Contents: closed disclosure on narrow screens ... */
+main.wrap > .post { position: relative; }
+.toc-rail { max-width: 46rem; margin: 22px auto 0; }
+.toc-box { background: var(--surface); border: 2px solid var(--fx, var(--line)); border-radius: 6px; box-shadow: 3px 3px 0 var(--hard, transparent); }
+.toc-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 8px 16px; cursor: pointer; list-style: none; font: 600 .75rem var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink); }
+.toc-title::-webkit-details-marker { display: none; }
+.toc-title::after { content: "+"; font: 700 1.25rem/1 var(--f-mono); color: var(--fx, var(--accent)); }
+.toc-box[open] > .toc-title::after { content: "\2212"; }
+.toc-list { list-style: none; margin: 0; padding: 0 8px 10px; display: grid; gap: 2px; counter-reset: toc; }
+.toc-list li { counter-increment: toc; }
+.toc-list a { display: block; padding: 9px 10px; border-left: 3px solid transparent; color: var(--muted); text-decoration: none; font-size: .9375rem; line-height: 1.35; border-radius: 3px; }
+.toc-list a:hover { color: var(--ink); background: var(--sunk, transparent); }
+.toc-list a[aria-current="true"] { color: var(--ink); font-weight: 600; border-left-color: var(--fx, var(--accent)); background: var(--accent-soft, transparent); }
+
+/* ... a sticky list in the card's left margin on wide ones (46rem text column + a ~190px gutter each side needs about 1180px) */
+@media (min-width: 1180px) {
+  .toc-rail { position: absolute; top: 0; bottom: 0; left: 0; width: calc((100% - 46rem) / 2); max-width: none; margin: 0; padding: 44px 14px 28px 20px; pointer-events: none; }
+  .toc { position: sticky; top: calc(var(--reader-top, 72px) + 20px); pointer-events: auto; max-height: calc(100vh - var(--reader-top, 72px) - 40px); overflow-y: auto; overscroll-behavior: contain; }
+  .toc-box { background: none; border: 0; border-radius: 0; box-shadow: none; }
+  .toc-title { min-height: 0; padding: 0 0 8px 3px; cursor: default; pointer-events: none; color: var(--muted); font-size: .6875rem; }
+  .toc-title::after, .toc-box[open] > .toc-title::after { content: none; }
+  .toc-list { padding: 0; gap: 0; }
+  .toc-list a { padding: 6px 8px; font-size: .8125rem; }
+}
+
+/* Lightbox */
+[data-zoom] { cursor: zoom-in; }
+img[data-zoom]:focus-visible, a[data-zoom]:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.chart-link[data-zoom]::after { content: "Zoom \2922"; }
+html:has(dialog.lb[open]) { overflow: hidden; }
+dialog.lb { margin: 0; padding: 0; border: 0; width: 100%; height: 100%; max-width: none; max-height: none; background: rgba(6, 12, 28, .96); color: #eaf3ff; overscroll-behavior: contain; }
+dialog.lb[open] { display: flex; flex-direction: column; }
+dialog.lb::backdrop { background: rgba(6, 12, 28, .96); }
+@media (prefers-reduced-motion: no-preference) {
+  dialog.lb[open] { animation: lb-in .14s ease-out; }
+  @keyframes lb-in { from { opacity: 0; } to { opacity: 1; } }
+}
+.lb-bar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; padding-top: max(12px, env(safe-area-inset-top, 0px)); }
+.lb-count { flex: 1; font: 500 .875rem var(--f-mono); letter-spacing: .06em; color: #b9d3f2; }
+.lb-btn { min-height: 48px; min-width: 48px; padding: 0 20px; border: 2px solid var(--fx, #2aa6e8); border-radius: 6px; background: var(--bg); color: var(--ink); box-shadow: 4px 4px 0 var(--hard, #000); font: 700 1rem var(--f-body, inherit); cursor: pointer; }
+.lb-btn:hover { background: var(--sunk, var(--bg)); }
+.lb-btn:active { box-shadow: 1px 1px 0 var(--hard, #000); transform: translate(3px, 3px); }
+.lb-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.lb-close { background: var(--accent); color: var(--accent-ink); font-size: 1.0625rem; padding: 0 24px; }
+.lb-close:hover { background: var(--accent); filter: brightness(1.08); }
+.lb-btn[hidden] { display: none !important; }
+.lb-stage { flex: 1 1 auto; min-height: 0; display: flex; overflow: auto; padding: 4px 16px; overscroll-behavior: contain; }
+.lb-stage:focus-visible { outline: 3px solid #fff; outline-offset: -3px; }
+.lb-img { display: block; margin: auto; max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 4px; background: #fff; }
+.is-loading .lb-img { opacity: .35; }
+.lb.is-actual .lb-img { max-width: none; max-height: none; width: auto; height: auto; flex: none; }
+.lb-nav { display: flex; align-items: center; gap: 14px; padding: 12px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom, 0px)); }
+.lb-cap { flex: 1; margin: 0; text-align: center; font-size: .9375rem; line-height: 1.45; color: #eaf3ff; max-height: 5.8em; overflow: auto; }
+.lb-cap[hidden] { display: block !important; visibility: hidden; }
+@media (max-width: 700px) {
+  .lb-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .lb-cap { grid-column: 1 / -1; grid-row: 1; max-height: 4.4em; }
+  .lb-prev, .lb-next { grid-row: 2; }
+  .lb-bar { gap: 8px; }
+  .lb-btn { padding: 0 14px; }
+}
+
+/* ==========================================================================
+   OPENING: establishing stage
+   On the 3D page (html.gl) the first view is the bare city plus a scroll cue.
+   The curtain then comes in over it, scroll-driven by assets/extras.js (--en 0 -> 1
+   on .cur-stage, plus transforms set inline). Without html.gl (no JS, no WebGL)
+   none of this applies and the curtain is shown at once, as before.
+   ========================================================================== */
+.op-intro { display: none; }
+html.gl .op-intro { display: grid; justify-items: center; gap: 14px; position: fixed; left: 0; right: 0; z-index: 6; bottom: clamp(30px, 8vh, 72px); padding-inline: 16px; pointer-events: none; text-align: center; }
+html.gl .op-intro.away { visibility: hidden; }
+html.gl .op-mark { position: fixed; left: max(20px, calc((100vw - 1128px) / 2)); top: calc(61px + env(safe-area-inset-top, 0px) + 22px); margin: 0; text-align: left; font: 600 .9375rem var(--f-display); letter-spacing: .05em; color: var(--ink); text-shadow: 0 0 16px var(--bg), 0 0 8px var(--bg), 0 0 3px var(--bg), 0 0 1px var(--bg); }
+html.gl .op-mark i { font-style: normal; color: var(--accent); margin-inline: .4em; }
+html.gl .op-cue { pointer-events: auto; display: inline-flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 26px 0 30px; font: 700 1.0625rem var(--f-body); letter-spacing: .01em; color: var(--ink); cursor: pointer;
+  background: color-mix(in srgb, var(--bg) 72%, transparent); border: 2px solid var(--fx); border-radius: 999px; box-shadow: 3px 3px 0 var(--hard); }
+html.gl .op-cue svg { width: 22px; height: 22px; color: var(--accent); animation: opChev 1.8s ease-in-out infinite; }
+html.gl .op-cue:hover { background: var(--bg); transform: translate3d(-1px, -1px, 0); }
+html.gl .op-cue:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+@keyframes opChev { 0%, 100% { transform: translate3d(0, -2px, 0); opacity: .55; } 50% { transform: translate3d(0, 4px, 0); opacity: 1; } }
+@media (max-width: 760px) {
+  html.gl .op-intro { bottom: calc(112px + env(safe-area-inset-bottom, 0px)); gap: 12px; }
+  html.gl .op-mark { font-size: .8125rem; letter-spacing: .03em; left: 16px; right: 16px; }
+  html.gl .op-cue { min-height: 54px; }
+}
+/* the curtain's scroll length grows by the establishing stretch (extras.js: estLen = 0.9 x window height) */
+/* 100svh pinned + 180 bare city + 80 name card held + 220 acts + 110 headline held (EST, HOLD1, ACTS in extras.js) */
+html.gl .curtain { height: 690svh; }
+/* hidden until extras.js drives it; the inline --en wins once it runs. Without html.gl, it all falls back to 1 */
+html.gl .cur-stage { --en: 0; }
+html.gl .cur-col { opacity: var(--en, 1); }
+html.gl .cur-col.outer { opacity: calc(.9 * var(--en, 1)); }
+html.gl .cur-center { opacity: var(--en, 1); pointer-events: none; }
+html.gl .cur-reel { opacity: calc(.32 * var(--en, 1)); }
+html.gl .cur-frame.lit .cur-spot { opacity: var(--en, 1); }
+@media (prefers-reduced-motion: reduce) {
+  /* no scroll-linked motion: a still first screen (city + cue), then the finished curtain, in normal flow */
+  html.gl .curtain { height: auto; }
+  html.gl .cur-stage { position: relative; top: 0; margin-top: calc(100svh - 61px); --en: 1; }
+  html.gl .op-cue svg { animation: none; opacity: 1; }
+  html.gl .op-cue:hover { transform: none; }
+}
+
+/* In-page links land below the sticky header, not under it. */
+#me, #work, #journey, #contact { scroll-margin-top: 76px; }
+
+/* OPENING: while the city has the screen to itself (html.op-bare, set by extras.js) the top bar is hidden and the cue is only a pair of chevrons.
+   Everything returns as soon as the curtain starts to come in. Reduced motion never gets op-bare. */
+html.gl .top { transition: opacity .45s ease, transform .45s ease, visibility 0s; }
+html.gl.op-bare .top { opacity: 0; transform: translate3d(0, -100%, 0); visibility: hidden; pointer-events: none; transition: opacity .45s ease, transform .45s ease, visibility 0s .45s; }
+html.gl.op-bare .top:focus-within { opacity: 1; transform: none; visibility: visible; pointer-events: auto; }
+html.gl .op-cue { width: 64px; min-height: 64px; height: 64px; padding: 0; justify-content: center; gap: 0; }
+html.gl .op-cue svg { width: 30px; height: 30px; }
+@media (max-width: 760px) { html.gl .op-cue { width: 60px; height: 60px; min-height: 60px; } }
+
+/* Wide blocks in a note (the Join Atlas) sit above the contents rail, so the rail never shows through them. */
+article.post .ja { position: relative; z-index: 2; }
+
+/* OPENING: "Skip to my work" under the chevrons, for visitors in a hurry. It leaves with the cue as the curtain comes in. */
+html.gl .op-skip { pointer-events: auto; display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 22px; font: 600 1rem var(--f-body); color: var(--ink); text-decoration: none;
+  background: color-mix(in srgb, var(--bg) 78%, transparent); border: 2px solid var(--fx); border-radius: 999px; box-shadow: 3px 3px 0 var(--hard); }
+html.gl .op-skip:hover { background: var(--bg); transform: translate3d(-1px, -1px, 0); }
+html.gl .op-skip:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+html:not(.gl) .op-skip { display: none; }
+
+
+/* A11Y PASS
+   Appended by the accessibility pass. Contrast, focus and tap-size fixes only; no layout changes.
+   1. Focus rings are 3px everywhere (colour and offset stay as each earlier rule set them).
+   2. Text that used the bright --fx accent now uses --fx-ink (4.5:1 on the panels it sits on).
+   3. On phones, small controls get a 44px hit area. */
+:root { --fx-ink: #0b68a8; }
+:root[data-theme="dark"] { --fx-ink: var(--fx); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --fx-ink: var(--fx); } }
+
+/* 1. focus */
+:root :focus-visible { outline-width: 3px; }
+:root summary:focus-visible, .diagram:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+/* the glass folders' real button is an invisible hit area, so ring the whole folder instead */
+.fd:has(.fd-hit:focus-visible) { outline: 3px solid var(--accent); outline-offset: 6px; border-radius: 20px; }
+/* the top bar is hidden (not display:none) while the opening plays, so it can still take keyboard focus and :focus-within brings it back */
+html.gl.op-bare .top { visibility: visible; }
+
+/* 2. contrast */
+.spin-tag b, .stage-tag b, .ride-cap::before, .cp-spd span, .lost-sector, .readouts li span, .goto a small, .fp h2 { color: var(--fx-ink); }
+.goto a.primary small { color: var(--bg); }
+.readouts .bad b { color: #c42a20; }
+.goal-list .g-n { color: color-mix(in srgb, var(--accent) 70%, transparent); }
+:root:not([data-theme="dark"]) .pill.wip { color: #7a4c05; }
+:root:not([data-theme="dark"]) .try-cta .eyebrow { color: #f0c874; }
+:root[data-theme="dark"] .try-cta .eyebrow { color: #6a4204; }
+.foot { color: color-mix(in srgb, var(--bg) 78%, transparent); }
+
+/* 3. tap targets on phones */
+@media (max-width: 760px) {
+  .chip, .filters button, .cmp-tabs button, .pj-go a.btn, .nb-all { min-height: 44px; }
+  .split-chip a { padding: 13px 14px; }
+  .me-card .ms-btn, .cf-btn { width: 44px; height: 44px; }
+  .ms-dots button { height: 44px; }
+  .cf-dots button { position: relative; }
+  .cf-dots button::after { content: ""; position: absolute; inset: -18px -3px; }
+  /* links and the header buttons keep their look and layout; an invisible pad grows the hit area */
+  .pj-go a:not(.btn), .jr-org, .back, .icon-btn, .mark { position: relative; }
+  .pj-go a:not(.btn)::after, .jr-org::after, .back::after { content: ""; position: absolute; inset: -10px -4px; }
+  .icon-btn::after { content: ""; position: absolute; inset: -4px; }
+  .mark::after { content: ""; position: absolute; inset: -6px -4px; }
+}
+
+/* OPENING, take three: a bare pixel arrow (no button chrome) and the site's handle, lit like a rooftop sign.
+   The handle comes on with a few stutters and then holds, with a rare soft flicker: a sign over a skyline, not a glitch. */
+html.gl .op-cue { width: 76px; height: 60px; min-height: 60px; padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; color: var(--fx); }
+html.gl .op-cue:hover { background: none; transform: none; color: var(--ink); }
+html.gl .op-cue svg { width: 46px; height: auto; animation: opChev 1.8s steps(4) infinite; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--bg) 70%, transparent)); }
+html.gl .op-id { position: fixed; left: max(22px, calc((100vw - 1128px) / 2)); top: calc(26px + env(safe-area-inset-top, 0px)); margin: 0; font: 600 clamp(1.5rem, 2.6vw, 2.1rem)/1 var(--f-pix); letter-spacing: .06em; color: var(--fx);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--fx) 55%, transparent), 0 0 2px var(--bg); animation: signOn 9s linear infinite; }
+html.gl .op-id i { font-style: normal; animation: signTube 9s linear infinite; }
+html:not(.gl) .op-id { display: none; }
+@keyframes signOn { 0% { opacity: 0; } 1.5% { opacity: 1; } 2.5% { opacity: .25; } 4% { opacity: 1; } 5% { opacity: .5; } 6%, 61% { opacity: 1; } 61.6% { opacity: .62; } 62.4%, 100% { opacity: 1; } }
+@keyframes signTube { 0%, 7% { opacity: .15; } 8% { opacity: 1; } 9% { opacity: .3; } 10.5%, 83% { opacity: 1; } 83.5% { opacity: .35; } 84.3% { opacity: 1; } 85% { opacity: .5; } 86%, 100% { opacity: 1; } }
+@media (max-width: 760px) { html.gl .op-id { left: 18px; top: calc(22px + env(safe-area-inset-top, 0px)); } html.gl .op-cue { width: 68px; height: 56px; min-height: 56px; } }
+@media (prefers-reduced-motion: reduce) { html.gl .op-id, html.gl .op-id i, html.gl .op-cue svg { animation: none; } }
+
+/* THE FORK: after "This is me" the page holds for a moment and offers two routes. Keep scrolling and the card leaves to the side: the full story.
+   "Just the highlights" (html.brief, set by extras.js) removes the story-only sections, so the page runs straight down to work, experience and contact. */
+.fork { position: relative; padding: 40px 16px; }
+.fork-sticky { display: grid; place-items: center; }
+html.gl .fork { height: 230vh; padding: 0; }
+html.gl .fork-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; padding: 70px 16px 24px; overflow-x: clip; }
+.fork-card { width: min(100%, 47rem); display: grid; gap: 14px; padding: clamp(20px, 3vw, 30px); background: var(--bg); border: 2px solid var(--fx, var(--line)); border-radius: 6px; box-shadow: 6px 6px 0 var(--hard, transparent); will-change: transform; }
+.fork-card h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); }
+.fork-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 4px; }
+.fork-go, .fork-story { position: relative; display: grid; gap: 6px; align-content: start; text-align: left; padding: 18px 54px 18px 18px; border-radius: 6px; font: inherit; color: var(--ink); min-height: 132px; }
+.fork-go { cursor: pointer; background: var(--ink); color: var(--bg); border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--fx, var(--accent)); }
+.fork-go:hover { transform: translate3d(-1px, -1px, 0); }
+.fork-go:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+.fork-story { border: 2px dashed var(--fx, var(--line)); }
+.fork-go b, .fork-story b { font: 700 1.25rem/1.15 var(--f-display); }
+.fork-go span, .fork-story span { font-size: .9375rem; line-height: 1.45; opacity: .86; }
+.fork-go i, .fork-story i { position: absolute; right: 16px; top: 16px; font: 700 1.5rem/1 var(--f-mono); font-style: normal; }
+.fork-go i { animation: forkDown 1.5s ease-in-out infinite; }
+.fork-story i { color: var(--fx, var(--accent)); animation: forkSide 1.5s ease-in-out infinite; }
+@keyframes forkDown { 0%, 100% { transform: translate3d(0, -2px, 0); } 50% { transform: translate3d(0, 5px, 0); } }
+@keyframes forkSide { 0%, 100% { transform: translate3d(-2px, 0, 0); } 50% { transform: translate3d(6px, 0, 0); } }
+@media (max-width: 640px) { .fork-opts { grid-template-columns: 1fr; } .fork-go, .fork-story { min-height: 0; } }
+@media (prefers-reduced-motion: reduce) { html.gl .fork { height: auto; padding: 40px 16px; } html.gl .fork-sticky { position: static; height: auto; padding: 0; } .fork-go i, .fork-story i { animation: none; } }
+html.fork-side #why { overflow-x: clip; }
+html.fork-side #why > .wrap { will-change: transform, opacity; }
+/* highlights mode */
+html.brief #fork, html.brief #why, html.brief #notes, html.brief #studied, html.brief #merdekastage, html.brief #toolkit, html.brief #pulse, html.brief #enter { display: none !important; }
+.brief-chip { display: none; }
+html.brief .brief-chip { display: inline-flex; align-items: center; gap: 10px; position: fixed; left: 16px; bottom: 16px; z-index: 30; min-height: 48px; padding: 0 16px; font: 500 .9375rem var(--f-body); color: var(--ink); background: var(--bg); border: 2px solid var(--fx, var(--line)); border-radius: 999px; box-shadow: 3px 3px 0 var(--hard, transparent); cursor: pointer; }
+html.brief .brief-chip b { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+html.brief .brief-chip:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+@media (max-width: 760px) { html.brief .brief-chip { bottom: calc(92px + env(safe-area-inset-bottom, 0px)); } }
+
+/* the pixel arrow now sits over buildings on a phone: darker, with a halo of the page colour, so it reads on any of the three blues */
+html.gl .op-cue { color: var(--ink); }
+html.gl .op-cue svg { filter: drop-shadow(0 0 2px var(--bg)) drop-shadow(0 0 7px var(--bg)); }

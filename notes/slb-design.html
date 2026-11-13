@@ -14,21 +14,41 @@
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://7ymera.github.io/notes/slb-design.html">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://7ymera.github.io/notes/slb-design.html">
+<link rel="alternate" type="application/rss+xml" title="Alif Najmi · Notes" href="/feed.xml">
 <meta name="theme-color" content="#0b2a6b">
-<link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=64">
-<link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=180">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/favicon-192.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=20261113j">
-<link rel="stylesheet" href="../assets/scene.css?v=20261113j">
+<link rel="stylesheet" href="../assets/site.css?v=20261114c">
+<link rel="stylesheet" href="../assets/scene.css?v=20261114c">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BlogPosting",
+ "headline": "Nine charts before one screen",
+ "description": "The flowcharts, ERDs and data model behind the IT Asset Disposal app I built at SLB.",
+ "datePublished": "2026-11-06",
+ "author": {
+  "@type": "Person",
+  "name": "Alif Najmi",
+  "url": "https://7ymera.github.io/"
+ },
+ "image": "https://7ymera.github.io/assets/og-slb.jpg",
+ "mainEntityOfPage": "https://7ymera.github.io/notes/slb-design.html"
+}
+</script>
 </head>
 <body>
 <div class="sky" aria-hidden="true"></div>
 
 <header class="top">
   <div class="wrap">
-    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge av"><img src="https://avatars.githubusercontent.com/u/140389858?v=4&amp;s=96" alt="" width="32" height="32" decoding="async"></span>Alif Najmi</a>
+    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge av"><img src="/assets/icons/favicon-192.png" alt="" width="32" height="32" decoding="async"></span>Alif Najmi</a>
     <nav class="nav" aria-label="Sections">
       <a href="../#me">Me</a>
       <a href="../#work">Work</a>
@@ -44,7 +64,7 @@
 <main class="wrap">
   <article class="post">
     <div class="post-head">
-      <a class="back" href="../#me">← Back to Alif</a>
+      <span><a class="back" href="../#me">← Back to Alif</a> · <a class="back" href="index.html">All notes</a></span>
       <span class="eyebrow">Notes · Internship · Design</span>
       <h1>Nine charts before one screen</h1>
       <p class="meta">6 November 2026 · 6 min read</p>
@@ -57,22 +77,22 @@
       <p>Disposal sounds abstract until you see it: switches, access points, chargers and hard drives piling up in a storeroom, waiting for two approvals that lived in an email thread.</p>
       <div class="trio">
         <figure><img src="../assets/notes/slb/disposal/01-junkyard.webp" alt="Boxes of old IT equipment on a warehouse floor" width="675" height="900" loading="lazy"></figure>
-        <figure><img src="../assets/notes/slb/disposal/04-storeroom.webp" alt="Old desktops and boxes stacked in a storeroom" width="730" height="900" loading="lazy"></figure>
-        <figure><img src="../assets/notes/slb/disposal/09-hard-drives.webp" alt="A box of removed hard drives" width="704" height="900" loading="lazy"></figure>
+        <figure><img src="../assets/notes/slb/disposal/04-storeroom.webp" alt="Old desktops and boxes stacked in a storeroom" width="730" height="900" loading="lazy" decoding="async"></figure>
+        <figure><img src="../assets/notes/slb/disposal/09-hard-drives.webp" alt="A box of removed hard drives" width="704" height="900" loading="lazy" decoding="async"></figure>
       </div>
       <p>Each laptop has its own asset tag and serial number. A cable lock doesn't; you just count them. That one difference shaped the whole data model later on.</p>
 
       <h2>1. The first flow: four lanes and one "third party"</h2>
       <p>The first version came over from LucidChart. It had four lanes: the requestor, the system, an admin, and a single "third party" approver. The whole approval was one cycle, repeated for the Finance Controller. The notes in the margin are me reminding myself to focus on manual input first.</p>
       <figure class="shot">
-        <a class="chart-link" href="../assets/notes/slb/charts/mvp-flow-full.webp" target="_blank" rel="noopener"><img src="../assets/notes/slb/charts/mvp-flow.webp" alt="The first swimlane flowchart with Requestor, System, Admin and Third Party lanes" width="1600" height="1107" loading="lazy"></a>
+        <a class="chart-link" href="../assets/notes/slb/charts/mvp-flow-full.webp" target="_blank" rel="noopener"><img src="../assets/notes/slb/charts/mvp-flow.webp" alt="The first swimlane flowchart with Requestor, System, Admin and Third Party lanes" width="1600" height="1107" loading="lazy" decoding="async"></a>
         <figcaption>Page 2, the MVP flow. Asset or non-asset is already the first big decision.</figcaption>
       </figure>
 
       <h2>2. Giving everyone their own lane</h2>
       <p>The single "third party" was really two different people with two different jobs. The IT Manager and the Finance Controller got their own lanes, every email was spelled out with who gets it as TO and who as CC, and a home page appeared with Create, View My Requests and Help.</p>
       <figure class="shot tall">
-        <a class="chart-link" href="../assets/notes/slb/charts/home-function-flow-full.webp" target="_blank" rel="noopener"><img src="../assets/notes/slb/charts/home-function-flow.webp" alt="A five-lane flowchart with a home page, IT Manager and Finance Controller lanes and an admin lane" width="1400" height="2129" loading="lazy"></a>
+        <a class="chart-link" href="../assets/notes/slb/charts/home-function-flow-full.webp" target="_blank" rel="noopener"><img src="../assets/notes/slb/charts/home-function-flow.webp" alt="A five-lane flowchart with a home page, IT Manager and Finance Controller lanes and an admin lane" width="1400" height="2129" loading="lazy" decoding="async"></a>
         <figcaption>Page 5. The dotted lines split it into stages: submit, IT Manager, Finance Controller, then the QUEST and IBase numbers.</figcaption>
       </figure>
 
@@ -80,11 +100,11 @@
       <p>The final version pulled the admin work out into its own chart. Admins can view, add, edit and remove four things: other admins, locations, requestors and approvers. The main flow also got a "Confirm submission" step, warning that the list can't change once it's submitted.</p>
       <div class="pair">
         <figure class="shot tall">
-          <a class="chart-link" href="../assets/notes/slb/charts/final-flow-full.webp" target="_blank" rel="noopener"><img src="../assets/notes/slb/charts/final-flow.webp" alt="The final four-lane flowchart from request to disposal" width="1200" height="2371" loading="lazy"></a>
+          <a class="chart-link" href="../assets/notes/slb/charts/final-flow-full.webp" target="_blank" rel="noopener"><img src="../assets/notes/slb/charts/final-flow.webp" alt="The final four-lane flowchart from request to disposal" width="1200" height="2371" loading="lazy" decoding="async"></a>
           <figcaption>Page 7, the final flow.</figcaption>
         </figure>
         <figure class="shot tall">
-          <img src="../assets/notes/slb/charts/final-admin-access.webp" alt="The admin flowchart: view, add, edit and delete admins, locations, requestors and approvers" width="800" height="1705" loading="lazy">
+          <img src="../assets/notes/slb/charts/final-admin-access.webp" alt="The admin flowchart: view, add, edit and delete admins, locations, requestors and approvers" width="800" height="1705" loading="lazy" decoding="async">
           <figcaption>Page 7, admin access.</figcaption>
         </figure>
       </div>
@@ -92,12 +112,12 @@
       <h2>4. From a ten-table ERD to five lists</h2>
       <p>The team's first ERD tried to model everything: users, requests, approvals, dismantling, documents, certificates and reports. It was a good map of the whole disposal process, but most of it wasn't the app's job.</p>
       <figure class="shot">
-        <img src="../assets/notes/slb/charts/erd-team-draft.webp" alt="A wide ERD with User, Location, Disposal Request, Approval, Asset, Non-Asset, Dismantling, Document, Certificate and Report tables" width="1200" height="1031" loading="lazy">
+        <img src="../assets/notes/slb/charts/erd-team-draft.webp" alt="A wide ERD with User, Location, Disposal Request, Approval, Asset, Non-Asset, Dismantling, Document, Certificate and Report tables" width="1200" height="1031" loading="lazy" decoding="async">
         <figcaption>Page 6, the team draft. The pink tables (dismantling, documents, certificates, reports) never made it into the app.</figcaption>
       </figure>
       <p>I cut it down and normalised it to third normal form: each fact stored once, and tables pointing at each other by ID.</p>
       <figure class="shot">
-        <img src="../assets/notes/slb/charts/erd-normalised.webp" alt="The normalised ERD with Approver, Case, Requestor, Location and Item" width="1100" height="1001" loading="lazy">
+        <img src="../assets/notes/slb/charts/erd-normalised.webp" alt="The normalised ERD with Approver, Case, Requestor, Location and Item" width="1100" height="1001" loading="lazy" decoding="async">
         <figcaption>Page 8, normalised: Case, Requestor, Location, Item and Approver.</figcaption>
       </figure>
 
@@ -126,22 +146,22 @@
       <p>Two ideas sit in every version of the charts: scanning a barcode to pull an asset's details from the internal asset system, and marking it as disposed in the hardware ESM afterwards. Both needed access to SLB systems outside an intern project's scope, so items were typed in by hand. If anyone picks the app up again, that's where I'd start.</p>
 
       <figure>
-        <img src="../assets/notes/slb/disposal/10-smashing-drives.webp" alt="A worker in orange coveralls breaking hard drives with a hammer, face blurred" width="581" height="900" loading="lazy" style="max-width:360px;margin-inline:auto">
+        <img src="../assets/notes/slb/disposal/10-smashing-drives.webp" alt="A worker in orange coveralls breaking hard drives with a hammer, face blurred" width="581" height="900" loading="lazy" style="max-width:360px;margin-inline:auto" decoding="async">
         <figcaption style="text-align:center">And at the very end of the flow: hard drives, by hammer.</figcaption>
       </figure>
 
       <p>The draw.io file, the data model and sample data are all in the <a href="https://github.com/7YMERA/it-asset-disposal-app-v1/tree/main/docs" target="_blank" rel="noopener">repo's docs</a>.</p>
 
       <a class="try-cta" href="slb-screens.html">
-        <span class="try-thumbs" aria-hidden="true"><img src="../assets/slb-screens/022-000.webp" alt=""><img src="../assets/slb-screens/044-033.webp" alt=""><img src="../assets/slb-screens/056-049.webp" alt=""></span>
+        <span class="try-thumbs" aria-hidden="true"><img src="../assets/slb-screens/022-000.webp" alt="" loading="lazy" decoding="async"><img src="../assets/slb-screens/044-033.webp" alt="" loading="lazy" decoding="async"><img src="../assets/slb-screens/056-049.webp" alt="" loading="lazy" decoding="async"></span>
         <span class="try-text"><span class="eyebrow">26 screens · about 2 minutes</span><b>See how the charts turned out</b><span>Click through one disposal case from draft to disposed.</span></span>
         <span class="try-go" aria-hidden="true">→</span>
       </a>
     </div>
 
     <div class="post-foot">
-      <a class="back" href="slb-power-apps.html">← From reply-all to Power Apps</a>
-      <a class="back" href="taskmatch-v2.html">Rebuilding my FYP properly →</a>
+      <a class="back" href="jom-al-quran.html">← Jom Al-Quran: 56 tables, back from Oracle</a>
+      <a class="back" href="smk-dashboard.html">A dashboard 150 teachers actually open →</a>
     </div>
   </article>
 </main>
@@ -158,5 +178,6 @@
   });
 })();
 </script>
+<script src="../assets/reader.js?v=20261114c" defer></script>
 </body>
 </html>
