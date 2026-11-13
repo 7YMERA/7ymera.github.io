@@ -34,7 +34,7 @@ any agent working on this repo, kept short on purpose so it costs little context
 ## Rules that bite
 
 - **Cache key:** every CSS/JS link carries `?v=YYYYMMDDx`. After any CSS/JS change, bump it everywhere:
-  `grep -rl 'v=OLD' index.html notes flight 404.html | xargs sed -i 's/v=OLD/v=NEW/g'`.
+  `grep -rl 'v=OLD' index.html resume.html notes flight 404.html | xargs sed -i 's/v=OLD/v=NEW/g'`.
   When you replace an image, give it a new file name (e.g. `cover-2.webp`).
 - **Performance:** animate only `transform` and `opacity`. No `backdrop-filter` over the moving aurora.
   No `mask-image` or rounded `clip-path` around 3D content. Pause off-screen work with
