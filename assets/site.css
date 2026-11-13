@@ -1608,3 +1608,6 @@ html.gl .op-theme { pointer-events: auto; display: inline-grid; place-items: cen
 html.gl .op-theme svg { width: 22px; height: 22px; }
 html.gl .op-theme:hover, html.gl .op-theme:focus-visible { opacity: 1; background: color-mix(in srgb, var(--bg) 80%, transparent); }
 html.gl .op-theme:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+
+/* "Why I do this" holds in the middle of the screen for a while: this empty run-up above it is the scroll distance of the hold (extras.js, fork tick). */
+html.gl.fork-side #why { padding-top: calc(44px + 62svh); }
