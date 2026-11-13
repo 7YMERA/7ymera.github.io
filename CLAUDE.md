@@ -24,7 +24,7 @@ any agent working on this repo, kept short on purpose so it costs little context
 | Join Atlas (Jom Al-Quran note) | `assets/join-atlas.js`, `.css` |
 | Notes (blog posts) | `notes/*.html`, listed in `notes/index.html`. Edit the HTML directly. |
 | README screenshots | `docs/screens/` |
-| 3D city, scroll flight, HUD | scene `assets/scene.js`, styles `assets/scene.css` (also skins the notes pages), models and textures `assets/city/` (the page itself is `index.html`) |
+| 3D city, scroll flight, HUD | scene `assets/scene.js`, its shader text `assets/scene-glsl.js` (load it first), styles `assets/scene.css` (also skins the notes pages), models and textures `assets/city/` (the page itself is `index.html`) |
 | Flight on its own (view and debug) | `/flight/`: `flight/index.html`, panel on **H**. Keep its `#enter` block in step with `index.html`. |
 | Notes reading aids (progress, contents, zoom) | `assets/reader.js`, styles under the READER banner at the end of `site.css` |
 | Search and feeds (hand-written: update when you add a note) | `sitemap.xml`, `feed.xml`, `robots.txt` |
@@ -44,7 +44,7 @@ any agent working on this repo, kept short on purpose so it costs little context
 - **`[hidden]` is `display:none !important`** in `site.css`. Overriding it needs `!important`.
 - **Light mode is the default** (`<html data-theme="light">`). Check both themes and 390 px width.
 - **The owner dislikes small hidden buttons** for major features. Make controls big and obvious.
-- **Scene colour rules from the owner:** no magenta or pink lighting, no Maybank sign, the moon stays locked in place, light mode stays one blue family (no cyan glass).
+- **Scene colour rules from the owner:** no magenta or pink lighting, no Maybank sign, the moon stays locked in place, light mode stays one blue family (no cyan glass), no barrel roll in the flight, no golden hour (it stuttered on phones).
 
 - **The old flat-aurora site** is commit `f3b9f08` (`git checkout f3b9f08`). There is no `/v2/` any more: the 3D city is the home page.
 

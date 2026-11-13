@@ -1498,3 +1498,10 @@ html.gl .op-cue svg { width: 30px; height: 30px; }
 
 /* Wide blocks in a note (the Join Atlas) sit above the contents rail, so the rail never shows through them. */
 article.post .ja { position: relative; z-index: 2; }
+
+/* OPENING: "Skip to my work" under the chevrons, for visitors in a hurry. It leaves with the cue as the curtain comes in. */
+html.gl .op-skip { pointer-events: auto; display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 22px; font: 600 1rem var(--f-body); color: var(--ink); text-decoration: none;
+  background: color-mix(in srgb, var(--bg) 78%, transparent); border: 2px solid var(--fx); border-radius: 999px; box-shadow: 3px 3px 0 var(--hard); }
+html.gl .op-skip:hover { background: var(--bg); transform: translate3d(-1px, -1px, 0); }
+html.gl .op-skip:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+html:not(.gl) .op-skip { display: none; }

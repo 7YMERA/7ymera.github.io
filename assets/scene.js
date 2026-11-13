@@ -57,28 +57,13 @@
   // The tones are derived from each material's role colour, so the themes and the golden hour keep working. The haze fades towards the CSS sky gradient itself (uSky1/uSky2 at this pixel's screen height), so geometry melts into the sky with no seam.
   var shadeBase=new T.Vector3(.3,.52,.92),hazeBase=.5,GSH=new T.Vector3(.52,.47,.68),TU={uLight:{value:new T.Vector3(-.42,.74,.52).normalize()},uSunC:{value:sun.color},uLitMul:{value:new T.Vector3(1,1,1)},uLitMix:{value:.7},uShadeMul:{value:new T.Vector3(.4,.6,.95)},uMidMul:{value:new T.Vector3(1,1,1)},
     uSky1:{value:new T.Color()},uSky2:{value:new T.Color()},uSky3:{value:new T.Color()},uStop:{value:1},uRes:{value:new T.Vector2(1,1)},uHazeK:{value:.7},uSunAmt:{value:.5},uEdge:{value:new T.Vector2(620,1250)}};
+  var GLSL=window.SCENE_GLSL; // the shader text lives in assets/scene-glsl.js (loaded just before this file), so it can be read and edited as GLSL
   function toon(sh){
     for(var k in TU)sh.uniforms[k]=TU[k];
     sh.vertexShader=sh.vertexShader.replace('void main() {','varying vec3 vWP;\nvoid main() {').replace('#include <worldpos_vertex>','#include <worldpos_vertex>\n vWP=(modelMatrix*vec4(transformed,1.0)).xyz;');
     sh.fragmentShader=sh.fragmentShader.replace('void main() {','varying vec3 vWP;uniform vec3 uLight,uSunC,uLitMul,uShadeMul,uMidMul,uSky1,uSky2,uSky3;uniform float uStop;uniform float uLitMix,uHazeK,uSunAmt;uniform vec2 uRes,uEdge;\nvoid main() {')
-      .replace('#include <aomap_fragment>',`#include <aomap_fragment>
-        vec3 tn=normalize(cross(dFdx(vWP),dFdy(vWP)));
-        float td=dot(tn,uLight);
-        float tlit=smoothstep(0.40,0.44,td),tsh=1.0-smoothstep(-0.14,-0.10,td);
-        vec3 bc=diffuseColor.rgb;
-        vec3 cLit=mix(bc*uLitMul,vec3(0.97,0.99,1.0),uLitMix)*mix(vec3(1.0),uSunC,uSunAmt);
-        reflectedLight.directDiffuse=vec3(0.0);
-        reflectedLight.indirectDiffuse=mix(mix(bc*uMidMul,cLit,tlit),bc*uShadeMul,tsh);`)
-      .replace('#include <fog_fragment>',`#ifdef USE_FOG
-        float hf=smoothstep(fogNear,fogFar,fogDepth);
-        float hy=max(vWP.y,0.0);
-        float hz=smoothstep(260.0,1700.0,distance(vWP,cameraPosition))*uHazeK*mix(0.15,1.0,exp(-hy/100.0));
-        float he=smoothstep(uEdge.x,uEdge.y,length(vWP.xz))*exp(-hy/70.0);
-        float ht=1.0-(1.0-hf)*(1.0-hz)*(1.0-he);
-        float sy=1.0-gl_FragCoord.y/uRes.y; /* the CSS gradient: sky1 to sky2 at uStop, then to sky3 (day: uStop is 1, so sky3 never shows) */
-        vec3 skyc=mix(mix(uSky1,uSky2,clamp(sy/uStop,0.0,1.0)),uSky3,clamp((sy-uStop)/max(1.0-uStop,0.0001),0.0,1.0));
-        gl_FragColor.rgb=mix(gl_FragColor.rgb,skyc,ht);
-      #endif`);
+      .replace('#include <aomap_fragment>',GLSL.toonShade)
+      .replace('#include <fog_fragment>',GLSL.toonHaze);
     return sh}
   var g=new T.Group();scene.add(g);
   var H=132;
@@ -154,93 +139,8 @@
     m.onBeforeCompile=function(sh){
       sh.uniforms.uNight=cityU.uNight;sh.uniforms.uCut=cityU.uCut;sh.uniforms.uLo=cityU.uLo;sh.uniforms.uDay=cityU.uDay;sh.uniforms.uNightTex=cityU.uNightTex;sh.uniforms.uGlass={value:glass?1:0};
       toon(sh);
-      sh.fragmentShader=sh.fragmentShader.replace('void main() {',`uniform sampler2D uDay;uniform sampler2D uNightTex;uniform float uNight,uGlass;uniform vec4 uCut[4];uniform float uLo[4];
-        float h21(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-        float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(h21(i),h21(i+vec2(1.0,0.0)),f.x),mix(h21(i+vec2(0.0,1.0)),h21(i+vec2(1.0,1.0)),f.x),f.y);}
-        void main() {`)
-        .replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
-        vec3 fn=normalize(cross(dFdx(vWP),dFdy(vWP)));
-        float wall=1.0-smoothstep(0.45,0.75,abs(fn.y));
-        bool onX=abs(fn.z)>abs(fn.x);
-        vec2 fuv=(onX?vWP.xy:vWP.zy)/6.0;
-        float hq=onX?vWP.x:vWP.z;
-        float dl=dot(texture2D(uDay,fuv).rgb,vec3(0.333));
-        float gd=distance(vWP,cameraPosition);float gk=mix(0.3*(1.0-smoothstep(70.0,420.0,gd)),0.75*(1.0-0.6*smoothstep(500.0,1200.0,gd)),uNight)*(1.0-uGlass); /* day: faint grid that clears with distance, so far blocks are clean tones; night keeps its grid. (The glass parts of the landmarks have no day grid.) */
-        diffuseColor.rgb*=mix(1.0,clamp(dl*1.9,0.0,1.3),wall*gk);
-        /* ---- night: lit windows, per window cell, per building, stable in world space ---- */
-        float al=1.0;int li=-1;
-        for(int i=0;i<4;i++){vec4 c=uCut[i];if(distance(vWP.xz,c.xy)<c.z){li=i;if(vWP.y>c.w||vWP.y<uLo[i])al=0.0;}} /* spires and shafts have no floors: no lit rooms there */
-        float lmF=li>=0?1.0:0.0;
-        vec2 bk=floor(vWP.xz/20.0);
-        float hb=h21(bk+vec2(1.7,4.1));
-        float nl=wall*uNight*al*mix(mix(1.0,0.06,step(0.8,hb)),1.0,lmF); /* about one block in five stands (almost) dark */
-        nl*=smoothstep(1.0,9.0,vWP.y); /* street level stays dark */
-        float b1=h21(bk+vec2(3.7,9.2)),b2=h21(bk+vec2(17.9,2.3));
-        vec2 cell=floor(vec2(hq/3.0,vWP.y/1.5)); /* one window = 3 x 1.5 units, two across and four high in each 6-unit tile of the photo */
-        vec2 ck=cell+bk*29.0+(onX?vec2(0.0):vec2(61.0,13.0));
-        float rr=h21(ck),rc=h21(ck+vec2(5.3,1.1)),rb=h21(ck+vec2(9.1,4.7));
-        float rf=h21(vec2(cell.y*2.3+b1*37.0,bk.x*1.7+bk.y*3.1)); /* the same value for every window on one floor of one building: whole floors light up */
-        float pl=mix(0.2,0.46,b1),bandT=0.12,wp=mix(0.12,0.95,b2); /* lit share (a quarter to under half), floor-band share, warm share: each building has its own bias */
-        if(li==1){pl=0.07;bandT=0.14;wp=0.7;}
-        if(li==2){pl=0.08;bandT=0.2;wp=0.0;}
-        float lit=step(rr,pl);
-        lit=max(lit,step(rf,bandT)*step(rr,0.94));
-        lit*=1.0-step(0.9,h21(vec2(cell.y*1.9+b2*13.0,bk.x+bk.y*5.0)))*0.85; /* the odd dark floor */
-        vec3 wc=mix(vec3(0.58,0.84,1.0),vec3(1.0,0.62,0.26),step(rc,wp));
-        float df=smoothstep(140.0,520.0,gd); /* far away the per-window detail gives way to the building's average, so nothing shimmers */
-        float avgp=pl+(1.0-pl)*bandT*0.94;
-        lit=mix(lit,avgp,df);
-        float tl=dot(texture2D(uNightTex,fuv).rgb,vec3(0.3333));
-        float st=mix(clamp(0.2+2.2*tl,0.0,1.5),0.5,df);
-        vec3 wem=wc*(0.55+0.8*rb)*lit*st*nl*1.55;
-        if(li==0){ /* Petronas: every floor floodlit cool silver, evenly, in regular bands */
-          /* each floor is a strip of bright windows cut by the steel mullions; a few rooms are dark, a few warm; the light builds toward the crowns */
-          float f=fract(vWP.y/1.9),bx=fract(hq/1.7);
-          float win=mix(smoothstep(0.0,0.14,f)*(1.0-smoothstep(0.6,0.8,f))*smoothstep(0.0,0.14,bx)*(1.0-smoothstep(0.78,0.94,bx)),0.46,df);
-          vec2 pc=vec2(floor(hq/1.7),floor(vWP.y/1.9))+(onX?vec2(0.0):vec2(31.0,7.0));
-          float pr=h21(pc+vec2(2.3,7.7)),pw=h21(pc+vec2(8.1,3.3));
-          float pon=mix(step(pr,0.9)*(0.7+0.5*pw),0.8,df);
-          vec3 pcw=mix(vec3(0.82,0.91,1.0),vec3(1.0,0.9,0.72),step(0.8,pw)*(1.0-df));
-          wem=pcw*(0.07+0.78*win*pon)*(0.75+0.6*smoothstep(10.0,106.0,vWP.y))*nl;}
-        if(li==1){ /* Merdeka 118: dark faceted glass. Every floor is a thin, even line of cool light, a few office floors glow warmer, the crown is a bright white lantern, and the spire is lit white, fading upward */
-          float mf=fract(vWP.y/1.5);float mline=mix(smoothstep(0.1,0.3,mf)*(1.0-smoothstep(0.42,0.62,mf)),0.3,df);
-          float mup=smoothstep(20.0,uCut[1].w,vWP.y);
-          float mcr=smoothstep(uCut[1].w-16.0,uCut[1].w-3.0,vWP.y);
-          wem=wem*0.8+vec3(0.72,0.86,1.0)*mline*(0.16+0.26*mup)*nl+vec3(0.95,0.98,1.0)*mcr*(0.35+0.75*mline)*nl;}
-        if(li==2){ /* The Exchange 106, from a photo: dark blue glass, with the offices lit in blocks of floors (cool white, mostly in the lower half), a faint line on every other floor */
-          float ef=floor(vWP.y/1.5),es=fract(vWP.y/1.5),ebx=fract(hq/1.6);
-          float ezone=smoothstep(0.42,0.56,vn(vec2(ef/7.0,4.3)))*(1.0-smoothstep(uCut[2].w*0.6,uCut[2].w*0.85,vWP.y));
-          float ewin=mix(smoothstep(0.08,0.24,es)*(1.0-smoothstep(0.6,0.8,es))*smoothstep(0.0,0.14,ebx)*(1.0-smoothstep(0.8,0.94,ebx)),0.42,df);
-          float eon=mix(step(h21(vec2(floor(hq/1.6),ef)+(onX?vec2(0.0):vec2(23.0,5.0))),mix(0.04,0.82,ezone)),mix(0.04,0.82,ezone),df);
-          wem=vec3(0.84,0.93,1.0)*ewin*eon*(0.6+0.5*rb)*nl*1.05+vec3(0.5,0.68,1.0)*ewin*0.05*nl;}
-        wem+=vec3(0.92,0.96,1.0)*(li==1?step(uCut[1].w,vWP.y)*(1.0-smoothstep(uCut[1].w,uCut[1].w+44.0,vWP.y)):0.0)*0.75*wall*uNight;
-        /* Menara KL, from photos: the shaft floodlit white (the brightest part, faintly fluted, a pink blush at the foot), the pod dark blue-violet with rings of white lamps, a white crown on top of it, the lower antenna lit */
-        float kw=li==3?step(vWP.y,uLo[3]):0.0;
-        float kang=atan(vWP.z-uCut[3].y,vWP.x-uCut[3].x);
-        float kfl=mix(0.84+0.16*step(0.5,fract(kang*24.0/6.2832)),0.92,df);
-        wem+=mix(vec3(1.0,0.7,0.82),vec3(0.9,0.95,1.0),smoothstep(2.0,26.0,vWP.y))*(0.55+0.3*smoothstep(8.0,78.0,vWP.y))*kfl*kw*uNight;
-        float kp=li==3?al:0.0;
-        float kr=fract(vWP.y/2.1),kd=fract(kang*44.0/6.2832);
-        float klamp=mix(smoothstep(0.3,0.5,kr)*(1.0-smoothstep(0.5,0.7,kr))*smoothstep(0.28,0.5,kd)*(1.0-smoothstep(0.5,0.72,kd)),0.16,df);
-        float ktop=smoothstep(uCut[3].w-5.5,uCut[3].w-4.0,vWP.y);
-        wem=mix(wem,(vec3(0.16,0.2,0.62)*0.55+vec3(0.95,0.97,1.0)*(klamp*1.9+ktop*0.9))*uNight,kp);
-        wem+=vec3(0.92,0.96,1.0)*(li==3?step(uCut[3].w,vWP.y)*(1.0-smoothstep(uCut[3].w,uCut[3].w+22.0,vWP.y)):0.0)*0.8*uNight;
-        /* sodium street light: amber at the feet of buildings and on the ground near them */
-        float low=1.0-smoothstep(0.5,11.0,max(vWP.y,0.0));
-        float gnd=(1.0-wall)*(1.0-step(2.5,vWP.y));
-        float rad=1.0-smoothstep(120.0,820.0,length(vWP.xz+vec2(60.0,60.0)));
-        float pool=smoothstep(0.3,0.9,vn(vWP.xz/16.0))*0.7+0.3*vn(vWP.xz/5.0);
-        float pg=mix(pool,0.45,smoothstep(120.0,500.0,gd));
-        vec3 sod=vec3(1.0,0.5,0.15)*uNight*(wall*low*(0.3+0.45*h21(vec2(floor(hq/4.0),bk.x*3.0+bk.y)))*0.8+gnd*rad*(0.04+0.2*pg));
-        diffuseColor.rgb*=1.0-(1.0-uNight)*(wall*low*0.2+gnd*rad*0.13*pg); /* by day the same shapes are shade, not light: darker feet on every building and soft cloud shadows drifting over the ground */
-        /* red aviation lights on a few of the tall flat roofs */
-        vec2 rc2=floor(vWP.xz/18.0);
-        float rl=step(0.9,fn.y)*step(36.0,vWP.y)*(1.0-lmF)*step(0.8,h21(rc2+vec2(11.3,5.9)))*(1.0-smoothstep(0.7,2.2,length(vWP.xz-(rc2+0.5)*18.0)))*uNight;
-        totalEmissiveRadiance+=wem+sod+vec3(1.0,0.1,0.06)*rl*1.8;
-        /* night glow of the landmarks: floodlit Petronas pinnacles, the lantern crown of The Exchange 106 */
-        float gP=(1.0-step(uCut[0].z,distance(vWP.xz,uCut[0].xy)))*step(uCut[0].w,vWP.y);
-        float gE=(1.0-step(uCut[2].z,distance(vWP.xz,uCut[2].xy)))*step(uCut[2].w-4.0,vWP.y);
-        totalEmissiveRadiance+=uNight*(vec3(1.0,0.95,0.86)*gP*mix(0.16+0.95*mix(smoothstep(0.08,0.24,fract(vWP.y/1.3))*(1.0-smoothstep(0.58,0.78,fract(vWP.y/1.3)))*smoothstep(0.0,0.16,fract(hq/1.15))*(1.0-smoothstep(0.76,0.94,fract(hq/1.15))),0.45,df),0.8,smoothstep(uCut[0].w+17.0,uCut[0].w+22.0,vWP.y))+ /* the crowns keep their windows: smaller floors and bays up the tiers, then the pinnacle's ball and mast lit solid */ gE*(vec3(0.5,0.4,1.0)*0.42+vec3(0.9,0.88,1.0)*mix(max(1.0-smoothstep(0.05,0.12,abs(fract((hq+vWP.y)/3.2)-0.5)),1.0-smoothstep(0.05,0.12,abs(fract((hq-vWP.y)/3.2)-0.5))),0.25,df)*0.85+vec3(1.0)*(1.0-step(uCut[2].w-2.2,vWP.y))*0.9)) /* The Exchange's crown: a violet lantern behind a white diamond lattice, with a bright white rim under it */;`)};
+      sh.fragmentShader=sh.fragmentShader.replace('void main() {',GLSL.facadeHead)
+        .replace('#include <emissivemap_fragment>',GLSL.facadeBody)};
     return m}
   // The ground stays one plain colour. (Roads and dark patches were tried and removed: owner didn't like them.)
   var cityM=facade(mat('mid',DIST?{side:T.DoubleSide}:{}));
@@ -668,9 +568,9 @@
         var cp=new T.Vector3(qv.x-tg.z*8,Math.max(30,qv.y-26),qv.z+tg.x*8);skyCurve.getPointAt(s1,qv);
         SK.push([cp,new T.Vector3(qv.x,qv.y-20,qv.z)])}
       var s0u=UW(SK[0][0].x,SK[0][0].z),fr=(mobile?1.3:1),fTh0=dg(E,C),fTh1=dg(E,s0u),fSw=wrap(fTh0-fTh1),fR0=100*fr,fR1=dist(E,s0u),nF=10,fk0=KF.length;
-      for(i=0;i<nF;i++){f=i/nF;var th=(fTh0-fSw*f)*RAD,r=fR1+(fR0-fR1)*Math.pow(1-f,1.6),y=SK[0][0].y+(214-SK[0][0].y)*Math.pow(1-f,1.35),phi=26*RAD,Lh=60,pit=Math.atan(.9-.55*f);
+      for(i=0;i<nF;i++){f=i/nF;var th=(fTh0-fSw*(1-Math.pow(1-f,2.1)))*RAD,r=fR1+(fR0-fR1)*Math.pow(1-f,1.6),y=SK[0][0].y+(214-SK[0][0].y)*(1-Math.pow(f,1.7)), /* the turn round the tower comes first, while still high; then the height goes all at once, on a nearly straight line, so it reads as a fall and the turn limit does not slow it */ phi=26*RAD,Lh=60,pit=Math.atan(.9-.55*f);
         var cx=E.u+Math.cos(th)*r,cz=E.w+Math.sin(th)*r;
-        KF.push([i?'e'+i:'e0',A(cx,cz,y),A(cx+Lh*(-Math.cos(phi)*Math.cos(th)+Math.sin(phi)*Math.sin(th)),cz+Lh*(-Math.cos(phi)*Math.sin(th)-Math.sin(phi)*Math.cos(th)),Math.max(0,y-Lh*Math.tan(pit))),i<nF-1?.8:1.1,1.2*Math.sin(f*Math.PI)]);
+        KF.push([i?'e'+i:'e0',A(cx,cz,y),A(cx+Lh*(-Math.cos(phi)*Math.cos(th)+Math.sin(phi)*Math.sin(th)),cz+Lh*(-Math.cos(phi)*Math.sin(th)-Math.sin(phi)*Math.cos(th)),Math.max(0,y-Lh*Math.tan(pit))),i<nF-1?.5:1.0,1.2*Math.sin(f*Math.PI)]);
         mixAim(KF.length-1,SK[0][1],(f-.45)/.5);if(f<.3)mixAim(KF.length-1,KF[fk0-1][2],1-f/.3)}   // the first fall knots keep the aim of the flight in, the last ones turn it to where the skim looks
       var skEndAim=A(ENDC.u,ENDC.w,90);for(i=nS-4;i<=nS;i++)SK[i][1]=SK[i][1].clone().lerp(skEndAim,sm((i-(nS-5))/5));  // the last skim knots turn their aim toward the group, ready for the pull-out
       SK.forEach(function(s,j){KF.push([j?(j===nS?'skEnd':'sk'+j):'sk0',s[0],s[1],j===nS?3.4:1.2,0])});
@@ -749,7 +649,7 @@
     for(i=0;i<=NT;i++){bankTab[i]=clamp(kS[i]*9,-.13,.13); // 0.0125 per unit (a circle of radius 80) leans about 14 degrees; at most 18
       var sp=clamp((sS[i]-lo)/Math.max(1e-6,hi-lo),0,1);fovTab[i]=9*sp*sp*(3-2*sp)}
     bankTab[0]=0;bankTab[NT]=0;fovTab[NT]=0;for(i=0;i<=4;i++)fovTab[i]=fovTab[i]*i/4}
-  function rollAt(u){if(reduce)return 0; /* the barrel roll through the skybridge gap (back on, owner's call); none with reduced motion */var n=rollK.length;if(n<2)return 0;var f=clamp(u,0,1)*(n-1),i=Math.min(n-2,Math.floor(f)),t=f-i;t=t*t*(3-2*t);return rollK[i]+(rollK[i+1]-rollK[i])*t}
+  function rollAt(u){return 0; /* no barrel roll: the owner tried it twice and turned it off twice. Do not turn it back on unless asked. The drone still banks into turns. */var n=rollK.length;if(n<2)return 0;var f=clamp(u,0,1)*(n-1),i=Math.min(n-2,Math.floor(f)),t=f-i;t=t*t*(3-2*t);return rollK[i]+(rollK[i+1]-rollK[i])*t}
   // ---- HUD (DOM) ----
   var hud=document.getElementById('hud'),hTags=[],hAlt=document.getElementById('h-alt'),hSec=document.getElementById('h-sec'),hFill=document.getElementById('h-fill'),hTicks=[],hLast=-1,hSecLast=-1;
   if(hud){var tg=hud.querySelector('.hud-tags');LM.forEach(function(l){var e=document.createElement('div');e.className='lm-tag';
@@ -813,7 +713,7 @@
   // Golden hour: for the finale skyline the light turns to a hazy sunrise (reference photo: warm orange sky, golden haze over the towers). Light theme only.
   var goldLast=-1,goldF=new T.Color(),goldC=new T.Color(),G1=new T.Color('#ffe2a8'),G2=new T.Color('#f3a95a'),G3=new T.Color('#f0b676');
   function goldHour(k){
-    var dark=root.getAttribute('data-theme')==='dark';if(dark)k=0;k=Math.round(k*50)/50;if(k===goldLast)return;goldLast=k;
+    var dark=root.getAttribute('data-theme')==='dark';k=0; /* the golden hour is off (owner's call): it rewrote the page's sky gradient and every material colour on each step, which made the finale stutter on phones in light mode. The reset path below is all that runs. */if(k===goldLast)return;goldLast=k;
     if(k===0){mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});root.style.removeProperty('--sky1');root.style.removeProperty('--sky2');if(scene.fog)scene.fog.color.copy(fogColor());TU.uSky1.value.set(C.sky1);TU.uSky2.value.set(C.skyM);TU.uShadeMul.value.copy(shadeBase);TU.uHazeK.value=hazeBase;sun.color.set(dark?0xb0b4ff:0xffffff);return}
     mats.forEach(function(m){var r=m.userData.role;if(r==='far'||r==='mid'||r==='near'||r==='ground')m.color.set(C[r]).lerp(G3,k*.38)}); /* the ground and towers take the warm haze */
     goldC.set(C.sky1).lerp(G1,k);root.style.setProperty('--sky1','#'+goldC.getHexString());TU.uSky1.value.copy(goldC);TU.uShadeMul.value.copy(shadeBase).lerp(GSH,k);TU.uHazeK.value=hazeBase*(1-.5*k); /* golden hour: dusky violet shadows, pale cream lit faces, less haze so the skyline stays crisp */

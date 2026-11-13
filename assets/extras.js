@@ -136,14 +136,15 @@
         var p = E ? .86 * clamp((s - E - innerHeight * HOLD1) / (innerHeight * ACTS)) : clamp(s / (rg || 1));
         if (!hasGl() && intro) intro.classList.add('away');
         tgP = p; tgE = e;
-        if (lastP < 0) { curP = p; curE = e; }   // first frame, resize: no glide
+        if (lastP < 0 || Math.abs(s - lastS) > innerHeight * 1.2) { curP = p; curE = e; }   // first frame, resize, or a jump (a link to a section): no glide
+        lastS = s;
         if (!gliding) { gliding = true; lastT = 0; requestAnimationFrame(glide); }
       };
       // Scroll arrives in steps (a wheel notch, a key press). The opening eases toward the scroll position
       // instead of jumping to it, so the motion is continuous between steps.
-      var tgP = 0, tgE = 0, curP = 0, curE = 0, gliding = false, lastT = 0;
+      var tgP = 0, tgE = 0, curP = 0, curE = 0, gliding = false, lastT = 0, lastS = 0;
       var glide = function (now) {
-        var dt = lastT ? Math.min(64, now - lastT) : 16; lastT = now;
+        var dt = lastT ? Math.min(250, now - lastT) : 16; lastT = now;   // by the clock, so a slow device eases over the same time, not over more frames
         var k = 1 - Math.exp(-dt / 130);
         curP += (tgP - curP) * k; curE += (tgE - curE) * k;
         if (Math.abs(tgP - curP) < .0004 && Math.abs(tgE - curE) < .0004) { curP = tgP; curE = tgE; gliding = false; }
