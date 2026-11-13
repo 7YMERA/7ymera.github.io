@@ -401,3 +401,53 @@
   addEventListener('hashchange', fromHash);
 })();
 
+
+/* THE FORK (after "This is me"): two routes through the page.
+   Story: keep scrolling. The card slides off to the left and the next section comes in from the right, so the page reads as turning aside into the detail.
+   Highlights: the button sets html.brief, which removes the story-only sections (site.css), then goes down to the work. A chip brings everything back. */
+(function () {
+  var root = document.documentElement, fork = document.getElementById('fork'), card = document.getElementById('fork-card'),
+      go = document.getElementById('fork-go'), exit = document.getElementById('brief-exit'), why = document.getElementById('why');
+  if (!fork || !card || !go) return;
+  var calm = matchMedia('(prefers-reduced-motion: reduce)').matches, whyWrap = why && why.querySelector('.wrap');
+  function relayout() { dispatchEvent(new Event('resize')); }   // scene.js re-reads where each section is
+  function setBrief(on, then) {
+    if (root.classList.contains('brief') === on) { if (then) then(); return; }
+    root.classList.toggle('brief', on); relayout();
+    requestAnimationFrame(function () { relayout(); if (then) then(); });
+  }
+  function goTo(el, smooth) { if (el) scrollTo({ top: el.getBoundingClientRect().top + scrollY - 70, behavior: smooth && !calm ? 'smooth' : 'instant' }); }
+  go.addEventListener('click', function () { setBrief(true, function () { goTo(document.getElementById('work'), true); }); });
+  if (exit) exit.addEventListener('click', function () {
+    // stay on the section being read
+    var ids = ['contact', 'journey', 'work', 'workstage', 'me'], cur = null, i, e;
+    for (i = 0; i < ids.length; i++) { e = document.getElementById(ids[i]); if (e && e.getBoundingClientRect().top < innerHeight * .6) { cur = e; break; } }
+    var off = cur ? cur.getBoundingClientRect().top : 0;
+    setBrief(false, function () { if (cur) scrollTo({ top: cur.getBoundingClientRect().top + scrollY - off, behavior: 'instant' }); });
+  });
+  // a link to a section that highlights mode has removed brings everything back first
+  function hidden(id) { var e = id && document.getElementById(id); return !!e && e.offsetHeight === 0; }
+  document.addEventListener('click', function (ev) {
+    var a = ev.target.closest && ev.target.closest('a[href^="#"]'); if (!a || !root.classList.contains('brief')) return;
+    var id = a.getAttribute('href').slice(1); if (!hidden(id)) return;
+    ev.preventDefault(); setBrief(false, function () { goTo(document.getElementById(id), false); history.replaceState(null, '', '#' + id); });
+  }, true);
+  addEventListener('hashchange', function () { var id = location.hash.slice(1); if (root.classList.contains('brief') && hidden(id)) setBrief(false, function () { goTo(document.getElementById(id), false); }); });
+  // the sideways move, driven by the scroll through the fork
+  if (calm) return;
+  var busy = false, on = false;
+  function tick() {
+    busy = false;
+    if (!root.classList.contains('gl') || root.classList.contains('brief')) { if (on) { on = false; root.classList.remove('fork-side'); card.style.transform = ''; card.style.opacity = ''; if (whyWrap) { whyWrap.style.transform = ''; whyWrap.style.opacity = ''; } } return; }
+    if (!on) { on = true; root.classList.add('fork-side'); }
+    var r = fork.getBoundingClientRect(), vh = innerHeight, range = r.height - vh;
+    if (r.bottom < -vh || r.top > vh * 2) return;
+    var p = range > 0 ? Math.min(1, Math.max(0, -r.top / range)) : 0;          // 0 -> 1 while the card is pinned
+    var t = Math.min(1, Math.max(0, (p - .58) / .42)); t = t * t * (3 - 2 * t);  // it holds for the first 58 %, then leaves
+    card.style.transform = 'translate3d(' + (-t * 115).toFixed(2) + 'vw, 0, 0)'; card.style.opacity = (1 - t * .6).toFixed(3);
+    if (whyWrap) { var w = why.getBoundingClientRect(), u = Math.min(1, Math.max(0, (vh - w.top) / (vh * .7))); u = u * u * (3 - 2 * u);
+      whyWrap.style.transform = 'translate3d(' + ((1 - u) * 60).toFixed(2) + 'vw, 0, 0)'; whyWrap.style.opacity = u.toFixed(3); }
+  }
+  addEventListener('scroll', function () { if (!busy) { busy = true; requestAnimationFrame(tick); } }, { passive: true });
+  addEventListener('resize', tick); tick();
+})();

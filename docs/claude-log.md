@@ -26,6 +26,12 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-14 · Two routes, the /7ymera sign, no gold hour, no roll (version 2.13)
+
+- **What:** a fork after *This is me* (`#fork`): keep scrolling for the full story (the card leaves sideways) or press *Just the highlights* (`html.brief` hides the story-only sections; a chip brings them back). The first screen has the handle `/7ymera` lit like a rooftop sign and a bare pixel arrow; the round button and the short-lived *Skip to my work* link are gone. Page title is `/7ymera · Alif Najmi`. Golden hour removed (it stuttered on phones in light mode), barrel roll off again, The Exchange fall reshaped (turn first, then one drop). Shader text moved to `assets/scene-glsl.js`. The opening eases by the clock and snaps on a jump. Accessibility block appended to `site.css` (`A11Y PASS`): 3 px focus rings, `--fx-ink` for small accent text, 44 px tap areas on phones. Cache key `20261114a`.
+- **Why:** the owner's list of 13 Nov, then his notes of 14 Nov.
+- **Open:** the accessibility fixes come from an audit that was cut short: axe was not re-run after them, and text sitting on the scene was not measured. Analytics needs the owner's GoatCounter code. Outcome numbers for the projects are the owner's to give. The fall takes 7.5 % of the flight's scroll, a little more than before, though the drop itself is quicker.
+
 ## 2026-11-13 · UTP subjects checked against the transcript
 
 - **What:** the owner shared his transcript. Every subject in `#studied` matches it: 42 subjects (5 programming, 5 systems, 4 maths, 5 data and AI, 9 business, 5 big ones, 9 side). Three corrections: "nine semesters" is ten (May 2023 to May 2026), *The big ones* is 5 subjects (Final Year Project I and II are two), and *Engineering Mathematics* is *Engineering Mathematics I*.
