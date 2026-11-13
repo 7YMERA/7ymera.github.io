@@ -9,7 +9,7 @@ where the last chat stopped without re-reading everything.
 
 ## Open items (keep this list current)
 
-- **UTP subject descriptions** in `#studied` are drafts written from coursework files. The owner hasn't confirmed them yet.
+- **UTP subject descriptions** in `#studied` are drafts written from coursework files. The owner hasn't confirmed the descriptions yet. (The subject *names and counts* were checked against the owner's transcript on 13 Nov 2026: all 42 match.)
 - **DENDROBYTES** (media / community outreach, in Journey) still needs its year from the owner.
 - **REQ cards in the opening's outer columns** (REQ-014, 022, 031, 040): the owner hasn't checked the wording yet.
 - **Tumble Deck** (`assets/tumble-deck.js`) is no longer used on the page. It's kept because the README documents it as a port.
@@ -25,6 +25,11 @@ where the last chat stopped without re-reading everything.
 
 
 ---
+
+## 2026-11-13 · UTP subjects checked against the transcript
+
+- **What:** the owner shared his transcript. Every subject in `#studied` matches it: 42 subjects (5 programming, 5 systems, 4 maths, 5 data and AI, 9 business, 5 big ones, 9 side). Three corrections: "nine semesters" is ten (May 2023 to May 2026), *The big ones* is 5 subjects (Final Year Project I and II are two), and *Engineering Mathematics* is *Engineering Mathematics I*.
+- **Privacy:** the transcript is not in the repo. Nothing from it but subject names is on the site: no grades, CGPA, matric or IC number.
 
 ## 2026-11-13 · New share image, no photo
 
