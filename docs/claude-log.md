@@ -29,7 +29,7 @@ where the last chat stopped without re-reading everything.
 ## 2026-11-14 · Opening card redesign, Menu label, skip link
 - The curtain card (name and details) now matches the HUD look of the rest of the site: corner ticks, an ONLINE status bar with KLCC coordinates, pixel-font eyebrow, a segmented pixel rule, a Role / Focus / Shipped readout table, and a solid CTA bar (`scene.css`, end of file; markup in `index.html`). Gotcha: `--fx` is a LENGTH inside `.cur-frame` (site.css), so colours there use the new `--hud` variable. The old card's `var(--fx)` border was silently invalid for that reason.
 - Phone "Menu" label was clipping over the search icon: the `.icon-btn::after` hit-area rule clashed with `.k-btn::after{content:"Menu"}`. Now a real `<span class="k-label">` (index.html) shown at 760 px and below; the notes pages no longer get a stray "Menu" on their theme button.
-- "Skip to my work" under the chevrons on the opening (`#op-skip`): instant jump to `#work`. Key `20261114f`.
+- A "Skip to my work" under the chevrons was added, then REMOVED at the owner's request: the "This is me" hero already has "See my work" and the fork card. Do not add skip links to the bare opening. Key `20261114g`.
 - Open: not checked on a real phone.
 
 ## 2026-11-13 · Top bar stuck after the theme switch; day/night on the landing screen
