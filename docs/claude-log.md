@@ -26,6 +26,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-16 · "Why I do this" slides straight in from the right
+- Owner: the reveal had an entry angle and faded in ghosted. Cause (`extras.js`, the fork tick): the section slid in sideways from 60vw while the page was also scrolling it up from below (a diagonal), with opacity 0 to 1. Now it is held at one height (like a sticky, 84 px from the top) while it slides in from the right edge of the screen at full opacity, then the normal scroll carries it up. Measured: panel top constant at 84 while its left goes 1370 to 70. Key `20261114i`.
+- Not checked on a real phone; reduced-motion visitors still get no slide.
+
 ## 2026-11-15 · Landing day/night switch is icon-only
 - `#op-theme` on the opening is now a 48 px round icon (moon in day, sun in night), still faint, `aria-label` kept. Key `20261114h`.
 - Owner asked whether visitors could leave a "review". Answered in chat (needs an outside service; options Giscus, Supabase, a form service). Nothing built yet.
