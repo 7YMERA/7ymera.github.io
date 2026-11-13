@@ -26,6 +26,13 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-13 · New share image, no photo
+
+- **What:** `assets/og-city.jpg` (1200 x 630): the site's night skyline with the wordmark, "I write the spec. Then I build it.", the one-line role and the address. It replaces `og-card.jpg` (the convocation photo) on the home page and on every note that used the home card; notes with their own card keep it. `og-card.jpg` stays in the repo, unused.
+- **Why:** the owner wanted a more modern thumbnail without his photo.
+- **How:** a 2x capture of `/flight/` at `draw(0)` in dark, then an HTML card (Bricolage Grotesque, JetBrains Mono) rendered by Playwright. Sources are not in the repo.
+- **Open:** social sites cache previews; the old one may show until they re-fetch.
+
 ## 2026-11-12 · Barrel roll back on
 
 - **What:** `rollAt` no longer returns 0: the flight rolls one full turn through the skybridge gap (measured 7, 108, 176, -92, 0 degrees across it, level after). Off in reduced motion. The skybridge caption says so again. Cache key `20261113y`.
