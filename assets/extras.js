@@ -445,8 +445,11 @@
     var p = range > 0 ? Math.min(1, Math.max(0, -r.top / range)) : 0;          // 0 -> 1 while the card is pinned
     var t = Math.min(1, Math.max(0, (p - .58) / .42)); t = t * t * (3 - 2 * t);  // it holds for the first 58 %, then leaves
     card.style.transform = 'translate3d(' + (-t * 115).toFixed(2) + 'vw, 0, 0)'; card.style.opacity = (1 - t * .6).toFixed(3);
-    if (whyWrap) { var w = why.getBoundingClientRect(), u = Math.min(1, Math.max(0, (vh - w.top) / (vh * .7))); u = u * u * (3 - 2 * u);
-      whyWrap.style.transform = 'translate3d(' + ((1 - u) * 60).toFixed(2) + 'vw, 0, 0)'; whyWrap.style.opacity = u.toFixed(3); }
+    // "Why I do this" comes straight in from the right: it is held at one height on screen (like a sticky) while it slides sideways,
+    // so the move is purely horizontal (no diagonal from the page scrolling under it), at full opacity. Once it has arrived the
+    // page's own scroll carries it up as normal.
+    if (whyWrap) { var w = why.getBoundingClientRect(), T = 84, u = Math.min(1, Math.max(0, (vh - w.top) / Math.max(1, vh - T))); u = u * u * (3 - 2 * u);
+      whyWrap.style.transform = 'translate3d(' + ((1 - u) * 100).toFixed(2) + 'vw, ' + Math.min(0, T - w.top).toFixed(1) + 'px, 0)'; whyWrap.style.opacity = ''; }
   }
   addEventListener('scroll', function () { if (!busy) { busy = true; requestAnimationFrame(tick); } }, { passive: true });
   addEventListener('resize', tick); tick();
