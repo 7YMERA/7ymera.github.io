@@ -37,7 +37,7 @@ The REQ-001 card, the "I write the spec. Then I build it." line and the teal-and
 
 ## Version history
 
-**Current version: 2.10.** Numbering: the first number changes when the site changes character (1.0 was a static page, 2.0 became the 3D city). The second number goes up for a major overhaul or a notable new feature. Small fixes and tweaks do not get a number; they live in [`docs/claude-log.md`](docs/claude-log.md). Dates come from the work log. Commit ids are on `main`: `git show <id>`.
+**Current version: 2.14.** Numbering: the first number changes when the site changes character (1.0 was a static page, 2.0 became the 3D city). The second number goes up for a major overhaul or a notable new feature. Small fixes and tweaks do not get a number; they live in [`docs/claude-log.md`](docs/claude-log.md). Dates come from the work log. Commit ids are on `main`: `git show <id>`.
 
 | Version | Date | What changed | Commit |
 |---|---|---|---|
@@ -63,6 +63,7 @@ The REQ-001 card, the "I write the spec. Then I build it." line and the teal-and
 | **2.11** | 12 Nov | **One skyline, a clean opening, a new flight, a real night.** The four landmarks stand in one group (a `LAY` table, no longer their map positions). The page opens on the city alone; the curtain comes in on scroll. The flight is eight different beats instead of four spirals, with banking and a wider view at speed. Night is lit from photos of Kuala Lumpur: scattered warm and cool windows, a warm horizon haze, each landmark with its own lighting. | `4db598a`, `e878183`, `1e808e6` |
 | **2.12** | 12 Nov | **The owner's notes pass.** The opening is longer, held and eased, and its first screen is the bare city with only a chevron cue (no top bar until you scroll). Each landmark is relit at night from photos: Petronas with real windows up to its crowns, Menara KL white with a lamp-ringed pod, Merdeka 118 in thin floor lines with a white crown and spire, The Exchange 106 with office blocks and a violet lattice crown. Light mode is one blue in three steps. The moon is locked in place, a *Fly it again in dark mode* button sits over the finale, the flight banks less and frames Merdeka against the skyline. | `d8cc850` to `319a6cd` |
 | **2.13** | 13 Nov | **Two routes.** After *This is me* the page offers the full story (keep scrolling) or just the highlights (work, journey, contact). The first screen carries only the handle `/7ymera`, lit like a sign, and a pixel arrow; the golden hour and the barrel roll removed (the first for phone frame rate); a new share image of the skyline with no photo; the shaders moved to their own file; an accessibility pass; the UTP subjects checked against the transcript. | see log |
+| **2.14** | 14 Nov | **KL trains with stations.** Six named stops on the rails (KLCC, Bukit Nanas, Merdeka, TRX, Suria KLCC, Ampang Park); trains with rounded-nose cabs, head and tail lights that ease into each station, wait and pull out; three trains on the sky line. Merdeka Maybank is centred behind the skill tree from its first screen. | `pending` |
 
 Tried and dropped along the way (still in git history): a clothes-rail project gallery (`5c68a02`), a ring and then a conveyor of floating screens, a Masjid Negara you could fly into, and a 5 second phone loading screen. The longer story of the 3D city is in *The 3D city and the flight* below.
 

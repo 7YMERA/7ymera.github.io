@@ -204,7 +204,7 @@
   var KU=3.42; // metres per world unit (Petronas Towers 132 units = about 452 m)
   var LM=[
     {name:'Petronas Twin Towers',real:452,top:new T.Vector3(crown('klcc')[0],134,crown('klcc')[1])},
-    {name:'Merdeka PNB 118',real:679,top:new T.Vector3(crown('mer')[0],194,crown('mer')[1])},
+    {name:'Merdeka Maybank',real:679,top:new T.Vector3(crown('mer')[0],194,crown('mer')[1])},
     {name:'Menara Kuala Lumpur',real:421,top:new T.Vector3(crown('kl')[0],DIST?127:130,crown('kl')[1])},
     {name:'The Exchange 106',real:445,top:new T.Vector3(crown('ex')[0],DIST?132:136,crown('ex')[1])}]; // tops derived from LAY (crown axis, height as before)
   var fx=[],fxGroup=new T.Group();scene.add(fxGroup);
@@ -307,32 +307,65 @@
   var pillarM=new T.MeshBasicMaterial({transparent:true,opacity:.7}),pillars=new T.InstancedMesh(new T.CylinderGeometry(.35,.5,17,6),pillarM,24),pdm=new T.Object3D();
   for(var pi=0;pi<24;pi++){var pp=ringCurve.getPointAt(pi/24);pdm.position.set(pp.x,8.5,pp.z);pdm.updateMatrix();pillars.setMatrixAt(pi,pdm.matrix)}
   scene.add(pillars);
-  // trains: cars are instanced boxes (long axis Z) plus a lit window strip on each
-  var CARL=6.4,CARGAP=.7,trains=[{c:skyCurve,len:skyLen,cars:5,sp:34,off:0,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:34,off:.5,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:0,off:0,hero:true},{c:ringCurve,len:ringLen,cars:4,sp:-15,off:0,hero:false},{c:ringCurve,len:ringLen,cars:4,sp:15,off:.5,hero:false}];
-  if(innerWidth<=820)trains.splice(1,1);
-  var nCars=0;trains.forEach(function(t){t.i0=nCars;nCars+=t.cars});
+  // STATIONS: named stops (real KL stations near each landmark) on the two rails. Trains ease in, wait with their doors open, and ease out.
+  // Trains: instanced meshes only (mid cars, two rounded-nose cabs per train, a window strip and a stripe on every car), so the cost stays flat.
+  var CARL=6.4,CARGAP=.7,DWELL=4.5;
+  function paramNear(curve,x,z){var b=1e9,r=0,q=new T.Vector3();for(var i=0;i<600;i++){curve.getPointAt(i/600,q);var d=Math.hypot(q.x-x,q.z-z);if(d<b){b=d;r=i/600}}return r}
+  var kS=A0(kP[0],kP[1],58),mS=A0(mP[0],mP[1],58),eS=A0(eP[0],eP[1],58);
+  var STAT=[{c:skyCurve,s:0,n:'KLCC'},{c:skyCurve,s:paramNear(skyCurve,kS.x,kS.z),n:'Bukit Nanas'},{c:skyCurve,s:paramNear(skyCurve,mS.x,mS.z),n:'Merdeka'},{c:skyCurve,s:paramNear(skyCurve,eS.x,eS.z),n:'TRX'},
+    {c:ringCurve,s:0,n:'Suria KLCC'},{c:ringCurve,s:.5,n:'Ampang Park'}];
+  var stPlatM=new T.MeshBasicMaterial({fog:true}),stCanM=new T.MeshBasicMaterial({transparent:true,opacity:.6,depthWrite:false,fog:true}),stPostM=new T.MeshBasicMaterial({fog:true});
+  var stPlatG=new T.BoxGeometry(7.4,.6,26),stCanG=new T.BoxGeometry(6.2,.3,22),stPostG=new T.BoxGeometry(.35,4.2,.35);
+  function signTex(name){var c=document.createElement('canvas');c.width=256;c.height=64;var x=c.getContext('2d');x.fillStyle='#0b2a6b';x.fillRect(0,0,256,64);x.fillStyle='#5cc0ff';x.fillRect(0,0,256,7);
+    x.fillStyle='#fff';x.font='700 30px Arial,Helvetica,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(name,128,38);var t=new T.CanvasTexture(c);return t}
+  STAT.forEach(function(st){var g2=new T.Group(),pp=st.c.getPointAt(st.s),tg=st.c.getTangentAt(st.s);g2.position.copy(pp);g2.lookAt(pp.clone().add(tg));
+    var pl=new T.Mesh(stPlatG,stPlatM);pl.position.y=-1.9;var cn=new T.Mesh(stCanG,stCanM);cn.position.y=3;g2.add(pl,cn);
+    [[-3,-9],[3,-9],[-3,9],[3,9]].forEach(function(o){var po=new T.Mesh(stPostG,stPostM);po.position.set(o[0],.9,o[1]);g2.add(po)});
+    var sg=new T.Sprite(new T.SpriteMaterial({map:signTex(st.n),fog:false,depthWrite:false}));sg.scale.set(13,3.25,1);sg.position.set(0,7.2,0);g2.add(sg);scene.add(g2)});
+  var trains=[{c:skyCurve,len:skyLen,cars:5,sp:34,off:0,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:34,off:.34,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:34,off:.67,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:0,off:0,hero:true},
+    {c:ringCurve,len:ringLen,cars:4,sp:-15,off:0,hero:false},{c:ringCurve,len:ringLen,cars:4,sp:15,off:.5,hero:false}];
+  if(innerWidth<=820)trains.splice(1,2);
+  var nCars=0,nMid=0;trains.forEach(function(t,ti){t.i0=nCars;nCars+=t.cars;t.m0=nMid;nMid+=t.cars-2;t.k0=ti*2;t.dir=t.sp<0?-1:1;
+    // the stops, in this train's own travel coordinate (0..1 along its direction), head a half-train past each station so the middle of the train sits at the platform
+    var half=t.cars*(CARL+CARGAP)/2/t.len,xs=[];STAT.forEach(function(st){if(st.c===t.c)xs.push((((t.dir>0?st.s:1-st.s)+half)%1+1)%1)});xs.sort(function(a,b){return a-b});t.xs=xs;
+    t.seg=xs.map(function(x,i){var d=((xs[(i+1)%xs.length]-x)%1+1)%1||1;return {dx:d,tt:d*t.len/(Math.abs(t.sp)||1)/.85}});t.cyc=0;t.seg.forEach(function(g3){t.cyc+=DWELL+g3.tt})});
+  function trainX(tr,t){ // where the train's head is, in its travel coordinate, with stops
+    if(!tr.xs.length)return ((tr.off+t*Math.abs(tr.sp)/tr.len)%1+1)%1;
+    var tt=(((t+tr.off*tr.cyc)%tr.cyc)+tr.cyc)%tr.cyc;
+    for(var i=0;i<tr.xs.length;i++){var sg=tr.seg[i],tot=DWELL+sg.tt;
+      if(tt<tot){if(tt<DWELL)return tr.xs[i];var f=(tt-DWELL)/sg.tt;f=f*f*f*(f*(f*6-15)+10);return (tr.xs[i]+sg.dx*f)%1}
+      tt-=tot}
+    return tr.xs[0]}
   var carBodyM=new T.MeshBasicMaterial({fog:true}),carWinM=new T.MeshBasicMaterial({fog:true}),carStripeM=new T.MeshBasicMaterial({fog:true});
-  var carBody=new T.InstancedMesh(new T.BoxGeometry(2.5,2.7,CARL),carBodyM,nCars),carWin=new T.InstancedMesh(new T.BoxGeometry(2.62,.85,CARL-1.2),carWinM,nCars),carStripe=new T.InstancedMesh(new T.BoxGeometry(2.58,.32,CARL),carStripeM,nCars);
-  carBody.frustumCulled=carWin.frustumCulled=carStripe.frustumCulled=false;scene.add(carBody,carWin,carStripe);
+  function cabGeo(){var g=new T.BoxGeometry(2.5,2.7,CARL,2,2,6),pa=g.attributes.position,Z0=CARL/2-1.5;
+    for(var i=0;i<pa.count;i++){var z=pa.getZ(i);if(z>Z0){var k=(z-Z0)/1.5;k*=k;pa.setX(i,pa.getX(i)*(1-.5*k));if(pa.getY(i)>0)pa.setY(i,pa.getY(i)-.95*k)}}return g}
+  var carMid=new T.InstancedMesh(new T.BoxGeometry(2.5,2.7,CARL),carBodyM,Math.max(1,nMid)),carCab=new T.InstancedMesh(cabGeo(),carBodyM,trains.length*2),
+      carWin=new T.InstancedMesh(new T.BoxGeometry(2.62,.85,CARL-2.4),carWinM,nCars),carStripe=new T.InstancedMesh(new T.BoxGeometry(2.58,.32,CARL-1.6),carStripeM,nCars);
+  carMid.frustumCulled=carCab.frustumCulled=carWin.frustumCulled=carStripe.frustumCulled=false;scene.add(carMid,carCab,carWin,carStripe);
   var headGlowM=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xfff0c0,opacity:.9}),headGlows=trains.map(function(){var sp=new T.Sprite(headGlowM);sp.scale.set(15,15,1);scene.add(sp);return sp});
-  var trD=new T.Object3D(),trP=new T.Vector3(),trT=new T.Vector3(),trTarget=new T.Vector3(),heroS=0,heroOn=false;
+  var tailGlowM=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xff3a2a,opacity:.8}),tailGlows=trains.map(function(){var sp=new T.Sprite(tailGlowM);sp.scale.set(5,5,1);scene.add(sp);return sp});
+  var trD=new T.Object3D(),trP=new T.Vector3(),trT=new T.Vector3(),trTarget=new T.Vector3(),trUp=new T.Vector3(0,.3,0),heroS=0,heroOn=false;
   var tK=0,tM=0;(function(){var kp=A0(kU[0],kU[1],58),mp=A0(mU[0],mU[1],58),bk=1e9,bm=1e9,q=new T.Vector3();for(var i=0;i<400;i++){skyCurve.getPointAt(i/400,q);var dk=Math.hypot(q.x-kp.x,q.z-kp.z),dm=Math.hypot(q.x-mp.x,q.z-mp.z);if(dk<bk){bk=dk;tK=i/400}if(dm<bm){bm=dm;tM=i/400}}})();
+  function setCar(tr,c,p,tg,flip){ // one car: body (a mid car or a nose cab), window strip and stripe, all on the same pose
+    trD.position.copy(p);trTarget.copy(p);if(flip)trTarget.sub(tg);else trTarget.add(tg);trD.lookAt(trTarget);trD.updateMatrix();
+    if(c===0)carCab.setMatrixAt(tr.k0,trD.matrix);else if(c===tr.cars-1)carCab.setMatrixAt(tr.k0+1,trD.matrix);else carMid.setMatrixAt(tr.m0+c-1,trD.matrix);
+    trD.position.y+=.35;trD.updateMatrix();carWin.setMatrixAt(tr.i0+c,trD.matrix);
+    trD.position.y-=1.05;trD.updateMatrix();carStripe.setMatrixAt(tr.i0+c,trD.matrix)}
   function railUpdate(time,still){
     var t=still?0:time*.001;
-    for(var k=0;k<trains.length;k++){var tr=trains[k];if(tr.hero&&!heroOn){headGlows[k].visible=false;for(var z=0;z<tr.cars;z++){trD.position.set(0,-9999,0);trD.updateMatrix();carBody.setMatrixAt(tr.i0+z,trD.matrix);carWin.setMatrixAt(tr.i0+z,trD.matrix);carStripe.setMatrixAt(tr.i0+z,trD.matrix)}continue}
-      var head=tr.hero?heroS:(((tr.off+(t*tr.sp)/tr.len)%1)+1)%1;
-      for(var c=0;c<tr.cars;c++){var u=(((head-c*(CARL+CARGAP)/tr.len)%1)+1)%1;tr.c.getPointAt(u,trP);tr.c.getTangentAt(u,trT);
-        trD.position.copy(trP);trTarget.copy(trP).add(trT);trD.lookAt(trTarget);trD.updateMatrix();
-        carBody.setMatrixAt(tr.i0+c,trD.matrix);
-        trD.position.y+=.35;trD.updateMatrix();carWin.setMatrixAt(tr.i0+c,trD.matrix);
-        trD.position.y-=1.05;trD.updateMatrix();carStripe.setMatrixAt(tr.i0+c,trD.matrix)}
-      tr.c.getPointAt(head,trP);tr.c.getTangentAt(head,trT);headGlows[k].visible=true;headGlows[k].position.copy(trP).addScaledVector(trT,CARL*.55).add(new T.Vector3(0,.3,0))}
-    carBody.instanceMatrix.needsUpdate=true;carWin.instanceMatrix.needsUpdate=true;carStripe.instanceMatrix.needsUpdate=true}
+    for(var k=0;k<trains.length;k++){var tr=trains[k];
+      if(tr.hero&&!heroOn){headGlows[k].visible=tailGlows[k].visible=false;trD.position.set(0,-9999,0);trD.updateMatrix();for(var z=0;z<tr.cars;z++){if(z===0)carCab.setMatrixAt(tr.k0,trD.matrix);else if(z===tr.cars-1)carCab.setMatrixAt(tr.k0+1,trD.matrix);else carMid.setMatrixAt(tr.m0+z-1,trD.matrix);carWin.setMatrixAt(tr.i0+z,trD.matrix);carStripe.setMatrixAt(tr.i0+z,trD.matrix)}continue}
+      var x=tr.hero?heroS:trainX(tr,t),dir=tr.dir,step=(CARL+CARGAP)/tr.len;
+      for(var c=0;c<tr.cars;c++){var xc=(((x-c*step)%1)+1)%1,u=dir>0?xc:(1-xc)%1;tr.c.getPointAt(u,trP);tr.c.getTangentAt(u,trT);if(dir<0)trT.negate();setCar(tr,c,trP,trT,c===tr.cars-1)}
+      var uh=dir>0?x%1:(1-x)%1;tr.c.getPointAt(uh,trP);tr.c.getTangentAt(uh,trT);if(dir<0)trT.negate();headGlows[k].visible=true;headGlows[k].position.copy(trP).addScaledVector(trT,CARL*.55).add(trUp);
+      var xt=(((x-(tr.cars-1)*step)%1)+1)%1,ut=dir>0?xt:(1-xt)%1;tr.c.getPointAt(ut,trP);tr.c.getTangentAt(ut,trT);if(dir<0)trT.negate();tailGlows[k].visible=true;tailGlows[k].position.copy(trP).addScaledVector(trT,-CARL*.55).add(trUp)}
+    carMid.instanceMatrix.needsUpdate=true;carCab.instanceMatrix.needsUpdate=true;carWin.instanceMatrix.needsUpdate=true;carStripe.instanceMatrix.needsUpdate=true}
   function railStyle(dark){
     railM.color.set(dark?C.glass:C.line);railM.blending=dark?T.AdditiveBlending:T.NormalBlending;railM2.color.set(dark?C.glass:C.line);railM2.blending=dark?T.AdditiveBlending:T.NormalBlending;railM2.opacity=dark?.25:.3;pillarM.color.set(dark?C.mid:C.near);
+    stPlatM.color.set(dark?C.mid:C.near);stPostM.color.set(dark?C.glass:C.near);stCanM.color.set(dark?C.glass:0xffffff);stCanM.opacity=dark?.32:.65;stCanM.blending=dark?T.AdditiveBlending:T.NormalBlending;
     carBodyM.color.set(dark?0x1b3d73:0xf6fbff);carWinM.color.set(dark?0xfff1b8:0x0b2a6b);carStripeM.color.set(dark?C.glass:0x1559c9);
     headGlowM.opacity=dark?.95:.5;headGlowM.color.set(dark?0xfff0c0:0xffffff);
-    [railM,railM2,headGlowM].forEach(function(m){m.needsUpdate=true})}
+    tailGlowM.opacity=dark?.9:.35;[railM,railM2,headGlowM,stCanM,tailGlowM].forEach(function(m){m.needsUpdate=true})}
   // Aircraft warning lights: a red double flash on the tip of every landmark (and on both Petronas spires), instead of lit rooms up there.
   var BEAC=(function(){var a=lp('klcc',11,-10),b=lp('klcc',-11,10),m=crown('mer'),e=crown('ex'),k=crown('kl');return [[a[0],134,a[1]],[b[0],134,b[1]],[m[0],193,m[1]],[e[0],136,e[1]],[k[0],130,k[1]]]})(); // both Petronas spires, then the tips of Merdeka 118, The Exchange 106 and Menara KL
   var beacons=BEAC.map(function(b,i){var m=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xff3a2a,fog:false,opacity:0}),sp=new T.Sprite(m);sp.scale.set(i===2?22:14,i===2?22:14,1);sp.position.set(b[0],b[1],b[2]);sp.renderOrder=6;g.add(sp);return{m:m,ph:i*.37}});
@@ -453,10 +486,11 @@
     ['studied',.9,-.5,function(){return UTP[utpIdx]}],
     // The shots at one landmark look at it from the side away from the group (bearing from the group's middle to the landmark), so the others stand behind it.
     ['merdekastage',.3,-.5,P(MER[0],MER[1],160,135,16,78,-.2)],  // a lead-in all of its own: the tower looming over its label
-    ['toolkit',.1,-.5,P(MER[0],MER[1],150,125,5,118,0)],    // Skills: Merdeka 118 between the two columns, base first ...
-    ['toolkit',.38,-.5,P(MER[0],MER[1],175,300,95,96,0)], // ... the whole building ...
-    ['toolkit',.66,-.5,P(MER[0],MER[1],205,150,150,150,0)],// ... the upper half ...
-    ['toolkit',.92,-.5,P(MER[0],MER[1],235,240,215,172,0)],// ... and the spire
+    ['toolkit',0,-.9,P(MER[0],MER[1],150,125,5,118,.03)],    // Skills: the camera is already on Merdeka Maybank when the heading arrives (the old first key sat after it, so the heading came up over the Petronas shot)
+    ['toolkit',.1,-.5,P(MER[0],MER[1],150,125,5,118,.03)],    // Skills: Merdeka 118 between the two columns, base first ...
+    ['toolkit',.38,-.5,P(MER[0],MER[1],175,300,95,96,.03)], // ... the whole building ...
+    ['toolkit',.66,-.5,P(MER[0],MER[1],205,150,150,150,.03)],// ... the upper half ...
+    ['toolkit',.92,-.5,P(MER[0],MER[1],235,240,215,172,.03)],// ... and the spire
     ['workstage',.3,-.5,P(KLT[0],KLT[1],215,205,72,66,.2)],// Work: Menara KL
     ['work',.5,-.5,P(KLT[0],KLT[1],255,215,82,66,.1)],
     ['pulse',.5,-.5,P(-95,-91,235,280,100,100,0,0,700)],
