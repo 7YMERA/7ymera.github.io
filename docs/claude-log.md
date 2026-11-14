@@ -26,7 +26,8 @@ where the last chat stopped without re-reading everything.
 
 ---
 
-## 2026-11-14 · Warp reel replaces the curved reel in the opening
+## 2026-11-14 · Warp reel tried in the opening, then REVERTED (owner did not like it)
+- REVERTED at the owner's request: the curved reel is back and `assets/warp-carousel.js` is deleted. Do not try the Warp Carousel there again. What follows is what was tried.
 - Owner supplied Louis Studios' "Warp Carousel" (React/TS/Tailwind, 21st.dev) and asked for it on the curved reel only. Not installed as React (project rule): ported to plain JS in `assets/warp-carousel.js` (ring poses, spin curve and the whole lens-flare WebGL2 shader kept; React wrapper, dragging, glow bands and the stat-card painter dropped). Cards are the existing `data-reel` screenshots, cropped top-aligned to a 256x164 card (`CH`); the stage is transparent (premultiplied output) so the 3D city shows through; no pointer interaction (it is a backdrop at 32 % opacity).
 - Wiring: `data-warp` on the `.reel` in `#curtain` (`index.html`); `warp-carousel.js` loads before `curved-reel.js`, sets `data-warp-on`, and curved-reel skips those elements. Without WebGL2 the old CSS curved reel runs as before. Cost controls: texture cap 512 px (384 on phones), canvas DPR 1.25 (1 on phones), 30 to 45 fps while a spin runs, paused off-screen or in a hidden tab, no autoplay with reduced motion. Key `20261114w`.
 - Not tested on a real phone (second WebGL context beside the city). Credit: Louis Studios (kept in the file header).
