@@ -133,5 +133,5 @@
     ro.observe(el);
   }
 
-  document.querySelectorAll('[data-reel]').forEach(build);
+  document.querySelectorAll('[data-reel]:not([data-warp-on])').forEach(build); // the warp reel (warp-carousel.js, loads first) takes the ones it can run
 })();
