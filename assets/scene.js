@@ -295,17 +295,20 @@
   function toward(c,d){var L=Math.hypot(c[0],c[1])||1;return [c[0]-c[0]/L*d,c[1]-c[1]/L*d]} // d units from c towards the towers
   var kU=UW0(LAY.kl[0],LAY.kl[1]),mU=UW0(LAY.mer[0],LAY.mer[1]),eU=UW0(LAY.ex[0],LAY.ex[1]),kP=toward(kU,38),mP=toward(mU,72),eP=toward(eU,55);
   var skyCurve=new T.CatmullRomCurve3([[41,0,88],[10,95,78],[kP[0],kP[1],58],[mP[0],mP[1],58],[eP[0],eP[1],58],[-20,-105,66],[40,-70,76]].map(function(p){return A0(p[0],p[1],p[2])}),true,'catmullrom',.5);
-  var ringPts=[];for(var rgi=0;rgi<12;rgi++){var rga=rgi/12*6.2832;ringPts.push(A0(Math.cos(rga)*41,Math.sin(rga)*41,17))}
+  var ringPts=[];for(var rgi=0;rgi<14;rgi++){var rga=rgi/14*6.2832;ringPts.push(A0(Math.cos(rga)*52,Math.sin(rga)*52,24))} /* the low ring round the towers: radius 52 (was 41), checked clear of every building */
   var ringCurve=new T.CatmullRomCurve3(ringPts,true,'catmullrom',.5);
-  var skyLen=skyCurve.getLength(),ringLen=ringCurve.getLength();
+  // The riser: one turn of a helix round the towers from the ring up to where the sky line starts, so the two are one connected network.
+  var hxPts=[];for(var hxi=0;hxi<=28;hxi++){var hxk=hxi/28,hxa=hxk*6.2832,hxr=52-11*hxk;hxPts.push(A0(Math.cos(hxa)*hxr,Math.sin(hxa)*hxr,24+64*hxk))}
+  var helixCurve=new T.CatmullRomCurve3(hxPts,false,'catmullrom',.5);
+  var skyLen=skyCurve.getLength(),ringLen=ringCurve.getLength(),helixLen=helixCurve.getLength();
   var tgtV=new T.Vector3(),chH=new T.Vector3(),chT=new T.Vector3(),chS=new T.Vector3(),chP=new T.Vector3(),chL=new T.Vector3();
   var railM=new T.MeshBasicMaterial({transparent:true,opacity:.9,fog:true}),railM2=new T.MeshBasicMaterial({transparent:true,opacity:.35,fog:true});
-  var skyTube=new T.Mesh(new T.TubeGeometry(skyCurve,260,.5,5,true),railM),ringTube=new T.Mesh(new T.TubeGeometry(ringCurve,120,.45,5,true),railM);
+  var skyTube=new T.Mesh(new T.TubeGeometry(skyCurve,260,.5,5,true),railM),ringTube=new T.Mesh(new T.TubeGeometry(ringCurve,140,.5,5,true),railM),helixTube=new T.Mesh(new T.TubeGeometry(helixCurve,160,.5,5,false),railM);
   var skyGlow=new T.Mesh(new T.TubeGeometry(skyCurve,200,1.6,5,true),railM2);
-  scene.add(skyTube,ringTube,skyGlow);
+  var helixGlow=new T.Mesh(new T.TubeGeometry(helixCurve,120,1.6,5,false),railM2);scene.add(skyTube,ringTube,helixTube,skyGlow,helixGlow);
   // short pillars under the ring line
-  var pillarM=new T.MeshBasicMaterial({transparent:true,opacity:.7}),pillars=new T.InstancedMesh(new T.CylinderGeometry(.35,.5,17,6),pillarM,24),pdm=new T.Object3D();
-  for(var pi=0;pi<24;pi++){var pp=ringCurve.getPointAt(pi/24);pdm.position.set(pp.x,8.5,pp.z);pdm.updateMatrix();pillars.setMatrixAt(pi,pdm.matrix)}
+  var pillarM=new T.MeshBasicMaterial({transparent:true,opacity:.7}),pillars=new T.InstancedMesh(new T.CylinderGeometry(.35,.5,24,6),pillarM,24),pdm=new T.Object3D();
+  for(var pi=0;pi<24;pi++){var pp=ringCurve.getPointAt(pi/24);pdm.position.set(pp.x,12,pp.z);pdm.updateMatrix();pillars.setMatrixAt(pi,pdm.matrix)}
   scene.add(pillars);
   // STATIONS: named stops (real KL stations near each landmark) on the two rails. Trains ease in, wait with their doors open, and ease out.
   // Trains: instanced meshes only (mid cars, two rounded-nose cabs per train, a window strip and a stripe on every car), so the cost stays flat.
@@ -315,17 +318,16 @@
   var STAT=[{c:skyCurve,s:0,n:'KLCC'},{c:skyCurve,s:paramNear(skyCurve,kS.x,kS.z),n:'Bukit Nanas'},{c:skyCurve,s:paramNear(skyCurve,mS.x,mS.z),n:'Merdeka'},{c:skyCurve,s:paramNear(skyCurve,eS.x,eS.z),n:'TRX'},
     {c:ringCurve,s:0,n:'Suria KLCC'},{c:ringCurve,s:.5,n:'Ampang Park'}];
   var stPlatM=new T.MeshBasicMaterial({fog:true}),stCanM=new T.MeshBasicMaterial({transparent:true,opacity:.6,depthWrite:false,fog:true}),stPostM=new T.MeshBasicMaterial({fog:true});
-  var stPlatG=new T.BoxGeometry(7.4,.6,26),stCanG=new T.BoxGeometry(6.2,.3,22),stPostG=new T.BoxGeometry(.35,4.2,.35);
-  function signTex(name){var c=document.createElement('canvas');c.width=256;c.height=64;var x=c.getContext('2d');x.fillStyle='#0b2a6b';x.fillRect(0,0,256,64);x.fillStyle='#5cc0ff';x.fillRect(0,0,256,7);
-    x.fillStyle='#fff';x.font='700 30px Arial,Helvetica,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(name,128,38);var t=new T.CanvasTexture(c);return t}
+  var stLampG=new T.BoxGeometry(6.4,.16,22.4),stLampM=new T.MeshBasicMaterial({fog:true}),stPlatG=new T.BoxGeometry(7.4,.6,26),stCanG=new T.BoxGeometry(6.2,.3,22),stPostG=new T.BoxGeometry(.35,4.2,.35);
   STAT.forEach(function(st){var g2=new T.Group(),pp=st.c.getPointAt(st.s),tg=st.c.getTangentAt(st.s);g2.position.copy(pp);g2.lookAt(pp.clone().add(tg));
     var pl=new T.Mesh(stPlatG,stPlatM);pl.position.y=-1.9;var cn=new T.Mesh(stCanG,stCanM);cn.position.y=3;g2.add(pl,cn);
     [[-3,-9],[3,-9],[-3,9],[3,9]].forEach(function(o){var po=new T.Mesh(stPostG,stPostM);po.position.set(o[0],.9,o[1]);g2.add(po)});
-    var sg=new T.Sprite(new T.SpriteMaterial({map:signTex(st.n),fog:false,depthWrite:false}));sg.scale.set(13,3.25,1);sg.position.set(0,7.2,0);g2.add(sg);scene.add(g2)});
+    var lp=new T.Mesh(stLampG,stLampM);lp.position.y=3.3;g2.add(lp);scene.add(g2)}); // a lit strip along the canopy: no name signs, just the design
   var trains=[{c:skyCurve,len:skyLen,cars:5,sp:34,off:0,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:34,off:.34,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:34,off:.67,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:0,off:0,hero:true},
-    {c:ringCurve,len:ringLen,cars:4,sp:-15,off:0,hero:false},{c:ringCurve,len:ringLen,cars:4,sp:15,off:.5,hero:false}];
+    {c:ringCurve,len:ringLen,cars:4,sp:-15,off:0,hero:false},{c:ringCurve,len:ringLen,cars:4,sp:15,off:.5,hero:false},{c:helixCurve,len:helixLen,cars:3,sp:22,off:.15,hero:false,pp:true}];
   if(innerWidth<=820)trains.splice(1,2);
   var nCars=0,nMid=0;trains.forEach(function(t,ti){t.i0=nCars;nCars+=t.cars;t.m0=nMid;nMid+=t.cars-2;t.k0=ti*2;t.dir=t.sp<0?-1:1;
+    if(t.pp){t.hh=t.cars*(CARL+CARGAP)/2/t.len;t.D=1-2*t.hh;t.tl=t.D*t.len/t.sp/.85;t.cyc=2*(t.tl+DWELL);t.xs=[];t.seg=[];return}
     // the stops, in this train's own travel coordinate (0..1 along its direction), head a half-train past each station so the middle of the train sits at the platform
     var half=t.cars*(CARL+CARGAP)/2/t.len,xs=[];STAT.forEach(function(st){if(st.c===t.c)xs.push((((t.dir>0?st.s:1-st.s)+half)%1+1)%1)});xs.sort(function(a,b){return a-b});t.xs=xs;
     t.seg=xs.map(function(x,i){var d=((xs[(i+1)%xs.length]-x)%1+1)%1||1;return {dx:d,tt:d*t.len/(Math.abs(t.sp)||1)/.85}});t.cyc=0;t.seg.forEach(function(g3){t.cyc+=DWELL+g3.tt})});
@@ -354,7 +356,13 @@
   function railUpdate(time,still){
     var t=still?0:time*.001;
     for(var k=0;k<trains.length;k++){var tr=trains[k];
-      if(tr.hero&&!heroOn){headGlows[k].visible=tailGlows[k].visible=false;trD.position.set(0,-9999,0);trD.updateMatrix();for(var z=0;z<tr.cars;z++){if(z===0)carCab.setMatrixAt(tr.k0,trD.matrix);else if(z===tr.cars-1)carCab.setMatrixAt(tr.k0+1,trD.matrix);else carMid.setMatrixAt(tr.m0+z-1,trD.matrix);carWin.setMatrixAt(tr.i0+z,trD.matrix);carStripe.setMatrixAt(tr.i0+z,trD.matrix)}continue}
+      /* the hero train is always on the rail (parked at its first stop before the chase, at its last after it), so it never pops in */
+      if(tr.pp){ // the shuttle: up the helix, wait, back down, wait (centre of the train at c, front car first)
+        var tt=(((t+tr.off*tr.cyc)%tr.cyc)+tr.cyc)%tr.cyc,cc,dd=1,ez=function(f){return f*f*f*(f*(f*6-15)+10)},st2=(CARL+CARGAP)/tr.len;
+        if(tt<DWELL)cc=tr.hh;else{tt-=DWELL;if(tt<tr.tl)cc=tr.hh+tr.D*ez(tt/tr.tl);else{tt-=tr.tl;dd=-1;if(tt<DWELL)cc=1-tr.hh;else{tt-=DWELL;cc=1-tr.hh-tr.D*ez(Math.min(1,tt/tr.tl))}}}
+        for(var c2=0;c2<tr.cars;c2++){var uu=Math.min(1,Math.max(0,cc+dd*((tr.cars-1)/2-c2)*st2));tr.c.getPointAt(uu,trP);tr.c.getTangentAt(uu,trT);if(dd<0)trT.negate();setCar(tr,c2,trP,trT,c2===tr.cars-1)}
+        var uf=Math.min(1,Math.max(0,cc+dd*(tr.cars-1)/2*st2));tr.c.getPointAt(uf,trP);tr.c.getTangentAt(uf,trT);if(dd<0)trT.negate();headGlows[k].visible=true;headGlows[k].position.copy(trP).addScaledVector(trT,CARL*.55).add(trUp);
+        var ub=Math.min(1,Math.max(0,cc-dd*(tr.cars-1)/2*st2));tr.c.getPointAt(ub,trP);tr.c.getTangentAt(ub,trT);if(dd<0)trT.negate();tailGlows[k].visible=true;tailGlows[k].position.copy(trP).addScaledVector(trT,-CARL*.55).add(trUp);continue}
       var x=tr.hero?heroS:trainX(tr,t),dir=tr.dir,step=(CARL+CARGAP)/tr.len;
       for(var c=0;c<tr.cars;c++){var xc=(((x-c*step)%1)+1)%1,u=dir>0?xc:(1-xc)%1;tr.c.getPointAt(u,trP);tr.c.getTangentAt(u,trT);if(dir<0)trT.negate();setCar(tr,c,trP,trT,c===tr.cars-1)}
       var uh=dir>0?x%1:(1-x)%1;tr.c.getPointAt(uh,trP);tr.c.getTangentAt(uh,trT);if(dir<0)trT.negate();headGlows[k].visible=true;headGlows[k].position.copy(trP).addScaledVector(trT,CARL*.55).add(trUp);
@@ -362,7 +370,7 @@
     carMid.instanceMatrix.needsUpdate=true;carCab.instanceMatrix.needsUpdate=true;carWin.instanceMatrix.needsUpdate=true;carStripe.instanceMatrix.needsUpdate=true}
   function railStyle(dark){
     railM.color.set(dark?C.glass:C.line);railM.blending=dark?T.AdditiveBlending:T.NormalBlending;railM2.color.set(dark?C.glass:C.line);railM2.blending=dark?T.AdditiveBlending:T.NormalBlending;railM2.opacity=dark?.25:.3;pillarM.color.set(dark?C.mid:C.near);
-    stPlatM.color.set(dark?C.mid:C.near);stPostM.color.set(dark?C.glass:C.near);stCanM.color.set(dark?C.glass:0xffffff);stCanM.opacity=dark?.32:.65;stCanM.blending=dark?T.AdditiveBlending:T.NormalBlending;
+    stLampM.color.set(dark?C.glass:C.line);stPlatM.color.set(dark?C.mid:C.near);stPostM.color.set(dark?C.glass:C.near);stCanM.color.set(dark?C.glass:0xffffff);stCanM.opacity=dark?.32:.65;stCanM.blending=dark?T.AdditiveBlending:T.NormalBlending;
     carBodyM.color.set(dark?0x1b3d73:0xf6fbff);carWinM.color.set(dark?0xfff1b8:0x0b2a6b);carStripeM.color.set(dark?C.glass:0x1559c9);
     headGlowM.opacity=dark?.95:.5;headGlowM.color.set(dark?0xfff0c0:0xffffff);
     tailGlowM.opacity=dark?.9:.35;[railM,railM2,headGlowM,stCanM,tailGlowM].forEach(function(m){m.needsUpdate=true})}
@@ -788,9 +796,9 @@
         var cf=clamp((cr-cwA)/(cwE-cwA),0,1),csm=function(x){x=clamp(x,0,1);return x*x*(3-2*x)},cwO=cwE-.15*(cwE-cwA);cw=csm((cr-cwA)/(.25*(cwE-cwA)))*csm((cwB-cr)/(cwB-cwO)); // in over the first quarter of the skim, out between just before its end and the start of the pull-out
         var cd=chB-chA;if(cd<0)cd+=1;heroS=((chA+cd*(.5*cf+.5*csm(cf)))%1+1)%1;heroOn=cw>.02;
         if(heroOn){skyCurve.getPointAt(heroS,chH);skyCurve.getTangentAt(heroS,chT);chS.crossVectors(chT,cam.up).normalize();
-          skyCurve.getPointAt(((heroS-40/skyLen)%1+1)%1,chP);chP.y-=24;chP.addScaledVector(chS,6*Math.sin((time||0)*.0009)); // 40 units behind the train along the rail (not along its tangent, so a bend in the rail turns the view gradually), 24 below it
-          skyCurve.getPointAt((heroS+90/skyLen)%1,chL);chL.y-=8;                                                              // looking 90 units ahead along the rail
-          cam.position.lerp(chP,cw);tgtV.lerp(chL,cw)}}
+          skyCurve.getPointAt(((heroS-56/skyLen)%1+1)%1,chP);chP.y-=11;chP.addScaledVector(chS,6*Math.sin((time||0)*.0009)); // 40 units behind the train along the rail (not along its tangent, so a bend in the rail turns the view gradually), 24 below it
+          skyCurve.getPointAt((heroS+50/skyLen)%1,chL);chL.y-=1;                                                              // looking 90 units ahead along the rail
+          cam.position.lerp(chP,cw);tgtV.lerp(chL,cw)}}else if(cwA!=null&&cwB!=null){heroS=cr>=cwB?chB:chA}
       cam.lookAt(tgtV);cam.setViewOffset(W,Hh,0,0,W,Hh);
       // finale: widen the view (phones a lot, desktop a little) and push the fog back, so the whole skyline is in frame
       var ke=KI['sweep1']!=null?KI['sweep1']:(KI['pass']!=null?KI['pass']:.7),ke2=KI['end']||HOLD0,fs=clamp((cr-ke-.4*(ke2-ke))/(.6*(ke2-ke)),0,1);fs=fs*fs*(3-2*fs);
@@ -804,7 +812,7 @@
       roll+=((reduce?0:tabAt(bankTab,cr))-roll)*(1-Math.exp(-dtF*3));cam.rotateZ(roll*(1-fs)+rollAt(u)); // drone bank into turns, the scripted barrel roll, and a level horizon for the finale
       hudUpdate(true,u,cr)
     }else{
-      rideQ=null;heroOn=false;goldHour(0);if(cam.fov!==42){cam.fov=42;cam.updateProjectionMatrix()}if(scene.fog){scene.fog.near=fogN0;scene.fog.far=fogF0}
+      rideQ=null;heroOn=false;heroS=chA;goldHour(0);if(cam.fov!==42){cam.fov=42;cam.updateProjectionMatrix()}if(scene.fog){scene.fog.near=fogN0;scene.fog.far=fogF0}
       var q=curPose,ang=(q[2]+px*7+idleK*3*Math.sin(time*.000314))*Math.PI/180,rk=1+idleK*.014*Math.sin(time*.00024); /* idle drift: a few degrees of swing over about 20 s and a slow breath in and out */
       cam.position.set(q[0]+Math.cos(ang)*q[3]*rk,q[4],q[1]+Math.sin(ang)*q[3]*rk);cam.lookAt(q[0],q[5],q[1]);
       cam.setViewOffset(W,Hh,-q[6]*W,-q[7]*Hh,W,Hh);hudUpdate(false)
@@ -851,7 +859,7 @@
   setTimeout(function(){(window.requestIdleCallback||setTimeout)(warmEdges)},12000); // light theme: build the night lines in idle time, so the first switch to dark has them ready
   root.classList.add('gl'); // first: it makes #enter visible, and the scroll maths below needs its real position
   size();buildRide();layoutKeys();tgtPose=dirPose(scrollY);curPose=tgtPose.slice();tr=cr=rideProg();raf=requestAnimationFrame(frame);
-  if(ONLY||/[?&]dbg/.test(location.search))window.__scene={drift:function(v){if(v===false)driftOff=false;return [Math.round(idleK*100)/100,driftOff]},keys:function(){return KEYS.map(function(k){return k.y})},dirPose:dirPose,scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},lay:LAY,lm:LM,utp:UTP,sky:skyCurve,city:function(){return cityMesh},mob:mob,DIST:DIST,draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;fInit=true;rideQ=null;dtF=9;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam);dtF=.016}};
+  if(ONLY||/[?&]dbg/.test(location.search))window.__scene={hero:function(){var q=new T.Vector3();skyCurve.getPointAt(heroS,q);var v=q.clone().project(cam);return [heroS,heroOn,Math.round(q.distanceTo(cam.position)),+v.x.toFixed(2),+v.y.toFixed(2),+v.z.toFixed(2)]},drift:function(v){if(v===false)driftOff=false;return [Math.round(idleK*100)/100,driftOff]},keys:function(){return KEYS.map(function(k){return k.y})},dirPose:dirPose,scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},lay:LAY,lm:LM,utp:UTP,sky:skyCurve,city:function(){return cityMesh},mob:mob,DIST:DIST,draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;fInit=true;rideQ=null;dtF=9;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam);dtF=.016}};
   } // start
   // Build the scene after the page's first paint, not before it: the curtain's text and photos come first, the canvas fades in after. (/flight/ is only the scene, so it starts at once.)
   if(!DEFER)start();
