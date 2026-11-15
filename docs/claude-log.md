@@ -98,6 +98,7 @@ where the last chat stopped without re-reading everything.
 - **What:** the stats card is now three panels (`.cs-p.l / .c / .r` inside `div.cur-sky`): the metre counter, the KL tower ladder, and four tiles. Left and right pivot on the edges beside the centre (`rotateY(±20deg)`, `transform-origin` at the inner edge) inside a `perspective: 1100px` grid, so they fold toward the viewer like the reel's side cards. Transforms only.
 - **Phones (<= 760px):** no room to fold, so the panels become one flat card again (the wrapper carries the background; `transform: none !important` on the panels).
 - **Why:** the owner found the flat card awkward under the curved reel; he chose "curve the stats" over flattening the reel. **Do not flatten the reel.**
+- **Theme:** all panel colours come from the theme tokens (`--surface`, `--ink`, `--muted`, `--line`, `--accent`, `--gold`), with a deeper gradient and accent edge in dark mode. They are no longer navy in both themes (the owner saw that dark mode was not darkmoding).
 - **Open:** the tower label is "Exchange" (not "Exchange 106") so the ladder stays on one line.
 
 ## 2026-11-15 · Opening is now a full stats card

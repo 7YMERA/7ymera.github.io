@@ -1604,38 +1604,41 @@ html.gl.fork-side #why { display: flow-root; }
 html.gl.fork-side #why > .wrap { position: sticky; top: var(--why-top, 84px); }
 html.gl.fork-side #why::after { content: ""; display: block; height: 120svh; }
 
-/* Opening: the live stats, three panels folded on the same arc as the reel (15 Nov 2026). Same look as the card on the GitHub profile; dark in both themes on purpose.
-   Panels are plain transforms: left and right pivot on the edges beside the centre panel, so they bend toward the viewer like the reel's side cards. */
+/* Opening: the live stats, three panels folded on the same arc as the reel (15 Nov 2026).
+   Panels are plain transforms: left and right pivot on the edges beside the centre panel, so they bend toward the viewer like the reel's side cards.
+   All colours come from the theme tokens, so light and dark both follow the site. */
 .cur-sky { margin-top: 10px; width: min(48rem, 100%); display: grid; grid-template-columns: 1fr 1.32fr 1fr; gap: 6px; perspective: 1100px; perspective-origin: 50% 40%; text-align: left; }
-.cs-p { min-width: 0; color: #fff; display: grid; align-content: center; gap: 8px; padding: 14px 15px; border-radius: 16px; background: linear-gradient(135deg, #050f26, #0d2e6e); border: 1px solid rgba(255, 255, 255, .2); box-shadow: 0 14px 30px rgba(8, 20, 50, .32); }
+.cs-p { min-width: 0; color: var(--ink); display: grid; align-content: center; gap: 8px; padding: 14px 15px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 14px 30px rgba(8, 20, 50, .18); }
+:root[data-theme="dark"] .cs-p { background: linear-gradient(160deg, color-mix(in srgb, var(--surface) 88%, #000), var(--surface)); border-color: color-mix(in srgb, var(--accent) 32%, var(--line)); box-shadow: 0 16px 34px rgba(0, 0, 0, .55); }
 .cs-p.l { transform-origin: 100% 50%; transform: rotateY(20deg); }
 .cs-p.r { transform-origin: 0 50%; transform: rotateY(-20deg); }
 .cs-bars { width: 100%; max-width: 130px; height: 40px; display: block; }
-.cs-bars rect { fill: #8fb4ff; }
-.cs-bars rect.cur { fill: #ffd36b; }
-.cs-big { display: block; font-family: var(--f-display); font-size: 2.5rem; font-weight: 800; line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: #fff; }
-.cs-cap { display: block; font-size: .75rem; line-height: 1.3; color: rgba(255, 255, 255, .75); }
-.cs-head { margin: 0; font-family: var(--f-mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: rgba(255, 255, 255, .75); }
-.cs-head b { font-family: var(--f-display); font-size: 1.5rem; letter-spacing: 0; color: #ffd36b; margin-right: 4px; }
+.cs-bars rect { fill: var(--accent); opacity: .85; }
+.cs-bars rect.cur { fill: var(--gold); opacity: 1; }
+.cs-big { display: block; font-family: var(--f-display); font-size: 2.5rem; font-weight: 800; line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.cs-cap { display: block; font-size: .75rem; line-height: 1.3; color: var(--muted); }
+.cs-head { margin: 0; font-family: var(--f-mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.cs-head b { font-family: var(--f-display); font-size: 1.5rem; letter-spacing: 0; color: var(--gold); margin-right: 4px; }
 .cs-ladder { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); position: relative; }
-.cs-ladder::before { content: ""; position: absolute; left: 12.5%; right: 12.5%; top: 7px; height: 2px; background: rgba(255, 255, 255, .22); }
-.cs-ladder li { position: relative; display: grid; justify-items: center; gap: 2px; text-align: center; font-size: .6875rem; line-height: 1.2; color: rgba(255, 255, 255, .55); }
-.cs-ladder li i { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .4); background: #0a2358; position: relative; z-index: 1; }
+.cs-ladder::before { content: ""; position: absolute; left: 12.5%; right: 12.5%; top: 7px; height: 2px; background: var(--line); }
+.cs-ladder li { position: relative; display: grid; justify-items: center; gap: 2px; text-align: center; font-size: .6875rem; line-height: 1.2; color: var(--muted); }
+.cs-ladder li i { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--line); background: var(--surface); position: relative; z-index: 1; }
 .cs-ladder li b { font-weight: 600; margin-top: 3px; }
 .cs-ladder li span { font-family: var(--f-mono); font-size: .625rem; }
-.cs-ladder li.on { color: #fff; }
-.cs-ladder li.on i { background: #ffd36b; border-color: #ffd36b; }
-.cs-foot { margin: 0; font-family: var(--f-mono); font-size: .6875rem; color: #ffd36b; }
+.cs-ladder li.on { color: var(--ink); }
+.cs-ladder li.on i { background: var(--gold); border-color: var(--gold); }
+.cs-foot { margin: 0; font-family: var(--f-mono); font-size: .6875rem; color: var(--gold); }
 .cs-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.cs-tiles div { padding: 7px 9px; border-radius: 10px; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .14); }
-.cs-tiles b { display: block; font-family: var(--f-display); font-size: 1.25rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; color: #fff; }
-.cs-tiles span { display: block; margin-top: 3px; font-size: .625rem; line-height: 1.2; color: rgba(255, 255, 255, .72); }
-.cs-src { font-family: var(--f-mono); font-size: .625rem; color: rgba(255, 255, 255, .6); }
+.cs-tiles div { padding: 7px 9px; border-radius: 10px; background: var(--sunk); border: 1px solid var(--line); }
+.cs-tiles b { display: block; font-family: var(--f-display); font-size: 1.25rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; color: var(--ink); }
+.cs-tiles span { display: block; margin-top: 3px; font-size: .625rem; line-height: 1.2; color: var(--muted); }
+.cs-src { font-family: var(--f-mono); font-size: .625rem; color: var(--muted); }
 /* Phones: not enough width to fold three panels, so they become one flat card again */
 @media (max-width: 760px) {
   .cur-hero { top: 52%; }
-  .cur-sky { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; perspective: none; padding: 12px; border-radius: 16px; background: linear-gradient(135deg, #050f26, #0d2e6e); border: 1px solid rgba(255, 255, 255, .2); box-shadow: 0 12px 28px rgba(8, 20, 50, .3); }
-  .cs-p { padding: 0; background: none; border: 0; box-shadow: none; transform: none !important; gap: 6px; }
+  .cur-sky { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; perspective: none; padding: 12px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 12px 28px rgba(8, 20, 50, .22); }
+  :root[data-theme="dark"] .cur-sky { background: linear-gradient(160deg, color-mix(in srgb, var(--surface) 88%, #000), var(--surface)); border-color: color-mix(in srgb, var(--accent) 32%, var(--line)); }
+  .cs-p, :root[data-theme="dark"] .cs-p { padding: 0; background: none; border: 0; box-shadow: none; transform: none !important; gap: 6px; }
   .cs-p.c { grid-column: 1 / -1; grid-row: 2; }
   .cs-p.l { grid-column: 1; grid-row: 1; }
   .cs-p.r { grid-column: 2; grid-row: 1; }
