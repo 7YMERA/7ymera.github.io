@@ -32,7 +32,7 @@
     //  1. the framed card grows to fill the screen,
     //  2. the photo columns part and the name fades, while the spinning reel
     //     behind them comes forward and rises to the top,
-    //  3. "I write the spec. Then I build it." arrives under the reel.
+    //  3. the two hero buttons arrive under the reel.
     // Everything moves with transform and opacity only.
     var cta = document.getElementById('cur-cta');
     var frame = document.getElementById('cur-frame'), stage = cur.querySelector('.cur-stage');
