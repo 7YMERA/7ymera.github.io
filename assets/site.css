@@ -1603,3 +1603,8 @@ html.gl .op-theme:focus-visible { outline: 3px solid var(--accent); outline-offs
 html.gl.fork-side #why { display: flow-root; }
 html.gl.fork-side #why > .wrap { position: sticky; top: var(--why-top, 84px); }
 html.gl.fork-side #why::after { content: ""; display: block; height: 120svh; }
+
+/* Opening: the at-a-glance chips above the two buttons (added 15 Nov 2026, replaces the removed slogan; facts only) */
+.cur-glance { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 44rem; }
+.cur-glance li { font-family: var(--f-mono); font-size: .8125rem; font-weight: 500; letter-spacing: .04em; line-height: 1; padding: 10px 15px; border-radius: 999px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); box-shadow: 0 6px 18px rgba(8, 20, 50, .12); white-space: nowrap; }
+@media (max-width: 760px) { .cur-glance { gap: 6px; max-width: 22rem; } .cur-glance li { font-size: .75rem; padding: 9px 12px; } }
