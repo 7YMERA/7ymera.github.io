@@ -75,7 +75,7 @@ The home page, top to bottom:
 
 | Section | What it is | Built with |
 |---|---|---|
-| **Opening** (`#curtain`) | Name, two columns of convocation photos, and outer columns of *spec* (sketches, flowcharts, ERDs, requirement cards) and *built* (app screens). The spinning reel sits faintly behind. Scrolling parts the photos, fades the name, brings the reel forward and lands on two buttons (See my work, Read the stories) with no slogan. | `extras.js`, `curved-reel.js` |
+| **Opening** (`#curtain`) | Name, two columns of convocation photos, and outer columns of *spec* (sketches, flowcharts, ERDs, requirement cards) and *built* (app screens). The spinning reel sits faintly behind. Scrolling parts the photos, fades the name, brings the reel forward and lands on two buttons (See my work, Read the stories) with no slogan. | `extras.js`, `glance.js` (the live skyline strip), `curved-reel.js` |
 | **This is me** (`#me`) | Intro and links, the REQ-001 card holding a five-slide carousel (slide 2, *Why hire me*, swaps the photo for a spec sheet and lists the acceptance criteria), and six fact tiles (based in, day job, side, studied, speaks, learning Mandarin). | `extras.js` |
 | **Why I do this** (`#why`) | Three goals. | CSS only |
 | **Notes** (`#notes`) | One glass folder per project. Opening one fans out the stories, demos, diagrams and repos. | `folders.js` |
