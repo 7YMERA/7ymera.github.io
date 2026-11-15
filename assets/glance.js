@@ -6,15 +6,21 @@
   var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   function fmt(iso) { var p = String(iso).split('-'); return +p[2] + ' ' + MON[+p[1] - 1]; }
   function ok(d) { return d && typeof d.metres === 'number' && Array.isArray(d.weeks) && d.weeks.length > 0 && typeof d.line1 === 'string'; }
+  var TOWERS = [421, 445, 452, 678.9];
+  function setText(id, v) { var e = document.getElementById(id); if (e && v != null) e.textContent = v; }
   function paint(d, live) {
-    document.getElementById('cs-m').textContent = d.metres.toLocaleString('en') + ' m';
-    document.getElementById('cs-next').textContent = d.line1;
-    document.getElementById('cs-src').textContent = (live ? 'Live from GitHub' : 'Snapshot') + ' \u00b7 ' + fmt(d.updated);
+    setText('cs-m', d.metres.toLocaleString('en') + ' m');
+    setText('cs-next', d.line2 || d.line1);
+    setText('cs-src', (live ? 'Live from GitHub' : 'Snapshot') + ' \u00b7 ' + fmt(d.updated));
+    setText('cs-r', d.repos); setText('cs-30', d.last30 != null ? d.last30.toLocaleString('en') : null);
+    setText('cs-best', d.best_day); setText('cs-weeks', d.active_weeks != null ? d.active_weeks + '/52' : null);
+    var passed = 0; document.querySelectorAll('#cs-ladder li').forEach(function (li, i) { var on = d.metres >= TOWERS[i]; li.classList.toggle('on', on); if (on) passed++; });
+    setText('cs-passed', passed + '/' + TOWERS.length);
     var mx = Math.max.apply(null, d.weeks) || 1, ns = 'http://www.w3.org/2000/svg', svg = document.getElementById('cs-bars');
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     d.weeks.forEach(function (v, i) {
-      var h = v ? 3 + v / mx * 27 : 2, r = document.createElementNS(ns, 'rect');
-      r.setAttribute('x', i * 5); r.setAttribute('y', (32 - h).toFixed(1)); r.setAttribute('width', 4); r.setAttribute('height', h.toFixed(1)); r.setAttribute('rx', 1);
+      var h = v ? 3 + v / mx * 35 : 2, r = document.createElementNS(ns, 'rect');
+      r.setAttribute('x', i * 5); r.setAttribute('y', (40 - h).toFixed(1)); r.setAttribute('width', 4); r.setAttribute('height', h.toFixed(1)); r.setAttribute('rx', 1);
       if (i === d.weeks.length - 1) r.setAttribute('class', 'cur');
       svg.appendChild(r);
     });
