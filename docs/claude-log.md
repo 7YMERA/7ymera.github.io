@@ -7,6 +7,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 16 Nov 2026 (logo)
+
+- Home page header logo text is now `\7ymera` (backslash, as the owner asked). Other pages, titles, share previews, manifest and feed keep Alif Najmi.
+
 ## Open items (keep this list current)
 
 - **UTP subject descriptions** in `#studied` are drafts written from coursework files. The owner hasn't confirmed the descriptions yet. (The subject *names and counts* were checked against the owner's transcript on 13 Nov 2026: all 42 match.)
