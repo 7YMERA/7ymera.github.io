@@ -9,7 +9,7 @@ where the last chat stopped without re-reading everything.
 
 ## 16 Nov 2026 (logo)
 
-- Home page header logo text is now `\7ymera` (backslash, as the owner asked). Other pages, titles, share previews, manifest and feed keep Alif Najmi.
+- Home page header logo text is now `\7ymera` (backslash, as the owner asked), and so is the landing sign (`.op-id`). Other pages, titles, share previews, manifest and feed keep Alif Najmi.
 
 ## Open items (keep this list current)
 
