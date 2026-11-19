@@ -26,6 +26,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-19 · Site matched to the new résumé (19 Nov 2026)
+- Handshake AI / "AI Model Evaluator" removed everywhere: the role, the summary sentence, the "AI & Data Quality" skills line (the home page skill-tree branch "AI evaluation" became "Testing & AI tools"), the journey card, the opening "Focus" fact and the "On the side" fact. `lab/ideas` chip renamed. The Claude/ChatGPT/Gemini/Bedrock/Claude Code/Kiro line moved into Business Analysis.
+- Axrail role, summary, "Testing & Quality" skills line and FRD/FRS/FSD done in `tools/cv/cv.html`; `resume.html` regenerated with `tools/cv/web.py`. Home page Axrail wording (lede, Work card, journey, typed words) now includes healthcare and the test packs / UAT / prototyping angle. No client names.
+- New public (phone-free) PDF from the owner swapped into `assets/Muhammad-Alif-Najmi-CV.pdf` (checked: no phone number, no Handshake); PDF link key now `cv20261119a`. Note `tools/cv/build.py` would regenerate it from `cv.html` and overwrite the owner's Word-made file; don't run it unless asked. The PDF is a shorter two-page version (it omits some projects the site keeps).
+
 ## 2026-11-14 · Warp reel tried in the opening, then REVERTED (owner did not like it)
 - REVERTED at the owner's request: the curved reel is back and `assets/warp-carousel.js` is deleted. Do not try the Warp Carousel there again. What follows is what was tried.
 - Owner supplied Louis Studios' "Warp Carousel" (React/TS/Tailwind, 21st.dev) and asked for it on the curved reel only. Not installed as React (project rule): ported to plain JS in `assets/warp-carousel.js` (ring poses, spin curve and the whole lens-flare WebGL2 shader kept; React wrapper, dragging, glow bands and the stat-card painter dropped). Cards are the existing `data-reel` screenshots, cropped top-aligned to a 256x164 card (`CH`); the stage is transparent (premultiplied output) so the 3D city shows through; no pointer interaction (it is a backdrop at 32 % opacity).

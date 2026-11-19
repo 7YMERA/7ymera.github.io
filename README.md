@@ -404,7 +404,7 @@ assets/
   me/                    photos
   notes/                 note images, covers, diagrams
   slb-screens/           the SLB click-through
-  Muhammad-Alif-Najmi-CV.pdf   built from tools/cv/cv.html
+  Muhammad-Alif-Najmi-CV.pdf   owner-supplied (Word), 19 Nov 2026
 tools/cv/                cv.html (the one source for the CV), build.py (PDF, needs weasyprint), web.py (resume.html), photo.jpg
 docs/screens/            screenshots used in this README
 ```
