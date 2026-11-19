@@ -30,6 +30,9 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-19 · Name changed to 7YMERA
+- Owner asked for plain `7YMERA` instead of `\7ymera`: tab title is now `7YMERA · Alif Najmi` and the header mark reads `7YMERA` (index.html only). No CSS/JS change, no key bump.
+
 ## 2026-11-19 · Site matched to the new résumé (19 Nov 2026)
 - Handshake AI / "AI Model Evaluator" removed everywhere: the role, the summary sentence, the "AI & Data Quality" skills line (the home page skill-tree branch "AI evaluation" became "Testing & AI tools"), the journey card, the opening "Focus" fact and the "On the side" fact. `lab/ideas` chip renamed. The Claude/ChatGPT/Gemini/Bedrock/Claude Code/Kiro line moved into Business Analysis.
 - Axrail role, summary, "Testing & Quality" skills line and FRD/FRS/FSD done in `tools/cv/cv.html`; `resume.html` regenerated with `tools/cv/web.py`. Home page Axrail wording (lede, Work card, journey, typed words) now includes healthcare and the test packs / UAT / prototyping angle. No client names.
