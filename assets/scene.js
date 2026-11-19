@@ -102,7 +102,7 @@
   loadModel(BASE+'city/klcc.json',LAY.klcc[0],LAY.klcc[1],LAY.klcc[2],bodyM,procedural,klccEdges);          // Petronas Twin Towers (SketchUp export, see tools/convert-obj.py)
   loadModel(BASE+'city/menara_kl.json',LAY.kl[0],LAY.kl[1],LAY.kl[2],bodyM,null,function(){g.remove(kl)}); // Menara KL; replaces the stand-in cylinder tower below once loaded
   loadModel(BASE+'city/merdeka118.json',LAY.mer[0],LAY.mer[1],LAY.mer[2],bodyM,null,merEdges);
-  loadModel(BASE+'city/exchange106.json',LAY.ex[0],LAY.ex[1],LAY.ex[2],bodyM,null,exEdges);   // The Exchange 106, cropped and simplified (tools/convert-dae-crop.py)  // Merdeka PNB 118 (SketchUp Collada, see tools/convert-dae.py)
+  loadModel(BASE+'city/exchange106.json',LAY.ex[0],LAY.ex[1],LAY.ex[2],bodyM,null,exEdges);   // The Exchange 106, cropped and simplified (tools/convert-dae-crop.py)  // Merdeka Maybank Tower (formerly Merdeka PNB 118; SketchUp Collada, see tools/convert-dae.py)
   }
   // In the district, the two landmarks baked into its mesh were welded coarsely and have holes: draw the full-detail models over them (1 % larger, so they sit just outside).
   var nightLines=[];
