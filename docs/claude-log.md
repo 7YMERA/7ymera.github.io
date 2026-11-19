@@ -30,6 +30,9 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-19 · Kracked Devs and Credly links
+- Added both profiles as chips in "This is me" and the contact section, to the JSON-LD `sameAs` and to the command palette. Credly uses the public profile URL (https://www.credly.com/users/muhammad-alif-najmi-md-hisamudin), not the private `/edit/badges/credly` page the owner pasted. Did not open either profile (no fetch access), so the Kracked Devs link is untested.
+
 ## 2026-11-19 · Name changed to 7YMERA
 - Owner asked for plain `7YMERA` instead of `\7ymera`: tab title is now `7YMERA · Alif Najmi` and the header mark reads `7YMERA` (index.html only). No CSS/JS change, no key bump.
 
