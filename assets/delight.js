@@ -47,7 +47,7 @@
       tick = 0;
       up.classList.toggle('on', scrollY > innerHeight * 1.6);
       var c = current(), name = c.at > -1 ? c.list[c.at][1] : '';
-      if (name !== lastName) { lastName = name; title(); }
+      if (name !== lastName) { lastName = name; title(); if (c.at > -1) d.dispatchEvent(new CustomEvent('sec-change', { detail: { index: c.at, name: name } })); }
     });
   }
   addEventListener('scroll', onScroll, { passive: true }); onScroll();
@@ -115,6 +115,7 @@
     var what = a.getAttribute('href').slice(4);
     setTimeout(function () {
       if (what === 'keys') openSheet();
+      else if (what === 'sound') { if (window.__sfx) window.__sfx.toggle(); }
       else if (what === 'theme') { var tb = $('theme-btn'); if (tb) tb.click(); }
       else if (what === 'share' && share) share.click();
       else if (what === 'train') train();

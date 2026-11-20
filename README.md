@@ -37,7 +37,7 @@ The REQ-001 card and the teal-and-gold palette survived. (The "I write the spec.
 
 ## Version history
 
-**Current version: 2.17.** Numbering: the first number changes when the site changes character (1.0 was a static page, 2.0 became the 3D city). The second number goes up for a major overhaul or a notable new feature. Small fixes and tweaks do not get a number; they live in [`docs/claude-log.md`](docs/claude-log.md). Dates come from the work log. Commit ids are on `main`: `git show <id>`.
+**Current version: 2.18.** Numbering: the first number changes when the site changes character (1.0 was a static page, 2.0 became the 3D city). The second number goes up for a major overhaul or a notable new feature. Small fixes and tweaks do not get a number; they live in [`docs/claude-log.md`](docs/claude-log.md). Dates come from the work log. Commit ids are on `main`: `git show <id>`.
 
 | Version | Date | What changed | Commit |
 |---|---|---|---|
@@ -67,6 +67,7 @@ The REQ-001 card and the teal-and-gold palette survived. (The "I write the spec.
 | **2.15** | 20 Nov | A small quality-of-life layer (`delight.js`, `delight.css`): keyboard shortcuts (`?` sheet, `j`/`k` sections, `t` theme, `/` quick jump), the tab title follows the section, a live Kuala Lumpur clock and Share button in Contact, a labelled Back to top button, print rules, and one hidden train. | (this commit) |
 | **2.16** | 20 Nov | **The arcade.** A new section after the Journey (`#arcade`, `arcade.js`, `arcade.css`) with three games built from the day job: *Last Train* (a one-button runner along the KL rail), *Scope Creep* (45-second triage: build it or park it) and *Spec Match* (pair each tool with the project it went into). Best scores saved on the device, optional sound, phone-friendly big buttons. | (this commit) |
 | **2.17** | 20 Nov | **From Halcyon.** Ideas and data brought over from my separate Halcyon project (a scroll descent from orbit to KL): a new `#halcyon` section with an *Orbit* globe (real country outlines as dots, arcs from KL, NASA satellite rings, an arc from where you are, guessed from your time zone only) and a *Particle lab* (dust that morphs between a Chladni plate, the Earth and the real KL landmark models, with an Explode slider); plus a trailing cursor ring, scrambling labels and faint rules (`fx.js`). | (this commit) |
+| **2.18** | 20 Nov | **The Mirage study.** Techniques from my scan of the Mirage reference, applied from scratch: site-wide synthesised sound with a four-bar audio meter in the header (`sfx.js`: scroll-driven drone, section chimes, decode tones), a ring ripple on every press and a gold pulse from the theme switch, headings that arrive with a brief colour split, bracket-corner buttons, `+` labels and blinking `_` captions, and in the Halcyon section a lens flare with chromatic spread, a cursor-proximity scan lens, a plexus network around a satellite and a full Plexus form in the lab. | (this commit) |
 
 Tried and dropped along the way (still in git history): a clothes-rail project gallery (`5c68a02`), a ring and then a conveyor of floating screens, a Masjid Negara you could fly into, and a 5 second phone loading screen. The longer story of the 3D city is in *The 3D city and the flight* below.
 
@@ -208,6 +209,7 @@ Every interactive piece below started as a React + Tailwind component on [21st.d
 
 ### Our own pieces (not from 21st.dev)
 
+- **Sound** (`sfx.js`): all synthesised (no audio files), off until the header meter button is pressed. `window.__sfx` has `beep`, `tick`, `glyph`, `lock`, `done`, `chime`; the arcade's Sound button drives the same switch. **fx.js** also does the click ripples, the theme pulse and the chromatic headings.
 - **Quality-of-life layer** (`delight.js` + `delight.css`): `?` shortcuts sheet, `j`/`k` section stepping, `t` theme, `/` quick jump; tab title follows the section and nudges when hidden; Kuala Lumpur clock and Share button in Contact; labelled Back to top; print rules; click the name five times (or use Ctrl+K, "hidden train") for a train.
 
 - **The opening:** a sticky stage whose progress drives the photo columns, name, reel and headline in three acts, all with `transform` and `opacity`.

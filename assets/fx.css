@@ -9,3 +9,49 @@
 @media (min-width: 1100px) { .fx-grid { display: block; } }
 html.brief .fx-grid { display: none; }
 @media print { .fx-ring, .fx-grid { display: none !important; } }
+
+/* chromatic heading: two coloured copies slide apart, then settle (transform and opacity only) */
+.sec-head h2.cg { position: relative; }
+.sec-head h2.cg::before, .sec-head h2.cg::after { content: attr(data-text); position: absolute; inset: 0; opacity: 0; pointer-events: none; font: inherit; letter-spacing: inherit; text-wrap: inherit; }
+.sec-head h2.cg::before { color: var(--accent); }
+.sec-head h2.cg::after { color: var(--gold); }
+.sec-head h2.cg-go::before { animation: cg-a .7s ease-out; }
+.sec-head h2.cg-go::after { animation: cg-b .7s ease-out; }
+@keyframes cg-a { 0% { opacity: .75; transform: translateX(-7px); } 100% { opacity: 0; transform: none; } }
+@keyframes cg-b { 0% { opacity: .75; transform: translateX(7px); } 100% { opacity: 0; transform: none; } }
+
+/* ripples */
+.fx-rp { position: fixed; z-index: 59; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; border: 1.5px solid var(--accent); pointer-events: none; opacity: 0; animation: fx-rp .6s ease-out forwards; }
+.fx-rp.big { border-width: 2px; border-color: var(--gold); animation: fx-rpb .9s ease-out forwards; }
+@keyframes fx-rp { 0% { opacity: .65; transform: scale(.4); } 100% { opacity: 0; transform: scale(3.6); } }
+@keyframes fx-rpb { 0% { opacity: .55; transform: scale(.4); } 100% { opacity: 0; transform: scale(60); } }
+
+/* the sound button and its four-bar meter */
+.sfx-btn { padding: 0 9px; }
+.sfx-bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 16px; }
+.sfx-bars i { display: block; width: 3px; height: 100%; border-radius: 1px; background: currentColor; transform-origin: bottom; transform: scaleY(.28); opacity: .55; }
+.sfx-btn.on { border-color: var(--accent); }
+.sfx-btn.on .sfx-bars i { opacity: 1; animation: sfx-b .9s ease-in-out infinite; }
+.sfx-btn.on .sfx-bars i:nth-child(2) { animation-delay: -.3s; animation-duration: 1.1s; }
+.sfx-btn.on .sfx-bars i:nth-child(3) { animation-delay: -.6s; animation-duration: .8s; }
+.sfx-btn.on .sfx-bars i:nth-child(4) { animation-delay: -.15s; animation-duration: 1.3s; }
+@keyframes sfx-b { 0%, 100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
+@media (prefers-reduced-motion: reduce) { .sfx-btn.on .sfx-bars i { animation: none; transform: scaleY(.7); } }
+
+/* bracket corners on the big buttons: small ticks that open outward on hover (the study's "enter" button) */
+.arc-btn, .hx-out { position: relative; }
+.arc-btn::before, .hx-out::before { content: ""; position: absolute; inset: -5px; pointer-events: none; opacity: .7; transition: inset .2s, opacity .2s;
+  background:
+    linear-gradient(var(--ink), var(--ink)) top left / 8px 1.5px no-repeat, linear-gradient(var(--ink), var(--ink)) top left / 1.5px 8px no-repeat,
+    linear-gradient(var(--ink), var(--ink)) top right / 8px 1.5px no-repeat, linear-gradient(var(--ink), var(--ink)) top right / 1.5px 8px no-repeat,
+    linear-gradient(var(--ink), var(--ink)) bottom left / 8px 1.5px no-repeat, linear-gradient(var(--ink), var(--ink)) bottom left / 1.5px 8px no-repeat,
+    linear-gradient(var(--ink), var(--ink)) bottom right / 8px 1.5px no-repeat, linear-gradient(var(--ink), var(--ink)) bottom right / 1.5px 8px no-repeat; }
+.arc-btn:hover::before, .arc-btn:focus-visible::before, .hx-out:hover::before { inset: -9px; opacity: 1; }
+.arc-btn:disabled::before { opacity: .25; }
+.arc-over .arc-btn::before { inset: -6px; }
+
+/* "+" before small labels, and a blinking caret on live captions (both from the study's HUD text) */
+.sec-head .eyebrow::before { content: "+ "; opacity: .6; }
+.hx-name::after, .sc-why.live::after { content: "_"; margin-left: 2px; animation: fx-caret 1s steps(1) infinite; }
+@keyframes fx-caret { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .hx-name::after { animation: none; } .fx-rp { display: none; } .sec-head h2.cg::before, .sec-head h2.cg::after { display: none; } }

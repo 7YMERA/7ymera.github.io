@@ -24,25 +24,14 @@
   }
 
   /* ---------- sound: off until asked, three tiny oscillator blips ---------- */
-  var ac = null, soundOn = false, soundBtn = $('#arc-sound');
-  function beep(f, len, type, vol, slide) {
-    if (!soundOn || !ac) return;
-    try {
-      var o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime;
-      o.type = type || 'square'; o.frequency.setValueAtTime(f, t);
-      if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f * slide), t + len);
-      g.gain.setValueAtTime(vol || .04, t); g.gain.exponentialRampToValueAtTime(.0001, t + len);
-      o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + len + .02);
-    } catch (e) { /* no audio */ }
+  var soundBtn = $('#arc-sound');
+  function beep(f, len, type, vol, slide) { if (window.__sfx) window.__sfx.beep(f, len, type, vol, slide); }   // sfx.js owns the audio and the on/off state
+  function paintSound() { if (!soundBtn) return; var on = !!(window.__sfx && window.__sfx.on); soundBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); soundBtn.querySelector('b').textContent = on ? 'On' : 'Off'; }
+  if (soundBtn) {
+    if (!window.__sfx) soundBtn.hidden = true;
+    soundBtn.addEventListener('click', function () { if (window.__sfx) { window.__sfx.toggle(); beep(660, .08, 'square', .05); } });
+    d.addEventListener('sfx-change', paintSound); paintSound();
   }
-  if (soundBtn) soundBtn.addEventListener('click', function () {
-    soundOn = !soundOn;
-    if (soundOn && !ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { soundOn = false; } }
-    if (ac && ac.state === 'suspended') ac.resume();
-    soundBtn.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
-    soundBtn.querySelector('b').textContent = soundOn ? 'On' : 'Off';
-    beep(660, .08, 'square', .05);
-  });
 
   /* ---------- tabs ---------- */
   var tabs = $$('[role=tab]'), panels = $$('[role=tabpanel]'), active = 'train';

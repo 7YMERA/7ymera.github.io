@@ -17,7 +17,8 @@
       var k = Math.floor((performance.now() - t0) / per), out = '';
       for (var i = 0; i < n; i++) { var c = text.charAt(i); out += i < k || c === ' ' || c === '·' || c === '-' ? c : GL.charAt((Math.random() * GL.length) | 0); }
       el.textContent = out;
-      if (k >= n) { clearInterval(id); el.textContent = text; el.__sc = false; el.removeAttribute('aria-label'); }
+      var sf = window.__sfx; if (sf && sf.on) { if (k < n) { sf.glyph(); if (k !== el.__k) { el.__k = k; sf.lock(k / n); } } }
+      if (k >= n) { clearInterval(id); el.textContent = text; el.__sc = false; el.__k = -1; el.removeAttribute('aria-label'); if (sf && sf.on) sf.done(); }
     }, 40);
   }
   if (!reduce) {
@@ -31,6 +32,22 @@
       d.querySelectorAll('.sec-head .eyebrow').forEach(function (el) { io.observe(el); });
     }
   }
+
+  /* ---- headings arrive with a brief colour split (from the Mirage study's chromatic transition) ---- */
+  if (!reduce && 'IntersectionObserver' in window) {
+    var hio = new IntersectionObserver(function (en) { en.forEach(function (e) { if (e.isIntersecting) { hio.unobserve(e.target); e.target.classList.add('cg-go'); } }); }, { threshold: .55 });
+    d.querySelectorAll('.sec-head h2').forEach(function (h) { if (h.children.length) return; h.setAttribute('data-text', h.textContent.trim()); h.classList.add('cg'); hio.observe(h); });
+  }
+
+  /* ---- a ring on every press (the study's "pointer ripple"), and a bigger pulse from the theme switch ---- */
+  function ripple(x, y, big) {
+    if (reduce) return; var live = d.querySelectorAll('.fx-rp').length; if (live > 5) return;
+    var r = d.createElement('i'); r.className = 'fx-rp' + (big ? ' big' : ''); r.style.left = x + 'px'; r.style.top = y + 'px'; r.setAttribute('aria-hidden', 'true');
+    r.addEventListener('animationend', function () { r.remove(); }); d.body.appendChild(r);
+  }
+  d.addEventListener('pointerdown', function (e) { if (e.target.closest && e.target.closest('input, textarea, select, canvas#arc-canvas, #arc-jump')) return; ripple(e.clientX, e.clientY, false); }, { passive: true });
+  var tb = d.getElementById('theme-btn');
+  if (tb) tb.addEventListener('click', function () { var r = tb.getBoundingClientRect(); ripple(r.left + r.width / 2, r.top + r.height / 2, true); if (window.__sfx && window.__sfx.on) window.__sfx.ripple(); });
 
   /* ---- rules ---- */
   var g = d.createElement('div'); g.className = 'fx-grid'; g.setAttribute('aria-hidden', 'true'); g.innerHTML = '<i></i><i></i><i></i>'; d.body.appendChild(g);

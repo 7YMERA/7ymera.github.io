@@ -82,7 +82,7 @@
     var sz = sizer(cv, function () { draw(performance.now()); });
     var raf = 0, dots = null, me = whereAmI(), meXYZ = xyz(me.lat, me.lon), hover = -1, goal = null;
     var arcs = [], sats = [{ n: 'AIM', i: .5, r: 1.3, s: .32, p: 0 }, { n: 'GPM', i: 1.05, r: 1.42, s: .24, p: 2.1 }, { n: 'TRMM', i: .33, r: 1.22, s: .4, p: 4.2 }];
-    var proj = [];
+    var proj = [], ptr = { x: -999, y: -999, in: false }, SR = 80;
 
     function build() {
       var n = small ? 3600 : 6500, ga = Math.PI * (3 - Math.sqrt(5)); dots = [];
@@ -145,8 +145,9 @@
         for (var i = 0; i < n; i++) {
           var p = dots[i]; if ((p[3] | 0) !== pass) continue;
           var r = rot(p); if (r[2] <= 0) continue;
-          ctx.globalAlpha = .4 + .6 * r[2];
-          var q = pass ? 2.6 : 1.9; ctx.fillRect(cx + r[0] * R - q / 2, cy - r[1] * R - q / 2, q, q);
+          var dx = cx + r[0] * R, dy = cy - r[1] * R, q = pass ? 2.6 : 1.9;
+          if (ptr.in) { var ex2 = dx - ptr.x, ey2 = dy - ptr.y, e2 = ex2 * ex2 + ey2 * ey2; if (e2 < SR * SR) { var f = 1 - Math.sqrt(e2) / SR; ctx.globalAlpha = 1; ctx.fillStyle = pass ? '#ffe3a0' : '#e6f0ff'; ctx.fillRect(dx - q * (1 + f) / 2, dy - q * (1 + f) / 2, q * (1 + f), q * (1 + f)); ctx.fillStyle = c0[pass]; continue; } }
+          ctx.globalAlpha = .4 + .6 * r[2]; ctx.fillRect(dx - q / 2, dy - q / 2, q, q);
         }
       }
       ctx.globalAlpha = 1;
@@ -166,6 +167,7 @@
         var gold = i < MYS, rad = (i === 0 ? 4.5 : 1.6 + c[3] * .55) * (hover === i ? 1.6 : 1);
         ctx.fillStyle = gold ? '#ffd27a' : '#dbe9ff'; ctx.beginPath(); ctx.arc(X, Y, rad, 0, TAU); ctx.fill();
         ctx.fillStyle = gold ? 'rgba(227,177,78,.22)' : 'rgba(150,190,255,.16)'; ctx.beginPath(); ctx.arc(X, Y, rad * 2.8, 0, TAU); ctx.fill();
+        if (ptr.in && (X - ptr.x) * (X - ptr.x) + (Y - ptr.y) * (Y - ptr.y) < SR * SR) { ctx.font = '600 10px ui-monospace,Menlo,monospace'; ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(230,240,255,.95)'; ctx.fillText(c[0].toUpperCase(), X + 8, Y - 6); }
       });
       // the visitor
       var rm = rot(meXYZ); if (rm[2] > .03) { var mx = cx + rm[0] * R, my = cy - rm[1] * R; ctx.strokeStyle = '#ffe3a0'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(mx, my, 6 + Math.sin(t * 3) * 1.2, 0, TAU); ctx.stroke(); ctx.fillStyle = '#ffe3a0'; ctx.font = '600 11px ui-monospace,Menlo,monospace'; ctx.textAlign = 'left'; ctx.fillText('YOU', mx + 10, my + 4); }
@@ -183,8 +185,35 @@
         var p = sd[1]; if (p[2] < 0 && p[0] * p[0] + p[1] * p[1] < 1) return;
         var X = cx + p[0] * R, Y = cy - p[1] * R; ctx.fillStyle = '#eaf3ff'; ctx.save(); ctx.translate(X, Y); ctx.rotate(.785); ctx.fillRect(-2.5, -2.5, 5, 5); ctx.restore();
         ctx.font = '600 10px ui-monospace,Menlo,monospace'; ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(210,228,255,.8)'; ctx.fillText(sd[0], X + 8, Y + 3);
+        flare(X, Y, 16, false);
+        if (sd[0] === 'AIM') plexus(X, Y, t);
       });
+      var rk = rot(K); if (rk[2] > .03) flare(cx + rk[0] * R, cy - rk[1] * R, 26, true);
+      // the scan lens under the pointer (the study's cursor-proximity "data scan")
+      if (ptr.in) {
+        ctx.setLineDash([5, 7]); ctx.lineDashOffset = -t * 18; ctx.strokeStyle = 'rgba(207,227,255,.75)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(ptr.x, ptr.y, SR, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
+        ctx.strokeStyle = 'rgba(227,177,78,.8)'; ctx.beginPath(); ctx.moveTo(ptr.x - 7, ptr.y); ctx.lineTo(ptr.x + 7, ptr.y); ctx.moveTo(ptr.x, ptr.y - 7); ctx.lineTo(ptr.x, ptr.y + 7); ctx.stroke();
+      }
       ctx.globalCompositeOperation = 'source-over';
+      // a halo and anamorphic streak with a little chromatic spread; the ghosts slide opposite the pointer
+      function flare(x, y, size, gold) {
+        var sx = ptr.in ? (cx - ptr.x) * .04 : 0, sy = ptr.in ? (cy - ptr.y) * .04 : 0;
+        ctx.globalCompositeOperation = 'lighter';
+        var g = ctx.createRadialGradient(x, y, 0, x, y, size); g.addColorStop(0, 'rgba(255,255,255,.85)'); g.addColorStop(.3, gold ? 'rgba(255,205,120,.3)' : 'rgba(140,185,255,.3)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, size, 0, TAU); ctx.fill();
+        var sg = ctx.createLinearGradient(x - size * 3.2, y, x + size * 3.2, y); sg.addColorStop(0, 'rgba(255,255,255,0)'); sg.addColorStop(.5, gold ? 'rgba(255,220,150,.45)' : 'rgba(190,215,255,.4)'); sg.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = sg; ctx.fillRect(x - size * 3.2, y - .8, size * 6.4, 1.6);
+        var gx = (cx - x) * .55 + sx * 4, gy = (cy - y) * .55 + sy * 4;
+        [['rgba(106,168,255,.35)', -1.6, .5], ['rgba(255,255,255,.28)', 0, .5], ['rgba(227,177,78,.35)', 1.6, .5]].forEach(function (c) { ctx.strokeStyle = c[0]; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(x + gx + c[1], y + gy, size * c[2] + 8, 0, TAU); ctx.stroke(); });
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      // a small drifting network around a satellite, dots joined when close (the study's "plexus")
+      function plexus(x, y, t) {
+        var pts = [], n = 16; for (var i = 0; i < n; i++) { var a = i * 2.399 + t * (.18 + (i % 4) * .05), rr = 20 + (i * 37 % 34); pts.push([x + Math.cos(a) * rr, y + Math.sin(a * 1.3) * rr * .8]); }
+        ctx.strokeStyle = 'rgba(160,200,255,.32)'; ctx.lineWidth = 1; ctx.beginPath();
+        for (var a2 = 0; a2 < n; a2++) for (var b2 = a2 + 1; b2 < n; b2++) { if (Math.hypot(pts[a2][0] - pts[b2][0], pts[a2][1] - pts[b2][1]) < 34) { ctx.moveTo(pts[a2][0], pts[a2][1]); ctx.lineTo(pts[b2][0], pts[b2][1]); } }
+        ctx.stroke(); ctx.fillStyle = 'rgba(220,235,255,.8)'; pts.forEach(function (q) { ctx.fillRect(q[0] - 1, q[1] - 1, 2, 2); });
+      }
     }
 
     function loop(now) {
@@ -199,10 +228,11 @@
     drag(cv, S, function (e, down) {
       var r = cv.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top, best = -1, bd = 18;
       if (!down) proj.forEach(function (p, i) { if (!p) return; var dd = Math.hypot(p[0] - mx, p[1] - my); if (dd < bd) { bd = dd; best = i; } });
+      ptr.x = mx; ptr.y = my; ptr.in = true;
       if (best !== hover) { hover = best; cv.style.cursor = hover > -1 ? 'pointer' : 'grab'; }
       if (hover > -1 && !down) { probe.hidden = false; probe.textContent = CITIES[hover][0]; probe.style.transform = 'translate(' + (mx + 12) + 'px,' + (my - 8) + 'px)'; } else probe.hidden = true;
     });
-    cv.addEventListener('pointerleave', function () { probe.hidden = true; hover = -1; });
+    cv.addEventListener('pointerleave', function () { probe.hidden = true; hover = -1; ptr.in = false; });
     S.onTap = function () { if (hover > -1) face(CITIES[hover][1], CITIES[hover][2]); };
     $('#hx-kl').addEventListener('click', function () { face(CITIES[0][1], CITIES[0][2]); S.touched = performance.now(); });
     $('#hx-me').addEventListener('click', function () { face(me.lat, me.lon); S.touched = performance.now(); });
@@ -231,6 +261,12 @@
     function earth() { var pos = new Float32Array(N * 3), tint = new Float32Array(N), i = 0; for (var g = 0; i < N && g < N * 40; g++) { var v = rnd() * 2 - 1, lon = rnd() * TAU - Math.PI, lat = Math.asin(v); var c = land.cell(lat * 180 / Math.PI, lon * 180 / Math.PI); if (!c) continue; var cl = Math.cos(lat); pos[3 * i] = cl * Math.sin(lon) * 1.02; pos[3 * i + 1] = Math.sin(lat) * 1.02; pos[3 * i + 2] = cl * Math.cos(lon) * 1.02; tint[i++] = c === 2 ? 1 : 0; } return { pos: pos, tint: tint }; }
     function knot() { var pos = new Float32Array(N * 3); for (var i = 0; i < N; i++) { var t = rnd() * TAU, r = .55 + .22 * Math.cos(3 * t), a = rnd() * TAU, rr = .07 * Math.sqrt(rnd()); pos[3 * i] = r * Math.cos(2 * t) * 1.5 + rr * Math.cos(a); pos[3 * i + 1] = .45 * Math.sin(3 * t) * 1.4 + rr * Math.sin(a); pos[3 * i + 2] = r * Math.sin(2 * t) * 1.5 + rr * Math.cos(a + 1); } return { pos: pos, tint: byHeight(pos) }; }
     function helix() { var pos = new Float32Array(N * 3); for (var i = 0; i < N; i++) { var t = (rnd() * 2 - 1) * Math.PI * 3, strand = rnd() < .72, ph = rnd() < .5 ? 0 : Math.PI, nz = function () { return (rnd() - .5) * .06; }; if (strand) { pos[3 * i] = Math.cos(t + ph) * .62 + nz(); pos[3 * i + 1] = t * .2 + nz(); pos[3 * i + 2] = Math.sin(t + ph) * .62 + nz(); } else { var k = rnd() * 2 - 1; pos[3 * i] = Math.cos(t) * .62 * k + nz(); pos[3 * i + 1] = t * .2 + nz(); pos[3 * i + 2] = Math.sin(t) * .62 * k + nz(); } } return { pos: pos, tint: byHeight(pos) }; }
+    function plexusForm() {
+      var M = 84, pos = new Float32Array(N * 3), tint = new Float32Array(N), no = new Uint16Array(N), c = new Float32Array(M * 3);
+      for (var m = 0; m < M; m++) { var x, y, z; do { x = rnd() * 2 - 1; y = rnd() * 2 - 1; z = rnd() * 2 - 1; } while (x * x + y * y + z * z > 1); c[m * 3] = x * 1.25; c[m * 3 + 1] = y * 1.05; c[m * 3 + 2] = z * 1.25; }
+      for (var i = 0; i < N; i++) { var q = i % M, g = function () { return (rnd() + rnd() + rnd() - 1.5) * .09; }; pos[3 * i] = c[q * 3] + g(); pos[3 * i + 1] = c[q * 3 + 1] + g(); pos[3 * i + 2] = c[q * 3 + 2] + g(); no[i] = q; tint[i] = q % 9 === 0 ? 1 : 0; }
+      return { pos: pos, tint: tint, nodes: c, nodeOf: no };
+    }
     function wave() { var pos = new Float32Array(N * 3), i = 0; for (var g = 0; i < N && g < N * 200; g++) { var r = Math.sqrt(rnd()) * 1.6, a = rnd() * TAU; if (Math.cos(r * 15) < .82) continue; pos[3 * i] = Math.cos(a) * r; pos[3 * i + 1] = .28 * Math.cos(r * 6.5) + (rnd() - .5) * .03; pos[3 * i + 2] = Math.sin(a) * r; i++; } return { pos: pos, tint: byHeight(pos) }; }
     // a landmark: area-weighted random points on the real model's triangles, all at one scale so the heights stay honest
     function landmark(json) {
@@ -255,7 +291,8 @@
       { k: 'exchange', n: 'The Exchange 106', file: 'exchange106.json' },
       { k: 'knot', n: 'Torus knot', make: knot },
       { k: 'helix', n: 'Double helix', make: helix },
-      { k: 'wave', n: 'Standing wave', make: wave }
+      { k: 'wave', n: 'Standing wave', make: wave },
+      { k: 'plexus', n: 'Plexus network', make: plexusForm }
     ];
     function get(f, cb) {
       if (cache[f.k]) return cb(cache[f.k]);
@@ -269,7 +306,7 @@
       get(f, function (form) {
         // freeze where every particle is now, then slide each to its place in the next form
         for (var i = 0; i < N; i++) { var e = ease(prog, delay[i]); for (var c = 0; c < 3; c++) A[i * 3 + c] = A[i * 3 + c] + (B[i * 3 + c] - A[i * 3 + c]) * e; tA[i] = tA[i] + (tB[i] - tA[i]) * e; }
-        B.set(form.pos); tB.set(form.tint); prog = instant ? 1 : 0; cur = k; nameEl.textContent = f.n;
+        B.set(form.pos); tB.set(form.tint); prog = instant ? 1 : 0; cur = k; nodesNow = form.nodes || null; nodeOf = form.nodeOf || null; if (nodesNow) { var MM = nodesNow.length / 3; ndx = new Float32Array(MM); ndy = new Float32Array(MM); ndz = new Float32Array(MM); } nameEl.textContent = f.n;
         $$('.hx-chip').forEach(function (b, n) { b.setAttribute('aria-pressed', n === k ? 'true' : 'false'); });
         if (instant) { A.set(B); tA.set(tB); }
         wake();
@@ -277,20 +314,52 @@
     }
     function ease(p, dl) { var u = clamp((p - dl) / (1 - .45), 0, 1); return u * u * (3 - 2 * u); }
 
+    var LP = { x: -999, y: -999, in: false }, LR = 90, nodesNow = null, nodeOf = null, ndx = null, ndy = null, ndz = null;
+    function drift(time) { var M = nodesNow.length / 3; for (var m = 0; m < M; m++) { ndx[m] = Math.sin(time * .0006 + m * 1.7) * .09; ndy[m] = Math.cos(time * .0005 + m * 2.3) * .09; ndz[m] = Math.sin(time * .0007 - m * 1.1) * .09; } }
     function draw(time) {
       var W = sz.w, H = sz.h; ctx.setTransform(sz.k, 0, 0, sz.k, 0, 0);
       ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = '#06132b'; ctx.fillRect(0, 0, W, H);
-      var cy = Math.cos(S.yaw), sy = Math.sin(S.yaw), cp = Math.cos(S.pitch), sp = Math.sin(S.pitch), F = 3.4, sc = Math.min(W, H) * (W / H > 1.3 ? .34 : .3), cx = W / 2, cyy = H * .52;
-      var u = ex;
+      // a soft, drifting haze behind the dust (the study's "space cloud"), two big gradients that wander slowly
+      var t = time / 1000; ctx.globalCompositeOperation = 'lighter';
+      [[.3 + Math.sin(t * .11) * .12, .4, 'rgba(60,110,230,.16)', .55], [.72 + Math.cos(t * .09) * .1, .62, 'rgba(227,177,78,.07)', .5]].forEach(function (c) { var hx = c[0] * W, hy = c[1] * H + Math.sin(t * .13 + c[0] * 9) * 20, r = Math.max(W, H) * c[3], g = ctx.createRadialGradient(hx, hy, 0, hx, hy, r); g.addColorStop(0, c[2]); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); });
+      var cyw = Math.cos(S.yaw), syw = Math.sin(S.yaw), cp = Math.cos(S.pitch), sp = Math.sin(S.pitch), F = 3.4, sc = Math.min(W, H) * (W / H > 1.3 ? .34 : .3), cx = W / 2, cyy = H * .52;
+      var u = ex, pl = !!nodesNow && prog >= 1;
+      if (pl) drift(time);
+      function proj(x, y, z, o) { // explode, turn, project: o = [x, y, size]
+        if (u > .001) { var band = Math.floor(clamp((y + 1) / 2, 0, .999) * 8); y += (band - 3.5) * .17 * u; var rr = 1 + .12 * u * (band % 2 ? 1 : -.4); x *= rr; z *= rr; }
+        var x1 = x * cyw + z * syw, z1 = -x * syw + z * cyw, y1 = y * cp - z1 * sp, z2 = y * sp + z1 * cp, k = F / (F + z2);
+        o[0] = cx + x1 * k * sc; o[1] = cyy - y1 * k * sc; o[2] = k;
+      }
+      var o3 = [0, 0, 0], inLens = 0, R2 = LR * LR;
       for (var i = 0; i < N; i++) {
         var e = ease(prog, delay[i]), x = A[i * 3] + (B[i * 3] - A[i * 3]) * e, y = A[i * 3 + 1] + (B[i * 3 + 1] - A[i * 3 + 1]) * e, z = A[i * 3 + 2] + (B[i * 3 + 2] - A[i * 3 + 2]) * e;
         if (prog < 1) { var sw = Math.sin(e * Math.PI) * .35; x += seed[i * 3] * sw * 2; y += seed[i * 3 + 1] * sw * 2; z += seed[i * 3 + 2] * sw * 2; }
-        if (u > .001) { var band = Math.floor(clamp((y + 1) / 2, 0, .999) * 8); y += (band - 3.5) * .17 * u; var rr = 1 + .12 * u * (band % 2 ? 1 : -.4); x *= rr; z *= rr; }
-        var x1 = x * cy + z * sy, z1 = -x * sy + z * cy, y1 = y * cp - z1 * sp, z2 = y * sp + z1 * cp, k = F / (F + z2);
-        qx[i] = cx + x1 * k * sc; qy[i] = cyy - y1 * k * sc; qs[i] = clamp(.7 + 1.5 * k * k, .8, 3); qg[i] = (tA[i] + (tB[i] - tA[i]) * e) > .5 ? 1 : 0;
+        else if (pl) { var m = nodeOf[i]; x += ndx[m]; y += ndy[m]; z += ndz[m]; }
+        proj(x, y, z, o3);
+        var px = o3[0], py = o3[1], k = o3[2], size = clamp(.7 + 1.5 * k * k, .8, 3), g = (tA[i] + (tB[i] - tA[i]) * e) > .5 ? 1 : 0;
+        if (LP.in) { var ddx = px - LP.x, ddy = py - LP.y, d2 = ddx * ddx + ddy * ddy; if (d2 < R2) { var dd = Math.sqrt(d2) || 1, f = 1 - dd / LR; px += ddx / dd * f * f * 26; py += ddy / dd * f * f * 26; size += f * 1.8; g = 2; inLens++; } }
+        qx[i] = px; qy[i] = py; qs[i] = size; qg[i] = g;
+      }
+      // plexus: join the nodes that drift close, three links at most each
+      if (pl) {
+        var M = nodesNow.length / 3, np = [], links = new Uint8Array(M), pt = [0, 0, 0];
+        for (var m2 = 0; m2 < M; m2++) { proj(nodesNow[m2 * 3] + ndx[m2], nodesNow[m2 * 3 + 1] + ndy[m2], nodesNow[m2 * 3 + 2] + ndz[m2], pt); np.push([pt[0], pt[1]]); }
+        ctx.strokeStyle = 'rgba(120,170,255,.34)'; ctx.lineWidth = 1; ctx.beginPath();
+        for (var a2 = 0; a2 < M; a2++) for (var b2 = a2 + 1; b2 < M && links[a2] < 3; b2++) {
+          var qx2 = nodesNow[a2 * 3] + ndx[a2] - nodesNow[b2 * 3] - ndx[b2], qy2 = nodesNow[a2 * 3 + 1] + ndy[a2] - nodesNow[b2 * 3 + 1] - ndy[b2], qz2 = nodesNow[a2 * 3 + 2] + ndz[a2] - nodesNow[b2 * 3 + 2] - ndz[b2];
+          if (qx2 * qx2 + qy2 * qy2 + qz2 * qz2 < .42 && links[b2] < 3) { links[a2]++; links[b2]++; ctx.moveTo(np[a2][0], np[a2][1]); ctx.lineTo(np[b2][0], np[b2][1]); }
+        }
+        ctx.stroke();
       }
       ctx.globalCompositeOperation = 'lighter';
-      for (var pass = 0; pass < 2; pass++) { ctx.fillStyle = pass ? 'rgba(227,177,78,.85)' : 'rgba(106,168,255,.8)'; for (var j = 0; j < N; j++) { if (qg[j] !== pass) continue; ctx.fillRect(qx[j], qy[j], qs[j], qs[j]); } }
+      var cols = ['rgba(106,168,255,.8)', 'rgba(227,177,78,.85)', 'rgba(240,247,255,.95)'];
+      for (var pass = 0; pass < 3; pass++) { ctx.fillStyle = cols[pass]; for (var j = 0; j < N; j++) { if (qg[j] !== pass) continue; ctx.fillRect(qx[j], qy[j], qs[j], qs[j]); } }
+      // the scan lens (the study's cursor-proximity "data scan"): a dashed ring, a cross and a live count
+      if (LP.in) {
+        ctx.setLineDash([5, 7]); ctx.lineDashOffset = -t * 18; ctx.strokeStyle = 'rgba(207,227,255,.75)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(LP.x, LP.y, LR, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
+        ctx.strokeStyle = 'rgba(227,177,78,.85)'; ctx.beginPath(); ctx.moveTo(LP.x - 7, LP.y); ctx.lineTo(LP.x + 7, LP.y); ctx.moveTo(LP.x, LP.y - 7); ctx.lineTo(LP.x, LP.y + 7); ctx.stroke();
+        ctx.fillStyle = 'rgba(230,240,255,.9)'; ctx.font = '600 10px ui-monospace,Menlo,monospace'; ctx.textAlign = 'left'; ctx.fillText('SCAN ' + inLens, LP.x + LR * .72, LP.y - LR * .72);
+      }
       ctx.globalCompositeOperation = 'source-over';
     }
     function loop(now) {
@@ -313,7 +382,8 @@
     function syncAuto() { autoBtn.setAttribute('aria-pressed', auto ? 'true' : 'false'); autoBtn.querySelector('b').textContent = auto ? 'On' : 'Off'; }
     autoBtn.addEventListener('click', function () { auto = !auto; autoT = 0; syncAuto(); });
     syncAuto();
-    drag(cv, S);
+    drag(cv, S, function (e) { var r = cv.getBoundingClientRect(); LP.x = e.clientX - r.left; LP.y = e.clientY - r.top; LP.in = true; });
+    cv.addEventListener('pointerleave', function () { LP.in = false; });
     cv.style.cursor = 'grab';
     function init() { if (started) return; started = true; var f = FORMS[0]; get(f, function (form) { A.set(form.pos); B.set(form.pos); tA.set(form.tint); tB.set(form.tint); prog = 1; sz.fit(); nameEl.textContent = f.n; wake(); }); }
     return { wake: function () { init(); wake(); } };
