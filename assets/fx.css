@@ -1,0 +1,11 @@
+/* fx.css: cursor ring, faint rules. Only transform and opacity animate. */
+.fx-ring { position: fixed; left: -17px; top: -17px; width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid #fff; mix-blend-mode: difference; pointer-events: none; z-index: 60; opacity: 0; transition: opacity .2s; display: grid; place-content: center; will-change: transform; }
+.fx-ring.on { opacity: 1; }
+.fx-ring span { font: 700 .25rem var(--f-mono); color: #fff; letter-spacing: .08em; text-transform: uppercase; opacity: 0; transition: opacity .15s; white-space: nowrap; }
+.fx-ring.lab span { opacity: 1; }
+.fx-grid { position: fixed; inset: 0; pointer-events: none; z-index: 2; display: none; }
+.fx-grid i { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--ink); opacity: .045; }
+.fx-grid i:nth-child(1) { left: 25%; } .fx-grid i:nth-child(2) { left: 50%; } .fx-grid i:nth-child(3) { left: 75%; }
+@media (min-width: 1100px) { .fx-grid { display: block; } }
+html.brief .fx-grid { display: none; }
+@media print { .fx-ring, .fx-grid { display: none !important; } }

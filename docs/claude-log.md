@@ -30,6 +30,12 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-20 · Halcyon ideas brought in (globe, particle lab, cursor, scramble)
+- Owner pointed at their private `7YMERA/halcyon` repo (read only, cloned to `/home/user/halcyon`, nothing from it was edited or pushed). Studied README/HANDOFF/STUDY/AUDIT and `src/lab.js`. Ported to plain canvas 2D (the site's three is r128 and a second WebGL context is a phone risk): `#halcyon` section with Orbit and Particle lab (`assets/halcyon.js`, `.css`), the land bitmap `assets/halcyon/land.json` (21 KB, built from Halcyon's `countries-50m.json`, Natural Earth public domain), and `assets/fx.js`/`fx.css` (cursor ring with a Drag/Jump label over the canvases, header name re-scrambles on hover, section labels decode once, three 4.5% rules at 1100 px+). The lab's landmark forms read the portfolio's own `assets/city/*.json` (fetched on first use).
+- NOT taken: anything from `research/mirage-analysis` (a scan of someone else's site) or the GPL study repo; no Halcyon code was copied verbatim (it is the owner's own, rewritten for 2D). Credit line on the section: Natural Earth, NASA models, link to https://halcyon-xmr.vercel.app/ (the public deploy).
+- Tested at 1300 and 390 px with WebGL switched off in the test browser (software 3D is too slow): no errors, no sideways scroll. Not tried on a real phone. Keys `20261120g`.
+- Ideas left: comets and depth-parallax stars (the city has no starfield), the Halcyon descent as an intro, ghost vertical chapter text, Halcyon's sound, an exploded view of the real model meshes (not just points).
+
 ## 2026-11-20 · The arcade (three games after the Journey)
 - Owner asked for a game section. `#arcade` sits between Journey and the flight: Last Train (canvas runner, colours read from the page tokens so both themes work), Scope Creep (28 cards, each with a one-line why), Spec Match (8 tool/project pairs from the site). `assets/arcade.js`, `arcade.css`; chip in *This is me*, Ctrl+K entry, `j`/`k` stop, Highlights mode hides it. `scene.js`: a hold key for `arcade` in `DIR`, and `html.arc-on` (set while a game runs) drops the city to about 8 fps and stops the idle-drift speed test counting those slow frames. Key `20261120e`.
 - Tested with a bot (survived 25 s, score 1850), a full Scope Creep round, and a full Spec Match (8 moves), at 1300 and 390 px, light and dark, WebGL switched off in the test browser because software 3D ran at about 1 fps. Not tried on a real phone: check the runner's frame rate beside the live city.

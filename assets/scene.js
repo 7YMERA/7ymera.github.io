@@ -505,6 +505,7 @@
     ['journey',.1,-.5,P(EXC[0],EXC[1],300,78,8,76,-.22)], // Journey: The Exchange 106, climbing as the years go by
     ['journey',.3,-.5,P(EXC[0],EXC[1],335,118,96,122,-.22)],
     ['journey',.62,0,P(-25,9,60,360,190,70,0,0,900)],
+    ['halcyon',.5,-.5,P(-25,9,60,360,190,70,0,0,900)],
     ['arcade',.5,-.5,P(-25,9,60,360,190,70,0,0,900)],                 // hold the pulled-back view while the arcade is on screen                 // pull right back (zoom out) ...
     ['enter',0,-1,END]                                         // ... then in to where the flight starts (zoom in)                                     // the flight starts here
   ];

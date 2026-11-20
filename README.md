@@ -37,7 +37,7 @@ The REQ-001 card and the teal-and-gold palette survived. (The "I write the spec.
 
 ## Version history
 
-**Current version: 2.16.** Numbering: the first number changes when the site changes character (1.0 was a static page, 2.0 became the 3D city). The second number goes up for a major overhaul or a notable new feature. Small fixes and tweaks do not get a number; they live in [`docs/claude-log.md`](docs/claude-log.md). Dates come from the work log. Commit ids are on `main`: `git show <id>`.
+**Current version: 2.17.** Numbering: the first number changes when the site changes character (1.0 was a static page, 2.0 became the 3D city). The second number goes up for a major overhaul or a notable new feature. Small fixes and tweaks do not get a number; they live in [`docs/claude-log.md`](docs/claude-log.md). Dates come from the work log. Commit ids are on `main`: `git show <id>`.
 
 | Version | Date | What changed | Commit |
 |---|---|---|---|
@@ -66,6 +66,7 @@ The REQ-001 card and the teal-and-gold palette survived. (The "I write the spec.
 | **2.14** | 14 Nov | **KL trains with stations.** Six named stops on the rails (KLCC, Bukit Nanas, Merdeka, TRX, Suria KLCC, Ampang Park); trains with rounded-nose cabs, head and tail lights that ease into each station, wait and pull out; three trains on the sky line. Merdeka Maybank is centred behind the skill tree from its first screen. | `b186c9e` |
 | **2.15** | 20 Nov | A small quality-of-life layer (`delight.js`, `delight.css`): keyboard shortcuts (`?` sheet, `j`/`k` sections, `t` theme, `/` quick jump), the tab title follows the section, a live Kuala Lumpur clock and Share button in Contact, a labelled Back to top button, print rules, and one hidden train. | (this commit) |
 | **2.16** | 20 Nov | **The arcade.** A new section after the Journey (`#arcade`, `arcade.js`, `arcade.css`) with three games built from the day job: *Last Train* (a one-button runner along the KL rail), *Scope Creep* (45-second triage: build it or park it) and *Spec Match* (pair each tool with the project it went into). Best scores saved on the device, optional sound, phone-friendly big buttons. | (this commit) |
+| **2.17** | 20 Nov | **From Halcyon.** Ideas and data brought over from my separate Halcyon project (a scroll descent from orbit to KL): a new `#halcyon` section with an *Orbit* globe (real country outlines as dots, arcs from KL, NASA satellite rings, an arc from where you are, guessed from your time zone only) and a *Particle lab* (dust that morphs between a Chladni plate, the Earth and the real KL landmark models, with an Explode slider); plus a trailing cursor ring, scrambling labels and faint rules (`fx.js`). | (this commit) |
 
 Tried and dropped along the way (still in git history): a clothes-rail project gallery (`5c68a02`), a ring and then a conveyor of floating screens, a Masjid Negara you could fly into, and a 5 second phone loading screen. The longer story of the 3D city is in *The 3D city and the flight* below.
 
@@ -86,6 +87,7 @@ The home page, top to bottom:
 | **Selected work** (`#work`) | Seven projects, with filters, screenshots and before/after sliders. | inline script in `index.html` |
 | **Pulse** (`#pulse`) | Status report: stat tiles, project board, 17-week commit map and a recent-activity feed. The feed tries GitHub's public events API and falls back to the snapshot. | `assets/pulse.js`, `assets/pulse-data.json` |
 | **Journey** (`#journey`) | Alternating cards on a centre line, coloured by kind, with a beam that fills as you scroll. | `extras.js` |
+| **Halcyon** (`#halcyon`) | Two canvas-2D pieces ported from the Halcyon project. *Orbit*: dotted globe from `assets/halcyon/land.json` (a 360x180, 2-bit land bitmap made from Natural Earth, public domain), pulsing great-circle arcs from KL, AIM/GPM/TRMM rings, a "you" arc from the browser's time zone. *Particle lab*: ~4,200 points morphing between forms; landmarks are sampled from `assets/city/*.json` at one scale. Both loops stop off screen. Hidden in Highlights mode. | `halcyon.js`, `halcyon.css` |
 | **Arcade** (`#arcade`) | Three small games: Last Train (canvas runner), Scope Creep (triage), Spec Match (memory pairs). Best scores in `localStorage` (`arc-best`). While a game runs, `html.arc-on` makes the city redraw at about 8 fps. Hidden in Highlights mode. | `arcade.js`, `arcade.css` |
 | **Contact** | Links and the CV. | |
 

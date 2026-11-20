@@ -32,10 +32,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600&display=swap"></noscript>
-<link rel="stylesheet" href="assets/site.css?v=20261120e">
-<link rel="stylesheet" href="assets/scene.css?v=20261120e">
-<link rel="stylesheet" href="assets/delight.css?v=20261120e">
-<link rel="stylesheet" href="assets/arcade.css?v=20261120e">
+<link rel="stylesheet" href="assets/site.css?v=20261120h">
+<link rel="stylesheet" href="assets/scene.css?v=20261120h">
+<link rel="stylesheet" href="assets/delight.css?v=20261120h">
+<link rel="stylesheet" href="assets/arcade.css?v=20261120h">
+<link rel="stylesheet" href="assets/halcyon.css?v=20261120h">
+<link rel="stylesheet" href="assets/fx.css?v=20261120h">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Person", "name": "Muhammad Alif Najmi", "alternateName": "Alif Najmi", "url": "https://7ymera.github.io/", "jobTitle": "Business Analyst", "worksFor": {"@type": "Organization", "name": "axrail.ai"}, "alumniOf": {"@type": "CollegeOrUniversity", "name": "Universiti Teknologi PETRONAS"}, "address": {"@type": "PostalAddress", "addressLocality": "Kuala Lumpur", "addressCountry": "MY"}, "sameAs": ["https://github.com/7YMERA", "https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin", "https://krackeddevs.com/profile/alifnajmx", "https://www.credly.com/users/muhammad-alif-najmi-md-hisamudin"], "image": "https://7ymera.github.io/assets/og-skyline-3.jpg"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "Alif Najmi", "url": "https://7ymera.github.io/"}</script>
 </head>
@@ -773,6 +775,52 @@
     </div>
   </section>
 
+  <section class="block" id="halcyon">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="eyebrow">From the lab · Halcyon</span>
+          <h2>The world from orbit, and a city in dust</h2>
+          <p>Two pieces of Halcyon, my side project: a scroll-driven descent from space down to Kuala Lumpur. Drag to spin, tap to explore.</p>
+        </div>
+        <a class="arc-btn hx-out" href="https://halcyon-xmr.vercel.app/" target="_blank" rel="noopener">Open the full descent</a>
+      </div>
+      <div class="arc-wrap">
+        <div class="arc-tabs" role="tablist" aria-label="Choose a piece of Halcyon">
+          <button class="arc-tab" role="tab" type="button" data-hx="orbit" aria-selected="true" id="hx-tab-orbit" aria-controls="hx-pan-orbit">Orbit<small>a globe, arcs and satellites</small></button>
+          <button class="arc-tab" role="tab" type="button" data-hx="lab" aria-selected="false" tabindex="-1" id="hx-tab-lab" aria-controls="hx-pan-lab">Particle lab<small>dust that becomes a skyline</small></button>
+        </div>
+
+        <div class="arc-panel" role="tabpanel" data-hx="orbit" id="hx-pan-orbit" aria-labelledby="hx-tab-orbit">
+          <div class="hx-stage">
+            <canvas id="hx-globe" data-cursor="Drag" width="800" height="450" role="img" aria-label="A dotted globe from orbit with glowing arcs from Kuala Lumpur to cities around the world and three satellites"></canvas>
+            <div class="hx-probe" id="hx-probe" hidden></div>
+          </div>
+          <div class="hx-bar">
+            <button class="arc-btn" id="hx-kl" type="button">Face Kuala Lumpur</button>
+            <button class="arc-btn alt" id="hx-me" type="button">Where I guess you are</button>
+            <button class="arc-sound" id="hx-spin" type="button" aria-pressed="true">Auto-spin <b>On</b></button>
+          </div>
+          <p class="hx-read" id="hx-read" role="status"></p>
+          <p class="hx-credit">Outlines: Natural Earth (public domain). Satellites: the NASA models behind <a href="https://halcyon-xmr.vercel.app/" target="_blank" rel="noopener">Halcyon</a> (AIM, GPM, TRMM). Your place is guessed from your time zone in this browser only.</p>
+        </div>
+
+        <div class="arc-panel" role="tabpanel" data-hx="lab" id="hx-pan-lab" aria-labelledby="hx-tab-lab" hidden>
+          <div class="hx-stage">
+            <canvas id="hx-lab" data-cursor="Drag" width="800" height="450" role="img" aria-label="A cloud of glowing particles that morphs between shapes, including the Petronas Towers and other Kuala Lumpur landmarks"></canvas>
+            <p class="hx-name" id="hx-form" role="status" aria-live="polite">Chladni plate</p>
+          </div>
+          <div class="hx-chips" id="hx-chips" role="group" aria-label="Shapes"></div>
+          <div class="hx-bar">
+            <button class="arc-sound" id="hx-explode" type="button" aria-pressed="false">Explode <b>Off</b></button>
+            <button class="arc-sound" id="hx-auto" type="button" aria-pressed="true">Auto-morph <b>On</b></button>
+          </div>
+          <p class="hx-credit">The landmarks are my own KL models (the same ones in the city above), turned into points. Heights are to scale: Merdeka 118 is the tallest.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="block" id="arcade">
     <div class="wrap">
       <div class="sec-head">
@@ -793,7 +841,7 @@
         <div class="arc-panel" role="tabpanel" data-game="train" id="pan-train" aria-labelledby="tab-train">
           <div class="arc-top"><div><h3>Last Train</h3><p>Ride the KL line. Jump the scope creep, grab the requirements.</p></div><p class="arc-hint">Space, up arrow or tap to jump · P to pause</p></div>
           <div class="arc-stage">
-            <canvas id="arc-canvas" width="720" height="270" role="img" aria-label="A train running along a rail past the Kuala Lumpur skyline"></canvas>
+            <canvas id="arc-canvas" data-cursor="Jump" width="720" height="270" role="img" aria-label="A train running along a rail past the Kuala Lumpur skyline"></canvas>
             <div class="arc-over" id="arc-over"><h4 id="arc-over-title">Last Train</h4><p id="arc-over-text">Jump the striped scope-creep blocks and grab the gold requirements.</p><button class="arc-btn" id="arc-go" type="button">Start</button></div>
           </div>
           <div class="arc-pad"><button class="arc-btn arc-jump" id="arc-jump" type="button">Jump</button></div>
@@ -1042,7 +1090,7 @@
     ['MyLokalEvent v2', '#p-mle', 'project'], ['KakiLima', '#p-kakilima', 'project'], ['EagleSan Sandbox (Roblox)', '#p-roblox', 'project'], ['JumaatFinder', '#p-jumaat', 'project'], ['IT Asset Disposal (SLB)', '#p-slb', 'project'],
     ['Try TaskMatch demo', 'https://taskmatch-umber.vercel.app', 'live'], ['Visit MyLokalEvent', 'https://mylokalevent.vercel.app', 'live'], ['Visit KakiLima', 'https://kakilima-iota.vercel.app', 'live'],
     ['All notes', 'notes/', 'note'], ['Note: Nine charts before one screen (SLB data model)', 'notes/slb-design.html', 'note'], ['Note: A dashboard 150 teachers actually open', 'notes/smk-dashboard.html', 'note'], ['Note: From coursework to something people could trust', 'notes/mylokalevent-v2.html', 'note'], ['Note: Accessible first, in four languages', 'notes/kakilima.html', 'note'], ['Note: Where can I solat Jumaat from here?', 'notes/jumaatfinder.html', 'note'], ['Note: One VPC, two departments, $56 (AWS coursework)', 'notes/aws-two-departments.html', 'note'], ['Note: A whole company in 49 tables (SQL playground)', 'notes/database.html', 'note'], ['Note: Jom Al-Quran, 56 tables (SQL playground)', 'notes/jom-al-quran.html', 'note'], ['Note: Rebuilding my FYP properly', 'notes/taskmatch-v2.html', 'note'], ['Note: From reply-all to Power Apps', 'notes/slb-power-apps.html', 'note'], ['Note: Four years, one walk across the stage', 'notes/convocation-2026.html', 'note'], ['Journey', '#journey', 'section'], ['Skill tree', '#toolkit', 'section'], ['Notes', '#notes', 'section'], ['Why I do this', '#why', 'section'], ['What I studied at UTP', '#studied', 'section'], ['Contact', '#contact', 'section'],
-    ['Click through the IT Asset Disposal app', 'notes/slb-screens.html', 'live'], ['IT Asset Disposal source', 'https://github.com/7YMERA/it-asset-disposal-app-v1', 'link'], ['Résumé (read online)', 'resume.html', 'link'], ['View CV (PDF)', 'assets/Muhammad-Alif-Najmi-CV.pdf', 'link'], ['GitHub', 'https://github.com/7YMERA', 'link'], ['LinkedIn', 'https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin', 'link'], ['Play a game (the arcade)', '#arcade', 'section'], ['Keyboard shortcuts', '#do-keys', 'action'], ['Switch light or dark', '#do-theme', 'action'], ['Share this site', '#do-share', 'action'], ['Ride the hidden train', '#do-train', 'action'], ['Kracked Devs', 'https://krackeddevs.com/profile/alifnajmx', 'link'], ['Credly badges', 'https://www.credly.com/users/muhammad-alif-najmi-md-hisamudin', 'link']
+    ['Click through the IT Asset Disposal app', 'notes/slb-screens.html', 'live'], ['IT Asset Disposal source', 'https://github.com/7YMERA/it-asset-disposal-app-v1', 'link'], ['Résumé (read online)', 'resume.html', 'link'], ['View CV (PDF)', 'assets/Muhammad-Alif-Najmi-CV.pdf', 'link'], ['GitHub', 'https://github.com/7YMERA', 'link'], ['LinkedIn', 'https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin', 'link'], ['Halcyon: globe and particle lab', '#halcyon', 'section'], ['Open Halcyon (full descent)', 'https://halcyon-xmr.vercel.app/', 'live'], ['Play a game (the arcade)', '#arcade', 'section'], ['Keyboard shortcuts', '#do-keys', 'action'], ['Switch light or dark', '#do-theme', 'action'], ['Share this site', '#do-share', 'action'], ['Ride the hidden train', '#do-train', 'action'], ['Kracked Devs', 'https://krackeddevs.com/profile/alifnajmx', 'link'], ['Credly badges', 'https://www.credly.com/users/muhammad-alif-najmi-md-hisamudin', 'link']
   ];
   var qj = document.getElementById('qj'), qi = document.getElementById('qj-input'), ql = document.getElementById('qj-list'), sel = 0, last = null;
   function render() {
@@ -1081,16 +1129,18 @@
   });
 })();
 </script>
-<script src="assets/curved-reel.js?v=20261120e" defer></script>
-<script src="assets/folders.js?v=20261120e" defer></script>
-<script src="assets/coverflow.js?v=20261120e" defer></script>
-<script src="assets/extras.js?v=20261120e" defer></script>
-<script src="assets/glance.js?v=20261120e" defer></script>
-<script src="assets/delight.js?v=20261120e" defer></script>
-<script src="assets/arcade.js?v=20261120e" defer></script>
-<script src="assets/pulse.js?v=20261120e" defer></script>
+<script src="assets/curved-reel.js?v=20261120h" defer></script>
+<script src="assets/folders.js?v=20261120h" defer></script>
+<script src="assets/coverflow.js?v=20261120h" defer></script>
+<script src="assets/extras.js?v=20261120h" defer></script>
+<script src="assets/glance.js?v=20261120h" defer></script>
+<script src="assets/delight.js?v=20261120h" defer></script>
+<script src="assets/arcade.js?v=20261120h" defer></script>
+<script src="assets/halcyon.js?v=20261120h" defer></script>
+<script src="assets/fx.js?v=20261120h" defer></script>
+<script src="assets/pulse.js?v=20261120h" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous" defer></script>
-<script src="assets/scene-glsl.js?v=20261120e" defer></script>
-<script src="assets/scene.js?v=20261120e" defer></script>
+<script src="assets/scene-glsl.js?v=20261120h" defer></script>
+<script src="assets/scene.js?v=20261120h" defer></script>
 </body>
 </html>

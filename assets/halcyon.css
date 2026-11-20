@@ -1,0 +1,21 @@
+/* halcyon.css: the Orbit globe and the Particle lab (#halcyon). Reuses the arcade's tabs and panels. The stage is always a night sky, in both themes. */
+html.brief #halcyon { display: none !important; }
+.hx-stage { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: #06132b; }
+.hx-stage canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+@media (max-width: 700px) { .hx-stage canvas { aspect-ratio: 1 / 1; } }
+.hx-probe { position: absolute; left: 0; top: 0; pointer-events: none; padding: 4px 10px; border-radius: 8px; background: rgba(6, 19, 43, .92); border: 1px solid rgba(106, 168, 255, .5); color: #eaf1ff; font: 600 .8125rem var(--f-mono); white-space: nowrap; }
+.hx-probe[hidden] { display: none; }
+.hx-name { position: absolute; left: 14px; bottom: 12px; margin: 0; color: #eaf1ff; font: 600 .8125rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; text-shadow: 0 0 12px #06132b; }
+.hx-bar { display: flex; flex-wrap: wrap; gap: 10px; }
+.hx-bar .arc-sound { margin-inline-start: 0; }
+.hx-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.hx-chip { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 600 .875rem var(--f-body); cursor: pointer; transition: border-color .2s, transform .2s; }
+.hx-chip:hover { border-color: var(--accent); transform: translateY(-1px); }
+.hx-chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.hx-chip:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.hx-read { margin: 0; color: var(--muted); font-size: .9375rem; min-height: 2.8em; }
+.hx-credit { margin: 0; color: var(--muted); font: 500 .75rem var(--f-mono); }
+.hx-credit a { color: inherit; }
+.hx-out { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+@media (prefers-reduced-motion: reduce) { .hx-chip { transition: none; } }
+html.hx-view .to-top { display: none; }
