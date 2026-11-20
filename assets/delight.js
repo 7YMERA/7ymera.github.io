@@ -11,7 +11,7 @@
   }
 
   /* ---- sections: which one am I in, and where do j / k go ---- */
-  var SECS = [['me', 'Me'], ['notes', 'Notes'], ['studied', 'What UTP put me through'], ['toolkit', 'Skills'], ['work', 'Work'], ['pulse', 'Pulse'], ['journey', 'Journey'], ['enter', 'Fly over KL'], ['contact', 'Contact']];
+  var SECS = [['me', 'Me'], ['notes', 'Notes'], ['studied', 'What UTP put me through'], ['toolkit', 'Skills'], ['work', 'Work'], ['pulse', 'Pulse'], ['journey', 'Journey'], ['arcade', 'Arcade'], ['enter', 'Fly over KL'], ['contact', 'Contact']];
   function live() { return SECS.map(function (s) { return [d.getElementById(s[0]), s[1]]; }).filter(function (s) { return s[0] && s[0].offsetHeight > 0; }); }
   function current() {
     var list = live(), y = innerHeight * .4, at = -1;

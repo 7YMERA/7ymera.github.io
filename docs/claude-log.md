@@ -30,6 +30,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-20 · The arcade (three games after the Journey)
+- Owner asked for a game section. `#arcade` sits between Journey and the flight: Last Train (canvas runner, colours read from the page tokens so both themes work), Scope Creep (28 cards, each with a one-line why), Spec Match (8 tool/project pairs from the site). `assets/arcade.js`, `arcade.css`; chip in *This is me*, Ctrl+K entry, `j`/`k` stop, Highlights mode hides it. `scene.js`: a hold key for `arcade` in `DIR`, and `html.arc-on` (set while a game runs) drops the city to about 8 fps and stops the idle-drift speed test counting those slow frames. Key `20261120e`.
+- Tested with a bot (survived 25 s, score 1850), a full Scope Creep round, and a full Spec Match (8 moves), at 1300 and 390 px, light and dark, WebGL switched off in the test browser because software 3D ran at about 1 fps. Not tried on a real phone: check the runner's frame rate beside the live city.
+- Ideas left: a global high-score board would need a backend (not added), a fourth game, gamepad support.
+
 ## 2026-11-20 · Quality-of-life layer (owner asked for fun, clarity, interaction)
 - New `assets/delight.js` + `delight.css`, linked from `index.html` (css also on `resume.html` for print). Shortcuts sheet (`?`), `j`/`k`, `t`, `/`; tab title follows the section; KL clock + Share chip in Contact (`#kl-clock`, `#share-site`); labelled Back to top; print rules; hidden train (5 clicks on the name, or Ctrl+K). Quick-jump entries use `#do-...` hrefs that delight.js intercepts. Key `20261120b`.
 - Checked at 1300 and 390 px in software-rendered Chromium: no errors, no sideways scroll. Not tried on a real phone. The existing Highlights mode already covers a recruiter brief, so none was added.

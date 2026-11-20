@@ -504,7 +504,8 @@
     ['pulse',.5,-.5,P(-95,-91,235,280,100,100,0,0,700)],
     ['journey',.1,-.5,P(EXC[0],EXC[1],300,78,8,76,-.22)], // Journey: The Exchange 106, climbing as the years go by
     ['journey',.3,-.5,P(EXC[0],EXC[1],335,118,96,122,-.22)],
-    ['journey',.62,0,P(-25,9,60,360,190,70,0,0,900)],                 // pull right back (zoom out) ...
+    ['journey',.62,0,P(-25,9,60,360,190,70,0,0,900)],
+    ['arcade',.5,-.5,P(-25,9,60,360,190,70,0,0,900)],                 // hold the pulled-back view while the arcade is on screen                 // pull right back (zoom out) ...
     ['enter',0,-1,END]                                         // ... then in to where the flight starts (zoom in)                                     // the flight starts here
   ];
   var KEYS=[],lastLay=-1;
@@ -840,10 +841,10 @@
     var dOn=!reduce&&!flying&&!driftOff&&!document.hidden&&!root.classList.contains('brief')&&time-lastUser>900;
     idleK+=((dOn?1:0)-idleK)*Math.min(1,dt*(dOn?.8:4));
     if(idleK<.002)idleK=0;
-    var iv=idleK>0?33:66;
+    var arcOn=root.classList.contains('arc-on'),iv=arcOn?125:idleK>0?33:66; // arc-on: a game in the arcade is running, so the city steps back to ~8 fps and leaves the frame budget to the game
     var moving=Math.abs(tr-cr)>(flying?.00002:.0003);for(var j2=0;j2<8;j2++)if(Math.abs(tgtPose[j2]-curPose[j2])>.02){moving=true;break}
     // While the reader is only reading, redraw at about 15 fps (the beams and pulses still drift); while scrolling, every frame.
-    if(moving||need||(!reduce&&time-lastR>iv)){if(idleK>0&&!moving&&lastR>0){dIv+=time-lastR;if(++dN>=90){if(dIv/dN>48)driftOff=true;dIv=0;dN=0}}place(reduce?0:time);renderer.render(scene,cam);need=false;lastR=time;if(!shown){shown=true;root.classList.add('gl-on')}}
+    if(moving||need||(!reduce&&time-lastR>iv)){if(idleK>0&&!moving&&lastR>0&&!arcOn){dIv+=time-lastR;if(++dN>=90){if(dIv/dN>48)driftOff=true;dIv=0;dN=0}}place(reduce?0:time);renderer.render(scene,cam);need=false;lastR=time;if(!shown){shown=true;root.classList.add('gl-on')}}
     raf=run?requestAnimationFrame(frame):0}
   var lastUser=0,driftAcc=0,idleK=0,driftOff=false,dIv=0,dN=0;
   ['wheel','touchstart','touchmove','keydown','pointerdown'].forEach(function(n){addEventListener(n,function(){lastUser=performance.now();driftAcc=0},{passive:true})});

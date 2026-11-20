@@ -32,9 +32,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600&display=swap"></noscript>
-<link rel="stylesheet" href="assets/site.css?v=20261120b">
-<link rel="stylesheet" href="assets/scene.css?v=20261120b">
-<link rel="stylesheet" href="assets/delight.css?v=20261120b">
+<link rel="stylesheet" href="assets/site.css?v=20261120e">
+<link rel="stylesheet" href="assets/scene.css?v=20261120e">
+<link rel="stylesheet" href="assets/delight.css?v=20261120e">
+<link rel="stylesheet" href="assets/arcade.css?v=20261120e">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Person", "name": "Muhammad Alif Najmi", "alternateName": "Alif Najmi", "url": "https://7ymera.github.io/", "jobTitle": "Business Analyst", "worksFor": {"@type": "Organization", "name": "axrail.ai"}, "alumniOf": {"@type": "CollegeOrUniversity", "name": "Universiti Teknologi PETRONAS"}, "address": {"@type": "PostalAddress", "addressLocality": "Kuala Lumpur", "addressCountry": "MY"}, "sameAs": ["https://github.com/7YMERA", "https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin", "https://krackeddevs.com/profile/alifnajmx", "https://www.credly.com/users/muhammad-alif-najmi-md-hisamudin"], "image": "https://7ymera.github.io/assets/og-skyline-3.jpg"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "Alif Najmi", "url": "https://7ymera.github.io/"}</script>
 </head>
@@ -231,6 +232,9 @@
             <a class="chip" href="https://www.credly.com/users/muhammad-alif-najmi-md-hisamudin" target="_blank" rel="noopener">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 18.7l1-1"/></svg>
               Credly</a>
+            <a class="chip" href="#arcade">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10v5M4.5 12.5h5"/><circle cx="16" cy="11.5" r=".6"/><circle cx="18.5" cy="14" r=".6"/></svg>
+              Play a game</a>
             <button class="chip" type="button" data-copy="alifnajmx@gmail.com">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
               alifnajmx@gmail.com <span class="sub">copy</span></button>
@@ -769,6 +773,57 @@
     </div>
   </section>
 
+  <section class="block" id="arcade">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="eyebrow">Arcade</span>
+          <h2>You read this far. Want a quick game?</h2>
+          <p>Three small games built from my day job. Best scores stay on this device.</p>
+        </div>
+      </div>
+      <div class="arc-wrap">
+        <div class="arc-tabs" role="tablist" aria-label="Choose a game">
+          <button class="arc-tab" role="tab" type="button" data-game="train" aria-selected="true" id="tab-train" aria-controls="pan-train">Last Train<small>best <span id="arc-best-train">-</span></small></button>
+          <button class="arc-tab" role="tab" type="button" data-game="creep" aria-selected="false" tabindex="-1" id="tab-creep" aria-controls="pan-creep">Scope Creep<small>best <span id="arc-best-creep">-</span></small></button>
+          <button class="arc-tab" role="tab" type="button" data-game="match" aria-selected="false" tabindex="-1" id="tab-match" aria-controls="pan-match">Spec Match<small>best <span id="arc-best-match">-</span></small></button>
+          <button class="arc-sound" id="arc-sound" type="button" aria-pressed="false">Sound <b>Off</b></button>
+        </div>
+
+        <div class="arc-panel" role="tabpanel" data-game="train" id="pan-train" aria-labelledby="tab-train">
+          <div class="arc-top"><div><h3>Last Train</h3><p>Ride the KL line. Jump the scope creep, grab the requirements.</p></div><p class="arc-hint">Space, up arrow or tap to jump · P to pause</p></div>
+          <div class="arc-stage">
+            <canvas id="arc-canvas" width="720" height="270" role="img" aria-label="A train running along a rail past the Kuala Lumpur skyline"></canvas>
+            <div class="arc-over" id="arc-over"><h4 id="arc-over-title">Last Train</h4><p id="arc-over-text">Jump the striped scope-creep blocks and grab the gold requirements.</p><button class="arc-btn" id="arc-go" type="button">Start</button></div>
+          </div>
+          <div class="arc-pad"><button class="arc-btn arc-jump" id="arc-jump" type="button">Jump</button></div>
+          <p class="sr-only" id="arc-live" role="status" aria-live="polite"></p>
+        </div>
+
+        <div class="arc-panel" role="tabpanel" data-game="creep" id="pan-creep" aria-labelledby="tab-creep" hidden>
+          <div class="arc-top"><div><h3>Scope Creep</h3><p>45 seconds. Is it a real requirement, or scope creep? Build it, or park it.</p></div>
+            <div class="arc-stats"><div class="arc-stat"><small>Score</small><b id="sc-score">0</b></div><div class="arc-stat"><small>Streak</small><b id="sc-streak">-</b></div><div class="arc-stat"><small>Time</small><b id="sc-time">45s</b></div></div></div>
+          <div class="sc-bar" aria-hidden="true"><i id="sc-bar"></i></div>
+          <div class="sc-play">
+            <div class="sc-card" id="sc-card" aria-live="polite">Press Start</div>
+            <p class="sc-why" id="sc-why">Build it (a real requirement) or Park it (scope creep).</p>
+            <div class="sc-btns"><button class="arc-btn alt" id="sc-no" type="button" disabled>Park it<small>Left arrow · A</small></button><button class="arc-btn" id="sc-yes" type="button" disabled>Build it<small>Right arrow · D</small></button></div>
+            <div class="arc-over" id="sc-over"><h4 id="sc-over-title">Scope Creep</h4><p id="sc-over-text">Right answers build a streak. Wrong ones cost you time.</p><button class="arc-btn" id="sc-start" type="button">Start</button></div>
+          </div>
+          <p class="sr-only" id="sc-live" role="status" aria-live="polite"></p>
+        </div>
+
+        <div class="arc-panel" role="tabpanel" data-game="match" id="pan-match" aria-labelledby="tab-match" hidden>
+          <div class="arc-top"><div><h3>Spec Match</h3><p>Pair each tool with the project it went into. Fewest moves wins.</p></div>
+            <div class="arc-stats"><div class="arc-stat"><small>Moves</small><b id="mt-moves">0</b></div><div class="arc-stat"><small>Pairs</small><b id="mt-pairs">0 / 8</b></div></div></div>
+          <div class="mt-grid" id="mt-grid"></div>
+          <p class="mt-msg" id="mt-msg" role="status" aria-live="polite"></p>
+          <div><button class="arc-btn" id="mt-again" type="button" hidden>Play again</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="enter" id="enter" aria-label="Scroll to fly through Kuala Lumpur">
   <div class="enter-sticky">
     <div class="hud" id="hud" aria-hidden="true">
@@ -987,7 +1042,7 @@
     ['MyLokalEvent v2', '#p-mle', 'project'], ['KakiLima', '#p-kakilima', 'project'], ['EagleSan Sandbox (Roblox)', '#p-roblox', 'project'], ['JumaatFinder', '#p-jumaat', 'project'], ['IT Asset Disposal (SLB)', '#p-slb', 'project'],
     ['Try TaskMatch demo', 'https://taskmatch-umber.vercel.app', 'live'], ['Visit MyLokalEvent', 'https://mylokalevent.vercel.app', 'live'], ['Visit KakiLima', 'https://kakilima-iota.vercel.app', 'live'],
     ['All notes', 'notes/', 'note'], ['Note: Nine charts before one screen (SLB data model)', 'notes/slb-design.html', 'note'], ['Note: A dashboard 150 teachers actually open', 'notes/smk-dashboard.html', 'note'], ['Note: From coursework to something people could trust', 'notes/mylokalevent-v2.html', 'note'], ['Note: Accessible first, in four languages', 'notes/kakilima.html', 'note'], ['Note: Where can I solat Jumaat from here?', 'notes/jumaatfinder.html', 'note'], ['Note: One VPC, two departments, $56 (AWS coursework)', 'notes/aws-two-departments.html', 'note'], ['Note: A whole company in 49 tables (SQL playground)', 'notes/database.html', 'note'], ['Note: Jom Al-Quran, 56 tables (SQL playground)', 'notes/jom-al-quran.html', 'note'], ['Note: Rebuilding my FYP properly', 'notes/taskmatch-v2.html', 'note'], ['Note: From reply-all to Power Apps', 'notes/slb-power-apps.html', 'note'], ['Note: Four years, one walk across the stage', 'notes/convocation-2026.html', 'note'], ['Journey', '#journey', 'section'], ['Skill tree', '#toolkit', 'section'], ['Notes', '#notes', 'section'], ['Why I do this', '#why', 'section'], ['What I studied at UTP', '#studied', 'section'], ['Contact', '#contact', 'section'],
-    ['Click through the IT Asset Disposal app', 'notes/slb-screens.html', 'live'], ['IT Asset Disposal source', 'https://github.com/7YMERA/it-asset-disposal-app-v1', 'link'], ['Résumé (read online)', 'resume.html', 'link'], ['View CV (PDF)', 'assets/Muhammad-Alif-Najmi-CV.pdf', 'link'], ['GitHub', 'https://github.com/7YMERA', 'link'], ['LinkedIn', 'https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin', 'link'], ['Keyboard shortcuts', '#do-keys', 'action'], ['Switch light or dark', '#do-theme', 'action'], ['Share this site', '#do-share', 'action'], ['Ride the hidden train', '#do-train', 'action'], ['Kracked Devs', 'https://krackeddevs.com/profile/alifnajmx', 'link'], ['Credly badges', 'https://www.credly.com/users/muhammad-alif-najmi-md-hisamudin', 'link']
+    ['Click through the IT Asset Disposal app', 'notes/slb-screens.html', 'live'], ['IT Asset Disposal source', 'https://github.com/7YMERA/it-asset-disposal-app-v1', 'link'], ['Résumé (read online)', 'resume.html', 'link'], ['View CV (PDF)', 'assets/Muhammad-Alif-Najmi-CV.pdf', 'link'], ['GitHub', 'https://github.com/7YMERA', 'link'], ['LinkedIn', 'https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin', 'link'], ['Play a game (the arcade)', '#arcade', 'section'], ['Keyboard shortcuts', '#do-keys', 'action'], ['Switch light or dark', '#do-theme', 'action'], ['Share this site', '#do-share', 'action'], ['Ride the hidden train', '#do-train', 'action'], ['Kracked Devs', 'https://krackeddevs.com/profile/alifnajmx', 'link'], ['Credly badges', 'https://www.credly.com/users/muhammad-alif-najmi-md-hisamudin', 'link']
   ];
   var qj = document.getElementById('qj'), qi = document.getElementById('qj-input'), ql = document.getElementById('qj-list'), sel = 0, last = null;
   function render() {
@@ -1026,15 +1081,16 @@
   });
 })();
 </script>
-<script src="assets/curved-reel.js?v=20261120b" defer></script>
-<script src="assets/folders.js?v=20261120b" defer></script>
-<script src="assets/coverflow.js?v=20261120b" defer></script>
-<script src="assets/extras.js?v=20261120b" defer></script>
-<script src="assets/glance.js?v=20261120b" defer></script>
-<script src="assets/delight.js?v=20261120b" defer></script>
-<script src="assets/pulse.js?v=20261120b" defer></script>
+<script src="assets/curved-reel.js?v=20261120e" defer></script>
+<script src="assets/folders.js?v=20261120e" defer></script>
+<script src="assets/coverflow.js?v=20261120e" defer></script>
+<script src="assets/extras.js?v=20261120e" defer></script>
+<script src="assets/glance.js?v=20261120e" defer></script>
+<script src="assets/delight.js?v=20261120e" defer></script>
+<script src="assets/arcade.js?v=20261120e" defer></script>
+<script src="assets/pulse.js?v=20261120e" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous" defer></script>
-<script src="assets/scene-glsl.js?v=20261120b" defer></script>
-<script src="assets/scene.js?v=20261120b" defer></script>
+<script src="assets/scene-glsl.js?v=20261120e" defer></script>
+<script src="assets/scene.js?v=20261120e" defer></script>
 </body>
 </html>
