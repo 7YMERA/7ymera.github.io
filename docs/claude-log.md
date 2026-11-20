@@ -30,6 +30,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-20 · Quality-of-life layer (owner asked for fun, clarity, interaction)
+- New `assets/delight.js` + `delight.css`, linked from `index.html` (css also on `resume.html` for print). Shortcuts sheet (`?`), `j`/`k`, `t`, `/`; tab title follows the section; KL clock + Share chip in Contact (`#kl-clock`, `#share-site`); labelled Back to top; print rules; hidden train (5 clicks on the name, or Ctrl+K). Quick-jump entries use `#do-...` hrefs that delight.js intercepts. Key `20261120b`.
+- Checked at 1300 and 390 px in software-rendered Chromium: no errors, no sideways scroll. Not tried on a real phone. The existing Highlights mode already covers a recruiter brief, so none was added.
+- Ideas not done: calm-motion toggle, per-note reading progress already exists, accent themes (scene colour rules).
+
 ## 2026-11-19 · Kracked Devs and Credly links
 - Added both profiles as chips in "This is me" and the contact section, to the JSON-LD `sameAs` and to the command palette. Credly uses the public profile URL (https://www.credly.com/users/muhammad-alif-najmi-md-hisamudin), not the private `/edit/badges/credly` page the owner pasted. Did not open either profile (no fetch access), so the Kracked Devs link is untested.
 

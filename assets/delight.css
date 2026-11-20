@@ -1,0 +1,37 @@
+/* delight.css: shortcuts sheet, back to top, Kuala Lumpur clock, the hidden train, print. Only transform and opacity animate. */
+.to-top { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: max(16px, env(safe-area-inset-bottom, 0px)); z-index: 29; display: inline-flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 16px 0 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 600 .875rem var(--f-body); cursor: pointer; box-shadow: 0 8px 24px rgba(0, 0, 0, .18); opacity: 0; transform: translateY(14px); visibility: hidden; transition: opacity .25s, transform .25s, visibility 0s .25s; }
+.to-top.on { opacity: 1; transform: none; visibility: visible; transition: opacity .25s, transform .25s; }
+.to-top svg { width: 20px; height: 20px; }
+.to-top:hover { border-color: var(--accent); }
+@media (max-width: 760px) { .to-top { bottom: calc(92px + env(safe-area-inset-bottom, 0px)); } }
+html.brief .to-top { display: none; }
+
+.kbd-sheet { position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 16px; background: color-mix(in srgb, var(--ink) 50%, transparent); }
+.kbd-sheet[hidden] { display: none !important; }
+.kbd-box { width: 100%; max-width: 440px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 16px; padding: 24px; box-shadow: 0 24px 70px rgba(0, 0, 0, .35); }
+.kbd-box h2 { font-size: 1.25rem; margin: 0 0 14px; }
+.kbd-box ul { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 4px; }
+.kbd-box li { display: flex; justify-content: space-between; gap: 16px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: .9375rem; }
+.kbd-keys { display: inline-flex; gap: 6px; align-items: center; flex: none; }
+.kbd-keys em { font-style: normal; color: var(--ink-2, var(--ink)); opacity: .6; font-size: .8125rem; }
+.kbd-box kbd { font: 600 .8125rem var(--f-mono); min-width: 28px; text-align: center; padding: 4px 8px; border-radius: 7px; border: 1px solid var(--line); background: var(--bg); box-shadow: 0 2px 0 var(--line); }
+.kbd-close { width: 100%; min-height: 48px; border-radius: 12px; border: 0; background: var(--accent); color: var(--accent-ink); font: 700 1rem var(--f-body); cursor: pointer; }
+.kbd-close:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+.kl-clock { display: flex; align-items: center; gap: 10px; font: 500 .875rem var(--f-mono); }
+.kl-clock:empty { display: none; }
+.kl-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.kl-dot.day { background: var(--gold); box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 25%, transparent); }
+.kl-dot.night { background: #8aa4e8; box-shadow: 0 0 0 4px color-mix(in srgb, #8aa4e8 25%, transparent); }
+
+.hidden-train { position: fixed; left: 0; bottom: 22px; z-index: 28; pointer-events: none; color: var(--accent); filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .25)); transform: translate3d(-380px, 0, 0); animation: train-run 5.6s cubic-bezier(.45, 0, .55, 1) forwards; }
+@keyframes train-run { to { transform: translate3d(calc(100vw + 20px), 0, 0); } }
+@media (prefers-reduced-motion: reduce) { .hidden-train { animation: none; transform: translate3d(16px, 0, 0); } }
+
+@media print {
+  canvas, .top, .dock, .dock-show, .to-top, .kbd-sheet, .qj, .hud, .brief-chip, .hidden-train, .cv-actions { display: none !important; }
+  html, body { background: #fff !important; color: #000 !important; }
+  a { color: #000; text-decoration: none; }
+  .cv-job, .cv-body li { break-inside: avoid; }
+}
+.contact .foot { padding-inline-end: 92px; }

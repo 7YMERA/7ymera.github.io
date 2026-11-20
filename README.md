@@ -37,7 +37,7 @@ The REQ-001 card and the teal-and-gold palette survived. (The "I write the spec.
 
 ## Version history
 
-**Current version: 2.14.** Numbering: the first number changes when the site changes character (1.0 was a static page, 2.0 became the 3D city). The second number goes up for a major overhaul or a notable new feature. Small fixes and tweaks do not get a number; they live in [`docs/claude-log.md`](docs/claude-log.md). Dates come from the work log. Commit ids are on `main`: `git show <id>`.
+**Current version: 2.15.** Numbering: the first number changes when the site changes character (1.0 was a static page, 2.0 became the 3D city). The second number goes up for a major overhaul or a notable new feature. Small fixes and tweaks do not get a number; they live in [`docs/claude-log.md`](docs/claude-log.md). Dates come from the work log. Commit ids are on `main`: `git show <id>`.
 
 | Version | Date | What changed | Commit |
 |---|---|---|---|
@@ -64,6 +64,7 @@ The REQ-001 card and the teal-and-gold palette survived. (The "I write the spec.
 | **2.12** | 12 Nov | **The owner's notes pass.** The opening is longer, held and eased, and its first screen is the bare city with only a chevron cue (no top bar until you scroll). Each landmark is relit at night from photos: Petronas with real windows up to its crowns, Menara KL white with a lamp-ringed pod, Merdeka 118 in thin floor lines with a white crown and spire, The Exchange 106 with office blocks and a violet lattice crown. Light mode is one blue in three steps. The moon is locked in place, a *Fly it again in dark mode* button sits over the finale, the flight banks less and frames Merdeka against the skyline. | `d8cc850` to `319a6cd` |
 | **2.13** | 13 Nov | **Two routes.** After *This is me* the page offers the full story (keep scrolling) or just the highlights (work, journey, contact). The first screen carries only the handle `/7ymera`, lit like a sign, and a pixel arrow; the golden hour and the barrel roll removed (the first for phone frame rate); a new share image of the skyline with no photo; the shaders moved to their own file; an accessibility pass; the UTP subjects checked against the transcript. | see log |
 | **2.14** | 14 Nov | **KL trains with stations.** Six named stops on the rails (KLCC, Bukit Nanas, Merdeka, TRX, Suria KLCC, Ampang Park); trains with rounded-nose cabs, head and tail lights that ease into each station, wait and pull out; three trains on the sky line. Merdeka Maybank is centred behind the skill tree from its first screen. | `b186c9e` |
+| **2.15** | 20 Nov | A small quality-of-life layer (`delight.js`, `delight.css`): keyboard shortcuts (`?` sheet, `j`/`k` sections, `t` theme, `/` quick jump), the tab title follows the section, a live Kuala Lumpur clock and Share button in Contact, a labelled Back to top button, print rules, and one hidden train. | (this commit) |
 
 Tried and dropped along the way (still in git history): a clothes-rail project gallery (`5c68a02`), a ring and then a conveyor of floating screens, a Masjid Negara you could fly into, and a 5 second phone loading screen. The longer story of the 3D city is in *The 3D city and the flight* below.
 
@@ -202,6 +203,8 @@ Every interactive piece below started as a React + Tailwind component on [21st.d
 - **Marquee:** the scrolling tool names above the skill tree.
 
 ### Our own pieces (not from 21st.dev)
+
+- **Quality-of-life layer** (`delight.js` + `delight.css`): `?` shortcuts sheet, `j`/`k` section stepping, `t` theme, `/` quick jump; tab title follows the section and nudges when hidden; Kuala Lumpur clock and Share button in Contact; labelled Back to top; print rules; click the name five times (or use Ctrl+K, "hidden train") for a train.
 
 - **The opening:** a sticky stage whose progress drives the photo columns, name, reel and headline in three acts, all with `transform` and `opacity`.
 - **Spec / built columns** beside the photos.
