@@ -1,0 +1,40 @@
+/* cosmos.css: the sky layer, the telemetry rails, the viewfinder corners, and a small orbit motif on section heads. transform and opacity only. */
+#cosmos { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+html.flying #cosmos, html.brief #cosmos { opacity: 0; }
+
+.tele { position: fixed; inset: 0; z-index: 3; pointer-events: none; display: none; font-family: var(--f-mono); color: var(--ink); }
+@media (min-width: 900px) { .tele { display: block; } }
+html.flying .tele, html.brief .tele { display: none; }
+.vf { position: absolute; width: 18px; height: 18px; border: 0 solid var(--ink); opacity: .32; }
+.vf.tl { top: 74px; left: 14px; border-top-width: 1.5px; border-left-width: 1.5px; }
+.vf.tr { top: 74px; right: 14px; border-top-width: 1.5px; border-right-width: 1.5px; }
+.vf.bl { bottom: 14px; left: 14px; border-bottom-width: 1.5px; border-left-width: 1.5px; }
+.vf.br { bottom: 14px; right: 14px; border-bottom-width: 1.5px; border-right-width: 1.5px; }
+
+.tele-l, .tele-r { display: none; }
+@media (min-width: 1320px) {
+  .tele-l { display: block; position: absolute; left: 26px; bottom: 50px; margin: 0; writing-mode: vertical-rl; transform: rotate(180deg); font-size: .6875rem; letter-spacing: .16em; white-space: pre; opacity: .6; text-shadow: 0 0 10px var(--bg), 0 0 4px var(--bg); }
+  .tele-r { display: block; position: absolute; right: 26px; top: 50%; height: 46vh; width: 0; transform: translateY(-50%); pointer-events: none; }
+}
+.tele-line { position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: var(--ink); opacity: .28; }
+.tele-r ol { list-style: none; margin: 0; padding: 0; }
+.tele-r li { position: absolute; left: 0; top: 0; }
+.tele-r li[hidden] { display: none; }
+.tele-r a { position: absolute; right: -14px; top: -14px; display: flex; align-items: center; justify-content: flex-end; gap: 10px; width: 120px; height: 28px; pointer-events: auto; text-decoration: none; color: inherit; }
+.tele-r a i { order: 2; width: 7px; height: 7px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--ink); flex: none; margin-right: 10px; opacity: .7; transition: transform .2s, background .2s; }
+.tele-r a span { order: 1; font-size: .625rem; letter-spacing: .14em; opacity: 0; transform: translateX(6px); transition: opacity .2s, transform .2s; text-shadow: 0 0 8px var(--bg), 0 0 3px var(--bg); }
+.tele-r li.on a span, .tele-r a:hover span, .tele-r a:focus-visible span { opacity: .85; transform: none; }
+.tele-r li.on a i { background: var(--gold); border-color: var(--gold); transform: scale(1.3); opacity: 1; }
+.tele-r a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 6px; }
+.tele-dot { position: absolute; left: -4px; top: -4px; width: 9px; height: 9px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 28%, transparent), 0 0 14px var(--gold); will-change: transform; }
+.tele-alt { position: absolute; right: -6px; top: 12px; text-align: right; font-size: .625rem; letter-spacing: .1em; opacity: .75; white-space: nowrap; will-change: transform; text-shadow: 0 0 8px var(--bg), 0 0 3px var(--bg); }
+
+/* an orbit with a moon-sized dot, turning slowly behind each section heading */
+@media (min-width: 900px) {
+  .sec-head { position: relative; }
+  .sec-head::after { content: ""; position: absolute; right: -10px; top: -46px; width: 220px; height: 220px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent); background: radial-gradient(circle at 50% 0, var(--gold) 0 3.5px, transparent 4.5px); pointer-events: none; opacity: .65; transform: rotateX(68deg) rotateZ(0deg); animation: orbit-spin 46s linear infinite; z-index: -1; }
+}
+@keyframes orbit-spin { to { transform: rotateX(68deg) rotateZ(360deg); } }
+@media (prefers-reduced-motion: reduce) { .sec-head::after { animation: none; } }
+html.brief .sec-head::after { display: none; }
+@media print { #cosmos, .tele, .sec-head::after { display: none !important; } }

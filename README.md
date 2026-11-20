@@ -37,7 +37,7 @@ The REQ-001 card and the teal-and-gold palette survived. (The "I write the spec.
 
 ## Version history
 
-**Current version: 2.18.** Numbering: the first number changes when the site changes character (1.0 was a static page, 2.0 became the 3D city). The second number goes up for a major overhaul or a notable new feature. Small fixes and tweaks do not get a number; they live in [`docs/claude-log.md`](docs/claude-log.md). Dates come from the work log. Commit ids are on `main`: `git show <id>`.
+**Current version: 2.19.** Numbering: the first number changes when the site changes character (1.0 was a static page, 2.0 became the 3D city). The second number goes up for a major overhaul or a notable new feature. Small fixes and tweaks do not get a number; they live in [`docs/claude-log.md`](docs/claude-log.md). Dates come from the work log. Commit ids are on `main`: `git show <id>`.
 
 | Version | Date | What changed | Commit |
 |---|---|---|---|
@@ -68,6 +68,7 @@ The REQ-001 card and the teal-and-gold palette survived. (The "I write the spec.
 | **2.16** | 20 Nov | **The arcade.** A new section after the Journey (`#arcade`, `arcade.js`, `arcade.css`) with three games built from the day job: *Last Train* (a one-button runner along the KL rail), *Scope Creep* (45-second triage: build it or park it) and *Spec Match* (pair each tool with the project it went into). Best scores saved on the device, optional sound, phone-friendly big buttons. | (this commit) |
 | **2.17** | 20 Nov | **From Halcyon.** Ideas and data brought over from my separate Halcyon project (a scroll descent from orbit to KL): a new `#halcyon` section with an *Orbit* globe (real country outlines as dots, arcs from KL, NASA satellite rings, an arc from where you are, guessed from your time zone only) and a *Particle lab* (dust that morphs between a Chladni plate, the Earth and the real KL landmark models, with an Explode slider); plus a trailing cursor ring, scrambling labels and faint rules (`fx.js`). | (this commit) |
 | **2.18** | 20 Nov | **The Mirage study.** Techniques from my scan of the Mirage reference, applied from scratch: site-wide synthesised sound with a four-bar audio meter in the header (`sfx.js`: scroll-driven drone, section chimes, decode tones), a ring ripple on every press and a gold pulse from the theme switch, headings that arrive with a brief colour split, bracket-corner buttons, `+` labels and blinking `_` captions, and in the Halcyon section a lens flare with chromatic spread, a cursor-proximity scan lens, a plexus network around a satellite and a full Plexus form in the lab. | (this commit) |
+| **2.19** | 20 Nov | **A city seen from orbit.** The sound is now a generative score (`sfx.js`): a gliding pad, shimmer and bell pings through a long reverb for space, and as you scroll down a sub bass, traffic hum, a plucked arpeggio and trains passing with a station chime for the city; night plays Am9 / Fmaj7#11 / Cmaj9 / G6/9, day a brighter set. Space becomes the page's second backdrop (`cosmos.js`): parallax stars, haze, comets and an orbit arc with satellites over the 3D sky, a telemetry readout (altitude falling from 408 km), a clickable descent rail of the sections, viewfinder corners, and a slowly turning orbit behind every section heading. | (this commit) |
 
 Tried and dropped along the way (still in git history): a clothes-rail project gallery (`5c68a02`), a ring and then a conveyor of floating screens, a Masjid Negara you could fly into, and a 5 second phone loading screen. The longer story of the 3D city is in *The 3D city and the flight* below.
 
@@ -209,7 +210,8 @@ Every interactive piece below started as a React + Tailwind component on [21st.d
 
 ### Our own pieces (not from 21st.dev)
 
-- **Sound** (`sfx.js`): all synthesised (no audio files), off until the header meter button is pressed. `window.__sfx` has `beep`, `tick`, `glyph`, `lock`, `done`, `chime`; the arcade's Sound button drives the same switch. **fx.js** also does the click ripples, the theme pulse and the chromatic headings.
+- **Cosmos** (`cosmos.js`, `cosmos.css`): sky layer on `#cosmos` (z-index -1, after `#gl`), telemetry `#tele` (left readout and right rail at 1320 px+, corner brackets at 900 px+), hidden in the flight and Highlights mode.
+- **Sound** (`sfx.js`): a generative score, all synthesised (no audio files), off until the header meter button is pressed. Layers: pad, sub, shimmer, bells (space) and hum, arpeggio, trains, chimes (city, mixed in by scroll depth). `window.__sfx` has `beep`, `tick`, `glyph`, `lock`, `done`, `chime`; the arcade's Sound button drives the same switch. **fx.js** also does the click ripples, the theme pulse and the chromatic headings.
 - **Quality-of-life layer** (`delight.js` + `delight.css`): `?` shortcuts sheet, `j`/`k` section stepping, `t` theme, `/` quick jump; tab title follows the section and nudges when hidden; Kuala Lumpur clock and Share button in Contact; labelled Back to top; print rules; click the name five times (or use Ctrl+K, "hidden train") for a train.
 
 - **The opening:** a sticky stage whose progress drives the photo columns, name, reel and headline in three acts, all with `transform` and `opacity`.
