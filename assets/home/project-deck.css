@@ -9,7 +9,7 @@
 }
 .pd-card:first-child { transform: none; }
 .pd-face { position: relative; overflow: hidden; border-radius: 24px; background: var(--hg, #e7eef7); box-shadow: 0 50px 90px -35px rgba(10, 12, 20, .5); }
-.pd-face img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; object-position: top; }
+.pd-face img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; object-position: top; }
 .pd-dim { position: absolute; inset: 0; background: #0a0c14; opacity: 0; pointer-events: none; }
 .pd-meta { position: absolute; left: 16px; top: 16px; display: flex; gap: 8px; align-items: center; font: 500 .6875rem/1 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: #fff; }
 .pd-meta b { font-weight: 500; padding: 7px 10px; background: rgba(8, 14, 30, .62); border: 1px solid rgba(255, 255, 255, .22); }
@@ -33,7 +33,7 @@
 @media (min-width: 640px) { .pd-link { gap: 20px; padding: 16px 4px 16px 28px; } .pd-link .pd-name { font-size: 19px; } .pd-link .pd-addr { font-size: 15px; } .pd-go { width: 52px; height: 52px; } .pd-go svg { width: 24px; height: 24px; } }
 @media (max-width: 639px) {
   .pd-card { width: 100%; }
-  .pd-face img { aspect-ratio: 4 / 5; }
+  .pd-face img { aspect-ratio: 16 / 10; }
   .pd-meta { left: 12px; top: 12px; }
   .pd-face { border-radius: 20px; }
 }

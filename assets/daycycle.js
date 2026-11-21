@@ -4,7 +4,8 @@
    - data-theme flips to "dark" at the point the text turns light-on-dark (t 1.5), so the page's existing dark rules (color-scheme, per-component overrides) apply; #theme-btn is hidden (daycycle.css);
    - a small sun-and-moon window (bottom left) shows the time of day, and an optional horizon glow layer (opacity only) warms the page at golden hour.
    Works without WebGL (no SceneTime then: the same sky variables and the `scenetime` event are produced here) and with prefers-reduced-motion (colours still change, nothing eases or animates).
-   Cost: tokens are written at most about 12 times a second, only the ones that changed, and only while t is moving. */
+   Cost: a change of a variable on <html> makes the browser recompute the style of every element (about 15 ms on a 2,000-element page, more on a phone), so the tokens are written only while t is moving, only the ones that changed, and no more often than that cost allows (the gap adapts: about 4 times what the last write cost, 60 to 500 ms).
+   The sky behind the 3D canvas is an inline gradient on <body> instead of variables, which costs a repaint, not a recalculation. */
 (function () {
   'use strict';
   var root = document.documentElement;
@@ -44,8 +45,8 @@
   var GOLD = { '--bg': '#fbf0dd', '--surface': '#fff8ec', '--sunk': '#f3e1c4', '--ink': '#2b1b3f', '--muted': '#6b5278', '--line': '#ecd2a6', '--accent': '#b4481a', '--accent-ink': '#ffffff', '--accent-soft': '#fbdcb4',
     '--glow': 'rgba(240,150,60,.18)', '--fx': '#d9772a', '--hud': '#d9772a', '--hard': '#3a2358', '--fx-ink': '#9a4a12', '--gold': '#a86d12', '--gold-soft': '#f6ead3' };
   // The sky gradient (the page background and the haze of the 3D city). KEEP IN STEP with TB in assets/scene.js: day, golden hour, night.
-  var SKY = { '--sky1': ['#eaf4fb', '#3a60a2', '#050a1a'], '--sky-mid': ['#cfe6f7', '#eea25f', '#141f52'], '--sky3': ['#cfe6f7', '#ffd79a', '#6a4030'] }, STOP = [1, 0.6, 0.58];
-  var tok = [], sky = [], i, k;
+  var SKY = { s1: ['#eaf4fb', '#3a60a2', '#050a1a'], s2: ['#cfe6f7', '#eea25f', '#141f52'], s3: ['#cfe6f7', '#ffd79a', '#6a4030'] }, STOP = [1, 0.6, 0.58];
+  var tok = [], sky = [];
   (function read() { // the day and night values come from the page itself: flip the theme twice, in one synchronous task (no paint between)
     var was = root.getAttribute('data-theme'), cs, d = {}, n = {};
     root.setAttribute('data-theme', 'light'); cs = getComputedStyle(root); NAMES.forEach(function (x) { d[x] = cs.getPropertyValue(x).trim(); });
@@ -58,7 +59,7 @@
     });
     // --shadow: two soft layers, colour and strength crossfaded (day: blue ink, night: black)
     tok.push({ name: '--shadow', shadow: true, set: [[0.3, 0, 0, 0], [0.3, 0, 0, 0], [0.3, 0, 0, 0]], last: '' });
-    Object.keys(SKY).forEach(function (x) { sky.push({ name: x, set: SKY[x].map(parse), last: '' }); });
+    sky = ['s1', 's2', 's3'].map(function (x) { return SKY[x].map(parse); });
   })();
   var SH = [[[11, 42, 107], .08, .10], [[58, 30, 70], .12, .16], [[0, 0, 0], .4, .4]]; // --shadow colours and strengths at day, golden hour, night
 
@@ -103,7 +104,7 @@
 
   // ---------- applying ----------
   var SKL = ['#5c92dc', '#6a5a98', '#16224d'].map(parse), lastFill = '';
-  var t = 0, target = 0, prog = 0, written = -1, lastW = 0, wTimer = 0, raf = 0, lastF = 0, theme = '';
+  var gap = 80, t = 0, target = 0, prog = 0, written = -1, lastW = 0, wTimer = 0, raf = 0, lastF = 0, theme = '';
   function write() {
     wTimer = 0; lastW = performance.now(); written = t;
     var seg = t <= 1 ? 0 : 1, F = t <= 1 ? t : t - 1, FU = seg ? sstep(0.3, 0.7, F) : F, st = root.style, j, c, s;
@@ -114,14 +115,17 @@
       else s = str(mix(c.set[seg], c.set[seg + 1], FU));
       if (s !== c.last) { c.last = s; st.setProperty(c.name, s); }
     }
-    for (j = 0; j < sky.length; j++) { c = sky[j]; s = str(mix(c.set[seg], c.set[seg + 1], F)); if (s !== c.last) { c.last = s; st.setProperty(c.name, s); } }
-    s = (STOP[seg] + (STOP[seg + 1] - STOP[seg]) * F); var sp = (s * 100).toFixed(1) + '%'; if (sp !== lastStop) { lastStop = sp; st.setProperty('--sky-stop', sp); }
-    if (sky[1].last !== lastS2) { lastS2 = sky[1].last; st.setProperty('--sky2', lastS2); }
+    if (root.classList.contains('gl')) { // the sky behind the canvas, mirrored by the city's shader (the same three colours and stop, mixed the same way)
+      var sp = ((STOP[seg] + (STOP[seg + 1] - STOP[seg]) * F) * 100).toFixed(1) + '%', gr = 'linear-gradient(' + str(mix(sky[0][seg], sky[0][seg + 1], F)) + ',' + str(mix(sky[1][seg], sky[1][seg + 1], F)) + ' ' + sp + ',' + str(mix(sky[2][seg], sky[2][seg + 1], F)) + ')';
+      if (gr !== lastGrad && document.body) { lastGrad = gr; document.body.style.backgroundImage = gr; }
+    } else if (lastGrad && document.body) { lastGrad = ''; document.body.style.backgroundImage = ''; }
     var th = t >= 1.5 ? 'dark' : 'light'; if (th !== theme) { theme = th; root.setAttribute('data-theme', th); }
     paintDial(t, prog);
+    var c0 = performance.now(); void getComputedStyle(root).getPropertyValue('--bg'); // forces the recalculation now (it would happen on the next frame anyway) to learn what it costs
+    gap = Math.max(60, Math.min(500, gap * 0.5 + (performance.now() - c0) * 4 * 0.5));
   }
-  var lastStop = '', lastS2 = '';
-  function queue() { if (wTimer) return; var w = 80 - (performance.now() - lastW); if (w <= 0) write(); else wTimer = setTimeout(write, w); }
+  var lastGrad = '';
+  function queue() { if (wTimer) return; var w = gap - (performance.now() - lastW); if (w <= 0) write(); else wTimer = setTimeout(write, w); }
   function publish() {
     if (window.SceneTime) window.SceneTime.set(t);
     else try { document.dispatchEvent(new CustomEvent('scenetime', { detail: { t: t } })); } catch (e) {}
@@ -137,6 +141,20 @@
   }
   function kick() { if (!raf) { lastF = performance.now(); raf = requestAnimationFrame(tick); } }
   function init() { build(); prog = progress(); t = target = curve(prog); write(); publish(); kick(); }
+  // Cost control: a token change on <html> restyles every element, so the long sections are given content-visibility:auto, which makes the browser skip the ones off screen.
+  // Their remembered size is set to the real measured content size, so nothing moves (checked: scroll height and every section top identical before, after and after scrolling through).
+  // Remeasured after a resize. Opt out with <html data-daycycle="nocv">.
+  var cvT = 0;
+  function cvApply() {
+    var els = document.querySelectorAll('main > section, main > .hero'), j, e, cs, h, rows = [];
+    for (j = 0; j < els.length; j++) { e = els[j]; e.style.contentVisibility = ''; e.style.containIntrinsicSize = ''; }
+    for (j = 0; j < els.length; j++) { e = els[j]; if (e.offsetHeight < 400) continue; cs = getComputedStyle(e);
+      h = e.getBoundingClientRect().height - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth); rows.push([e, h]); }
+    rows.forEach(function (r) { r[0].style.containIntrinsicSize = 'auto ' + r[1].toFixed(2) + 'px'; r[0].style.contentVisibility = 'auto'; });
+  }
+  function cvLater() { if (root.getAttribute('data-daycycle') === 'nocv') return; clearTimeout(cvT); cvT = setTimeout(cvApply, 400); }
+  addEventListener('load', cvLater); addEventListener('resize', cvLater);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(cvLater);
   new MutationObserver(function () { if (theme && root.getAttribute('data-theme') !== theme) root.setAttribute('data-theme', theme); }).observe(root, { attributes: true, attributeFilter: ['data-theme'] }); // the page's own theme key or button cannot override the cycle
   addEventListener('scroll', kick, { passive: true });
   addEventListener('resize', kick);

@@ -11,6 +11,7 @@
   'use strict';
   var KL = [3.139, 101.687], D2R = Math.PI / 180;
   var PEN = [[6.50, 100.19], [6.10, 100.35], [5.60, 100.38], [5.10, 100.45], [4.60, 100.62], [4.20, 100.70], [3.80, 100.80], [3.40, 101.10], [3.00, 101.35], [2.60, 101.75], [2.25, 102.10], [1.90, 102.60], [1.50, 103.25], [1.30, 103.55], [1.28, 103.85], [1.35, 104.15], [1.65, 104.25], [2.20, 103.95], [2.70, 103.80], [3.20, 103.45], [3.80, 103.35], [4.40, 103.45], [5.00, 103.45], [5.50, 103.05], [6.00, 102.45], [6.25, 102.10], [6.10, 101.85], [5.90, 101.25], [6.10, 100.95], [6.30, 100.60], [6.50, 100.19]];
+  var BORC = [[4.50, 117.40], [3.60, 115.60], [2.30, 113.40], [1.50, 111.00], [1.80, 109.65]];
   var BOR = [[1.80, 109.65], [1.70, 110.30], [2.20, 111.10], [2.90, 112.00], [3.30, 113.05], [4.00, 113.90], [4.60, 114.20], [4.95, 115.15], [5.30, 115.20], [5.95, 115.60], [6.40, 116.35], [6.90, 116.80], [7.35, 117.00], [6.60, 117.70], [5.95, 118.10], [5.00, 118.35], [4.40, 118.60], [4.20, 117.90], [4.50, 117.40]];
 
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
@@ -69,7 +70,7 @@
     var r = this.stage.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, r.width < 720 ? 1.5 : 2);
     this.W = Math.max(2, r.width); this.H = Math.max(2, r.height); this.dpr = dpr;
     this.cv.width = Math.round(this.W * dpr); this.cv.height = Math.round(this.H * dpr);
-    var target = this.W < 720 ? 30000 : 52000, ds = Math.max(3, Math.ceil(Math.sqrt(this.W * this.H / target)));
+    var target = this.W < 720 ? 20000 : 34000, ds = Math.max(3, Math.ceil(Math.sqrt(this.W * this.H / target)));
     this.ds = ds; this.off.width = Math.ceil(this.W / ds); this.off.height = Math.ceil(this.H / ds);
     this.img = this.offCtx.createImageData(this.off.width, this.off.height);
   };
@@ -171,12 +172,15 @@
     var W = this.W, H = this.H, ds = this.ds, ow = this.off.width, oh = this.off.height, R = v.R;
     // a sphere that is off screen entirely needs no pass; one that fills it is flat
     var land = this.land, data = this.img.data, x, y, i = 0;
-    var k = this.key = [Math.round(v.cx), Math.round(v.cy), Math.round(R), Math.round(v.lat0 * 1e4), Math.round(v.lon0 * 1e4), ow, this.land ? 1 : 0, this.sky[0]].join();
+    if (z >= .36 && R > W * 8) { // the globe is flat to the eye and the 1-degree land is faded out: one colour, no per-pixel pass
+      var f0 = sstep(.55, .95, z); ctx.fillStyle = 'rgb(' + Math.round(8 + 20 * f0) + ',' + Math.round(30 + 40 * f0) + ',' + Math.round(64 + 60 * f0) + ')'; ctx.fillRect(0, 0, W, H); return;
+    }
+    var k = this.key = [Math.round(v.cx), Math.round(v.cy), Math.round(R), Math.round(v.lat0 * 1e4), Math.round(v.lon0 * 1e4), ow, this.land ? 1 : 0, Math.round(z * 200)].join();
     if (this.cache.k !== k) {
       this.cache.k = k;
       // colours: night-blue ocean, slate land, Malaysia warmed to gold; as we fall the palette moves toward the city's blue
-      var f = sstep(.55, .95, z), oc = [8 + 20 * f, 30 + 40 * f, 64 + 60 * f], lc = [38 + 50 * f, 78 + 50 * f, 104 + 44 * f], mc = [196 - 40 * f, 150 - 6 * f, 60 + 60 * f];
-      var L = land ? land.L : null, M = land ? land.M : null, lw = land ? land.w : 0, lh = land ? land.h : 0;
+      var f = sstep(.55, .95, z), oc = [8 + 20 * f, 30 + 40 * f, 64 + 60 * f], lc = [38 + 50 * f, 78 + 50 * f, 104 + 44 * f], mc = [150 - 30 * f, 140 - 10 * f, 90 + 40 * f];
+      var lfade = 1 - sstep(.16, .36, z), L = land ? land.L : null, M = land ? land.M : null, lw = land ? land.w : 0, lh = land ? land.h : 0;
       var sin0 = v.sin0, cos0 = v.cos0, lon0 = v.lon0, invR = 1 / R;
       for (y = 0; y < oh; y++) {
         var dy = (v.cy - (y + .5) * ds) * invR;
@@ -191,7 +195,7 @@
             var x1 = (x0 + 1) % lw, a0 = y0 * lw + x0, a1 = y0 * lw + x1, b0 = y1 * lw + x0, b1 = y1 * lw + x1;
             lf = (L[a0] * (1 - tx) + L[a1] * tx) * (1 - ty) + (L[b0] * (1 - tx) + L[b1] * tx) * ty;
             mf = (M[a0] * (1 - tx) + M[a1] * tx) * (1 - ty) + (M[b0] * (1 - tx) + M[b1] * tx) * ty;
-            lf = sstep(.35, .65, lf); mf = sstep(.35, .65, mf);
+            lf = sstep(.3, .7, lf) * lfade; mf = sstep(.3, .7, mf) * .4 * lfade;
           }
           var sh = .32 + .68 * Math.pow(zz, .55), rr = oc[0], gg = oc[1], bb = oc[2];
           rr += (lc[0] - rr) * lf; gg += (lc[1] - gg) * lf; bb += (lc[2] - bb) * lf;
@@ -240,6 +244,13 @@
       }
       ctx.stroke();
     }
+    // a soft gold fill inside the coast (the bitmap is only 1 degree a cell, so the fill is drawn from the points)
+    function fillPoly(pts) {
+      ctx.beginPath(); var any = false;
+      for (var i = 0; i < pts.length; i++) { var q = me.proj(pts[i][0], pts[i][1], v); if (!q[2]) continue; var X = v.cx + q[0], Y = v.cy - q[1]; if (any) ctx.lineTo(X, Y); else ctx.moveTo(X, Y); any = true; }
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.globalAlpha = fade * .22 * sstep(.3, .5, p + .1); ctx.fillStyle = '#ffb938'; fillPoly(PEN); fillPoly(BOR.concat(BORC));
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     ctx.globalAlpha = fade * .35; ctx.strokeStyle = '#ffb938'; ctx.lineWidth = 7; trace(PEN, k); trace(BOR, k);
     ctx.globalAlpha = fade; ctx.strokeStyle = '#ffd27a'; ctx.lineWidth = 1.8; trace(PEN, k); trace(BOR, k);

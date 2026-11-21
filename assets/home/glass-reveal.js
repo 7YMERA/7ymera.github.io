@@ -135,7 +135,7 @@
     '  gl.g=glass(fc,off,uA.w).g;',
     '  gl.b=glass(fc,off*(1.-dz*.55),uA.w).b;',
     // body: a touch of ink so the glass reads on a light page, darker toward the rim like a thick edge
-    '  gl=mix(gl,uInk,(.06+.05*(1.-uDark*.4))+edge*edge*(.30-.12*uDark));',
+    '  gl=mix(gl,uInk,(.16+.05*(1.-uDark*.4))+edge*edge*(.30-.12*uDark));',
     // light: two rim lights from the top-left and a faint one from the opposite side
     '  vec2 L=normalize(vec2(-.62,-.78)+uMouse*.5+vec2(sin(uTime*.4)*.06,0.));',
     '  vec2 nrm=-gd;',
@@ -355,9 +355,9 @@
     var W = this.cv.width, H = this.cv.height, d = this.dpr;
     // the logo: its width is `size` of the shorter side (wider on a phone), centred a little above the middle to leave room for the name below
     var aspect = this.aspect || 1.5, wide = this.W < 720;
-    var logoW = Math.min(this.W * (wide ? .62 : .44), this.H * (wide ? .5 : .62) * aspect, 760) * (this.opts.scale || 1);
+    var logoW = Math.min(this.W * (wide ? .66 : .44), this.H * (wide ? .4 : .4) * aspect, 760) * (this.opts.scale || 1);
     var side = logoW / .70; // the logo fills 70 % of the field square
-    var cy = this.H * (wide ? .40 : .43);
+    var cy = this.H * (wide ? .36 : .38);
     gl.useProgram(this.prog);
     gl.uniform2f(u.uRes, W, H);
     gl.uniform1f(u.uTime, time);

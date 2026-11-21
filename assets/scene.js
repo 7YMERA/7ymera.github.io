@@ -422,7 +422,7 @@
   // ===== TIME OF DAY: SceneTime =====
   // t runs 0 (plain day), 1 (golden hour), 2 (night). Three parameter sets are built ONCE (TB below, one row per parameter: [day, golden, night]; colours as hex, converted to OKLab here).
   // applyTime(t) blends the two neighbouring sets into the shader uniforms and a few dozen material colours: no CSS reads, no material rebuilds, no shader recompiles, at most once per frame
-  // and only when t changed. The page's sky gradient (--sky1, --sky-mid, --sky3, --sky-stop) is written at most 10 times a second, and only when it changed (not at all under <html data-daycycle>, which writes it itself).
+  // and only when t changed. The page's sky gradient (an inline gradient on <body>, mirroring the shader's sky) is written at most 10 times a second, and only when it changed (not at all under <html data-daycycle>, which writes it itself).
   // Day = the old light theme and night = the old dark theme, number for number, so t 0 and t 2 look as they always did.
   function s2l(c){return c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4)}
   function l2s(c){c=c<0?0:c>1?1:c;return c<=.0031308?c*12.92:1.055*Math.pow(c,1/2.4)-.055}
@@ -463,9 +463,9 @@
     if(add===addNow)return;addNow=add;var b=add?T.AdditiveBlending:T.NormalBlending,L=[railM,railM2,stCanM,gyroM,beamM,haloM,radarM,polyM];
     for(var i=0;i<L.length;i++)L[i].blending=b;beaconAdd=add}
   function hex3(c){return '#'+c.getHexString()}
-  function writeCss(){cssTimer=0;cssAt=performance.now();if(root.hasAttribute('data-daycycle'))return;
-    var a=hex3(cc('sky1')),b=hex3(cc('skyM')),c=hex3(cc('sky3')),st=(TU.uStop.value*100).toFixed(1)+'%',key=a+b+c+st;if(key===cssLast)return;cssLast=key;
-    var s=root.style;s.setProperty('--sky1',a);s.setProperty('--sky2',b);s.setProperty('--sky-mid',b);s.setProperty('--sky3',c);s.setProperty('--sky-stop',st)}
+  function writeCss(){cssTimer=0;cssAt=performance.now();if(root.hasAttribute('data-daycycle')||!document.body)return;
+    // The sky behind the canvas: one inline gradient on <body>. (Not CSS variables on <html>: a variable change on the root makes the browser recompute the style of every element on the page, 15 to 20 ms on a long page; a background on body alone costs a repaint.)
+    var g='linear-gradient('+hex3(cc('sky1'))+','+hex3(cc('skyM'))+' '+(TU.uStop.value*100).toFixed(1)+'%,'+hex3(cc('sky3'))+')';if(g===cssLast)return;cssLast=g;document.body.style.backgroundImage=g}
   function queueCss(){if(cssTimer)return;var w=100-(performance.now()-cssAt);if(w<=0)writeCss();else cssTimer=setTimeout(writeCss,w)}
   function applyTime(t){
     tLast=t;pick(t);var i,add=t>=1.5,night=t>1;
