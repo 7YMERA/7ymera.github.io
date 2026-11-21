@@ -437,7 +437,7 @@
   var TB={
     far:['#b9d0ee','#c2b6d2','#1a1b3a'],mid:['#8ab2e6','#a597ca','#10183a'],near:['#5c92dc','#8a7cb8','#16224d'],ground:['#8ab2e6','#b3a4c4','#0d1230'],glass2:['#5c92dc','#968ac2','#0e1838'],
     ring:['#a2c3f0','#ffc07a','#7fd3ff'],orb:['#2c63c9','#6a5cb4','#3d79e0'],glass:['#e8f1fd','#ffe6c0','#7fd3ff'],line:['#2aa6e8','#f0a444','#3aa0ee'],
-    sky1:['#eaf4fb','#3a60a2','#050a1a'],skyM:['#cfe6f7','#eea25f','#141f52'],sky3:['#cfe6f7','#ffd79a','#6a4030'],fog:['#cfe6f7','#f1b27c','#3f2f41'],
+    sky1:['#fcfeff','#3a60a2','#050a1a'],skyM:['#e4f0fa','#eea25f','#141f52'],sky3:['#e4f0fa','#ffd79a','#6a4030'],fog:['#e4f0fa','#f1b27c','#3f2f41'],
     sunC:['#ffffff','#ffd9a4','#b0b4ff'],litC:['#f8fcff','#fff1d2','#f8fcff'],sunGlow:['#ffe6b0','#ffae55','#ffae55'],sunDisc:['#fffdf2','#fffbe8','#fffbe8'],
     star:['#5c92dc','#ffffff','#ffffff'],moon:['#5c92dc','#eac9aa','#c4cfee'],moon2:['#8ab2e6','#e2c6ac','#cfd8f2'],halo:['#ffffff','#ffd6a0','#9dbbff'],moonRing:['#5c92dc','#e9c9a4','#bcd2ff'],
     rail:['#2aa6e8','#ffcf8a','#7fd3ff'],pillar:['#5c92dc','#8f80b8','#10183a'],stPlat:['#5c92dc','#9a8cbd','#10183a'],stPost:['#5c92dc','#9a8cbd','#7fd3ff'],stCan:['#ffffff','#ffe9c8','#7fd3ff'],
@@ -457,7 +457,7 @@
   function nn(k){return TA[k]+(TBb[k]-TA[k])*TF}
   function vmix(k,o){var a=TA[k],b=TBb[k];o.set(a[0]+(b[0]-a[0])*TF,a[1]+(b[1]-a[1])*TF,a[2]+(b[2]-a[2])*TF);return o}
   var ROLES=['far','mid','near','ground','glass2','ring','orb'],addNow=null,starSwap=null,beaconK=.45,beaconAdd=false,cssOn=false,cssAt=0,cssTimer=0,cssLast='',tDirty=true,tLast=-1;
-  scene.fog=new T.Fog(0xcfe6f7,620,1700);
+  scene.fog=new T.Fog(0xe4f0fa,620,1700);
   var fogN0=620,fogF0=1700; // base fog (applyTime sets them); the finale pushes it back
   function setAdd(add){ // the additive glow materials: normal blending by day and golden hour, additive from t 1.5
     if(add===addNow)return;addNow=add;var b=add?T.AdditiveBlending:T.NormalBlending,L=[railM,railM2,stCanM,gyroM,beamM,haloM,radarM,polyM];
@@ -465,7 +465,7 @@
   function hex3(c){return '#'+c.getHexString()}
   function writeCss(){cssTimer=0;cssAt=performance.now();if(root.hasAttribute('data-daycycle')||!document.body)return;
     // The sky behind the canvas: one inline gradient on <body>. (Not CSS variables on <html>: a variable change on the root makes the browser recompute the style of every element on the page, 15 to 20 ms on a long page; a background on body alone costs a repaint.)
-    var g='linear-gradient('+hex3(cc('sky1'))+','+hex3(cc('skyM'))+' '+(TU.uStop.value*100).toFixed(1)+'%,'+hex3(cc('sky3'))+')';if(g===cssLast)return;cssLast=g;document.body.style.backgroundImage=g}
+    var g='linear-gradient('+hex3(cc('sky1'))+','+hex3(cc('skyM'))+' '+(TU.uStop.value*100).toFixed(1)+'%,'+hex3(cc('sky3'))+')';if(g===cssLast)return;cssLast=g;var bs=document.body.style;bs.backgroundImage=g;bs.backgroundAttachment='fixed';bs.backgroundRepeat='no-repeat'}
   function queueCss(){if(cssTimer)return;var w=100-(performance.now()-cssAt);if(w<=0)writeCss();else cssTimer=setTimeout(writeCss,w)}
   function applyTime(t){
     tLast=t;pick(t);var i,add=t>=1.5,night=t>1;
@@ -501,6 +501,7 @@
     if(root.hasAttribute('data-daycycle'))return;var dk=root.getAttribute('data-theme')==='dark',t=ST.get();
     if(dk&&t<1.5)ST.mode('night');else if(!dk&&t>=1.5)ST.mode('day')}).observe(root,{attributes:true,attributeFilter:['data-theme']});
   if(ST.get()===0&&root.getAttribute('data-theme')==='dark')ST.set(2); // a page that starts dark (stored choice, ?theme=dark) starts at night
+  cssOn=ST.get()>0; // a page that starts at golden hour or night (remembered choice, ?time=) needs its sky gradient written; plain day is already what the stylesheet draws
   applyTime(ST.get());tDirty=false;
   var W=0,Hh=0,mobile=false,need=true,px=0,tx=0,cr=0,tr=0,vr={v:0},vx={v:0},dtF=.016,tgtPose=mob(END),curPose=mob(END),vPose=[{v:0},{v:0},{v:0},{v:0},{v:0},{v:0},{v:0},{v:0}];
   function size(){W=innerWidth;Hh=innerHeight;mobile=W<=820;renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile?1.5:2));renderer.setSize(W,Hh,false);renderer.getDrawingBufferSize(TU.uRes.value);cam.aspect=W/Hh;cam.updateProjectionMatrix();need=true}

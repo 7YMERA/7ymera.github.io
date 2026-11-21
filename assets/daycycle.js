@@ -45,7 +45,7 @@
   var GOLD = { '--bg': '#fbf0dd', '--surface': '#fff8ec', '--sunk': '#f3e1c4', '--ink': '#2b1b3f', '--muted': '#6b5278', '--line': '#ecd2a6', '--accent': '#b4481a', '--accent-ink': '#ffffff', '--accent-soft': '#fbdcb4',
     '--glow': 'rgba(240,150,60,.18)', '--fx': '#d9772a', '--hud': '#d9772a', '--hard': '#3a2358', '--fx-ink': '#9a4a12', '--gold': '#a86d12', '--gold-soft': '#f6ead3' };
   // The sky gradient (the page background and the haze of the 3D city). KEEP IN STEP with TB in assets/scene.js: day, golden hour, night.
-  var SKY = { s1: ['#eaf4fb', '#3a60a2', '#050a1a'], s2: ['#cfe6f7', '#eea25f', '#141f52'], s3: ['#cfe6f7', '#ffd79a', '#6a4030'] }, STOP = [1, 0.6, 0.58];
+  var SKY = { s1: ['#fcfeff', '#3a60a2', '#050a1a'], s2: ['#e4f0fa', '#eea25f', '#141f52'], s3: ['#e4f0fa', '#ffd79a', '#6a4030'] }, STOP = [1, 0.6, 0.58];
   var tok = [], sky = [];
   (function read() { // the day and night values come from the page itself: flip the theme twice, in one synchronous task (no paint between)
     var was = root.getAttribute('data-theme'), cs, d = {}, n = {};
@@ -117,7 +117,7 @@
     }
     if (root.classList.contains('gl')) { // the sky behind the canvas, mirrored by the city's shader (the same three colours and stop, mixed the same way)
       var sp = ((STOP[seg] + (STOP[seg + 1] - STOP[seg]) * F) * 100).toFixed(1) + '%', gr = 'linear-gradient(' + str(mix(sky[0][seg], sky[0][seg + 1], F)) + ',' + str(mix(sky[1][seg], sky[1][seg + 1], F)) + ' ' + sp + ',' + str(mix(sky[2][seg], sky[2][seg + 1], F)) + ')';
-      if (gr !== lastGrad && document.body) { lastGrad = gr; document.body.style.backgroundImage = gr; }
+      if (gr !== lastGrad && document.body) { lastGrad = gr; var bs = document.body.style; bs.backgroundImage = gr; bs.backgroundAttachment = 'fixed'; bs.backgroundRepeat = 'no-repeat'; }
     } else if (lastGrad && document.body) { lastGrad = ''; document.body.style.backgroundImage = ''; }
     var th = t >= 1.5 ? 'dark' : 'light'; if (th !== theme) { theme = th; root.setAttribute('data-theme', th); }
     paintDial(t, prog);

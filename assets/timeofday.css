@@ -10,7 +10,7 @@
 .tod-t b{font:700 .95rem var(--f-display,system-ui)}
 .tod-t small{font:500 .72rem var(--f-body,system-ui);opacity:.78}
 /* the mini sky */
-.tod-sw{position:relative;display:block;width:100%;aspect-ratio:3/1.15;overflow:hidden;border-radius:7px;border:2px solid var(--fx);isolation:isolate;background:linear-gradient(#eaf4fb,#cfe6f7)}
+.tod-sw{position:relative;display:block;width:100%;aspect-ratio:3/1.15;overflow:hidden;border-radius:7px;border:2px solid var(--fx);isolation:isolate;background:linear-gradient(#fcfeff,#e4f0fa)}
 .tod-sw svg{position:absolute;left:0;right:0;bottom:0;width:100%;height:62%;fill:#5c92dc}
 .tod-sw i{position:absolute;display:block;pointer-events:none}
 .tod-orb{left:64%;top:16%;width:26%;aspect-ratio:1;border-radius:50%;background:#2c63c9;opacity:.9;animation:tod-bob 6s ease-in-out infinite}
