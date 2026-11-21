@@ -129,7 +129,7 @@
   function tick(now) {
     raf = 0; prog = progress(); target = curve(prog);
     var d = target - t;
-    if (reduce || Math.abs(d) < 0.0015) t = target; else t += d * (1 - Math.exp(-Math.min(0.1, (now - lastF) / 1000 || 0.016) / 0.12));
+    if (reduce || Math.abs(d) < 0.0015) t = target; else t += d * (1 - Math.exp(-Math.max(0.004, Math.min(0.1, (now - lastF) / 1000 || 0.016)) / 0.12));
     lastF = now;
     if (Math.abs(t - written) > 0.0008) { queue(); publish(); }
     else paintDial(t, prog);
