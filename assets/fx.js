@@ -1,8 +1,8 @@
-/* fx.js: three small flourishes borrowed from Halcyon.
-   1. A trailing cursor ring (mouse only) that swells over buttons and says "Drag" over the globe and the lab.
+/* fx.js: small flourishes borrowed from Halcyon. (The cursor now lives in cursor.js; data-cursor="Drag" labels are read there.)
+   1. Press ripples on touch screens and when cursor.js is off.
    2. Scrambling text: the name in the header re-scrambles as you move across it, and each small section label decodes once as it arrives.
    3. Three faint vertical rules, so the page reads like a control panel.
-   Nothing here runs on touch screens, and nothing moves with prefers-reduced-motion. */
+   Nothing moves with prefers-reduced-motion. */
 (function () {
   'use strict';
   var d = document, reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -45,36 +45,10 @@
     var r = d.createElement('i'); r.className = 'fx-rp' + (big ? ' big' : ''); r.style.left = x + 'px'; r.style.top = y + 'px'; r.setAttribute('aria-hidden', 'true');
     r.addEventListener('animationend', function () { r.remove(); }); d.body.appendChild(r);
   }
-  d.addEventListener('pointerdown', function (e) { if (e.target.closest && e.target.closest('input, textarea, select, canvas#arc-canvas, #arc-jump')) return; ripple(e.clientX, e.clientY, false); }, { passive: true });
+  d.addEventListener('pointerdown', function (e) { if (d.documentElement.classList.contains('cu-on')) return; if (e.target.closest && e.target.closest('input, textarea, select, canvas#arc-canvas, #arc-jump')) return; ripple(e.clientX, e.clientY, false); }, { passive: true });
   var tb = d.getElementById('theme-btn');
   if (tb) tb.addEventListener('click', function () { var r = tb.getBoundingClientRect(); ripple(r.left + r.width / 2, r.top + r.height / 2, true); if (window.__sfx && window.__sfx.on) window.__sfx.ripple(); });
 
   /* ---- rules ---- */
   var g = d.createElement('div'); g.className = 'fx-grid'; g.setAttribute('aria-hidden', 'true'); g.innerHTML = '<i></i><i></i><i></i>'; d.body.appendChild(g);
-
-  /* ---- cursor ring ---- */
-  if (reduce || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-  var ring = d.createElement('div'), lab = d.createElement('span');
-  ring.className = 'fx-ring'; ring.setAttribute('aria-hidden', 'true'); ring.appendChild(lab); d.body.appendChild(ring);
-  var tx = -100, ty = -100, x = -100, y = -100, s = 1, ts = 1, raf = 0, shown = false, text = '';
-  var HOT = 'a, button, [role=tab], summary, input, select, label, .chip, [data-copy]';
-  function frame() {
-    raf = 0; x += (tx - x) * .18; y += (ty - y) * .18; s += (ts - s) * .2;
-    ring.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0) scale(' + s.toFixed(3) + ')';
-    if (Math.abs(tx - x) + Math.abs(ty - y) + Math.abs(ts - s) > .05) raf = requestAnimationFrame(frame);
-  }
-  function kick() { if (!raf) raf = requestAnimationFrame(frame); }
-  d.addEventListener('pointermove', function (e) {
-    if (e.pointerType && e.pointerType !== 'mouse') return;
-    tx = e.clientX; ty = e.clientY;
-    if (!shown) { shown = true; x = tx; y = ty; ring.classList.add('on'); }
-    var t = e.target, tagged = t.closest && t.closest('[data-cursor]'), hot = t.closest && t.closest(HOT);
-    var want = tagged ? tagged.getAttribute('data-cursor') : '';
-    ts = tagged ? 2.7 : hot ? 1.8 : 1;
-    if (want !== text) { text = want; lab.textContent = text; ring.classList.toggle('lab', !!text); }
-    kick();
-  }, { passive: true });
-  d.addEventListener('pointerdown', function () { ts *= .8; kick(); });
-  d.documentElement.addEventListener('pointerleave', function () { ring.classList.remove('on'); shown = false; });
-  d.addEventListener('visibilitychange', function () { if (d.hidden) ring.classList.remove('on'); });
 })();

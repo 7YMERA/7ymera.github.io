@@ -1,0 +1,46 @@
+/* cursor.css: the orbital reticle cursor (see cursor.js). Only transform and opacity animate. The native cursor is hidden only while
+   cursor.js is active (html.cu-on), and never over form fields. */
+html.cu-on, html.cu-on * { cursor: none !important; }
+html.cu-on input, html.cu-on textarea, html.cu-on select, html.cu-on option, html.cu-on [contenteditable=""], html.cu-on [contenteditable="true"] { cursor: auto !important; }
+
+.cu, .cu-tr { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 2147483000; }
+.cu-tr { z-index: 2147482990; }
+.cu { --cu-r: var(--accent, #0a6c74); --cu-i: var(--ink, #0f1e24); --cu-b: var(--bg, #f3f6f6); width: 0; height: 0; opacity: 0; transition: opacity .18s; }
+.cu.on { opacity: 1; }
+.cu > * { position: absolute; left: 0; top: 0; pointer-events: none; will-change: transform; }
+
+/* the centre dot: never lags the pointer */
+.cu-dot { width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--cu-i); box-shadow: 0 0 0 1.5px var(--cu-b); transition: opacity .15s; }
+.cu.pr .cu-dot { background: var(--cu-r); }
+
+/* four bracket corners; each pivots on its own corner point so the set can rotate and stretch to a box */
+.cu-c { width: 9px; height: 9px; border: 0 solid var(--cu-r); transition: opacity .15s; }
+.cu-c.c0 { border-width: 2px 0 0 2px; transform-origin: 0 0; }
+.cu-c.c1 { border-width: 2px 2px 0 0; margin-left: -9px; transform-origin: 100% 0; }
+.cu-c.c2 { border-width: 0 2px 2px 0; margin: -9px 0 0 -9px; transform-origin: 100% 100%; }
+.cu-c.c3 { border-width: 0 0 2px 2px; margin-top: -9px; transform-origin: 0 100%; }
+
+/* crosshair and telemetry (canvases, data-cursor="crosshair") */
+.cu-xh { width: 0; height: 0; opacity: 0; transition: opacity .15s; }
+.cu-xh i { position: absolute; background: var(--cu-r); opacity: .85; }
+.cu-xh .h { left: -34px; top: -.5px; width: 68px; height: 1px; background: linear-gradient(90deg, var(--cu-r) 0 36%, transparent 36% 64%, var(--cu-r) 64%); }
+.cu-xh .v { top: -34px; left: -.5px; height: 68px; width: 1px; background: linear-gradient(180deg, var(--cu-r) 0 36%, transparent 36% 64%, var(--cu-r) 64%); }
+.cu-tel, .cu-lab { font: 700 10px/1 var(--f-mono, ui-monospace, monospace); letter-spacing: .08em; white-space: pre; text-transform: uppercase; color: var(--cu-i); background: var(--cu-b); border: 1px solid var(--cu-r); border-radius: 3px; padding: 3px 5px; opacity: 0; transition: opacity .15s; }
+.cu-lab { margin: -8px 0 0; translate: -50% 0; }
+
+/* the I-beam caret over text: 2 x 24 line scaled in height by JS, with two serifs */
+.cu-beam { width: 2px; height: 24px; margin: -12px 0 0 -1px; background: var(--cu-i); border-radius: 1px; opacity: 0; transition: opacity .15s; box-shadow: 0 0 0 1px var(--cu-b); }
+.cu-beam::before, .cu-beam::after { content: ""; position: absolute; left: -3px; width: 8px; height: 2px; background: var(--cu-i); border-radius: 1px; }
+.cu-beam::before { top: -1px; } .cu-beam::after { bottom: -1px; }
+
+/* which parts show in which mode */
+.cu.m-xh .cu-xh, .cu.m-xh .cu-tel, .cu.m-text .cu-beam, .cu.m-lab .cu-lab { opacity: 1; }
+.cu.m-text .cu-c, .cu.m-text .cu-dot, .cu.m-native .cu-c, .cu.m-native .cu-dot, .cu.m-lab .cu-dot { opacity: 0; }
+.cu.m-native { opacity: 0 !important; }
+.cu.m-link .cu-dot { opacity: .9; }
+
+/* press ripple, appended to <body> by cursor.js */
+.cu-rp { position: fixed; z-index: 2147482995; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; border: 1.5px solid var(--cu-r, var(--accent, #0a6c74)); pointer-events: none; opacity: 0; animation: cu-rp .6s cubic-bezier(.2, .7, .3, 1) forwards; }
+@keyframes cu-rp { 0% { opacity: .8; transform: scale(.3); } 100% { opacity: 0; transform: scale(3.4); } }
+
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce), print { .cu, .cu-tr, .cu-rp { display: none !important; } }
