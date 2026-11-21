@@ -86,10 +86,10 @@
   }
 
   /* ---------- sizing ---------- */
-  var W = 0, H = 0, DPR = 1, sc = 1, VW = 400;
+  var W = 0, H = 0, DPR = 1, sc = 1, VW = 400, quality = 1, slowN = 0, ema = 16;
   function resize() {
     var w = wrap.clientWidth, h = wrap.clientHeight; if (!w || !h) return;
-    DPR = Math.min(window.devicePixelRatio || 1, 2); if (w * h * DPR * DPR > 2.4e6) DPR = Math.max(1, Math.sqrt(2.4e6 / (w * h)));
+    DPR = Math.min(window.devicePixelRatio || 1, 2); if (w * h * DPR * DPR > 2.4e6) DPR = Math.max(1, Math.sqrt(2.4e6 / (w * h))); DPR = Math.max(.5, DPR * quality);
     W = Math.round(w * DPR); H = Math.round(h * DPR);
     if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
     sc = H / VH; VW = W / sc; skyGrad = null; vigGrad = null; initScenery();
@@ -165,6 +165,7 @@
     if (demo) { restartAt = performance.now() + 1700; return; }
     var n = t.n, newBest = n > best;
     if (newBest) { best = n; saveBest(); }
+    el.pause.hidden = true; paintHud(true);
     gameOverCard(n, newBest);
   }
 
@@ -391,7 +392,8 @@
   /* ---------- loop and controls ---------- */
   function loop(t) {
     raf = 0; if (!active || d.hidden) return;
-    var dt = Math.min((t - last) / 1000, .05); last = t;
+    var dt = Math.min((t - last) / 1000, .05); ema += ((t - last) - ema) * .05; last = t;
+    if (ema > 26 && quality > .55 && ++slowN > 45) { slowN = 0; quality *= .82; ema = 16; resize(); } else if (ema <= 26) slowN = 0;
     if (state === 'paused') { draw(); return; }
     update(dt); draw();
     raf = requestAnimationFrame(loop);
