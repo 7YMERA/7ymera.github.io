@@ -4,12 +4,16 @@ window.SCENE_GLSL={
 /* Three flat tones per face, picked by the face normal against one fixed light. Replaces <aomap_fragment> in every scene material (toon() in scene.js). */
 toonShade:`#include <aomap_fragment>
         vec3 tn=normalize(cross(dFdx(vWP),dFdy(vWP)));
-        float td=dot(tn,uLight);
+        float td=dot(tn,uLight)+uWrap;
         float tlit=smoothstep(0.40,0.44,td),tsh=1.0-smoothstep(-0.14,-0.10,td);
         vec3 bc=diffuseColor.rgb;
-        vec3 cLit=mix(bc*uLitMul,vec3(0.97,0.99,1.0),uLitMix)*mix(vec3(1.0),uSunC,uSunAmt);
+        vec3 cLit=mix(bc*uLitMul,uLitC,uLitMix)*mix(vec3(1.0),uSunC,uSunAmt);
         reflectedLight.directDiffuse=vec3(0.0);
-        reflectedLight.indirectDiffuse=mix(mix(bc*uMidMul,cLit,tlit),bc*uShadeMul,tsh);`,
+        reflectedLight.indirectDiffuse=mix(mix(bc*uMidMul,cLit,tlit),bc*uShadeMul,tsh);
+        /* golden hour (uGold 0 by day and at night): the low sun only reaches the upper floors, so the street canyons sink into dusk while the crowns catch amber light */
+        float cgh=smoothstep(25.0,210.0,vWP.y);
+        reflectedLight.indirectDiffuse*=mix(1.0,mix(0.74,1.0,smoothstep(0.0,130.0,vWP.y)),uGold);
+        reflectedLight.indirectDiffuse+=uSunC*uGlint*cgh*(0.3+0.7*tlit);`,
 
 /* Height and distance haze toward the page sky gradient. Replaces <fog_fragment> in every scene material. */
 toonHaze:`#ifdef USE_FOG
@@ -18,7 +22,7 @@ toonHaze:`#ifdef USE_FOG
         float hz=smoothstep(260.0,1700.0,distance(vWP,cameraPosition))*uHazeK*mix(0.15,1.0,exp(-hy/100.0));
         float he=smoothstep(uEdge.x,uEdge.y,length(vWP.xz))*exp(-hy/70.0);
         float ht=1.0-(1.0-hf)*(1.0-hz)*(1.0-he);
-        float sy=1.0-gl_FragCoord.y/uRes.y; /* the CSS gradient: sky1 to sky2 at uStop, then to sky3 (day: uStop is 1, so sky3 never shows) */
+        float sy=1.0-gl_FragCoord.y/uRes.y; /* the CSS gradient: sky1 to sky2 at uStop, then to sky3 (day: uStop is 1 and sky3 equals sky2, so the third stop never shows). Blended by SceneTime between day, golden hour and night. */
         vec3 skyc=mix(mix(uSky1,uSky2,clamp(sy/uStop,0.0,1.0)),uSky3,clamp((sy-uStop)/max(1.0-uStop,0.0001),0.0,1.0));
         gl_FragColor.rgb=mix(gl_FragColor.rgb,skyc,ht);
       #endif`,

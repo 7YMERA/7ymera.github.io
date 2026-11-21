@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Play · Alif Najmi</title>
+<link rel="canonical" href="https://7ymera.github.io/play/">
+<meta name="description" content="An arcade hall and toy box: Skyline Stack, a one-button tower stacker over the Kuala Lumpur skyline, a train runner, a particle lab, a globe from orbit, a glass shader lab and SQL playgrounds you can run in the browser.">
+<meta property="og:title" content="Play · Alif Najmi">
+<meta property="og:description" content="Games and toys from Alif Najmi: stack the Kuala Lumpur skyline, ride the last train, spin a globe, run SQL in your browser.">
+<meta property="og:image" content="https://7ymera.github.io/assets/og-skyline-3.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Kuala Lumpur skyline at night with all four landmarks.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Alif Najmi">
+<meta property="og:locale" content="en_MY">
+<meta property="og:url" content="https://7ymera.github.io/play/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Play · Alif Najmi">
+<meta name="twitter:description" content="Games and toys from Alif Najmi: stack the Kuala Lumpur skyline, ride the last train, spin a globe, run SQL in your browser.">
+<meta name="twitter:image" content="https://7ymera.github.io/assets/og-skyline-3.jpg">
+<meta name="theme-color" content="#f3f6f6">
+<meta name="theme-color" content="#081114" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/favicon-192.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@500;600&display=swap">
+<link rel="stylesheet" href="/assets/site.css?v=20261120m">
+<link rel="stylesheet" href="/assets/fx.css?v=20261120m">
+<link rel="stylesheet" href="/assets/cursor.css?v=20261121a">
+<link rel="stylesheet" href="/assets/arcade.css?v=20261121a">
+<link rel="stylesheet" href="/assets/halcyon.css?v=20261121a">
+<link rel="stylesheet" href="/assets/join-atlas.css?v=20261120m">
+<link rel="stylesheet" href="/assets/play/play.css?v=20261121a">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Play","url":"https://7ymera.github.io/play/","description":"Games and toys by Alif Najmi.","isPartOf":{"@type":"WebSite","name":"Alif Najmi","url":"https://7ymera.github.io/"}}</script>
+</head>
+<body class="play">
+<a class="skip-link" href="#cabinets">Skip to the cabinets</a>
+
+<div id="hall">
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="/" aria-label="7YMERA, home"><span class="badge av"><img src="/assets/icons/favicon-192.png" alt="" width="32" height="32" decoding="async"></span><span class="mark-t">7YMERA</span></a>
+    <nav class="nav" aria-label="Site">
+      <a href="/">Home</a>
+      <a href="/portfolio/">Portfolio</a>
+      <a href="/play/" aria-current="page">Play</a>
+      <a href="/notes/">Notes</a>
+    </nav>
+    <button class="icon-btn sfx-btn" id="sfx-btn" type="button" aria-pressed="false" aria-label="Sound off. Turn sound on"><span class="sfx-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+    <button class="icon-btn" id="theme-btn" type="button" aria-pressed="false" aria-label="Switch light or dark theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero-play" aria-labelledby="play-h1">
+    <canvas id="attract" aria-hidden="true"></canvas>
+    <div class="wrap hero-in">
+      <p class="eyebrow hero-eye"><span class="led" aria-hidden="true"></span>Arcade hall · 11 cabinets · no coins needed</p>
+      <h1 id="play-h1"><span class="l1">Play</span><span class="l2">the skyline.</span></h1>
+      <p class="lede">An arcade, a lab and a toy box in one room. Stack Kuala Lumpur higher than Merdeka 118, ride the last train, spin the Earth, or run a real database in your browser.</p>
+      <div class="hero-cta">
+        <button class="pix-btn" id="coin" type="button"><span class="pix-slot" aria-hidden="true"></span><span>Insert coin</span><small>Enter · Start</small></button>
+        <a class="ghost-btn" href="#cabinets">See all cabinets</a>
+      </div>
+    </div>
+    <div class="wrap hero-foot">
+      <ul class="hi-strip" aria-label="Your best scores on this device">
+        <li><small>Skyline Stack</small><b data-hi-show="stack">---</b><span>floors</span></li>
+        <li><small>Last Train</small><b data-hi-show="train">---</b><span>points</span></li>
+        <li><small>Scope Creep</small><b data-hi-show="creep">---</b><span>points</span></li>
+        <li><small>Spec Match</small><b data-hi-show="match">---</b><span>moves</span></li>
+      </ul>
+      <p class="attract-tag" aria-hidden="true"><i></i>Attract mode · Last Train on auto-pilot</p>
+    </div>
+  </section>
+
+  <div class="ticker" aria-hidden="true"><div class="ticker-in"><span>Insert coin</span><span>Press start</span><span>11 cabinets</span><span>Best scores stay on this device</span><span>Gamepad ready</span><span>Insert coin</span><span>Press start</span><span>11 cabinets</span><span>Best scores stay on this device</span><span>Gamepad ready</span></div></div>
+
+  <div class="wrap bays" id="cabinets">
+
+    <section class="bay" aria-labelledby="bay-1">
+      <header class="bay-head"><span class="bay-no" aria-hidden="true">01</span><h2 id="bay-1">Arcade floor</h2><p>Four games. Bots play them for you in the previews; you do the real thing.</p></header>
+      <div class="cabs">
+        <a class="cab cab-feature" href="#stack" data-open="stack" data-tone="gold">
+          <span class="cab-sign"><b>Skyline Stack</b><i class="tag">New</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="stack" width="640" height="400" aria-hidden="true"></canvas><span class="cab-hi" data-hi-tag="stack"></span></span>
+          <span class="cab-deck"><span class="cab-desc">One button, one tower. Drop each floor, trim the overhang, and climb past Menara TM, KL Tower, Petronas and Merdeka 118 at their real heights.</span><span class="cab-keys"><kbd>Tap</kbd><kbd>Space</kbd><kbd>A</kbd></span><span class="cab-go">Play<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" href="#train" data-open="train" data-tone="teal">
+          <span class="cab-sign"><b>Last Train</b></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="train" width="640" height="400" aria-hidden="true"></canvas><span class="cab-hi" data-hi-tag="train"></span></span>
+          <span class="cab-deck"><span class="cab-desc">Ride the KL line. Jump the scope creep, grab the requirements.</span><span class="cab-keys"><kbd>Tap</kbd><kbd>Space</kbd><kbd>A</kbd></span><span class="cab-go">Play<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" href="#creep" data-open="creep" data-tone="blue">
+          <span class="cab-sign"><b>Scope Creep</b></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="creep" width="640" height="400" aria-hidden="true"></canvas><span class="cab-hi" data-hi-tag="creep"></span></span>
+          <span class="cab-deck"><span class="cab-desc">45 seconds of triage. Is it a real requirement, or creep? Build it or park it.</span><span class="cab-keys"><kbd>&larr;</kbd><kbd>&rarr;</kbd><kbd>D-pad</kbd></span><span class="cab-go">Play<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" href="#match" data-open="match" data-tone="teal">
+          <span class="cab-sign"><b>Spec Match</b></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="match" width="640" height="400" aria-hidden="true"></canvas><span class="cab-hi" data-hi-tag="match"></span></span>
+          <span class="cab-deck"><span class="cab-desc">Pair each tool with the project it shipped in. Fewest moves wins.</span><span class="cab-keys"><kbd>Tap</kbd><kbd>Arrows</kbd><kbd>A</kbd></span><span class="cab-go">Play<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+      </div>
+    </section>
+
+    <section class="bay" aria-labelledby="bay-2">
+      <header class="bay-head"><span class="bay-no" aria-hidden="true">02</span><h2 id="bay-2">The lab</h2><p>Toys from my side projects. Nothing to win, a lot to poke.</p></header>
+      <div class="cabs">
+        <a class="cab" href="#orbit" data-open="orbit" data-tone="blue">
+          <span class="cab-sign"><b>Orbit</b><i class="tag">Halcyon</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="orbit" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">A dotted globe with arcs out of Kuala Lumpur and three NASA satellites. Drag to spin, tap a city.</span><span class="cab-keys"><kbd>Drag</kbd><kbd>Tap</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" href="#lab" data-open="lab" data-tone="teal">
+          <span class="cab-sign"><b>Particle lab</b><i class="tag">Halcyon</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="lab" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">Four thousand specks of dust that become Petronas, a plexus, a helix. Pull any shape apart.</span><span class="cab-keys"><kbd>Drag</kbd><kbd>Tap</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" href="#glass" data-open="glass" data-tone="gold">
+          <span class="cab-sign"><b>Glass lab</b><i class="tag">WebGL</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="glass" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">A reeded-glass panel in one shader. Slide the light across it, then bend, frost and re-rib it.</span><span class="cab-keys"><kbd>Move</kbd><kbd>Drag</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+      </div>
+    </section>
+
+    <section class="bay" aria-labelledby="bay-3">
+      <header class="bay-head"><span class="bay-no" aria-hidden="true">03</span><h2 id="bay-3">Data toys</h2><p>Real SQLite databases running in your browser. Nothing leaves the page.</p></header>
+      <div class="cabs">
+        <a class="cab" href="#sql-company" data-open="sql-company" data-tone="teal">
+          <span class="cab-sign"><b>Company SQL</b><i class="tag">49 tables</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="sql" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">A whole company from CEO down. Run the original joins or write your own.</span><span class="cab-keys"><kbd>Ctrl</kbd><kbd>Enter</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" href="#sql-jom" data-open="sql-jom" data-tone="blue">
+          <span class="cab-sign"><b>Jom Al-Quran SQL</b><i class="tag">26 tables</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="sql2" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">A tuition-centre database with scrubbed data, plus ready questions to try.</span><span class="cab-keys"><kbd>Ctrl</kbd><kbd>Enter</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" href="#atlas" data-open="atlas" data-tone="gold">
+          <span class="cab-sign"><b>Join Atlas</b><i class="tag">Map</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="atlas" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">Pick tables on a map; it finds the shortest route and writes the JOINs for you.</span><span class="cab-keys"><kbd>Tap</kbd><kbd>Drag</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+      </div>
+    </section>
+
+    <section class="bay" aria-labelledby="bay-4">
+      <header class="bay-head"><span class="bay-no" aria-hidden="true">04</span><h2 id="bay-4">Back room</h2><p>There is one more cabinet. It does not like being looked at.</p></header>
+      <div class="cabs">
+        <a class="cab cab-egg" href="#egg" data-open="egg" data-tone="ink">
+          <span class="cab-sign"><b>Out of order</b><i class="tag" data-egg-tag>???</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="egg" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">The hidden train from the home page. Find it, then ring the bell.</span><span class="cab-keys"><kbd>Tap</kbd></span><span class="cab-go">Peek<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+      </div>
+    </section>
+
+    <section class="howto" aria-labelledby="how-h">
+      <h2 id="how-h">Controls</h2>
+      <ul class="how-grid">
+        <li><b>Keyboard</b><span><kbd>Space</kbd> or <kbd>Enter</kbd> acts. <kbd>P</kbd> pauses. <kbd>Esc</kbd> goes back to the hall. Arrow keys walk between cabinets.</span></li>
+        <li><b>Touch</b><span>Tap anywhere on a game to act. Every control is a big button. Your phone buzzes on perfect drops.</span></li>
+        <li><b>Controller</b><span><kbd>A</kbd> acts, <kbd>B</kbd> goes back, <kbd>Start</kbd> pauses or starts Skyline Stack, D-pad or left stick moves. <span class="pad-chip" id="pad-chip" hidden>Controller connected</span></span></li>
+      </ul>
+    </section>
+  </div>
+</main>
+<footer class="play-foot"><div class="wrap"><span>© 2026 Muhammad Alif Najmi</span><span><a href="/">Home</a> · <a href="/portfolio/">Portfolio</a> · <a href="/notes/">Notes</a></span></div></footer>
+</div>
+
+<div class="stage" id="stage" role="dialog" aria-modal="true" aria-labelledby="stage-title" hidden>
+  <div class="stage-bar">
+    <button class="sbtn" id="stage-close" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>Back to hall</span><kbd>Esc</kbd></button>
+    <div class="stage-id"><p class="eyebrow" id="stage-sub"></p><h2 id="stage-title" tabindex="-1">Play</h2></div>
+    <div class="stage-tools">
+      <button class="sbtn sbtn-icon sfx-btn" id="stage-sound" type="button" aria-pressed="false" aria-label="Sound off. Turn sound on"><span class="sfx-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+      <button class="sbtn sbtn-icon" id="stage-full" type="button" aria-label="Full screen" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    </div>
+  </div>
+  <div class="stage-body" id="stage-body">
+
+    <section class="view view-stack" data-view="stack" hidden>
+      <div class="stk" id="stk">
+        <canvas id="stk-canvas" data-cursor="Drop" aria-label="Skyline Stack. A tower of floors rising past the Kuala Lumpur skyline." role="img"></canvas>
+        <div class="stk-hud" aria-hidden="false">
+          <div class="stk-score"><small>Floor</small><b id="stk-floor">0</b><span id="stk-metres">0 m</span></div>
+          <div class="stk-prog"><p id="stk-next">Next Menara TM 310 m</p><div class="stk-bar"><i id="stk-bar"></i></div></div>
+          <div class="stk-side"><div class="stk-best"><small>Best</small><b id="stk-best">-</b></div><button class="sbtn sbtn-icon" id="stk-pause" type="button" aria-label="Pause" hidden><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button></div>
+        </div>
+        <p class="stk-combo" id="stk-combo" aria-hidden="true"></p>
+        <p class="stk-banner" id="stk-banner" role="status"></p>
+        <div class="stk-card" id="stk-card" data-mode="ready">
+          <h3 id="stk-card-title">Skyline Stack</h3>
+          <p id="stk-card-text"></p>
+          <ul class="stk-chips" id="stk-chips"></ul>
+          <button class="pix-btn" id="stk-go" type="button">Press start</button>
+          <p class="stk-hint" id="stk-hint">Tap, Space or A to build</p>
+        </div>
+        <p class="sr-only" id="stk-live" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section class="view view-pad" data-view="arcade" hidden>
+<div class="arc-wrap" id="arcade">
+        <div class="arc-tabs" role="tablist" aria-label="Choose a game">
+          <button class="arc-tab" role="tab" type="button" data-game="train" aria-selected="true" id="tab-train" aria-controls="pan-train">Last Train<small>best <span id="arc-best-train">-</span></small></button>
+          <button class="arc-tab" role="tab" type="button" data-game="creep" aria-selected="false" tabindex="-1" id="tab-creep" aria-controls="pan-creep">Scope Creep<small>best <span id="arc-best-creep">-</span></small></button>
+          <button class="arc-tab" role="tab" type="button" data-game="match" aria-selected="false" tabindex="-1" id="tab-match" aria-controls="pan-match">Spec Match<small>best <span id="arc-best-match">-</span></small></button>
+          <button class="arc-sound" id="arc-sound" type="button" aria-pressed="false">Sound <b>Off</b></button>
+        </div>
+
+        <div class="arc-panel" role="tabpanel" data-game="train" id="pan-train" aria-labelledby="tab-train">
+          <div class="arc-top"><div><h3>Last Train</h3><p>Ride the KL line. Jump the scope creep, grab the requirements.</p></div><p class="arc-hint">Space, up arrow or tap to jump · P to pause</p></div>
+          <div class="arc-stage">
+            <canvas id="arc-canvas" data-cursor="Jump" width="720" height="270" role="img" aria-label="A train running along a rail past the Kuala Lumpur skyline"></canvas>
+            <div class="arc-over" id="arc-over"><h4 id="arc-over-title">Last Train</h4><p id="arc-over-text">Jump the striped scope-creep blocks and grab the gold requirements.</p><button class="arc-btn" id="arc-go" type="button">Start</button></div>
+          </div>
+          <div class="arc-pad"><button class="arc-btn arc-jump" id="arc-jump" type="button">Jump</button></div>
+          <p class="sr-only" id="arc-live" role="status" aria-live="polite"></p>
+        </div>
+
+        <div class="arc-panel" role="tabpanel" data-game="creep" id="pan-creep" aria-labelledby="tab-creep" hidden>
+          <div class="arc-top"><div><h3>Scope Creep</h3><p>45 seconds. Is it a real requirement, or scope creep? Build it, or park it.</p></div>
+            <div class="arc-stats"><div class="arc-stat"><small>Score</small><b id="sc-score">0</b></div><div class="arc-stat"><small>Streak</small><b id="sc-streak">-</b></div><div class="arc-stat"><small>Time</small><b id="sc-time">45s</b></div></div></div>
+          <div class="sc-bar" aria-hidden="true"><i id="sc-bar"></i></div>
+          <div class="sc-play">
+            <div class="sc-card" id="sc-card" aria-live="polite">Press Start</div>
+            <p class="sc-why" id="sc-why">Build it (a real requirement) or Park it (scope creep).</p>
+            <div class="sc-btns"><button class="arc-btn alt" id="sc-no" type="button" disabled>Park it<small>Left arrow · A</small></button><button class="arc-btn" id="sc-yes" type="button" disabled>Build it<small>Right arrow · D</small></button></div>
+            <div class="arc-over" id="sc-over"><h4 id="sc-over-title">Scope Creep</h4><p id="sc-over-text">Right answers build a streak. Wrong ones cost you time.</p><button class="arc-btn" id="sc-start" type="button">Start</button></div>
+          </div>
+          <p class="sr-only" id="sc-live" role="status" aria-live="polite"></p>
+        </div>
+
+        <div class="arc-panel" role="tabpanel" data-game="match" id="pan-match" aria-labelledby="tab-match" hidden>
+          <div class="arc-top"><div><h3>Spec Match</h3><p>Pair each tool with the project it went into. Fewest moves wins.</p></div>
+            <div class="arc-stats"><div class="arc-stat"><small>Moves</small><b id="mt-moves">0</b></div><div class="arc-stat"><small>Pairs</small><b id="mt-pairs">0 / 8</b></div></div></div>
+          <div class="mt-grid" id="mt-grid"></div>
+          <p class="mt-msg" id="mt-msg" role="status" aria-live="polite"></p>
+          <div><button class="arc-btn" id="mt-again" type="button" hidden>Play again</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view view-pad" data-view="halcyon" hidden>
+<div class="arc-wrap" id="halcyon">
+        <div class="arc-tabs" role="tablist" aria-label="Choose a piece of Halcyon">
+          <button class="arc-tab" role="tab" type="button" data-hx="orbit" aria-selected="true" id="hx-tab-orbit" aria-controls="hx-pan-orbit">Orbit<small>a globe, arcs and satellites</small></button>
+          <button class="arc-tab" role="tab" type="button" data-hx="lab" aria-selected="false" tabindex="-1" id="hx-tab-lab" aria-controls="hx-pan-lab">Particle lab<small>dust that becomes a skyline</small></button>
+        </div>
+
+        <div class="arc-panel" role="tabpanel" data-hx="orbit" id="hx-pan-orbit" aria-labelledby="hx-tab-orbit">
+          <div class="hx-stage">
+            <canvas id="hx-globe" data-cursor="Drag" width="800" height="450" role="img" aria-label="A dotted globe from orbit with glowing arcs from Kuala Lumpur to cities around the world and three satellites"></canvas>
+            <div class="hx-probe" id="hx-probe" hidden></div>
+          </div>
+          <div class="hx-bar">
+            <button class="arc-btn" id="hx-kl" type="button">Face Kuala Lumpur</button>
+            <button class="arc-btn alt" id="hx-me" type="button">Where I guess you are</button>
+            <button class="arc-sound" id="hx-spin" type="button" aria-pressed="true">Auto-spin <b>On</b></button>
+          </div>
+          <p class="hx-read" id="hx-read" role="status"></p>
+          <p class="hx-credit">Outlines: Natural Earth (public domain). Satellites: the NASA models behind <a href="https://halcyon-xmr.vercel.app/" target="_blank" rel="noopener">Halcyon</a> (AIM, GPM, TRMM). Your place is guessed from your time zone in this browser only.</p>
+        </div>
+
+        <div class="arc-panel" role="tabpanel" data-hx="lab" id="hx-pan-lab" aria-labelledby="hx-tab-lab" hidden>
+          <div class="hx-stage">
+            <canvas id="hx-lab" data-cursor="Drag" width="800" height="450" role="img" aria-label="A cloud of glowing particles that morphs between shapes, including the Petronas Towers and other Kuala Lumpur landmarks"></canvas>
+            <p class="hx-name" id="hx-form" role="status" aria-live="polite">Chladni plate</p>
+          </div>
+          <div class="hx-chips" id="hx-chips" role="group" aria-label="Shapes"></div>
+          <div class="hx-bar">
+            <button class="arc-sound" id="hx-explode" type="button" aria-pressed="false">Explode <b>Off</b></button>
+            <button class="arc-sound" id="hx-auto" type="button" aria-pressed="true">Auto-morph <b>On</b></button>
+          </div>
+          <p class="hx-credit">The landmarks are my own KL models, turned into points. Heights are to scale: Merdeka 118 is the tallest.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="view view-glass" data-view="glass" hidden>
+      <iframe id="glass-frame" title="Glass lab" loading="lazy" allow="fullscreen"></iframe>
+    </section>
+
+    <section class="view view-pad" data-view="sql" hidden>
+      <div class="sql-head"><p id="sql-lede"></p><a id="sql-note" class="ghost-btn" href="/notes/">Read the story</a></div>
+      <div id="sql-host" class="sql-host"><p class="sql-wait">Loading the playground…</p></div>
+    </section>
+
+    <section class="view view-egg" data-view="egg" hidden>
+      <div class="egg">
+        <div class="egg-scene" aria-hidden="true">
+          <svg class="egg-train" id="egg-train" viewBox="0 0 360 44" width="360" height="44"><g fill="currentColor"><rect x="2" y="6" width="112" height="28" rx="9"/><rect x="120" y="6" width="112" height="28" rx="9"/><rect x="238" y="6" width="112" height="28" rx="9"/></g><g class="egg-win" fill="currentColor"><rect x="14" y="12" width="20" height="12" rx="2"/><rect x="40" y="12" width="20" height="12" rx="2"/><rect x="66" y="12" width="20" height="12" rx="2"/><rect x="132" y="12" width="20" height="12" rx="2"/><rect x="158" y="12" width="20" height="12" rx="2"/><rect x="184" y="12" width="20" height="12" rx="2"/><rect x="250" y="12" width="20" height="12" rx="2"/><rect x="276" y="12" width="20" height="12" rx="2"/><rect x="302" y="12" width="20" height="12" rx="2"/></g><g fill="currentColor"><circle cx="24" cy="38" r="4"/><circle cx="92" cy="38" r="4"/><circle cx="142" cy="38" r="4"/><circle cx="210" cy="38" r="4"/><circle cx="260" cy="38" r="4"/><circle cx="328" cy="38" r="4"/></g></svg>
+          <i class="egg-rail"></i>
+        </div>
+        <h3>You found the back room</h3>
+        <p>On the home page there is a train nobody mentions. Tap the 7YMERA mark five times in a row and it rolls along the bottom of the screen. Or skip the hunt and ring the bell from here.</p>
+        <button class="pix-btn" id="egg-ring" type="button">Ring the bell</button>
+        <p class="egg-count" id="egg-count" role="status">Trains run from this room: 0</p>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  try { var saved = localStorage.getItem('theme'); if (saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved); } catch (e) {}
+  var btn = document.getElementById('theme-btn');
+  function paint() { btn.setAttribute('aria-pressed', root.getAttribute('data-theme') === 'dark' ? 'true' : 'false'); }
+  btn.addEventListener('click', function (e) {
+    var cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var next = cur === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', next); paint();
+    try { localStorage.setItem('theme', next); } catch (er) {}
+    if (e && e.detail > 0) btn.blur();
+  });
+  paint();
+})();
+</script>
+<script src="/assets/sfx.js?v=20261120m" defer></script>
+<script src="/assets/fx.js?v=20261120m" defer></script>
+<script src="/assets/cursor.js?v=20261121a" defer></script>
+<script src="/assets/arcade.js?v=20261121a" defer></script>
+<script src="/assets/halcyon.js?v=20261121a" defer></script>
+<script src="/assets/play/stack.js?v=20261121a" defer></script>
+<script src="/assets/play/pad.js?v=20261121a" defer></script>
+<script src="/assets/play/play.js?v=20261121a" defer></script>
+</body>
+</html>

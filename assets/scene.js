@@ -1,7 +1,23 @@
 /* KLCC in WebGL. The camera orbits the towers as the page scrolls. three.js comes from cdnjs. */
 (function(){
-  if(!window.THREE){document.documentElement.classList.remove('gl');return}
+  // ===== SceneTime: the time of day, shared by every page =====
+  // SceneTime.set(t): t is 0 (plain day) to 2 (night), 1 is golden hour; continuous. SceneTime.mode('day'|'golden'|'night') tweens there in about 1.2 s. SceneTime.get() reads it.
+  // Each change dispatches `scenetime` on document with detail.t. This part needs no WebGL: it also drives the page colours of pages that have no scene.
+  var ST=window.SceneTime;
+  if(!ST){(function(){
+    var t=0,tw=0,subs=[],rm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function set(v){v=+v;if(v!==v)return t;v=v<0?0:v>2?2:v;if(Math.abs(v-t)<1e-4)return t;t=v;
+      for(var i=0;i<subs.length;i++)try{subs[i](t)}catch(e){}
+      try{document.dispatchEvent(new CustomEvent('scenetime',{detail:{t:t}}))}catch(e){}return t}
+    function mode(n,ms){var to=n==='day'?0:n==='golden'?1:n==='night'?2:+n;if(to!==to)return;to=Math.max(0,Math.min(2,to));
+      if(tw){cancelAnimationFrame(tw);tw=0}
+      ms=ms==null?1200:ms;var from=t,d=Math.abs(to-from);if(!d)return;ms*=Math.min(1,d/1+.3);
+      if(rm||ms<=0){set(to);return}
+      var t0=0;(function step(now){if(!t0)t0=now;var k=Math.min(1,(now-t0)/ms);k=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;set(from+(to-from)*k);tw=k<1?requestAnimationFrame(step):0})(performance.now())}
+    ST=window.SceneTime={get:function(){return t},set:function(v){if(tw){cancelAnimationFrame(tw);tw=0}return set(v)},mode:mode,_on:function(f){subs.push(f)},nearest:function(){return t<.5?'day':t<1.5?'golden':'night'}};
+  })()}
   var CS=document.currentScript; // read now: it is null once the start is deferred
+  if(!window.THREE){document.documentElement.classList.remove('gl');return}
   var DEFER=!document.documentElement.hasAttribute('data-flight-only');
   // The page layout for the scene (panels, plate round the name) must not change after the first paint, so `gl` goes on now; start() removes it again if WebGL turns out to be unavailable.
   if(DEFER)document.documentElement.classList.add('gl');
@@ -55,13 +71,13 @@
   var amb=new T.AmbientLight(0xffffff,.75),sun=new T.DirectionalLight(0xffffff,.8);sun.position.set(80,140,60);scene.add(amb,sun);
   // Three flat tones per face (lit / mid / shade, picked by the face normal against one fixed light) and height-aware haze, both in the existing materials' shaders.
   // The tones are derived from each material's role colour, so the themes and the golden hour keep working. The haze fades towards the CSS sky gradient itself (uSky1/uSky2 at this pixel's screen height), so geometry melts into the sky with no seam.
-  var shadeBase=new T.Vector3(.3,.52,.92),hazeBase=.5,GSH=new T.Vector3(.52,.47,.68),TU={uLight:{value:new T.Vector3(-.42,.74,.52).normalize()},uSunC:{value:sun.color},uLitMul:{value:new T.Vector3(1,1,1)},uLitMix:{value:.7},uShadeMul:{value:new T.Vector3(.4,.6,.95)},uMidMul:{value:new T.Vector3(1,1,1)},
-    uSky1:{value:new T.Color()},uSky2:{value:new T.Color()},uSky3:{value:new T.Color()},uStop:{value:1},uRes:{value:new T.Vector2(1,1)},uHazeK:{value:.7},uSunAmt:{value:.5},uEdge:{value:new T.Vector2(620,1250)}};
+  var TU={uLight:{value:new T.Vector3(-.42,.74,.52).normalize()},uSunC:{value:sun.color},uLitMul:{value:new T.Vector3(1,1,1)},uLitMix:{value:.7},uShadeMul:{value:new T.Vector3(.4,.6,.95)},uMidMul:{value:new T.Vector3(1,1,1)},
+    uSky1:{value:new T.Color()},uSky2:{value:new T.Color()},uSky3:{value:new T.Color()},uStop:{value:1},uRes:{value:new T.Vector2(1,1)},uHazeK:{value:.7},uSunAmt:{value:.5},uEdge:{value:new T.Vector2(620,1250)},uLitC:{value:new T.Color(.97,.99,1)},uWrap:{value:0},uGold:{value:0},uGlint:{value:0}};
   var GLSL=window.SCENE_GLSL; // the shader text lives in assets/scene-glsl.js (loaded just before this file), so it can be read and edited as GLSL
   function toon(sh){
     for(var k in TU)sh.uniforms[k]=TU[k];
     sh.vertexShader=sh.vertexShader.replace('void main() {','varying vec3 vWP;\nvoid main() {').replace('#include <worldpos_vertex>','#include <worldpos_vertex>\n vWP=(modelMatrix*vec4(transformed,1.0)).xyz;');
-    sh.fragmentShader=sh.fragmentShader.replace('void main() {','varying vec3 vWP;uniform vec3 uLight,uSunC,uLitMul,uShadeMul,uMidMul,uSky1,uSky2,uSky3;uniform float uStop;uniform float uLitMix,uHazeK,uSunAmt;uniform vec2 uRes,uEdge;\nvoid main() {')
+    sh.fragmentShader=sh.fragmentShader.replace('void main() {','varying vec3 vWP;uniform vec3 uLight,uSunC,uLitMul,uShadeMul,uMidMul,uSky1,uSky2,uSky3,uLitC;uniform float uStop,uWrap,uGold,uGlint;uniform float uLitMix,uHazeK,uSunAmt;uniform vec2 uRes,uEdge;\nvoid main() {')
       .replace('#include <aomap_fragment>',GLSL.toonShade)
       .replace('#include <fog_fragment>',GLSL.toonHaze);
     return sh}
@@ -105,7 +121,7 @@
   loadModel(BASE+'city/exchange106.json',LAY.ex[0],LAY.ex[1],LAY.ex[2],bodyM,null,exEdges);   // The Exchange 106, cropped and simplified (tools/convert-dae-crop.py)  // Merdeka Maybank Tower (formerly Merdeka PNB 118; SketchUp Collada, see tools/convert-dae.py)
   }
   // In the district, the two landmarks baked into its mesh were welded coarsely and have holes: draw the full-detail models over them (1 % larger, so they sit just outside).
-  var nightLines=[];
+  var nightLines=[],lineMats=[],curLines=0; // curLines: how much of the night creases show (0 to 1, from SceneTime)
   // The long creases are only drawn at night, and finding them (EdgesGeometry over every landmark mesh) took about 1.1 s of main thread at load. So the work is queued
   // per mesh and run one mesh per task, and only once it is needed: at once when the page is (or turns) dark, otherwise as idle warm-up long after load (see sciStyle and warmEdges).
   var edgeJobs=[],edgeTimer=0,edgesWanted=false;
@@ -113,10 +129,10 @@
     if(edgeTimer||!edgeJobs.length)return;
     edgeTimer=setTimeout(function(){edgeTimer=0;var j=edgeJobs.shift();j[0](j[1],j[2]);need=true;pumpEdges()},0)}
   function edgesFor(color,minLen,op){ // night-only lines along a landmark's long creases (Merdeka ice white, Petronas warm white, The Exchange pale cyan)
-    var lm=new T.LineBasicMaterial({color:color,transparent:true,opacity:op,blending:T.AdditiveBlending,depthWrite:false});
+    var lm=new T.LineBasicMaterial({color:color,transparent:true,opacity:op,blending:T.AdditiveBlending,depthWrite:false});lineMats.push({m:lm,op:op});lm.opacity=op*curLines;
     function build(m,out){var eg=new T.EdgesGeometry(m.geometry,42),pa=eg.attributes.position.array,keep=[],SCm=out.scale.x||1;
       for(var e=0;e<pa.length;e+=6){var ex=pa[e+3]-pa[e],ey=pa[e+4]-pa[e+1],ez=pa[e+5]-pa[e+2];if(Math.sqrt(ex*ex+ey*ey+ez*ez)*SCm>minLen)keep.push(pa[e],pa[e+1],pa[e+2],pa[e+3],pa[e+4],pa[e+5])}
-      var kg=new T.BufferGeometry();kg.setAttribute('position',new T.Float32BufferAttribute(keep,3));var ln=new T.LineSegments(kg,lm);ln.scale.set(1.006,1,1.006);ln.visible=beaconDark;ln.renderOrder=3;m.parent.add(ln);nightLines.push(ln)}
+      var kg=new T.BufferGeometry();kg.setAttribute('position',new T.Float32BufferAttribute(keep,3));var ln=new T.LineSegments(kg,lm);ln.scale.set(1.006,1,1.006);ln.visible=curLines>.01;ln.renderOrder=3;m.parent.add(ln);nightLines.push(ln)}
     return function(out){var ms=[];out.traverse(function(m){if(m.isMesh)ms.push(m)});ms.forEach(function(m){edgeJobs.push([build,m,out])});if(edgesWanted)pumpEdges()}}
   function warmEdges(){edgesWanted=true;pumpEdges()}
   var merEdges=edgesFor(0xd4e9ff,24,.4),klccEdges=edgesFor(0xffe7b0,14,.55),exEdges=edgesFor(0xa8ecff,16,.7);
@@ -275,6 +291,14 @@
   moonRing.rotation.x=1.15;moonRing2.rotation.x=1.15;moonRing.renderOrder=moonRing2.renderOrder=-14;moonG.add(moonRing,moonRing2);
   var moon2M=new T.MeshBasicMaterial({map:mTex,fog:false}),moon2=new T.Mesh(new T.SphereGeometry(15,20,14),moon2M);moon2.renderOrder=-14;moonG.add(moon2);
   sci.add(moonG);
+  // -- the golden-hour sun: a low warm disc with a wide glow, locked in the sky like the moon (visible only from t 0 to 2 around golden hour, see SceneTime). SUND is also where the golden-hour light comes from.
+  function discTex(){var c=document.createElement('canvas');c.width=c.height=128;var x=c.getContext('2d'),g=x.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'#fff');g.addColorStop(.86,'#fff');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return new T.CanvasTexture(c)}
+  var SUND=new T.Vector3(-.8,.11,-.59).normalize(),sunG=new T.Group(),
+    sunDisc=new T.Sprite(new T.SpriteMaterial({map:discTex(),transparent:true,depthWrite:false,fog:false})),
+    sunGlow=new T.Sprite(new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,depthTest:false,fog:false,blending:T.AdditiveBlending})), // the glow is not depth-tested: it is the sun's glare over the whole picture, so the ground and the sky meet without a seam
+    sunGlow2=new T.Sprite(new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,depthTest:false,fog:false,blending:T.AdditiveBlending}));
+  sunDisc.scale.set(84,84,1);sunGlow.scale.set(760,760,1);sunGlow2.scale.set(2400,2400,1);sunDisc.renderOrder=-12;sunGlow.renderOrder=-13;sunGlow2.renderOrder=-14;
+  sunG.add(sunGlow2,sunGlow,sunDisc);sunG.position.copy(SUND).multiplyScalar(1100);sunG.visible=false;sci.add(sunG);
   // -- gyroscope rings round the Petronas crowns and the top of Merdeka 118
   var gyroM=new T.MeshBasicMaterial({transparent:true,depthWrite:false,side:T.DoubleSide}),gyros=[];
   function addGyro(c,r,speed){var g=new T.Group();g.position.copy(c);
@@ -368,17 +392,10 @@
       var uh=dir>0?x%1:(1-x)%1;tr.c.getPointAt(uh,trP);tr.c.getTangentAt(uh,trT);if(dir<0)trT.negate();headGlows[k].visible=true;headGlows[k].position.copy(trP).addScaledVector(trT,CARL*.55).add(trUp);
       var xt=(((x-(tr.cars-1)*step)%1)+1)%1,ut=dir>0?xt:(1-xt)%1;tr.c.getPointAt(ut,trP);tr.c.getTangentAt(ut,trT);if(dir<0)trT.negate();tailGlows[k].visible=true;tailGlows[k].position.copy(trP).addScaledVector(trT,-CARL*.55).add(trUp)}
     carMid.instanceMatrix.needsUpdate=true;carCab.instanceMatrix.needsUpdate=true;carWin.instanceMatrix.needsUpdate=true;carStripe.instanceMatrix.needsUpdate=true}
-  function railStyle(dark){
-    railM.color.set(dark?C.glass:C.line);railM.blending=dark?T.AdditiveBlending:T.NormalBlending;railM2.color.set(dark?C.glass:C.line);railM2.blending=dark?T.AdditiveBlending:T.NormalBlending;railM2.opacity=dark?.25:.3;pillarM.color.set(dark?C.mid:C.near);
-    stLampM.color.set(dark?C.glass:C.line);stPlatM.color.set(dark?C.mid:C.near);stPostM.color.set(dark?C.glass:C.near);stCanM.color.set(dark?C.glass:0xffffff);stCanM.opacity=dark?.32:.65;stCanM.blending=dark?T.AdditiveBlending:T.NormalBlending;
-    carBodyM.color.set(dark?0x1b3d73:0xf6fbff);carWinM.color.set(dark?0xfff1b8:0x0b2a6b);carStripeM.color.set(dark?C.glass:0x1559c9);
-    headGlowM.opacity=dark?.95:.5;headGlowM.color.set(dark?0xfff0c0:0xffffff);
-    tailGlowM.opacity=dark?.9:.35;[railM,railM2,headGlowM,stCanM,tailGlowM].forEach(function(m){m.needsUpdate=true})}
   // Aircraft warning lights: a red double flash on the tip of every landmark (and on both Petronas spires), instead of lit rooms up there.
   var BEAC=(function(){var a=lp('klcc',11,-10),b=lp('klcc',-11,10),m=crown('mer'),e=crown('ex'),k=crown('kl');return [[a[0],134,a[1]],[b[0],134,b[1]],[m[0],193,m[1]],[e[0],136,e[1]],[k[0],130,k[1]]]})(); // both Petronas spires, then the tips of Merdeka 118, The Exchange 106 and Menara KL
   var beacons=BEAC.map(function(b,i){var m=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xff3a2a,fog:false,opacity:0}),sp=new T.Sprite(m);sp.scale.set(i===2?22:14,i===2?22:14,1);sp.position.set(b[0],b[1],b[2]);sp.renderOrder=6;g.add(sp);return{m:m,ph:i*.37}});
-  var beaconDark=beaconDark||false;
-  function beaconUpdate(time){var t=time/1000;beacons.forEach(function(b){var p=((t/1.7+b.ph)%1+1)%1,a=(p<.09||(p>.2&&p<.29))?1:.08;b.m.opacity=a*(beaconDark?1:.45);b.m.blending=beaconDark?T.AdditiveBlending:T.NormalBlending})}
+  function beaconUpdate(time){var t=time/1000;beacons.forEach(function(b){var p=((t/1.7+b.ph)%1+1)%1,a=(p<.09||(p>.2&&p<.29))?1:.08;b.m.opacity=a*beaconK;b.m.blending=beaconAdd?T.AdditiveBlending:T.NormalBlending})}
   // Night moon: put in the clearest part of the picture. Each frame, a few candidate spots on the screen are scored by their distance from the projected landmark tops (and their spires),
   // the best one wins (with a bias for the current one, so it does not hop), and the moon eases there, 1100 units out along that ray. Day keeps the old fixed placement.
   var sciPos=new T.Vector3(),MCAND=[[.74,.62],[-.74,.62],[0,.82],[.86,.18],[-.86,.18],[.45,.84],[-.45,.84]],mIdx=0,mX=.74,mY=.62,mP=new T.Vector3(),mTop=[];
@@ -402,38 +419,89 @@
     moon2.position.set(Math.cos(t*.22)*170,Math.sin(t*.22)*28,Math.sin(t*.22)*170);
     for(var g=0;g<gyros.length;g++){gyros[g].ring.rotation.z=t*.5*gyros[g].sp;gyros[g].h.rotation.y+=still?0:.0016*gyros[g].sp}
     railUpdate(time,still)}
-  function sciStyle(dark){
-    beaconDark=dark;nightLines.forEach(function(l){l.visible=dark});if(dark)warmEdges();
-    starM.color.set(dark?0xffffff:C.near);starM.opacity=dark?1:.38;starM.blending=dark?T.AdditiveBlending:T.NormalBlending;starGeo.setAttribute('color',dark?starAD:starAL);
-    moonM.color.set(dark?0xc4cfee:C.near);moon2M.color.set(dark?0xcfd8f2:C.mid);
-    moonHalo.material.color.set(dark?0x9dbbff:0xffffff);moonHalo.material.opacity=dark?.38:.85;
-    ringMat.color.set(dark?0xbcd2ff:C.near);ringMat.opacity=dark?.5:.55;
-    gyroM.color.set(dark?C.glass:C.line);gyroM.opacity=dark?.85:.75;gyroM.blending=dark?T.AdditiveBlending:T.NormalBlending;
-    [starM,ringMat,gyroM,moonHalo.material].forEach(function(m){m.needsUpdate=true});railStyle(dark)}
-  function fxStyle(dark){
-    var bl=dark?T.AdditiveBlending:T.NormalBlending,c=C.line;
-    beamM.color.set(c);beamM.blending=bl;beamM.opacity=dark?.7:.6;
-    haloM.color.set(c);haloM.blending=bl;haloM.opacity=dark?.9:.8;
-    radarM.color.set(c);radarM.blending=bl;
-    polyM.color.set(c);polyM.blending=bl;polyM.opacity=dark?.8:.7;polyM.needsUpdate=true;
-    linkM.color.set(c);linkM.opacity=dark?.5:.6;pulseM.color.set(dark?C.glass:C.line);
-    fx.forEach(function(m){m.needsUpdate=true});sciStyle(dark)}
-  function fogColor(){return root.getAttribute('data-theme')==='dark'?col('skyM').lerp(col('sky3'),.5):col('sky2')} // the fog (cars, rails) takes the haze colour at night
-  var fogN0=300,fogF0=680; // base fog (set by recolor); the finale pushes it back
-  function recolor(){
-    root.style.removeProperty('--sky1');root.style.removeProperty('--sky2');goldLast=-1;readColors();var dark=root.getAttribute('data-theme')==='dark';
-    mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});
-    tower.emissive.set(C.glass);tower.emissiveIntensity=dark?1:.28;glassM.emissive.set(C.ring);glassM.emissiveIntensity=dark?.9:.15;
-    cityU.uNight.value=dark?1:0;
-    if(glassModelM){glassModelM.emissive.set(C.ring);glassModelM.emissiveIntensity=dark?0:.04}ringM.color.set(C.ring);specks.material.color.set(C.ring);
-    var f=fogColor();fogN0=dark?520:620;fogF0=dark?1500:1700; /* thin fog: it used to hide the city */scene.fog=new T.Fog(f,fogN0,fogF0);
-    TU.uSky1.value.set(C.sky1);TU.uSky2.value.set(C.skyM);TU.uSky3.value.set(C.sky3);TU.uStop.value=dark?.58:1;
-    if(dark){TU.uLitMul.value.set(3,3,1.9);TU.uMidMul.value.set(.95,.95,.95);TU.uLitMix.value=0;TU.uShadeMul.value.set(.45,.5,.7);TU.uHazeK.value=.55} /* night: dark blue-violet silhouettes in three tones, the haze takes the warm horizon colour */
-    else{TU.uLitMul.value.set(1,1,1);TU.uMidMul.value.set(1,1,1);TU.uLitMix.value=.42;TU.uShadeMul.value.set(.46,.62,.95);TU.uHazeK.value=.5} /* day: one blue, three steps of it. Lit faces are a pale tint of the base (not white), shade is the same blue deepened, so every building sits in one family and the steps give the depth */
-    TU.uSunAmt.value=dark?1:.5;shadeBase.copy(TU.uShadeMul.value);hazeBase=TU.uHazeK.value;
-    fxStyle(dark);amb.intensity=dark?.45:.5;sun.intensity=dark?.55:.55;sun.color.set(dark?0xb0b4ff:0xffffff)}
-  recolor();window.addEventListener('scenetheme',function(){recolor();need=true});
-  new MutationObserver(function(){recolor();need=true}).observe(root,{attributes:true,attributeFilter:['data-theme']}); // the page's own theme button flips data-theme
+  // ===== TIME OF DAY: SceneTime =====
+  // t runs 0 (plain day), 1 (golden hour), 2 (night). Three parameter sets are built ONCE (TB below, one row per parameter: [day, golden, night]; colours as hex, converted to OKLab here).
+  // applyTime(t) blends the two neighbouring sets into the shader uniforms and a few dozen material colours: no CSS reads, no material rebuilds, no shader recompiles, at most once per frame
+  // and only when t changed. The page's sky gradient (--sky1, --sky-mid, --sky3, --sky-stop) is written at most 10 times a second, and only when it changed (not at all under <html data-daycycle>, which writes it itself).
+  // Day = the old light theme and night = the old dark theme, number for number, so t 0 and t 2 look as they always did.
+  function s2l(c){return c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4)}
+  function l2s(c){c=c<0?0:c>1?1:c;return c<=.0031308?c*12.92:1.055*Math.pow(c,1/2.4)-.055}
+  function lab(h){var n=parseInt(h.slice(1),16),r=s2l((n>>16&255)/255),g=s2l((n>>8&255)/255),b=s2l((n&255)/255),
+      l=Math.cbrt(.4122214708*r+.5363325363*g+.0514459929*b),m=Math.cbrt(.2119034982*r+.6806995451*g+.1073969566*b),s=Math.cbrt(.0883024619*r+.2817188376*g+.6299787005*b);
+    return [.2104542553*l+.793617785*m-.0040720468*s,1.9779984951*l-2.428592205*m+.4505937099*s,.0259040371*l+.7827717662*m-.808675766*s]}
+  function mixc(o,A,B,f){var L=A[0]+(B[0]-A[0])*f,a=A[1]+(B[1]-A[1])*f,b=A[2]+(B[2]-A[2])*f,
+      l=L+.3963377774*a+.2158037573*b,m=L-.1055613458*a-.0638541728*b,s=L-.0894841775*a-1.291485548*b;l=l*l*l;m=m*m*m;s=s*s*s;
+    o.r=l2s(4.0767416621*l-3.3077115913*m+.2309699292*s);o.g=l2s(-1.2684380046*l+2.6097574011*m-.3413193965*s);o.b=l2s(-.0041960863*l-.7034186147*m+1.707614701*s)}
+  // [day, golden hour, night]. Golden hour: dusky blue-violet zenith, an amber sky at the horizon, a low warm sun, pale cream lit faces, violet shade, long amber haze, windows just starting to glow.
+  // No magenta or pink anywhere in it (the owner's rule); the day column is the one blue family.
+  var TB={
+    far:['#b9d0ee','#c2b6d2','#1a1b3a'],mid:['#8ab2e6','#a597ca','#10183a'],near:['#5c92dc','#8a7cb8','#16224d'],ground:['#8ab2e6','#b3a4c4','#0d1230'],glass2:['#5c92dc','#968ac2','#0e1838'],
+    ring:['#a2c3f0','#ffc07a','#7fd3ff'],orb:['#2c63c9','#6a5cb4','#3d79e0'],glass:['#e8f1fd','#ffe6c0','#7fd3ff'],line:['#2aa6e8','#f0a444','#3aa0ee'],
+    sky1:['#eaf4fb','#3a60a2','#050a1a'],skyM:['#cfe6f7','#eea25f','#141f52'],sky3:['#cfe6f7','#ffd79a','#6a4030'],fog:['#cfe6f7','#f1b27c','#3f2f41'],
+    sunC:['#ffffff','#ffd9a4','#b0b4ff'],litC:['#f8fcff','#fff1d2','#f8fcff'],sunGlow:['#ffe6b0','#ffae55','#ffae55'],sunDisc:['#fffdf2','#fffbe8','#fffbe8'],
+    star:['#5c92dc','#ffffff','#ffffff'],moon:['#5c92dc','#eac9aa','#c4cfee'],moon2:['#8ab2e6','#e2c6ac','#cfd8f2'],halo:['#ffffff','#ffd6a0','#9dbbff'],moonRing:['#5c92dc','#e9c9a4','#bcd2ff'],
+    rail:['#2aa6e8','#ffcf8a','#7fd3ff'],pillar:['#5c92dc','#8f80b8','#10183a'],stPlat:['#5c92dc','#9a8cbd','#10183a'],stPost:['#5c92dc','#9a8cbd','#7fd3ff'],stCan:['#ffffff','#ffe9c8','#7fd3ff'],
+    carBody:['#f6fbff','#fff0da','#1b3d73'],carWin:['#0b2a6b','#5a4a88','#fff1b8'],carStripe:['#1559c9','#e0842a','#7fd3ff'],headGlow:['#ffffff','#ffe2a8','#fff0c0'],
+    gyro:['#2aa6e8','#ffc27a','#7fd3ff'],pulse:['#2aa6e8','#ffcf8a','#7fd3ff'],
+    stop:[1,.6,.58],fogN:[620,500,520],fogF:[1700,1650,1500],nightU:[0,.24,1],gold:[0,1,0],wrap:[0,.2,0],glint:[0,.5,0],
+    light:[[-.42,.74,.52],[.95,.2,-.3],[-.42,.74,.52]],litMul:[[1,1,1],[1.08,1,.9],[3,3,1.9]],midMul:[[1,1,1],[1,.97,1.04],[.95,.95,.95]],litMix:[.42,.5,0],shadeMul:[[.46,.62,.95],[.62,.55,.78],[.45,.5,.7]],hazeK:[.5,.92,.55],sunAmt:[.5,1,1],
+    towEm:[.28,.5,1],glassEm:[.15,.45,.9],gmEm:[.04,.2,0],amb:[.5,.5,.45],
+    starO:[.38,0,1],moonO:[.85,.3,.38],ringO:[.55,.4,.5],gyroO:[.75,.8,.85],sunO:[0,1,0],lines:[0,0,1],beacon:[.45,.7,1],
+    railO2:[.3,.3,.25],stCanO:[.65,.5,.32],headO:[.5,.7,.95],tailO:[.35,.6,.9],beamO:[.6,.65,.7],haloO:[.8,.85,.9],polyO:[.7,.75,.8],linkO:[.6,.6,.5]};
+  var SET=[{},{},{}],tk,ti,tv0;
+  for(tk in TB)for(ti=0;ti<3;ti++){tv0=TB[tk][ti];SET[ti][tk]=typeof tv0==='string'?lab(tv0):tv0}
+  var CC={},TA,TBb,TF=0;
+  function cc(k){return CC[k]||(CC[k]=new T.Color())}
+  function pick(t){if(t<=1){TA=SET[0];TBb=SET[1];TF=t}else{TA=SET[1];TBb=SET[2];TF=t-1}}
+  function cmix(k,o){mixc(o||cc(k),TA[k],TBb[k],TF);return o||CC[k]}
+  function nn(k){return TA[k]+(TBb[k]-TA[k])*TF}
+  function vmix(k,o){var a=TA[k],b=TBb[k];o.set(a[0]+(b[0]-a[0])*TF,a[1]+(b[1]-a[1])*TF,a[2]+(b[2]-a[2])*TF);return o}
+  var ROLES=['far','mid','near','ground','glass2','ring','orb'],addNow=null,starSwap=null,beaconK=.45,beaconAdd=false,cssOn=false,cssAt=0,cssTimer=0,cssLast='',tDirty=true,tLast=-1;
+  scene.fog=new T.Fog(0xcfe6f7,620,1700);
+  var fogN0=620,fogF0=1700; // base fog (applyTime sets them); the finale pushes it back
+  function setAdd(add){ // the additive glow materials: normal blending by day and golden hour, additive from t 1.5
+    if(add===addNow)return;addNow=add;var b=add?T.AdditiveBlending:T.NormalBlending,L=[railM,railM2,stCanM,gyroM,beamM,haloM,radarM,polyM];
+    for(var i=0;i<L.length;i++)L[i].blending=b;beaconAdd=add}
+  function hex3(c){return '#'+c.getHexString()}
+  function writeCss(){cssTimer=0;cssAt=performance.now();if(root.hasAttribute('data-daycycle'))return;
+    var a=hex3(cc('sky1')),b=hex3(cc('skyM')),c=hex3(cc('sky3')),st=(TU.uStop.value*100).toFixed(1)+'%',key=a+b+c+st;if(key===cssLast)return;cssLast=key;
+    var s=root.style;s.setProperty('--sky1',a);s.setProperty('--sky2',b);s.setProperty('--sky-mid',b);s.setProperty('--sky3',c);s.setProperty('--sky-stop',st)}
+  function queueCss(){if(cssTimer)return;var w=100-(performance.now()-cssAt);if(w<=0)writeCss();else cssTimer=setTimeout(writeCss,w)}
+  function applyTime(t){
+    tLast=t;pick(t);var i,add=t>=1.5,night=t>1;
+    for(i=0;i<ROLES.length;i++)cmix(ROLES[i]);
+    for(i=0;i<mats.length;i++){var r=mats[i].userData.role;if(r)mats[i].color.copy(CC[r])}
+    cmix('sky1');cmix('skyM');cmix('sky3');TU.uSky1.value.copy(CC.sky1);TU.uSky2.value.copy(CC.skyM);TU.uSky3.value.copy(CC.sky3);TU.uStop.value=nn('stop');
+    scene.fog.color.copy(cmix('fog'));fogN0=nn('fogN');fogF0=nn('fogF');
+    vmix('light',TU.uLight.value).normalize();vmix('litMul',TU.uLitMul.value);vmix('midMul',TU.uMidMul.value);vmix('shadeMul',TU.uShadeMul.value);
+    TU.uLitMix.value=nn('litMix');TU.uHazeK.value=nn('hazeK');TU.uSunAmt.value=nn('sunAmt');TU.uGold.value=nn('gold');TU.uWrap.value=nn('wrap');TU.uGlint.value=nn('glint');
+    cmix('litC',TU.uLitC.value);cmix('sunC',sun.color);cityU.uNight.value=nn('nightU');
+    tower.emissive.copy(cmix('glass'));tower.emissiveIntensity=nn('towEm');glassM.emissive.copy(CC.ring);glassM.emissiveIntensity=nn('glassEm');
+    glassModelM.emissive.copy(CC.ring);glassModelM.emissiveIntensity=nn('gmEm');ringM.color.copy(CC.ring);specks.material.color.copy(CC.ring);amb.intensity=nn('amb');
+    // sci-fi layer: stars (white and additive from golden hour on; faint blue dots by day), moon, sun, night creases, beacons
+    if(night!==starSwap){starSwap=night;starM.blending=night?T.AdditiveBlending:T.NormalBlending;starGeo.setAttribute('color',night?starAD:starAL)}
+    starM.color.copy(cmix('star'));starM.opacity=nn('starO');
+    moonM.color.copy(cmix('moon'));moon2M.color.copy(cmix('moon2'));moonHalo.material.color.copy(cmix('halo'));moonHalo.material.opacity=nn('moonO');ringMat.color.copy(cmix('moonRing'));ringMat.opacity=nn('ringO');
+    var so=nn('sunO');sunG.visible=so>.01;if(sunG.visible){sunGlow.material.color.copy(cmix('sunGlow'));sunGlow.material.opacity=so*.34;sunGlow2.material.color.copy(CC.sunGlow);sunGlow2.material.opacity=so*.16;sunDisc.material.color.copy(cmix('sunDisc'));sunDisc.material.opacity=Math.min(1,so*1.4)}
+    var lk=curLines=nn('lines'),lv=lk>.01;for(i=0;i<nightLines.length;i++)nightLines[i].visible=lv;for(i=0;i<lineMats.length;i++)lineMats[i].m.opacity=lineMats[i].op*lk;if(t>.6)warmEdges();
+    beaconK=nn('beacon');
+    // rail, stations, trains, the light layer
+    setAdd(add);
+    railM.color.copy(cmix('rail'));railM2.color.copy(CC.rail);railM2.opacity=nn('railO2');pillarM.color.copy(cmix('pillar'));stLampM.color.copy(CC.rail);stPlatM.color.copy(cmix('stPlat'));stPostM.color.copy(cmix('stPost'));
+    stCanM.color.copy(cmix('stCan'));stCanM.opacity=nn('stCanO');carBodyM.color.copy(cmix('carBody'));carWinM.color.copy(cmix('carWin'));carStripeM.color.copy(cmix('carStripe'));
+    headGlowM.color.copy(cmix('headGlow'));headGlowM.opacity=nn('headO');tailGlowM.opacity=nn('tailO');
+    gyroM.color.copy(cmix('gyro'));gyroM.opacity=nn('gyroO');
+    cmix('line');beamM.color.copy(CC.line);beamM.opacity=nn('beamO');haloM.color.copy(CC.line);haloM.opacity=nn('haloO');radarM.color.copy(CC.line);polyM.color.copy(CC.line);polyM.opacity=nn('polyO');linkM.color.copy(CC.line);linkM.opacity=nn('linkO');pulseM.color.copy(cmix('pulse'));
+    if(cssOn)queueCss()}
+  // SceneTime listener: remember that t changed, draw on the next frame; and (pages that do not run <html data-daycycle>) keep data-theme in step so the page's own dark rules follow: dark from t 1.5.
+  ST._on(function(t){tDirty=true;need=true;if(root.hasAttribute('data-daycycle'))return;cssOn=true;var want=t>=1.5?'dark':'light';if(root.getAttribute('data-theme')!==want)root.setAttribute('data-theme',want)});
+  function recolor(){tDirty=true;need=true}
+  window.addEventListener('scenetheme',function(){recolor()});
+  new MutationObserver(function(){ // the page's own theme button (or the T key) flips data-theme: follow it, unless the day cycle owns the theme
+    if(root.hasAttribute('data-daycycle'))return;var dk=root.getAttribute('data-theme')==='dark',t=ST.get();
+    if(dk&&t<1.5)ST.mode('night');else if(!dk&&t>=1.5)ST.mode('day')}).observe(root,{attributes:true,attributeFilter:['data-theme']});
+  if(ST.get()===0&&root.getAttribute('data-theme')==='dark')ST.set(2); // a page that starts dark (stored choice, ?theme=dark) starts at night
+  applyTime(ST.get());tDirty=false;
   var W=0,Hh=0,mobile=false,need=true,px=0,tx=0,cr=0,tr=0,vr={v:0},vx={v:0},dtF=.016,tgtPose=mob(END),curPose=mob(END),vPose=[{v:0},{v:0},{v:0},{v:0},{v:0},{v:0},{v:0},{v:0}];
   function size(){W=innerWidth;Hh=innerHeight;mobile=W<=820;renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile?1.5:2));renderer.setSize(W,Hh,false);renderer.getDrawingBufferSize(TU.uRes.value);cam.aspect=W/Hh;cam.updateProjectionMatrix();need=true}
   var enter=document.getElementById('enter'),caps=enter?enter.querySelectorAll('.ride-cap'):[],roll=0,rideP=null,rideT=null,rideQ=null;
@@ -445,14 +513,13 @@
   // Poses are interpolated as bearings and radii, not as straight lines, so the camera sweeps round the building instead of through it.
   // The keys below are placed on the page by section: [section id, fraction down it, viewport offset, pose]. Keys are
   // spaced so a shot holds while its section is read and the move to the next one happens in the gap between them.
-  // "Fly it again in dark mode": shown over the finale; it switches the theme and goes back to the start of the flight.
+  // "Fly it again ...": shown over the finale. It cycles the view (plain, golden hour, night) and goes back to the start of the flight. The big picker in the flight HUD (assets/timeofday.js) does the same by choice.
   var again=document.getElementById('fly-again'),DBGCR=/[?&]dbg/.test(location.search);
-  if(again){(function(){var H=document.documentElement,lab=again.querySelector('b');
-    function isDark(){return H.getAttribute('data-theme')==='dark'}
-    function label(){if(lab)lab.textContent=isDark()?'Fly it again in light mode':'Fly it again in dark mode'}
-    label();if('MutationObserver' in window)new MutationObserver(label).observe(H,{attributes:true,attributeFilter:['data-theme']});
-    again.addEventListener('click',function(){var tb=document.getElementById('theme-btn');
-      if(tb)tb.click();else{var nx=isDark()?'light':'dark';H.setAttribute('data-theme',nx);try{localStorage.setItem('theme',nx)}catch(e){}}
+  if(again){(function(){var lab=again.querySelector('b'),NX={day:'golden',golden:'night',night:'day'},TXT={golden:'Fly it again at golden hour',night:'Fly it again at night',day:'Fly it again by day'};
+    function next(){return NX[ST.nearest()]}
+    function label(){if(lab)lab.textContent=TXT[next()]}
+    label();document.addEventListener('scenetime',label);
+    again.addEventListener('click',function(){ST.mode(next());
       var en=document.getElementById('enter');if(en)scrollTo({top:en.getBoundingClientRect().top+scrollY+innerHeight*.15,behavior:'instant'})})})()}
   var spin=document.getElementById('spin'),SP0=.06,SPW=.28,sTop=0,sH=0; // sTop/sH: the buffer's place (read on layout, not per frame)
   function P(cx,cz,a,r,y,ty,sx,sy,mr){return [cx,cz,a,r,y,ty,sx||0,sy||0,mr||0]} // mr: the radius to use on a phone for a wide shot of the group (0 = the usual 12 % back)
@@ -761,15 +828,6 @@
   if('IntersectionObserver' in window){var stObs=new IntersectionObserver(function(es){es.forEach(function(e){e.target.classList.toggle('on',e.isIntersecting&&e.intersectionRatio>.55)})},{threshold:[0,.55,1]});document.querySelectorAll('.stage').forEach(function(el){stObs.observe(el)})}
   function ringUpdate(){} // the screens that floated behind the towers (ring, then conveyor) were removed; see docs/claude-log.md
   var flying=false;
-  // Golden hour: for the finale skyline the light turns to a hazy sunrise (reference photo: warm orange sky, golden haze over the towers). Light theme only.
-  var goldLast=-1,goldF=new T.Color(),goldC=new T.Color(),G1=new T.Color('#ffe2a8'),G2=new T.Color('#f3a95a'),G3=new T.Color('#f0b676');
-  function goldHour(k){
-    var dark=root.getAttribute('data-theme')==='dark';k=0; /* the golden hour is off (owner's call): it rewrote the page's sky gradient and every material colour on each step, which made the finale stutter on phones in light mode. The reset path below is all that runs. */if(k===goldLast)return;goldLast=k;
-    if(k===0){mats.forEach(function(m){var r=m.userData.role;if(r)m.color.set(C[r])});root.style.removeProperty('--sky1');root.style.removeProperty('--sky2');if(scene.fog)scene.fog.color.copy(fogColor());TU.uSky1.value.set(C.sky1);TU.uSky2.value.set(C.skyM);TU.uShadeMul.value.copy(shadeBase);TU.uHazeK.value=hazeBase;sun.color.set(dark?0xb0b4ff:0xffffff);return}
-    mats.forEach(function(m){var r=m.userData.role;if(r==='far'||r==='mid'||r==='near'||r==='ground')m.color.set(C[r]).lerp(G3,k*.38)}); /* the ground and towers take the warm haze */
-    goldC.set(C.sky1).lerp(G1,k);root.style.setProperty('--sky1','#'+goldC.getHexString());TU.uSky1.value.copy(goldC);TU.uShadeMul.value.copy(shadeBase).lerp(GSH,k);TU.uHazeK.value=hazeBase*(1-.5*k); /* golden hour: dusky violet shadows, pale cream lit faces, less haze so the skyline stays crisp */
-    goldC.set(C.sky2).lerp(G2,k);root.style.setProperty('--sky2','#'+goldC.getHexString());TU.uSky2.value.copy(goldC);
-    if(scene.fog)scene.fog.color.copy(goldC);sun.color.set(0xffffff).lerp(new T.Color('#ffd08a'),k)}
   // ONE CAMERA. Above, the director (before the flight) and the flight (inside #enter) each only say where the camera should be.
   // This follower is the only thing that actually moves it: position, rotation, lens and the sideways push all chase their target
   // with the same short lag and a top speed, so a change between the two systems (or anything else) can never show as a snap.
@@ -806,7 +864,6 @@
       var ke=KI['sweep1']!=null?KI['sweep1']:(KI['pass']!=null?KI['pass']:.7),ke2=KI['end']||HOLD0,fs=clamp((cr-ke-.4*(ke2-ke))/(.6*(ke2-ke)),0,1);fs=fs*fs*(3-2*fs);
       var kk=Math.sin(Math.PI*clamp(cr/.07,0,1)),fv=42+(mobile?30:10)*fs+26*kk*kk+(reduce?0:tabAt(fovTab,cr)*(1-fs)*(1-kk*kk)); /* speed feel: up to +9 degrees of lens in the fast beats, none at the start, in the finale or in reduced motion */ /* kk: a gentle push-in that starts and ends at the normal lens, so entering the flight never snaps */if(Math.abs(fv-cam.fov)>.01){cam.fov=fv;cam.updateProjectionMatrix()}
       if(scene.fog){scene.fog.near=fogN0+260*fs;scene.fog.far=fogF0+560*fs}
-      goldHour(fs);
       // Ease the rotation: the view turns towards where it should look with a short lag (time constant about 0.2 s), so a sharp
       // turn in the route can never show as a jolt. Reset when the flight starts, and when snapping.
       if(!rideQ)rideQ=cam.quaternion.clone();else{rideQ.slerp(cam.quaternion,reduce?1:1-Math.exp(-dtF*5));cam.quaternion.copy(rideQ)}
@@ -814,7 +871,7 @@
       roll+=((reduce?0:tabAt(bankTab,cr))-roll)*(1-Math.exp(-dtF*3));cam.rotateZ(roll*(1-fs)+rollAt(u)); // drone bank into turns, the scripted barrel roll, and a level horizon for the finale
       hudUpdate(true,u,cr)
     }else{
-      rideQ=null;heroOn=false;heroS=chA;goldHour(0);if(cam.fov!==42){cam.fov=42;cam.updateProjectionMatrix()}if(scene.fog){scene.fog.near=fogN0;scene.fog.far=fogF0}
+      rideQ=null;heroOn=false;heroS=chA;if(cam.fov!==42){cam.fov=42;cam.updateProjectionMatrix()}if(scene.fog){scene.fog.near=fogN0;scene.fog.far=fogF0}
       var q=curPose,ang=(q[2]+px*7+idleK*3*Math.sin(time*.000314))*Math.PI/180,rk=1+idleK*.014*Math.sin(time*.00024); /* idle drift: a few degrees of swing over about 20 s and a slow breath in and out */
       cam.position.set(q[0]+Math.cos(ang)*q[3]*rk,q[4],q[1]+Math.sin(ang)*q[3]*rk);cam.lookAt(q[0],q[5],q[1]);
       cam.setViewOffset(W,Hh,-q[6]*W,-q[7]*Hh,W,Hh);hudUpdate(false)
@@ -843,6 +900,7 @@
     idleK+=((dOn?1:0)-idleK)*Math.min(1,dt*(dOn?.8:4));
     if(idleK<.002)idleK=0;
     var arcOn=root.classList.contains('arc-on'),iv=arcOn?125:idleK>0?33:66; // arc-on: a game in the arcade is running, so the city steps back to ~8 fps and leaves the frame budget to the game
+    if(tDirty){tDirty=false;applyTime(ST.get())} // the time of day changed (SceneTime): blend the three parameter sets, once per frame at most
     var moving=Math.abs(tr-cr)>(flying?.00002:.0003);for(var j2=0;j2<8;j2++)if(Math.abs(tgtPose[j2]-curPose[j2])>.02){moving=true;break}
     // While the reader is only reading, redraw at about 15 fps (the beams and pulses still drift); while scrolling, every frame.
     if(moving||need||(!reduce&&time-lastR>iv)){if(idleK>0&&!moving&&lastR>0&&!arcOn){dIv+=time-lastR;if(++dN>=90){if(dIv/dN>48)driftOff=true;dIv=0;dN=0}}place(reduce?0:time);renderer.render(scene,cam);need=false;lastR=time;if(!shown){shown=true;root.classList.add('gl-on')}}
@@ -861,7 +919,7 @@
   setTimeout(function(){(window.requestIdleCallback||setTimeout)(warmEdges)},12000); // light theme: build the night lines in idle time, so the first switch to dark has them ready
   root.classList.add('gl'); // first: it makes #enter visible, and the scroll maths below needs its real position
   size();buildRide();layoutKeys();tgtPose=dirPose(scrollY);curPose=tgtPose.slice();tr=cr=rideProg();raf=requestAnimationFrame(frame);
-  if(ONLY||/[?&]dbg/.test(location.search))window.__scene={hero:function(){var q=new T.Vector3();skyCurve.getPointAt(heroS,q);var v=q.clone().project(cam);return [heroS,heroOn,Math.round(q.distanceTo(cam.position)),+v.x.toFixed(2),+v.y.toFixed(2),+v.z.toFixed(2)]},drift:function(v){if(v===false)driftOff=false;return [Math.round(idleK*100)/100,driftOff]},keys:function(){return KEYS.map(function(k){return k.y})},dirPose:dirPose,scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},lay:LAY,lm:LM,utp:UTP,sky:skyCurve,city:function(){return cityMesh},mob:mob,DIST:DIST,draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;fInit=true;rideQ=null;dtF=9;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam);dtF=.016}};
+  if(ONLY||/[?&]dbg/.test(location.search))window.__scene={TU:TU,sunG:function(){return sunG},SUND:SUND,applyTime:applyTime,hero:function(){var q=new T.Vector3();skyCurve.getPointAt(heroS,q);var v=q.clone().project(cam);return [heroS,heroOn,Math.round(q.distanceTo(cam.position)),+v.x.toFixed(2),+v.y.toFixed(2),+v.z.toFixed(2)]},drift:function(v){if(v===false)driftOff=false;return [Math.round(idleK*100)/100,driftOff]},keys:function(){return KEYS.map(function(k){return k.y})},dirPose:dirPose,scene:scene,cam:cam,g:g,rideP:rideP,rideT:rideT,rideU:function(c){return rideU(c)},snap:snap,place:place,KF:KF,KI:function(){return KI},render:function(){renderer.render(scene,cam)},set:function(c){tr=c;cr=c;vr.v=0},pause:function(){run=false;cancelAnimationFrame(raf);raf=0},lay:LAY,lm:LM,utp:UTP,sky:skyCurve,city:function(){return cityMesh},mob:mob,DIST:DIST,draw:function(c,t){tr=c;cr=c;vr.v=0;tick=0;fInit=true;rideQ=null;dtF=9;place(t||0);renderer.render(scene,cam);tick=0;place(t||0);renderer.render(scene,cam);dtF=.016}};
   } // start
   // Build the scene after the page's first paint, not before it: the curtain's text and photos come first, the canvas fades in after. (/flight/ is only the scene, so it starts at once.)
   if(!DEFER)start();

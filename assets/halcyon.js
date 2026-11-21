@@ -3,6 +3,7 @@
                      and an arc from wherever you are (guessed from your time zone only; nothing leaves the browser).
    2. Particle lab : one cloud of dust that morphs between a Chladni plate, a sphere, the Earth, the real KL landmark models
                      (sampled from assets/city/*.json), a knot, a helix and a wave. "Explode" pulls any form apart in slices.
+   Mounts on any page that has a #halcyon element (today: /play/) and does nothing otherwise.
    Nothing runs until the section is near the screen, and the loops stop when it is off screen, on another tab or hidden. */
 (function () {
   'use strict';
@@ -35,7 +36,7 @@
 
   /* ---------- the land: a 360 x 180 bitmap, 2 bits a cell (0 sea, 1 land, 2 Malaysia), made from Natural Earth ---------- */
   var land = null, landWait = [];
-  function withLand(fn) { if (land) return fn(); landWait.push(fn); if (landWait.length > 1) return; fetch('assets/halcyon/land.json').then(function (r) { return r.json(); }).then(function (j) {
+  function withLand(fn) { if (land) return fn(); landWait.push(fn); if (landWait.length > 1) return; fetch('/assets/halcyon/land.json').then(function (r) { return r.json(); }).then(function (j) {
     var raw = b64(j.data, Uint8Array); land = { w: j.w, h: j.h, cell: function (lat, lon) { var x = Math.min(j.w - 1, Math.max(0, Math.floor(lon + 180))), y = Math.min(j.h - 1, Math.max(0, Math.floor(90 - lat))), i = y * j.w + x; return (raw[i >> 2] >> ((i & 3) * 2)) & 3; } };
     landWait.splice(0).forEach(function (f) { f(); }); }).catch(function () { landWait = []; }); }
 
@@ -297,7 +298,7 @@
     function get(f, cb) {
       if (cache[f.k]) return cb(cache[f.k]);
       function done(form) { cache[f.k] = form; cb(form); }
-      if (f.file) { fetch('assets/city/' + f.file).then(function (r) { return r.json(); }).then(function (j) { done(landmark(j)); }).catch(function (e) { console.error(e); nameEl.textContent = 'Could not load ' + f.n; }); }
+      if (f.file) { fetch('/assets/city/' + f.file).then(function (r) { return r.json(); }).then(function (j) { done(landmark(j)); }).catch(function (e) { console.error(e); nameEl.textContent = 'Could not load ' + f.n; }); }
       else if (f.need === 'land') withLand(function () { done(f.make()); });
       else done(f.make());
     }

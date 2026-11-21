@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -8,6 +8,9 @@
 <style>
 :root{--bg:#f3f6f6;--surface:#fff;--ink:#0f1e24;--muted:#52636a;--line:#d6e0e2;--accent:#0a6c74;--accent-ink:#fff}
 @media (prefers-color-scheme:dark){:root{--bg:#081114;--surface:#0f1b20;--ink:#e6eff1;--muted:#93a7ae;--line:#1f3238;--accent:#4fc2c8;--accent-ink:#04211f}}
+:root[data-theme=dark]{--bg:#081114;--surface:#0f1b20;--ink:#e6eff1;--muted:#93a7ae;--line:#1f3238;--accent:#4fc2c8;--accent-ink:#04211f}
+:root[data-theme=light]{--bg:#f3f6f6;--surface:#fff;--ink:#0f1e24;--muted:#52636a;--line:#d6e0e2;--accent:#0a6c74;--accent-ink:#fff}
+.embed h1,.embed .w>p,.embed .note{display:none}.embed body{padding:12px}.embed .stage{border-radius:14px}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Albert Sans",system-ui,sans-serif;padding:0 16px 48px}
 .w{max-width:1000px;margin:0 auto}h1{font-size:clamp(1.8rem,5vw,2.8rem);line-height:1.1;margin:32px 0 8px}p{color:var(--muted);margin:0 0 16px;max-width:42em}
 .stage{position:relative;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--surface);aspect-ratio:16/10;touch-action:pan-y}
@@ -23,6 +26,7 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:32px}
 .note{margin-top:28px;border-top:1px solid var(--line);padding-top:18px}
 </style>
 </head>
+<script>(function(){var q=new URLSearchParams(location.search),r=document.documentElement;if(q.get('embed')){r.classList.add('embed');}var t=q.get('theme');if(t==='dark'||t==='light')r.setAttribute('data-theme',t);})();</script>
 <body>
 <div class="w">
   <h1>Glass lab</h1>

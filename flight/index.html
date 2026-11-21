@@ -15,9 +15,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@500;600&display=swap">
 <link rel="stylesheet" href="../assets/site.css?v=20261120m">
 <link rel="stylesheet" href="../assets/scene.css?v=20261120m">
+<link rel="stylesheet" href="../assets/timeofday.css?v=20261121a">
 <style>
 /* Flight-only page: the scene is the page. Nothing but the debug panel (opt-in) sits on top of it. */
-html.gl body{margin:0;background:linear-gradient(var(--sky1),var(--sky2)) fixed}
+html.gl body{margin:0;background:linear-gradient(var(--sky1),var(--sky-mid) var(--sky-stop),var(--sky3)) fixed}
 html.ui-off .enter-sticky>*{visibility:hidden!important}
 .fp{position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:50;width:min(340px,calc(100vw - 24px));display:none;gap:10px;padding:14px;
   background:var(--surface);color:var(--ink);border:2px solid var(--fx);box-shadow:5px 5px 0 var(--hard);border-radius:6px;font:500 14px/1.4 var(--f-body)}
@@ -50,7 +51,7 @@ html.fp-on .fp{display:grid}
       </div>
       <div class="ride-caps" aria-live="polite">
       <p class="ride-cap" data-from="0.012" data-to="0.2"><b>Petronas Twin Towers</b><span>452 m. We drop to street level, rush in between the blocks, then climb round both towers.</span></p>
-      <p class="ride-cap" data-from="0.2" data-to="0.35"><b>The skybridge</b><span>Line up, then a barrel roll straight through the gap between the towers.</span></p>
+      <p class="ride-cap" data-from="0.2" data-to="0.35"><b>The skybridge</b><span>Line up, then straight through the gap between the towers.</span></p>
       <p class="ride-cap" data-from="0.35" data-to="0.45"><b>Menara Kuala Lumpur</b><span>421 m. Out of the gap and one level circle round the pod, the skyline sliding past behind it.</span></p>
       <p class="ride-cap" data-from="0.45" data-to="0.75"><b>Merdeka Maybank</b><span>678.9 m, the tallest in Malaysia. Up its faceted face, over the spire, then a look straight down.</span></p>
       <p class="ride-cap" data-from="0.75" data-to="0.85"><b>The Exchange 106</b><span>445 m. Tip over and fall down its glass face, almost to the street.</span></p>
@@ -64,21 +65,23 @@ html.fp-on .fp{display:grid}
 
 <aside class="fp" id="fp" aria-label="Flight viewer">
   <h2>Flight viewer</h2>
+  <div data-tod-mount></div>
   <input id="fp-t" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the flight">
   <p class="fp-read" id="fp-read"></p>
   <div class="fp-row">
     <button id="fp-play" type="button" aria-pressed="false">&#9654; Auto-fly</button>
     <button id="fp-speed" type="button" title="Auto-fly speed">1&times;</button>
     <button id="fp-ui" type="button" aria-pressed="false">Captions + HUD</button>
-    <button id="fp-theme" type="button">Light / dark</button>
+    <button id="fp-theme" type="button" title="Switch between plain day and night">Day / night</button>
     <button id="fp-link" type="button">Copy link to this moment</button>
   </div>
-  <p class="fp-keys"><kbd>H</kbd> panel &nbsp;<kbd>Space</kbd> auto-fly &nbsp;<kbd>&larr;</kbd><kbd>&rarr;</kbd> nudge &nbsp;<kbd>U</kbd> captions &nbsp;<kbd>T</kbd> theme</p>
+  <p class="fp-keys"><kbd>H</kbd> panel &nbsp;<kbd>Space</kbd> auto-fly &nbsp;<kbd>&larr;</kbd><kbd>&rarr;</kbd> nudge &nbsp;<kbd>U</kbd> captions &nbsp;<kbd>T</kbd> day / night</p>
 </aside>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
 <script src="../assets/scene-glsl.js?v=20261120m" defer></script>
 <script src="../assets/scene.js?v=20261120m" defer></script>
+<script src="../assets/timeofday.js?v=20261121a" defer></script>
 <script>
 /* The viewer: everything here is optional. Without it, scrolling flies the route. */
 (function(){
@@ -107,7 +110,7 @@ html.fp-on .fp{display:grid}
   ui.addEventListener('click',function(){setUi(root.classList.contains('ui-off'))});
   document.getElementById('fp-theme').addEventListener('click',theme);
   document.getElementById('fp-link').addEventListener('click',function(){
-    var u=location.origin+location.pathname+'?'+(root.getAttribute('data-theme')==='dark'?'theme=dark&':'')+(root.classList.contains('ui-off')?'':'ui&')+'panel#t='+frac().toFixed(3);
+    var tm=window.SceneTime?SceneTime.nearest():'day',u=location.origin+location.pathname+'?'+(tm!=='day'?'time='+tm+'&':'')+(root.classList.contains('ui-off')?'':'ui&')+'panel#t='+frac().toFixed(3);
     (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){history.replaceState(null,'',u)},function(){history.replaceState(null,'',u)})});
   addEventListener('keydown',function(e){
     if(e.metaKey||e.ctrlKey||e.altKey)return;

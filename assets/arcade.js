@@ -1,4 +1,4 @@
-/* The arcade (#arcade): three small games built from the day job. Plain JS and canvas 2D, no libraries.
+/* The arcade (#arcade): three small games built from the day job. Mounts on any page that has an #arcade element (today: /play/) and does nothing otherwise. Plain JS and canvas 2D, no libraries.
    1. Last Train   : one-button runner along the KL rail. Jump scope creep, grab requirements.
    2. Scope Creep  : 45-second triage. Build it, or park it for later?
    3. Spec Match   : pair each tool with where it was used.
@@ -15,7 +15,7 @@
   var best = { train: 0, creep: 0, match: 0 };
   try { var raw = JSON.parse(localStorage.getItem('arc-best') || '{}'); ['train', 'creep', 'match'].forEach(function (k) { if (+raw[k] > 0) best[k] = +raw[k]; }); } catch (e) { /* private mode */ }
   function busy(on) { root.classList.toggle('arc-on', !!on); }
-  function save() { try { localStorage.setItem('arc-best', JSON.stringify(best)); } catch (e) { /* fine */ } showBests(); }
+  function save() { try { localStorage.setItem('arc-best', JSON.stringify(best)); } catch (e) { /* fine */ } showBests(); try { d.dispatchEvent(new CustomEvent('play-best', { detail: { best: best } })); } catch (e) { /* old browsers */ } }
   function showBests() {
     var t = $('#arc-best-train'), c = $('#arc-best-creep'), m = $('#arc-best-match');
     if (t) t.textContent = best.train ? best.train : '-';
@@ -25,7 +25,7 @@
 
   /* ---------- sound: off until asked, three tiny oscillator blips ---------- */
   var soundBtn = $('#arc-sound');
-  function beep(f, len, type, vol, slide) { if (window.__sfx) window.__sfx.beep(f, len, type, vol, slide); }   // sfx.js owns the audio and the on/off state
+  function beep(f, len, type, vol, slide) { var S = window.SFX || window.__sfx; if (S && S.beep) S.beep(f, len, type, vol, slide); }   // sfx.js owns the audio and the on/off state
   function paintSound() { if (!soundBtn) return; var on = !!(window.__sfx && window.__sfx.on); soundBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); soundBtn.querySelector('b').textContent = on ? 'On' : 'Off'; }
   if (soundBtn) {
     if (!window.__sfx) soundBtn.hidden = true;

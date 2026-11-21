@@ -1,0 +1,43 @@
+/* Project Deck (plain CSS half). Project Deck by Aakash Mehra, via 21st.dev; ported by hand. See project-deck.js. */
+.pd { position: relative; width: 100%; height: calc(var(--pd-n, 6) * 100svh); background: var(--hg, #e7eef7); }
+.pd-stage { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; overflow: hidden; padding: 0 20px; perspective: 1800px; }
+@media (min-width: 640px) { .pd-stage { padding: 0 40px; } }
+@media (min-width: 1024px) { .pd-stage { padding: 0 56px; } }
+.pd-card {
+  grid-area: 1 / 1; margin-top: 4svh; width: min(100%, calc(84svh * 16 / 9), 1480px); transform-origin: 50% 25%;
+  will-change: transform, filter; transform: translate3d(0, 110svh, 0);
+}
+.pd-card:first-child { transform: none; }
+.pd-face { position: relative; overflow: hidden; border-radius: 24px; background: var(--hg, #e7eef7); box-shadow: 0 50px 90px -35px rgba(10, 12, 20, .5); }
+.pd-face img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; object-position: top; }
+.pd-dim { position: absolute; inset: 0; background: #0a0c14; opacity: 0; pointer-events: none; }
+.pd-meta { position: absolute; left: 16px; top: 16px; display: flex; gap: 8px; align-items: center; font: 500 .6875rem/1 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: #fff; }
+.pd-meta b { font-weight: 500; padding: 7px 10px; background: rgba(8, 14, 30, .62); border: 1px solid rgba(255, 255, 255, .22); }
+.pd-meta span { padding: 7px 10px; background: rgba(8, 14, 30, .42); border: 1px solid rgba(255, 255, 255, .14); }
+.pd-visit { position: absolute; right: 0; bottom: 0; z-index: 2; color: var(--hg, #e7eef7); }
+.pd-c1, .pd-c2 { position: absolute; display: block; line-height: 0; }
+.pd-c1 { right: 0; bottom: 100%; }
+.pd-c2 { right: 100%; bottom: 0; }
+.pd-link {
+  display: flex; align-items: center; gap: 16px; padding: 12px 4px 12px 20px; border-top-left-radius: 20px; background: var(--hg, #e7eef7);
+  color: var(--ink, #0b2a6b); text-decoration: none; outline: none;
+}
+.pd-link .pd-name { display: block; font: 600 16px/1.15 var(--f-display); letter-spacing: -.015em; }
+.pd-link .pd-addr { display: block; margin-top: 3px; font: 400 13px/1.2 var(--f-body); color: var(--muted, #3f5b94); text-underline-offset: 4px; }
+.pd-link:hover .pd-addr, .pd-link:focus-visible .pd-addr { text-decoration: underline; }
+.pd-go { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: #fff; background: var(--pd-accent, #1559c9); transition: transform .2s ease-out; flex: none; }
+.pd-go svg { width: 20px; height: 20px; }
+.pd-link:hover .pd-go, .pd-link:focus-visible .pd-go { transform: rotate(45deg); }
+.pd-link:active .pd-go { transform: rotate(45deg) scale(.9); }
+.pd-link:focus-visible .pd-go { outline: 2px solid var(--pd-accent, #1559c9); outline-offset: 2px; }
+@media (min-width: 640px) { .pd-link { gap: 20px; padding: 16px 4px 16px 28px; } .pd-link .pd-name { font-size: 19px; } .pd-link .pd-addr { font-size: 15px; } .pd-go { width: 52px; height: 52px; } .pd-go svg { width: 24px; height: 24px; } }
+@media (max-width: 639px) {
+  .pd-card { width: 100%; }
+  .pd-face img { aspect-ratio: 4 / 5; }
+  .pd-meta { left: 12px; top: 12px; }
+  .pd-face { border-radius: 20px; }
+}
+@media (prefers-reduced-motion: reduce) { .pd-card { will-change: auto; } }
+html:not(.js) .pd { height: auto; }
+html:not(.js) .pd-stage { position: static; height: auto; display: block; }
+html:not(.js) .pd-card { transform: none; margin: 0 0 24px; }
