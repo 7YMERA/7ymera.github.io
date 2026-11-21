@@ -76,32 +76,33 @@
     var b = document.body; if (!b || document.querySelector('.dc-dial')) return;
     glow = document.createElement('div'); glow.className = 'dc-glow'; glow.setAttribute('aria-hidden', 'true'); b.appendChild(glow);
     dial = document.createElement('div'); dial.className = 'dc-dial'; dial.setAttribute('aria-hidden', 'true');
-    dial.innerHTML = '<div class="dc-win"><i class="dc-sky dc-d"></i><i class="dc-sky dc-g"></i><i class="dc-sky dc-n"></i><i class="dc-st a"></i><i class="dc-st b"></i><i class="dc-st c"></i><i class="dc-sun"></i><i class="dc-moon"></i>' +
+    dial.innerHTML = '<div class="dc-win"><i class="dc-sky dc-d"></i><i class="dc-sky dc-g"></i><i class="dc-sky dc-n"></i><span class="dc-stars"><i class="dc-st a"></i><i class="dc-st b"></i><i class="dc-st c"></i></span><i class="dc-sun"></i><i class="dc-moon"></i>' +
       '<svg class="dc-sk" viewBox="0 0 120 40" preserveAspectRatio="none" focusable="false"><path d="M0 40V30h9v-6h7v6h6V20h5v10h8V27h6v13h4V12l2-8 2 8v28h5V12l2-8 2 8v28h4V25h7v-9h6v9h5v15z"/></svg></div>' +
       '<svg class="dc-ring" viewBox="0 0 76 76" focusable="false"><circle cx="38" cy="38" r="35" class="dc-ring-bg"/><circle cx="38" cy="38" r="35" class="dc-ring-p" transform="rotate(-90 38 38)"/></svg><span class="dc-lab">Day</span>';
     b.appendChild(dial);
     ['d', 'g', 'n'].forEach(function (x) { wins[x] = dial.querySelector('.dc-' + x); });
-    wins.sun = dial.querySelector('.dc-sun'); wins.moon = dial.querySelector('.dc-moon'); wins.sk = dial.querySelector('.dc-sk'); ringC = dial.querySelector('.dc-ring-p'); lab = dial.querySelector('.dc-lab');
+    wins.sun = dial.querySelector('.dc-sun'); wins.stars = dial.querySelector('.dc-stars'); wins.moon = dial.querySelector('.dc-moon'); wins.sk = dial.querySelector('.dc-sk'); ringC = dial.querySelector('.dc-ring-p'); lab = dial.querySelector('.dc-lab');
     if (reduce) dial.classList.add('dc-still');
   }
   function paintDial(t, p) {
     if (!dial) return;
     wins.d.style.opacity = t < 1 ? 1 : 0; // the day sky stays underneath and the others fade over it
-    wins.g.style.opacity = t < 1 ? t : Math.max(0, 2 - t * 1) > 1 ? 1 : Math.max(0, 2 - t);
+    wins.g.style.opacity = Math.max(0, 1 - Math.abs(t - 1)).toFixed(3);
     wins.n.style.opacity = t > 1 ? t - 1 : 0;
     var sy = t <= 1 ? 8 + 40 * sstep(0, 1, t) : 48 + 62 * sstep(0, 1, (t - 1) / 0.55), sx = 36 + 18 * Math.min(1, t / 1.4);
     var my = t < 1.3 ? 84 : 84 - 66 * sstep(0, 1, (t - 1.3) / 0.7);
     wins.sun.style.transform = 'translate3d(' + sx.toFixed(1) + 'px,' + sy.toFixed(1) + 'px,0)';
     wins.moon.style.transform = 'translate3d(46px,' + my.toFixed(1) + 'px,0)';
     wins.sun.style.opacity = t > 1.5 ? 0 : 1;
-    for (var s = 0; s < 3; s++) { /* stars come in with night */ }
-    dial.style.setProperty('--dc-star', Math.max(0, t - 1.3) / 0.7 > 1 ? 1 : Math.max(0, t - 1.3) / 0.7);
+    var fs = t <= 1 ? mix(SKL[0], SKL[1], t) : mix(SKL[1], SKL[2], t - 1), fl = str(fs); if (fl !== lastFill) { lastFill = fl; wins.sk.style.fill = fl; }
+    wins.stars.style.opacity = Math.max(0, Math.min(1, (t - 1.3) / 0.7)).toFixed(3);
     ringC.style.strokeDashoffset = (220 * (1 - p)).toFixed(1);
     var l = t < 0.5 ? 'Day' : t < 1.5 ? 'Golden hour' : 'Night'; if (l !== labTxt) { labTxt = l; lab.textContent = l; }
     if (glow) { var g = 1 - Math.abs(t - 1); g = g < 0 ? 0 : g; glow.style.opacity = ((gl ? 0.5 : 0.9) * g * g * (3 - 2 * g)).toFixed(3); }
   }
 
   // ---------- applying ----------
+  var SKL = ['#5c92dc', '#6a5a98', '#16224d'].map(parse), lastFill = '';
   var t = 0, target = 0, prog = 0, written = -1, lastW = 0, wTimer = 0, raf = 0, lastF = 0, theme = '';
   function write() {
     wTimer = 0; lastW = performance.now(); written = t;
@@ -115,7 +116,7 @@
     }
     for (j = 0; j < sky.length; j++) { c = sky[j]; s = str(mix(c.set[seg], c.set[seg + 1], F)); if (s !== c.last) { c.last = s; st.setProperty(c.name, s); } }
     s = (STOP[seg] + (STOP[seg + 1] - STOP[seg]) * F); var sp = (s * 100).toFixed(1) + '%'; if (sp !== lastStop) { lastStop = sp; st.setProperty('--sky-stop', sp); }
-    var s2 = sky[0].last; if (s2 !== lastS2) { lastS2 = s2; st.setProperty('--sky2', sky[1].last); }
+    if (sky[1].last !== lastS2) { lastS2 = sky[1].last; st.setProperty('--sky2', lastS2); }
     var th = t >= 1.5 ? 'dark' : 'light'; if (th !== theme) { theme = th; root.setAttribute('data-theme', th); }
     paintDial(t, prog);
   }
@@ -136,6 +137,7 @@
   }
   function kick() { if (!raf) { lastF = performance.now(); raf = requestAnimationFrame(tick); } }
   function init() { build(); prog = progress(); t = target = curve(prog); write(); publish(); kick(); }
+  new MutationObserver(function () { if (theme && root.getAttribute('data-theme') !== theme) root.setAttribute('data-theme', theme); }).observe(root, { attributes: true, attributeFilter: ['data-theme'] }); // the page's own theme key or button cannot override the cycle
   addEventListener('scroll', kick, { passive: true });
   addEventListener('resize', kick);
   addEventListener('load', kick);

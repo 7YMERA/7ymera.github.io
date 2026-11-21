@@ -1,0 +1,28 @@
+/* Day cycle (assets/daycycle.js): pages with <html data-daycycle>. */
+html[data-daycycle] #theme-btn{display:none!important} /* the scroll is the time of day: no light/dark button */
+/* the horizon glow: a warm wash from the bottom edge at golden hour; only its opacity changes */
+.dc-glow{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0;background:radial-gradient(130% 62% at 50% 104%,rgba(255,178,84,.85),rgba(255,150,64,.34) 46%,rgba(255,150,64,0) 72%)}
+/* the sun and moon window: a round view of the sky that shows the time of day, with a ring that fills as you scroll */
+.dc-dial{position:fixed;left:max(14px,env(safe-area-inset-left,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));z-index:40;width:76px;height:76px;pointer-events:none;color:var(--ink)}
+.dc-win{position:absolute;inset:6px;border-radius:50%;overflow:hidden;isolation:isolate;background:#eaf4fb;box-shadow:0 0 0 2px var(--fx),3px 3px 0 var(--hard)}
+.dc-sky,.dc-st,.dc-sun,.dc-moon,.dc-stars{position:absolute;display:block}
+.dc-sky{inset:0}
+.dc-d{background:linear-gradient(#eaf4fb,#cfe6f7)}
+.dc-g{background:linear-gradient(#3a60a2,#eea25f 62%,#ffd79a);opacity:0}
+.dc-n{background:linear-gradient(#050a1a,#141f52 58%,#6a4030);opacity:0}
+.dc-stars{inset:0;opacity:0}
+.dc-st{width:3px;height:3px;border-radius:50%;background:#fff;animation:dc-tw 2.8s ease-in-out infinite}
+.dc-st.a{left:20%;top:16%}.dc-st.b{left:62%;top:30%;animation-delay:-1s}.dc-st.c{left:40%;top:9%;animation-delay:-1.8s}
+.dc-sun{left:0;top:0;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:#fffbe8;box-shadow:0 0 0 4px rgba(255,190,100,.55),0 0 14px 6px rgba(255,170,80,.7);will-change:transform;transition:transform .12s linear}
+.dc-moon{left:0;top:0;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:#c4cfee;box-shadow:inset -4px -2px 0 0 #9aa6cf;will-change:transform;transition:transform .12s linear}
+.dc-sk{position:absolute;left:0;right:0;bottom:0;width:100%;height:46%;fill:#5c92dc;opacity:1}
+.dc-ring{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.dc-ring circle{fill:none;stroke-width:3}
+.dc-ring-bg{stroke:var(--line);opacity:.9}
+.dc-ring-p{stroke:var(--accent);stroke-dasharray:220;stroke-dashoffset:220;stroke-linecap:round}
+.dc-lab{position:absolute;left:84px;top:50%;transform:translateY(-50%);white-space:nowrap;padding:7px 12px;font:600 12px var(--f-pix,ui-monospace,monospace);letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:var(--surface);border:2px solid var(--fx);box-shadow:3px 3px 0 var(--hard);border-radius:6px}
+.dc-sk{transition:fill .2s}
+@keyframes dc-tw{50%{opacity:.3}}
+@media (max-width:640px){.dc-lab{display:none}.dc-dial{width:64px;height:64px}}
+@media print{.dc-dial,.dc-glow{display:none}}
+@media (prefers-reduced-motion:reduce){.dc-sun,.dc-moon,.dc-sk{transition:none}.dc-st{animation:none}}
