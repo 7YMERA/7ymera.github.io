@@ -483,7 +483,7 @@
     starM.color.copy(cmix('star'));starM.opacity=nn('starO');
     moonM.color.copy(cmix('moon'));moon2M.color.copy(cmix('moon2'));moonHalo.material.color.copy(cmix('halo'));moonHalo.material.opacity=nn('moonO');ringMat.color.copy(cmix('moonRing'));ringMat.opacity=nn('ringO');
     var so=nn('sunO');sunG.visible=so>.01;if(sunG.visible){sunGlow.material.color.copy(cmix('sunGlow'));sunGlow.material.opacity=so*.34;sunGlow2.material.color.copy(CC.sunGlow);sunGlow2.material.opacity=so*.16;sunDisc.material.color.copy(cmix('sunDisc'));sunDisc.material.opacity=Math.min(1,so*1.4)}
-    var lk=curLines=nn('lines'),lv=lk>.01;for(i=0;i<nightLines.length;i++)nightLines[i].visible=lv;for(i=0;i<lineMats.length;i++)lineMats[i].m.opacity=lineMats[i].op*lk;if(t>.6)warmEdges();
+    var lk=curLines=nn('lines'),lv=lk>.01;for(i=0;i<nightLines.length;i++)nightLines[i].visible=lv;for(i=0;i<lineMats.length;i++)lineMats[i].m.opacity=lineMats[i].op*lk;if(t>.02)warmEdges();
     beaconK=nn('beacon');
     // rail, stations, trains, the light layer
     setAdd(add);
@@ -597,7 +597,7 @@
       if(y<=KEYS[i].y){var a=poseOf(KEYS[i-1]),b=poseOf(KEYS[i]),t=(y-KEYS[i-1].y)/Math.max(1,KEYS[i].y-KEYS[i-1].y);t=t*t*(3-2*t);
         var o=[];for(var j=0;j<8;j++)o.push(a[j]+(b[j]-a[j])*t);return o}}
     return poseOf(KEYS[KEYS.length-1])}
-  function rideProg(){if(!enter)return 0;var m=document.documentElement.scrollHeight-innerHeight,st=ONLY?0:enter.offsetTop-innerHeight;return m>st?Math.min(1,Math.max(0,(scrollY-st)/(m-st))):0}
+  function rideProg(){if(!enter)return 0;var m=ONLY?document.documentElement.scrollHeight-innerHeight:enter.offsetTop+enter.offsetHeight-innerHeight,st=ONLY?0:enter.offsetTop-innerHeight;return m>st?Math.min(1,Math.max(0,(scrollY-st)/(m-st))):0}
   function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
   // Critically damped follow (no overshoot, no jump when a wheel notch lands): the camera glides to where the scroll bar is.
   function damp(c,t,v,st,dt){var o=2/st,x=o*dt,e=1/(1+x+.48*x*x+.235*x*x*x),ch=c-t,tmp=(v.v+o*ch)*dt;v.v=(v.v-o*tmp)*e;return t+(ch+tmp)*e}

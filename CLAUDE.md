@@ -16,7 +16,11 @@ any agent working on this repo, kept short on purpose so it costs little context
 
 | Thing | File |
 |---|---|
-| Home page (all sections) | `index.html` |
+| Front page (reveal, descent, flight, deck, doors) | `index.html`, `assets/home/` |
+| Recruiter portfolio (the old home page's content) | `portfolio/index.html`, `assets/portfolio/`, day cycle `assets/daycycle.js` |
+| Games and labs | `play/index.html`, `assets/play/`, `arcade.js`, `halcyon.js` |
+| Time of day, view picker | `assets/scene.js` (`SceneTime`), `assets/timeofday.js` |
+| Music, cursor | `assets/sfx.js`, `assets/cursor.js` |
 | All styles (later rules override earlier ones, so append, don't hunt) | `assets/site.css` |
 | Opening, carousel, skill tree, timeline, dock, before/after sliders | `assets/extras.js` (sliders are inline in `index.html`) |
 | Spin reel / Glass folders / Coverflow / Image stream | `assets/curved-reel.js`, `folders.js`, `coverflow.js`, `image-stream.js` |
@@ -34,7 +38,7 @@ any agent working on this repo, kept short on purpose so it costs little context
 ## Rules that bite
 
 - **Cache key:** every CSS/JS link carries `?v=YYYYMMDDx`. After any CSS/JS change, bump it everywhere:
-  `grep -rl 'v=OLD' index.html resume.html notes flight 404.html | xargs sed -i 's/v=OLD/v=NEW/g'`.
+  `grep -rl 'v=OLD' index.html portfolio play resume.html notes flight 404.html | xargs sed -i 's/v=OLD/v=NEW/g'`.
   When you replace an image, give it a new file name (e.g. `cover-2.webp`).
 - **Performance:** animate only `transform` and `opacity`. No `backdrop-filter` over the moving aurora.
   No `mask-image` or rounded `clip-path` around 3D content. Pause off-screen work with
@@ -44,7 +48,7 @@ any agent working on this repo, kept short on purpose so it costs little context
 - **`[hidden]` is `display:none !important`** in `site.css`. Overriding it needs `!important`.
 - **Light mode is the default** (`<html data-theme="light">`). Check both themes and 390 px width.
 - **The owner dislikes small hidden buttons** for major features. Make controls big and obvious.
-- **Scene colour rules from the owner:** no magenta or pink lighting, no Maybank sign, the moon stays locked in place, light mode stays one blue family (no cyan glass), no barrel roll in the flight, no golden hour (it stuttered on phones).
+- **Scene colour rules from the owner:** no magenta or pink lighting, no Maybank sign, the moon stays locked in place, light mode stays one blue family (no cyan glass), no barrel roll in the flight. Golden hour is back by the owner's request (21 Nov 2026), as a blend: `window.SceneTime` in `scene.js` (t 0 day, 1 golden, 2 night), uniforms only, never per-material rewrites.
 
 - **The old flat-aurora site** is commit `f3b9f08` (`git checkout f3b9f08`). There is no `/v2/` any more: the 3D city is the home page.
 
