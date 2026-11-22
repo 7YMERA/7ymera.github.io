@@ -257,7 +257,7 @@
     try { var qs = /[?&]sat=(gpm|trmm|aim)\b/.exec(location.search); if (qs) this.curKey = qs[1]; } catch (e) { /* default */ }
     this.arr = this.cab ? 1 : 0; this.u = 0; this.x = 0; this.alpha = this.cab ? 1 : 0; this.uiA = 0; this.near = false; this.on = false;
     this.ready = false; this.failed = false; this.loading = false; this.raf = 0; this.last = 0; this.t = 0; this.swap = 1;
-    this.e = 0; this.eT = 0; this.zoom = 1; this.zoomT = 1; this.auto = false;
+    this.e = 0; this.eT = 0; this.zoom = .7; this.zoomT = .7; this.auto = false; // starts fully zoomed out (owner); + zooms in
     this.yaw = 0; this.pitch = 0; this.vyaw = 0; this.vpitch = 0; this.drag = null;
     this.mx = 0; this.my = 0; this.pmx = 0; this.pmy = 0; this.inside = false; this.W = 0; this.H = 0;
     this.act = 0; this.energy = 0; this.hx = .5; this.hy = .5; this.tx = .5; this.ty = .5; this.lastMove = -9; this.lastSample = 0; this.samples = []; this.lastCue = -9; this.prevInt = 0;
@@ -588,7 +588,7 @@
     } else this.energy = 0;
     this.act += moving ? Math.min(1, dt / .12) : -dt / 1.0; this.act = clamp(this.act, 0, 1);
     var strength = this.act * this.act * (3 - 2 * this.act) * gate;
-    var base = (this.mob ? .2 : .18) * (this.auto ? 1.35 : 1), rad = base * (1 + (reduce ? 0 : 1.4) * this.energy) * (.5 + .5 * this.act);
+    var base = (this.mob ? .13 : .11) * (this.auto ? 1.35 : 1), rad = base * (1 + (reduce ? 0 : .9) * this.energy) * (.5 + .5 * this.act);
     if (strength > .5 && this.prevInt <= .5) this.cueX(false); this.prevInt = strength;
     // samples: a comet tail of past heads, fading over about 0.7 s
     if (!reduce && this.t - this.lastSample > .045 && strength > .02) { this.lastSample = this.t; this.samples.unshift({ x: this.hx, y: this.hy, s: strength, r: rad, t: this.t }); }
