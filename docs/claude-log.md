@@ -7,6 +7,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 22 Nov 2026 (data toys to the lab)
+
+- Company SQL, Jom Al-Quran SQL and Join Atlas moved from /play/ to /lab/ (own bay 02 "Data toys" below the experiments). `LAB_IDS` in `play.js` updated; /play/'s head redirect also maps `#sql-company`, `#sql-jom`, `#atlas`; /play/ lost `join-atlas.css` and the SQL view; cabinet counts on /play/ now 5. Scripts stay lazy (`mountSql`). README Play and Lab sections updated.
+
 ## 16 Nov 2026 (logo)
 
 - Home page header logo text is now `\7ymera` (backslash, as the owner asked), and so is the landing sign (`.op-id`). Other pages, titles, share previews, manifest and feed keep Alif Najmi.

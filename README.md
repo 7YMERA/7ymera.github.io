@@ -157,13 +157,12 @@ The old home page's content, reordered for someone with 30 seconds: Download CV,
 
 ### `/play/` · the games (`play/index.html`, `assets/play/`)
 
-An arcade hall, games only. Last Train plays itself behind the title, and the hero slideshow turns through the four games (`HS` in `play.js`). Every cabinet below has a live preview and opens full screen (Esc or Back closes it, `#stack` style links open one directly). Best scores are kept on the device; games take touch, keyboard and a gamepad (`pad.js`). The experiments moved to `/lab/`: a big **The lab** card (and a hero button) links there, and old links such as `/play/#sat` or `/play/#anatomy` redirect to `/lab/#...` with a small inline script in the page head. `play.js` serves both pages: `<body data-page="play|lab">` picks which cabinets (`LAB_IDS` in `play.js`) and whether the hero exists.
+An arcade hall, games only. Last Train plays itself behind the title, and the hero slideshow turns through the four games (`HS` in `play.js`). Every cabinet below has a live preview and opens full screen (Esc or Back closes it, `#stack` style links open one directly). Best scores are kept on the device; games take touch, keyboard and a gamepad (`pad.js`). The experiments moved to `/lab/`: a big **The lab** card (and a hero button) links there, and the SQL data toys moved there too; old links such as `/play/#sat`, `/play/#anatomy` or `/play/#sql-company` redirect to `/lab/#...` with a small inline script in the page head. `play.js` serves both pages: `<body data-page="play|lab">` picks which cabinets (`LAB_IDS` in `play.js`) and whether the hero exists.
 
 | Cabinet | What it is | File |
 |---|---|---|
 | **Skyline Stack** | One-button stacker past Menara TM, KL Tower, The Exchange 106, Petronas and Merdeka 118 at their real heights. | `assets/play/stack.js` |
 | **Last Train**, **Scope Creep**, **Spec Match** | The three original arcade games. | `assets/arcade.js` |
-| **Company SQL**, **Jom Al-Quran SQL**, **Join Atlas** | The data toys (bay 2): the playgrounds from the database notes, loaded from those notes at run time. | `db-playground.js`, `join-atlas.js` |
 | **Out of order** | The hidden train, found. | `assets/play/play.js` |
 
 | The hall | The cabinets |
@@ -172,7 +171,7 @@ An arcade hall, games only. Last Train plays itself behind the title, and the he
 
 ### `/lab/` · the lab (`lab/index.html`, `assets/play/`)
 
-The experiments, split off `/play/`. It **starts with the satellite inspector**: the first screen is the live inspector, not a card you open. Below it, five cabinets (Orbit, Particle lab, Glass lab, Skyline anatomy, Liquid glass lab) open full screen exactly as on `/play/` (same `play.js`, `play.css`, stage dialog; `/lab/#anatomy` opens one directly), and a big **The games** card links back to `/play/`. `Lab` sits between Play and Notes in the nav.
+The experiments, split off `/play/`. It **starts with the satellite inspector**: the first screen is the live inspector, not a card you open. Below it, five cabinets (Orbit, Particle lab, Glass lab, Skyline anatomy, Liquid glass lab) open full screen exactly as on `/play/` (same `play.js`, `play.css`, stage dialog; `/lab/#anatomy` opens one directly), then a second bay, **Data toys** (Company SQL, Jom Al-Quran SQL, Join Atlas; `#sql-company`, `#sql-jom`, `#atlas`), and a big **The games** card links back to `/play/`. `play/index.html` therefore no longer loads `join-atlas.css` or any SQL script: `mountSql()` in `play.js` fetches the playground markup from the database notes only when a data toy is opened (so on `/lab/` it loads `db-playground.js` / `join-atlas.js` lazily, and sql.js from cdnjs after that). `/lab/` loads `join-atlas.css`. `Lab` sits between Play and Notes in the nav.
 
 | Part | What it is | File |
 |---|---|---|
@@ -180,6 +179,7 @@ The experiments, split off `/play/`. It **starts with the satellite inspector**:
 | **Orbit**, **Particle lab** | The Halcyon globe and the morphing particle cloud. | `assets/halcyon.js` |
 | **Skyline anatomy** | The real landmark meshes sliced into strata, with an Explode slider. | `assets/play/anatomy.js` |
 | **Glass lab**, **Liquid Glass Lab** | The glass shader toys, with sliders. | `lab/glass.html`, `lab/liquid-glass.html` |
+| **Company SQL**, **Jom Al-Quran SQL**, **Join Atlas** | The data toys (bay 2): the playgrounds from the database notes, loaded from those notes at run time. | `assets/db-playground.js`, `assets/join-atlas.js`, `assets/db/*.sqlite` |
 ### On every page
 
 - **Time of day:** `window.SceneTime` in `scene.js` (t 0 day, 1 golden hour, 2 night), blended in the shader with a few uniforms. The flight's picker is `timeofday.js`; the portfolio's scroll is `daycycle.js`.
