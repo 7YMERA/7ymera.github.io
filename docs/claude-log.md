@@ -30,6 +30,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · Portfolio back on the city, a light dusk instead of night
+- Owner: the centred panel looked plain and the night was too dark and hard on the eyes; wanted the old side layout with the camera showing the landmarks, and the grey wash at the day/night flip gone. `portfolio.css`: the sheet behind every section is gone; Notes and UTP sit left (`side-l`), Experience right (`side-r`), the split skill tree is back, and the `#workstage` (Menara KL) and `#merdekastage` (Merdeka 118) spacers return so the director's shots show again.
+- `daycycle.js`: the end of the cycle is a light dusk (`DUSK` tokens: periwinkle paper, navy ink) instead of the dark theme, the sky ends lilac and peach, the city stops at t 1.7 (windows lit, sky light), and `data-theme` never flips, so there is no grey crossover. Dial says Day / Golden hour / Dusk. Key `20261122c`.
+
 ## 2026-11-22 · Descent from above, picker steps aside, glitching letters
 - Owner: the descent should end looking down on the skyline from above and ease into the drone angle. `scene.js`: on the front page (`#descent` present, `HOMEDS`) three director keys hold a straight-down view (radius 4 to 6, 1250 to 980 high) as the clouds clear, then tilt into the flight's first shot (`END`); the flight now starts at the top of `#enter` instead of one screen earlier, so the director reaches `END` exactly where the flight takes over.
 - Owner: Menara KL's label was hidden behind the view picker. `scene.js` sets `html.ride-mid` between 5 % and 90 % of the flight; `timeofday.css` fades the picker out then. It is there at the start and at the finale.

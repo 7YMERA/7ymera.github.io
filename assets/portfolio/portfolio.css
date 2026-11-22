@@ -74,13 +74,8 @@ body.pf .top .wrap { max-width: var(--pf-w); }
 .pf-live i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pfPulse 2.4s ease-in-out infinite; }
 @keyframes pfPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.8); } }
 
-/* ---------- Sheets: every section sits on one calm panel; the city shows in the gaps ---------- */
-html body.pf main > section.pf-s.block,
-html body.pf main > section.pf-s.block#notes {
-  width: min(calc(100% - 32px), var(--pf-w)); margin: 0 auto var(--pf-gap); padding: var(--pf-pad);
-  background: var(--pf-panel); border: 1px solid var(--line); border-radius: 28px; box-shadow: var(--pf-shadow);
-}
-html body.pf main > section.pf-s > .wrap, html body.pf main > section.pf-s > .wrap.wrap { max-width: none; padding-inline: 0; }
+/* ---------- Sections stand straight on the city, as on the old home page: no sheet behind them; side-l / side-r leave the other half of the screen to the landmark the camera is showing (camera keys in scene.js, by section id) ---------- */
+html body.pf main > section.pf-s.block { margin-bottom: var(--pf-gap); }
 .pf-s .sec-head { margin-bottom: clamp(28px, 4vw, 52px); align-items: end; gap: 24px; }
 .pf-s .sec-head > div:first-child { gap: 14px; max-width: 46em; }
 .pf-s .sec-head h2, .nb-head h2 { font: 400 clamp(2.4rem, 4.8vw, 4.1rem)/1.02 var(--f-serif); letter-spacing: -.022em; color: var(--ink); }
@@ -118,18 +113,6 @@ html body.pf main > section.pf-s > .wrap, html body.pf main > section.pf-s > .wr
 .pf-s .nb-head > div { display: grid; gap: 14px; }
 .pf-s .nb-all { min-height: 48px; }
 .pf-s .jr-card h3 { letter-spacing: -.01em; }
-html body.pf main > section.pf-s.block.tree-split { padding: var(--pf-pad); }
-html body.pf .tree-split .sec-head, html body.pf .tree-split .marquee, html body.pf .tree-split .st-legend { background: none; border: 0; box-shadow: none; border-radius: 0; }
-html body.pf .tree-split .sec-head { padding: 0; margin: 0 0 clamp(28px, 4vw, 52px); max-width: none; }
-html body.pf .tree-split .marquee { padding: 6px 0; margin: 0 0 32px; }
-html body.pf .tree-split .st-legend { padding: 0; }
-html body.pf .tree-split .skilltree { gap: 24px; }
-html body.pf .tree-split .st-branches { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 16px; row-gap: 16px; }
-html body.pf .tree-split .st-branch { background: var(--surface); border: 1px solid var(--line); box-shadow: none; border-radius: 20px; }
-html body.pf .tree-split .st-branch:hover { border-color: var(--accent); }
-@media (max-width: 980px) { html body.pf .tree-split .st-branches { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 700px) { html body.pf .tree-split .st-branches { grid-template-columns: 1fr; } }
-
 /* ---------- Credentials ---------- */
 .pf-cred { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .pf-cred li { display: flex; }

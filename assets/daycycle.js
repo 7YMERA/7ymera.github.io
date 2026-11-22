@@ -44,8 +44,11 @@
   // Golden hour: cream paper, violet ink, burnt-orange accent, violet hard shadows. (No pink or magenta.) Tokens not listed here take the middle of day and night.
   var GOLD = { '--bg': '#fbf0dd', '--surface': '#fff8ec', '--sunk': '#f3e1c4', '--ink': '#2b1b3f', '--muted': '#6b5278', '--line': '#ecd2a6', '--accent': '#b4481a', '--accent-ink': '#ffffff', '--accent-soft': '#fbdcb4',
     '--glow': 'rgba(240,150,60,.18)', '--fx': '#d9772a', '--hud': '#d9772a', '--hard': '#3a2358', '--fx-ink': '#9a4a12', '--gold': '#a86d12', '--gold-soft': '#f6ead3' };
+  // The end of the cycle is a light dusk, not the dark theme (owner, 22 Nov 2026: the dark night was hard to read): periwinkle paper, deep navy ink, a cool blue accent, so the page stays as easy to read as by day while the city lights up behind it.
+  var DUSK = { '--bg': '#e9ebf8', '--surface': '#f5f6fd', '--sunk': '#dde1f3', '--ink': '#1b2350', '--muted': '#4f5884', '--line': '#cfd4ee', '--accent': '#3e4fc0', '--accent-ink': '#ffffff', '--accent-soft': '#dfe3fb',
+    '--glow': 'rgba(90,110,220,.16)', '--fx': '#5867d6', '--hud': '#5867d6', '--hard': '#26306a', '--fx-ink': '#3340a8', '--gold': '#8a6a1c', '--gold-soft': '#efe9dc' };
   // The sky gradient (the page background and the haze of the 3D city). KEEP IN STEP with TB in assets/scene.js: day, golden hour, night.
-  var SKY = { s1: ['#fcfeff', '#3a60a2', '#050a1a'], s2: ['#e4f0fa', '#eea25f', '#141f52'], s3: ['#e4f0fa', '#ffd79a', '#6a4030'] }, STOP = [1, 0.6, 0.58];
+  var SKY = { s1: ['#fcfeff', '#3a60a2', '#5b6aa8'], s2: ['#e4f0fa', '#eea25f', '#a99ad0'], s3: ['#e4f0fa', '#ffd79a', '#f0cfb8'] }, STOP = [1, 0.6, 0.58];
   var tok = [], sky = [];
   (function read() { // the day and night values come from the page itself: flip the theme twice, in one synchronous task (no paint between)
     var was = root.getAttribute('data-theme'), cs, d = {}, n = {};
@@ -53,7 +56,7 @@
     root.setAttribute('data-theme', 'dark'); cs = getComputedStyle(root); NAMES.forEach(function (x) { n[x] = cs.getPropertyValue(x).trim(); });
     if (was) root.setAttribute('data-theme', was); else root.removeAttribute('data-theme');
     NAMES.forEach(function (x) {
-      var D = parse(d[x]), N = parse(n[x]); if (!D || !N) return;
+      var D = parse(d[x]), N = parse(DUSK[x] || d[x]); if (!D || !N) return;
       var G = GOLD[x] ? parse(GOLD[x]) : null; if (!G) { var m = mix(D, N, 0.5); G = parse(str(m)); }
       tok.push({ name: x, set: [D, G, N], last: '' });
     });
@@ -61,10 +64,10 @@
     tok.push({ name: '--shadow', shadow: true, set: [[0.3, 0, 0, 0], [0.3, 0, 0, 0], [0.3, 0, 0, 0]], last: '' });
     sky = ['s1', 's2', 's3'].map(function (x) { return SKY[x].map(parse); });
   })();
-  var SH = [[[11, 42, 107], .08, .10], [[58, 30, 70], .12, .16], [[0, 0, 0], .4, .4]]; // --shadow colours and strengths at day, golden hour, night
+  var SH = [[[11, 42, 107], .08, .10], [[58, 30, 70], .12, .16], [[27, 35, 80], .1, .14]]; // --shadow colours and strengths at day, golden hour, night
 
   // ---------- time of day from scroll ----------
-  var CURVE = [[0, 0], [0.22, 0], [0.40, 1], [0.60, 1], [0.78, 2], [1, 2]]; // [scroll progress, t]: day on top, golden hour in the middle, night at the bottom, eased between
+  var CURVE = [[0, 0], [0.22, 0], [0.40, 1], [0.60, 1], [0.80, 1.7], [1, 1.7]]; // the city goes as far as dusk (windows lit, sky still light), never to full night // [scroll progress, t]: day on top, golden hour in the middle, night at the bottom, eased between
   function curve(p) {
     for (var j = 1; j < CURVE.length; j++) if (p <= CURVE[j][0]) { var a = CURVE[j - 1], b = CURVE[j], f = b[0] === a[0] ? 1 : (p - a[0]) / (b[0] - a[0]); f = f * f * (3 - 2 * f); return a[1] + (b[1] - a[1]) * f; }
     return CURVE[CURVE.length - 1][1];
@@ -114,7 +117,7 @@
     var fs = t <= 1 ? mix(SKL[0], SKL[1], t) : mix(SKL[1], SKL[2], t - 1), fl = str(fs); if (fl !== lastFill) { lastFill = fl; wins.sk.style.fill = fl; }
     wins.stars.style.opacity = Math.max(0, Math.min(1, (t - 1.3) / 0.7)).toFixed(3);
     ringC.style.strokeDashoffset = (220 * (1 - p)).toFixed(1);
-    var l = pinned ? 'Daylight pinned' : ((t < 0.5 ? 'Day' : t < 1.5 ? 'Golden hour' : 'Night') + ' · ' + clockFor(p));
+    var l = pinned ? 'Daylight pinned' : ((t < 0.5 ? 'Day' : t < 1.4 ? 'Golden hour' : 'Dusk') + ' · ' + clockFor(p));
     if (l !== labTxt) { labTxt = l; lab.textContent = l; }
     if (glow) { var g = 1 - Math.abs(t - 1); g = g < 0 ? 0 : g; glow.style.opacity = ((gl ? 0.5 : 0.9) * g * g * (3 - 2 * g)).toFixed(3); }
   }
@@ -126,7 +129,7 @@
   function write() {
     wTimer = 0; lastW = performance.now(); written = t;
     // Contrast-locked crossover: ink tokens flip rapidly across t 1.46..1.54 so text never reads grey-on-grey near t 1.5.
-    var seg = t <= 1 ? 0 : 1, F = t <= 1 ? t : t - 1, FU = seg ? sstep(0.36, 0.64, F) : F, FInk = seg ? sstep(0.46, 0.54, F) : F, st = root.style, j, c, s;
+    var seg = t <= 1 ? 0 : 1, F = t <= 1 ? t : t - 1, FU = F, FInk = FU, st = root.style, j, c, s;
     for (j = 0; j < tok.length; j++) {
       c = tok[j];
       if (c.shadow) { var a = SH[seg], b = SH[seg + 1], col = [0, 1, 2].map(function (q) { return Math.round(a[0][q] + (b[0][q] - a[0][q]) * FU); }), o1 = a[1] + (b[1] - a[1]) * FU, o2 = a[2] + (b[2] - a[2]) * FU;
@@ -138,7 +141,7 @@
       var sp = ((STOP[seg] + (STOP[seg + 1] - STOP[seg]) * F) * 100).toFixed(1) + '%', gr = 'linear-gradient(' + str(mix(sky[0][seg], sky[0][seg + 1], F)) + ',' + str(mix(sky[1][seg], sky[1][seg + 1], F)) + ' ' + sp + ',' + str(mix(sky[2][seg], sky[2][seg + 1], F)) + ')';
       if (gr !== lastGrad && document.body) { lastGrad = gr; var bs = document.body.style; bs.backgroundImage = gr; bs.backgroundAttachment = 'fixed'; bs.backgroundRepeat = 'no-repeat'; }
     } else if (lastGrad && document.body) { lastGrad = ''; document.body.style.backgroundImage = ''; }
-    var th = t >= 1.5 ? 'dark' : 'light'; if (th !== theme) { theme = th; root.setAttribute('data-theme', th); }
+    var th = 'light'; if (th !== theme) { theme = th; root.setAttribute('data-theme', th); }
     paintDial(t, prog);
     var c0 = performance.now(); void getComputedStyle(root).getPropertyValue('--bg'); // forces the recalculation now (it would happen on the next frame anyway) to learn what it costs
     gap = Math.max(60, Math.min(500, gap * 0.5 + (performance.now() - c0) * 4 * 0.5));
