@@ -37,6 +37,7 @@
 <link rel="stylesheet" href="/assets/join-atlas.css?v=20261122r">
 <link rel="stylesheet" href="/assets/play/play.css?v=20261122r">
 <link rel="stylesheet" href="/assets/play/anatomy.css?v=20261122r">
+<link rel="stylesheet" href="/assets/play/sat.css?v=20261122r">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Play","url":"https://7ymera.github.io/play/","description":"Games and toys by Alif Najmi.","isPartOf":{"@type":"WebSite","name":"Alif Najmi","url":"https://7ymera.github.io/"}}</script>
 </head>
 <body class="play">
@@ -63,7 +64,7 @@
   <section class="hero-play" aria-labelledby="play-h1">
     <canvas id="attract" aria-hidden="true"></canvas>
     <div class="wrap hero-in">
-      <p class="eyebrow hero-eye"><span class="led" aria-hidden="true"></span>Arcade hall · 13 cabinets · no coins needed</p>
+      <p class="eyebrow hero-eye"><span class="led" aria-hidden="true"></span>Arcade hall · 14 cabinets · no coins needed</p>
       <h1 id="play-h1"><span class="l1">Play</span><span class="l2" id="hs-l2">the skyline.</span></h1>
       <p class="lede" id="hs-lede">An arcade, a lab and a toy box in one room. Stack Kuala Lumpur higher than Merdeka 118, ride the last train, spin the Earth, or run a real database in your browser.</p>
       <div class="hero-cta">
@@ -90,7 +91,7 @@
     </div>
   </section>
 
-  <div class="ticker" aria-hidden="true"><div class="ticker-in"><span>Insert coin</span><span>Press start</span><span>13 cabinets</span><span>Best scores stay on this device</span><span>Gamepad ready</span><span>Insert coin</span><span>Press start</span><span>13 cabinets</span><span>Best scores stay on this device</span><span>Gamepad ready</span></div></div>
+  <div class="ticker" aria-hidden="true"><div class="ticker-in"><span>Insert coin</span><span>Press start</span><span>14 cabinets</span><span>Best scores stay on this device</span><span>Gamepad ready</span><span>Insert coin</span><span>Press start</span><span>14 cabinets</span><span>Best scores stay on this device</span><span>Gamepad ready</span></div></div>
 
   <div class="wrap bays" id="cabinets">
 
@@ -147,6 +148,11 @@
           <span class="cab-sign"><b>Liquid glass lab</b><i class="tag">New</i></span>
           <span class="cab-screen"><canvas class="pv" data-pv="lglass" width="640" height="400" aria-hidden="true"></canvas></span>
           <span class="cab-deck"><span class="cab-desc">Tune the front page’s WebGL2 optical shader live: dispersion, corner shape, rim light, or paste any custom SVG.</span><span class="cab-keys"><kbd>Move</kbd><kbd>Sliders</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" id="sat" href="#sat" data-open="sat" data-tone="teal">
+          <span class="cab-sign"><b>Satellite inspector</b><i class="tag">NASA</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="sat" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">Three real NASA satellites, GPM, TRMM and AIM. Sweep an x-ray over the shell to see inside, or explode one into its parts.</span><span class="cab-keys"><kbd>Move</kbd><kbd>Drag</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
         </a>
       </div>
     </section>
@@ -331,6 +337,10 @@
       </div>
     </section>
 
+    <section class="view view-sat" data-view="sat" hidden>
+      <div class="sat-stage" id="sat-stage" data-cursor="Scan"></div>
+    </section>
+
     <section class="view view-pad" data-view="sql" hidden>
       <div class="sql-head"><p id="sql-lede"></p><a id="sql-note" class="ghost-btn" href="/notes/">Read the story</a></div>
       <div id="sql-host" class="sql-host"><p class="sql-wait">Loading the playground…</p></div>
@@ -374,6 +384,7 @@
 <script src="/assets/halcyon.js?v=20261122r" defer></script>
 <script src="/assets/play/stack.js?v=20261122r" defer></script>
 <script src="/assets/play/anatomy.js?v=20261122r" defer></script>
+<script src="/assets/home/sat/satellite.js?v=20261122r" defer></script>
 <script src="/assets/play/pad.js?v=20261122r" defer></script>
 <script src="/assets/play/play.js?v=20261122r" defer></script>
 </body>

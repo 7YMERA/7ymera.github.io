@@ -53,6 +53,7 @@
     lab: { view: 'halcyon', title: 'Particle lab', sub: 'The lab · Halcyon', pick: 'lab' },
     glass: { view: 'glass', title: 'Glass lab', sub: 'The lab · one WebGL shader', src: '/lab/glass.html' },
     anatomy: { view: 'anatomy', title: 'Skyline anatomy', sub: 'The lab · exploded KL meshes' },
+    sat: { view: 'sat', title: 'Satellite inspector', sub: 'The lab · NASA 3D models, x-ray and explode' },
     lglass: { view: 'glass', title: 'Liquid glass lab', sub: 'The lab · WebGL2 optical shader', src: '/lab/liquid-glass.html' },
     'sql-company': { view: 'sql', title: 'Company SQL', sub: 'Data toys · SQLite in your browser', sql: 'company' },
     'sql-jom': { view: 'sql', title: 'Jom Al-Quran SQL', sub: 'Data toys · SQLite in your browser', sql: 'jom' },
@@ -369,6 +370,28 @@
       }
       px(g, 11); g.textAlign = 'left'; g.fillStyle = C.mute; g.fillText('EXPLODED STRATA · 4 LANDMARKS', 12, 190);
     },
+    sat: function (g, t) {
+      backdrop(g);
+      for (var i = 0; i < 26; i++) { g.globalAlpha = .25 + hash(i * 2.3) * .5; g.fillStyle = C.ink; g.fillRect(hash(i * 1.7) * PW, hash(i * 4.1) * 150, 1.2, 1.2); } g.globalAlpha = 1;
+      var cx = 160, cy = 96, sw = Math.sin(t * .35) * 5;
+      function draw(xr) {
+        g.save(); g.translate(cx, cy + sw); g.rotate(-.2 + Math.sin(t * .3) * .05);
+        g.lineWidth = 1.2; g.strokeStyle = xr ? C.teal : C.blue;
+        [-1, 1].forEach(function (sd) {
+          var x0 = sd * 26, w = 82; g.fillStyle = xr ? 'rgba(79,194,200,.08)' : '#12305a'; g.fillRect(sd > 0 ? x0 : x0 - w, -22, w, 44); g.strokeRect(sd > 0 ? x0 : x0 - w, -22, w, 44);
+          g.beginPath(); for (var k = 1; k < 5; k++) { var gx = (sd > 0 ? x0 : x0 - w) + k * w / 5; g.moveTo(gx, -22); g.lineTo(gx, 22); } for (k = 1; k < 3; k++) { g.moveTo(sd > 0 ? x0 : x0 - w, -22 + k * 44 / 3); g.lineTo((sd > 0 ? x0 : x0 - w) + w, -22 + k * 44 / 3); } g.globalAlpha = .55; g.stroke(); g.globalAlpha = 1;
+        });
+        g.fillStyle = xr ? 'rgba(227,177,78,.12)' : C.gold; g.strokeStyle = xr ? C.gold : '#fff0c2'; g.fillRect(-26, -26, 52, 52); g.strokeRect(-26, -26, 52, 52);
+        if (xr) { g.strokeStyle = C.gold; g.beginPath(); g.moveTo(-18, -18); g.lineTo(18, 18); g.moveTo(18, -18); g.lineTo(-18, 18); g.rect(-9, -9, 18, 18); g.stroke(); }
+        else { g.fillStyle = C.bg2; g.beginPath(); g.arc(0, -34, 11, 0, 7); g.fill(); g.strokeStyle = C.mute; g.stroke(); }
+        g.restore();
+      }
+      draw(false);
+      var ang = t * .8, rx = cx + Math.cos(ang) * 58, ry = cy + Math.sin(ang * 1.3) * 18;
+      g.save(); g.beginPath(); g.arc(rx, ry, 34, 0, 7); g.clip(); g.fillStyle = 'rgba(6,16,26,.88)'; g.fillRect(rx - 40, ry - 40, 80, 80); draw(true); g.restore();
+      g.strokeStyle = C.teal; g.lineWidth = 1.4; g.beginPath(); g.arc(rx, ry, 34, 0, 7); g.stroke();
+      px(g, 11); g.textAlign = 'left'; g.fillStyle = C.mute; g.fillText('GPM · TRMM · AIM · X-RAY', 12, 190);
+    },
     lglass: function (g, t) {
       backdrop(g);
       var cx = 160, cy = 94, sz = 104, ang = t * 1.1;
@@ -527,6 +550,7 @@
     ['orbit', 'Lab', 'Orbit', 'the planet.', 'Spin the Earth from 408 km up, with arcs flying out of Kuala Lumpur.'],
     ['lab', 'Lab', 'Particle lab', 'with particles.', 'Thousands of points that morph between a Chladni plate, the Earth and the KL towers.'],
     ['anatomy', 'Lab', 'Skyline anatomy', 'with buildings.', 'The real tower models sliced into floors. Pull the slider and they come apart like a watch.'],
+    ['sat', 'Lab', 'Satellite inspector', 'with satellites.', 'Three real NASA satellites. Sweep an x-ray across the shell, or pull one apart.'],
     ['lglass', 'Lab', 'Liquid Glass Lab', 'with glass.', 'Bend light through a liquid glass lens, tune every slider, paste your own logo.'],
     ['sql-company', 'Toy', 'Company SQL', 'with data.', 'A real database and a real SQL engine, running in your browser. Break nothing, query anything.']
   ];

@@ -90,27 +90,59 @@
     return (motifCache[kind] = out);
   }
 
+  /* ================= shared buffers: noise and reverb impulses, generated once ================= */
+  var bufCache = {};
+  function sharedBuffers(ac) {
+    var rate = ac.sampleRate, B = bufCache[rate]; if (B) return B;
+    B = bufCache[rate] = {}; var i, last = 0;
+    B.white = ac.createBuffer(1, rate * 2, rate); var wd = B.white.getChannelData(0);
+    for (i = 0; i < wd.length; i++) wd[i] = Math.random() * 2 - 1;
+    B.brown = ac.createBuffer(1, rate * 6, rate); var bd = B.brown.getChannelData(0);
+    for (i = 0; i < bd.length; i++) { last = (last + .02 * (Math.random() * 2 - 1)) / 1.02; bd[i] = last * 3.5; }
+    // Main reverb: a long, dark, wide impulse. 3.4 s (was 6.4 s: the old tail sat below -40 dB for its last two seconds, and
+    // convolution cost is linear in length). Same recipe, decay shape rescaled so the first second matches the old one within ~1.5 dB,
+    // and the damping is a little darker. Pre-delay, a few early taps, then a tail that darkens as it decays.
+    B.ir = impulse(ac, 3.4, .6, .04, .45, 1.5, .8, 3.0, true);
+    // Shared brighter reverb for the airy zones and the cues: 3.0 s (was 5 s)
+    B.irE = impulse(ac, 3.0, .85, .15, .5, 1.4, .8, 2.0, false);
+    return B;
+  }
+  function impulse(ac, len, k0, k1, kp, ea, eb, gain, taps) {
+    var rate = ac.sampleRate, n = Math.floor(rate * len), buf = ac.createBuffer(2, n, rate), pre = taps ? Math.floor(rate * .028) : 0;
+    for (var c = 0; c < 2; c++) {
+      var ch = buf.getChannelData(c), lp = 0;
+      for (var i = pre; i < n; i++) { var t = (i - pre) / n, k = lerp(k0, k1, Math.pow(t, kp)); lp += ((Math.random() * 2 - 1) - lp) * k; ch[i] = lp * Math.pow(1 - t, ea) * Math.exp(-t * eb) * gain; }
+      if (taps) [.011, .017, .023, .031, .043, .057].forEach(function (s, j) { var p = Math.floor(rate * (.028 + s + c * .0037)); ch[p] += (j % 2 ? -.5 : .6) * (1 - j * .1); });
+    }
+    return buf;
+  }
+  /* a gated noise loop: a fresh source is started when its zone becomes audible and faded out then stopped when it is not,
+     so silent zones cost nothing. `head` is the first node of the chain the source feeds. */
+  function mkLoop(ac, buf, head, span) {
+    var L = { on: false, src: null, sg: ac.createGain() }; L.sg.gain.value = 0; L.sg.connect(head);
+    L.start = function (t) {
+      if (L.on) return; L.on = true; var s = ac.createBufferSource(); s.buffer = buf; s.loop = true; s.connect(L.sg); L.src = s;
+      L.sg.gain.cancelScheduledValues(t); L.sg.gain.setValueAtTime(0, t); L.sg.gain.linearRampToValueAtTime(1, t + .04); s.start(t, Math.random() * (span || 1));
+    };
+    L.stop = function (t) {
+      if (!L.on) return; L.on = false; var s = L.src; L.src = null;
+      L.sg.gain.cancelScheduledValues(t); L.sg.gain.setValueAtTime(L.sg.gain.value, t); L.sg.gain.linearRampToValueAtTime(0, t + .05);
+      try { s.stop(t + .08); } catch (e) {} s.onended = function () { try { s.disconnect(); } catch (e) {} };
+    };
+    return L;
+  }
+
   /* ================= the engine (works on a realtime or an offline context) ================= */
   function Engine(ac, env, opts) {
     opts = opts || {};
-    var rate = ac.sampleRate, E = {}, live = 0, MAXLIVE = opts.maxLive || 30;
+    var rate = ac.sampleRate, E = {}, live = 0, MAXLIVE = opts.maxLive || 30, dlive = 0, DMAX = opts.power ? 40 : 1e9;   // dlive: drum one-shots in flight (offline renders have no onended while building, so no cap there)
     function g(v) { var n = ac.createGain(); n.gain.value = v; return n; }
     function flt(type, f, q) { var n = ac.createBiquadFilter(); n.type = type; n.frequency.value = f; if (q != null) n.Q.value = q; return n; }
     function pan(v) { if (!ac.createStereoPanner) return g(1); var p = ac.createStereoPanner(); p.pan.value = v; return p; }
     function osc(type, f) { var o = ac.createOscillator(); o.type = type; o.frequency.value = f; return o; }
 
-    /* buffers */
-    var white = ac.createBuffer(1, rate * 2, rate), wd = white.getChannelData(0), i, last = 0;
-    for (i = 0; i < wd.length; i++) wd[i] = Math.random() * 2 - 1;
-    var brown = ac.createBuffer(1, rate * 6, rate), bd = brown.getChannelData(0);
-    for (i = 0; i < bd.length; i++) { last = (last + .02 * (Math.random() * 2 - 1)) / 1.02; bd[i] = last * 3.5; }
-    // a long, dark, wide reverb: pre-delay, a few early taps, then a tail that darkens as it decays
-    var irLen = 6.4, irN = Math.floor(rate * irLen), ir = ac.createBuffer(2, irN, rate);
-    for (var c = 0; c < 2; c++) {
-      var ch = ir.getChannelData(c), lp = 0, pre = Math.floor(rate * .028);
-      for (i = pre; i < irN; i++) { var t = (i - pre) / irN, k = lerp(.7, .05, Math.pow(t, .45)); lp += ((Math.random() * 2 - 1) - lp) * k; ch[i] = lp * Math.pow(1 - t, 2.4) * Math.exp(-t * 1.4) * 2.4; }
-      [.011, .017, .023, .031, .043, .057].forEach(function (s, j) { var p = Math.floor(rate * (.028 + s + c * .0037)); ch[p] += (j % 2 ? -.5 : .6) * (1 - j * .1); });
-    }
+    /* buffers: built once per page and sample rate (see sharedBuffers), never per engine */
+    var SB = sharedBuffers(ac), white = SB.white, brown = SB.brown, ir = SB.ir, i;
 
     /* master chain */
     var mix = g(1), preSat = g(1), sat = ac.createWaveShaper(), curve = new Float32Array(2048);
@@ -152,9 +184,9 @@
     var swF = flt('lowpass', 900, .4), swG = g(.0), swO = []; swF.connect(swG); swG.connect(bAir.in);
     [0, 1, 2].forEach(function (k) { var o = osc('sawtooth', 110), o2 = osc('sawtooth', 110); o.detune.value = -9 + k * 3; o2.detune.value = 9 - k * 3; o.connect(swF); o2.connect(swF); o.start(); o2.start(); swO.push([o, o2]); });
     // city: distant traffic (brown noise, low pass) and a faint breathing "air" band
-    var hum = ac.createBufferSource(); hum.buffer = brown; hum.loop = true; var humF = flt('lowpass', 170), humG = g(0); hum.connect(humF); humF.connect(humG); humG.connect(ctxG); hum.start();
-    var city = ac.createBufferSource(); city.buffer = white; city.loop = true; var cityF = flt('bandpass', 1500, .45), cityG = g(0), cl = osc('sine', .09), clg = g(.5), cgate = g(.5);
-    city.connect(cityF); cityF.connect(cgate); cl.connect(clg); clg.connect(cgate.gain); cgate.connect(cityG); cityG.connect(ctxG); city.start(); cl.start();
+    var humF = flt('lowpass', 170), humG = g(0), humL = mkLoop(ac, brown, humF, 5); humF.connect(humG); humG.connect(ctxG);
+    var cityF = flt('bandpass', 1500, .45), cityG = g(0), cl = osc('sine', .09), clg = g(.5), cgate = g(.5), cityL = mkLoop(ac, white, cityF, 1.5);
+    cityF.connect(cgate); cl.connect(clg); clg.connect(cgate.gain); cgate.connect(cityG); cityG.connect(ctxG); cl.start();
 
     function padTo(t, vl, glide) { for (var v = 0; v < 4; v++) { var f = hz(vl[v]); padV[v][0].frequency.setTargetAtTime(f, t, glide); padV[v][1].frequency.setTargetAtTime(f, t, glide); } }
     function swTo(t, root, glide) { [0, 7, 16].forEach(function (iv, k) { var f = hz(root + 12 + iv); swO[k][0].frequency.setTargetAtTime(f, t, glide); swO[k][1].frequency.setTargetAtTime(f, t, glide); }); }
@@ -195,13 +227,13 @@
     }
     var hatF = flt('highpass', 6800, .5), hatG = g(1), hatP = pan(.22); hatF.connect(hatG); hatG.connect(hatP); hatP.connect(bDr);
     var hatB = flt('bandpass', 9500, .8); hatB.connect(hatF);
-    function hat(t, vel, open) { var s = ac.createBufferSource(); s.buffer = white; var e = g(0); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .22, t + .006); e.gain.exponentialRampToValueAtTime(.0002, t + (open ? .26 : .06)); s.connect(e); e.connect(hatB); s.start(t, Math.random() * 1.5); s.stop(t + (open ? .3 : .1)); }
+    function hat(t, vel, open) { if (dlive > DMAX) return; dlive++; var s = ac.createBufferSource(); s.buffer = white; var e = g(0); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .22, t + .006); e.gain.exponentialRampToValueAtTime(.0002, t + (open ? .26 : .06)); s.connect(e); e.connect(hatB); s.onended = function () { dlive--; }; s.start(t, Math.random() * 1.5); s.stop(t + (open ? .3 : .1)); }
     var clapF = flt('bandpass', 1500, .9), clapG = g(1); clapF.connect(clapG); clapG.connect(bDr); clapG.connect(drRev);
-    function clap(t, vel) { [0, .011, .022].forEach(function (o, k) { var s = ac.createBufferSource(); s.buffer = white; var e = g(0); e.gain.setValueAtTime(0, t + o); e.gain.linearRampToValueAtTime(vel * .26, t + o + .002); e.gain.exponentialRampToValueAtTime(.0002, t + o + (k === 2 ? .2 : .02)); s.connect(e); e.connect(clapF); s.start(t + o, Math.random() * 1.5); s.stop(t + o + .24); }); }
-    function rim(t, vel) { var o = osc('triangle', 1750), e = g(0), bp = flt('bandpass', 2400, 2); o.frequency.setValueAtTime(1750, t); o.frequency.exponentialRampToValueAtTime(1180, t + .04); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .16, t + .001); e.gain.exponentialRampToValueAtTime(.0002, t + .07); o.connect(bp); bp.connect(e); e.connect(bDr); e.connect(drRev); o.start(t); o.stop(t + .1); }
+    function clap(t, vel) { if (dlive > DMAX) return; dlive++; [0, .011, .022].forEach(function (o, k) { var s = ac.createBufferSource(); s.buffer = white; var e = g(0); e.gain.setValueAtTime(0, t + o); e.gain.linearRampToValueAtTime(vel * .26, t + o + .002); e.gain.exponentialRampToValueAtTime(.0002, t + o + (k === 2 ? .2 : .02)); s.connect(e); e.connect(clapF); if (k === 2) s.onended = function () { dlive--; }; s.start(t + o, Math.random() * 1.5); s.stop(t + o + .24); }); }
+    function rim(t, vel) { if (dlive > DMAX) return; dlive++; var o = osc('triangle', 1750), e = g(0), bp = flt('bandpass', 2400, 2); o.frequency.setValueAtTime(1750, t); o.frequency.exponentialRampToValueAtTime(1180, t + .04); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .16, t + .001); e.gain.exponentialRampToValueAtTime(.0002, t + .07); o.connect(bp); bp.connect(e); e.connect(bDr); e.connect(drRev); o.onended = function () { dlive--; }; o.start(t); o.stop(t + .1); }
     function kick(t, vel) {
-      var o = osc('sine', 140), e = g(0); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(46, t + .11);
-      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .6, t + .003); e.gain.exponentialRampToValueAtTime(.0003, t + .42); o.connect(e); e.connect(bDr); o.start(t); o.stop(t + .45);
+      if (dlive > DMAX) return; dlive++; var o = osc('sine', 140), e = g(0); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(46, t + .11);
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .6, t + .003); e.gain.exponentialRampToValueAtTime(.0003, t + .42); o.connect(e); e.connect(bDr); o.onended = function () { dlive--; }; o.start(t); o.stop(t + .45);
       var cf = flt('highpass', 1800); noiseHit(t, .012, bDr, cf, vel * .05); duckAt(t, .5 * vel);
     }
     function riser(t, dur) {
@@ -227,9 +259,8 @@
     /* ================= ZONES: glass (airy bed), cosmos (orbit), city (the score) + one-shot cues ================= */
     var zlog = [], zconn = { g: true, c: true, y: true };
     function act(z, t) { var cur = false, off = -1; for (var k = 0; k < zlog.length; k++) { var ev = zlog[k]; if (ev.t > t + .001) break; if (ev.z === z) cur = true; else if (cur) { cur = false; off = ev.t + ev.tc * 5 + .5; } } return cur || t < off; }
-    // a shared, brighter reverb for the airy zones and the cues
-    var irEN = Math.floor(rate * 5), irE = ac.createBuffer(2, irEN, rate);
-    for (var ce = 0; ce < 2; ce++) { var che = irE.getChannelData(ce), lpe = 0; for (i = 0; i < irEN; i++) { var te = i / irEN, ke = lerp(.9, .15, Math.pow(te, .5)); lpe += ((Math.random() * 2 - 1) - lpe) * ke; che[i] = lpe * Math.pow(1 - te, 2.2) * Math.exp(-te * 1.1) * 1.8; } }
+    // a shared, brighter reverb for the airy zones and the cues (impulse built once in sharedBuffers)
+    var irE = SB.irE;
     var convE = ac.createConvolver(); convE.buffer = irE; var eRet = g(.7); convE.connect(eRet); eRet.connect(mix);
     function zbus(rev) { var z = { src: g(1), zin: g(0) }; z.src.connect(z.zin); z.zin.connect(mix); z.rs = g(rev); z.zin.connect(z.rs); z.rs.connect(convE); return z; }
     var Zc = zbus(.8), Zg = zbus(1);
@@ -256,9 +287,9 @@
     var chSwL = osc('sine', .055), chSwG = g(.4); chSwL.connect(chSwG); chSwG.connect(cChSw.gain); chSwL.start();
     var chVib = osc('sine', 5.2), chVibG = g(11); chVib.connect(chVibG); chVib.start(); var cCh = [];
     [0, 1, 2].forEach(function (v) { var a = osc('sawtooth', 220), b = osc('sawtooth', 220), vg = g(.085); a.detune.value = -6; b.detune.value = 6; chVibG.connect(a.detune); chVibG.connect(b.detune); a.connect(vg); b.connect(vg); vg.connect(cChIn); a.start(); b.start(); cCh.push([a, b]); });
-    var cAtm = ac.createBufferSource(); cAtm.buffer = brown; cAtm.loop = true; var cAtmF = flt('bandpass', 520, .6), cAtmG = g(.05), cAtmP = pan(0); cAtm.connect(cAtmF); cAtmF.connect(cAtmG); cAtmG.connect(cAtmP); cAtmP.connect(Zc.src); cAtm.start();
+    var cAtmF = flt('bandpass', 520, .6), cAtmG = g(.05), cAtmP = pan(0), cAtmL = mkLoop(ac, brown, cAtmF, 5); cAtmF.connect(cAtmG); cAtmG.connect(cAtmP); cAtmP.connect(Zc.src);
     var atL = osc('sine', .03), atG = g(280); atL.connect(atG); atG.connect(cAtmF.frequency); atL.start(); if (cAtmP.pan) { var apL = osc('sine', .045), apG = g(.7); apL.connect(apG); apG.connect(cAtmP.pan); apL.start(); }
-    var cGl = ac.createBufferSource(); cGl.buffer = white; cGl.loop = true; var cGlF = flt('bandpass', 6200, 1), cGlG = g(.006); cGl.connect(cGlF); cGlF.connect(cGlG); cGlG.connect(Zc.src); cGl.start();
+    var cGlF = flt('bandpass', 6200, 1), cGlG = g(.006), cGlL = mkLoop(ac, white, cGlF, 1.5); cGlF.connect(cGlG); cGlG.connect(Zc.src);
     // D lydian-ish orbit chords, 16 seconds each: [root, pad voices, choir voices, vowel]
     var VOW = [[800, 1150, 2900], [450, 800, 2830], [325, 700, 2530], [530, 1840, 2480]];
     var COS = [[38, [57, 61, 64, 69], [62, 69, 73], 0], [35, [54, 62, 66, 69], [62, 66, 73], 1], [43, [55, 62, 66, 71], [67, 71, 74], 2], [45, [57, 64, 69, 71], [64, 69, 76], 3]];
@@ -272,7 +303,7 @@
     var gHP = flt('highpass', 1100, .5), gTr = g(.65), gSh = g(.024), gOs = []; gHP.connect(gTr); gTr.connect(gSh); gSh.connect(Zg.src);
     var gtl = osc('sine', .13), gtg = g(.35); gtl.connect(gtg); gtg.connect(gTr.gain); gtl.start();
     [0, 1, 2, 3].forEach(function (k) { var a = osc('sine', 2000), b = osc('sine', 2000); a.detune.value = -1.4; b.detune.value = 1.4; var vg = g(.25); a.connect(vg); b.connect(vg); vg.connect(gHP); a.start(); b.start(); gOs.push([a, b]); });
-    var gAir = ac.createBufferSource(); gAir.buffer = white; gAir.loop = true; var gAirF = flt('bandpass', 7000, .9), gAirG = g(.004); gAir.connect(gAirF); gAirF.connect(gAirG); gAirG.connect(Zg.src); gAir.start();
+    var gAirF = flt('bandpass', 7000, .9), gAirG = g(.004), gAirL = mkLoop(ac, white, gAirF, 1.5); gAirF.connect(gAirG); gAirG.connect(Zg.src);
     var GS = [[88, 95, 92, 99], [86, 93, 90, 97], [84, 91, 88, 95], [90, 97, 93, 100]];
     function applyGlass(t, c) { for (var k = 0; k < 4; k++) { var f = hz(c[k]); gOs[k][0].frequency.setTargetAtTime(f, t, 3); gOs[k][1].frequency.setTargetAtTime(f, t, 3); } }
     /* the ambient clock: one "bar" is four seconds; the chord changes every four bars */
@@ -333,6 +364,19 @@
       else if (name === 'sat-assemble') {
         sweepNoise(t, .9, 6500, 900, .8, .1, .93, 0); [.52, .64, .75, .85].forEach(function (d0, j) { click(t + d0, .08 + j * .04, 2000 + j * 700); }); thunk(t + .9, .2, 110); chirp(t + .92, 1760, 2349, .2, .04);
       }
+      else if (name === 'gate') {
+        // power-up: a rising filtered swell, a soft low boom at 0.8 s, a bright glassy ping on top (about 1.2 s, tail into the reverb)
+        o = osc('sawtooth', 55); var og2 = osc('sawtooth', 55.6); lp = flt('lowpass', 180, 1.1); e = g(0);
+        o.frequency.setValueAtTime(55, t); o.frequency.exponentialRampToValueAtTime(220, t + .85); og2.frequency.setValueAtTime(55.6, t); og2.frequency.exponentialRampToValueAtTime(222, t + .85);
+        lp.frequency.setValueAtTime(180, t); lp.frequency.exponentialRampToValueAtTime(3200, t + .85); lp.frequency.exponentialRampToValueAtTime(500, t + 1.2);
+        e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(.15, t + .8); e.gain.linearRampToValueAtTime(0, t + 1.25);
+        o.connect(lp); og2.connect(lp); lp.connect(e); e.connect(Cue); o.start(t); og2.start(t); o.stop(t + 1.3); og2.stop(t + 1.3);
+        sweepNoise(t, 1, 400, 6000, 1.1, .08, .85, 0);
+        thunk(t + .8, .26, 95);
+        var cr = osc('sine', 1975.5), md = osc('sine', 1975.5 * 3.5), mg = g(0), ping = cueEnv(t + .82, .004, .09, 0, 1.6);
+        mg.gain.setValueAtTime(1975.5 * 1.4, t + .82); mg.gain.exponentialRampToValueAtTime(40, t + 1.5); md.connect(mg); mg.connect(cr.frequency); cr.connect(ping); ping.connect(Cue);
+        cr.start(t + .82); md.start(t + .82); cr.stop(t + 2.5); md.stop(t + 2.5);
+      }
       else if (name === 'flight-start') {
         o = osc('sawtooth', 38); lp = flt('lowpass', 200, .8); e = g(0); o.frequency.setValueAtTime(38, t); o.frequency.exponentialRampToValueAtTime(150, t + 2.2); o.frequency.exponentialRampToValueAtTime(95, t + 3.4);
         lp.frequency.setValueAtTime(200, t); lp.frequency.exponentialRampToValueAtTime(1800, t + 2.2); lp.frequency.exponentialRampToValueAtTime(700, t + 3.4);
@@ -355,7 +399,11 @@
       if (opts.power) E.power(t);
     };
     function wire(k, on) { if (zconn[k] === on) return; zconn[k] = on; try { if (k === 'y') { if (on) cityLP.connect(cityZ); else cityLP.disconnect(cityZ); } else { var Z = k === 'c' ? Zc : Zg; if (on) Z.src.connect(Z.zin); else Z.src.disconnect(Z.zin); } } catch (x) {} }
-    E.power = function (t) { wire('y', act('y', t)); wire('c', act('c', t)); wire('g', act('g', t)); };
+    // zone gating: a zone's connection and its noise loops are live only while the zone is audible (or fading); see mkLoop
+    var zLoops = { y: [humL, cityL], c: [cAtmL, cGlL], g: [gAirL] };
+    function gateLoops(k, on) { var t0 = opts.power ? ac.currentTime : 0; zLoops[k].forEach(function (l) { if (on) l.start(t0); else l.stop(t0); }); }
+    E.power = function (t) { ['y', 'c', 'g'].forEach(function (k) { var a = act(k, t); wire(k, a); gateLoops(k, a); }); };
+    if (!opts.power) gateLoops('y', true), gateLoops('c', true), gateLoops('g', true);   // offline: everything runs, as before
     E.zones = function (t) { return { glass: act('g', t), cosmos: act('c', t), city: act('y', t) }; };
 
     /* sequencer state */
@@ -476,8 +524,11 @@
     }
     /* schedule every bar that starts before `until` */
     E.start = function (t, bar0) { amb.nextT = t; amb.bar = 0; st.nextT = t; st.bar = bar0 || 0; st.mood = null; st.ch = null; st.vl = null; st.bpm = tempoFor(env.T); ctrl(t); };
+    // a stalled clock (throttled timer, tab in the background, context resumed late) leaves nextT in the past, and the schedulers
+    // would then fire every missed bar at once: skip ahead instead
+    E.resync = function (now) { if (st.nextT < now) st.nextT = now + .1; if (amb.nextT < now) amb.nextT = now + .1; };
     E.pump = function (until) {
-      var n = 0; if (opts.power) E.power(until);
+      var n = 0; if (opts.power) { E.resync(ac.currentTime); E.power(until); }
       if (act('y', until)) { while (st.nextT < until && n++ < 4) { var len = buildBar(st.bar, st.nextT); st.nextT += len; st.bar++; } } else if (st.nextT < until) st.nextT = until;
       n = 0; while (amb.nextT < until && n++ < 3) { ambBar(amb.nextT, amb.bar); amb.nextT += AMB; amb.bar++; }
     };
@@ -490,7 +541,7 @@
 
   /* ================= realtime wrapper ================= */
   var env = { T: root.getAttribute('data-theme') === 'light' ? 0 : (root.getAttribute('data-theme') ? 2 : 0), energy: .55, flight: 0, ctx: .78 };
-  var on = false, armed = false, ac = null, eng = null, fadeG = null, uiG = null, windG = null, windF = null, an = null, timer = 0, vol = .75, lastGlyph = 0, lastTick = 0, started = 0, sawScene = false;
+  var on = false, armed = false, ac = null, eng = null, fadeG = null, uiG = null, windG = null, windF = null, windL = null, an = null, timer = 0, vol = .75, lastGlyph = 0, lastTick = 0, started = 0, sawScene = false;
   var LOOK = .5;
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -498,7 +549,9 @@
   function vgain() { return Math.pow(vol, 1.6) * .95; }
   function themeT() { return root.getAttribute('data-theme') === 'light' || !root.getAttribute('data-theme') ? 0 : 2; }
   function sceneT() { var s = window.SceneTime; if (s && typeof s.get === 'function') { var v = +s.get(); if (v >= 0 && v <= 2) return v; } return themeT(); }
-  function readPage() {
+  var readAt = -1e9, lastKey = '';
+  function readPage(force) {
+    var nowMs = performance.now(); if (!force && nowMs - readAt < 8) return; readAt = nowMs;   // scroll and the per-frame loop can land in the same frame: read once
     var en = d.getElementById('enter'), vh = innerHeight;
     if (en) {
       var r = en.getBoundingClientRect(), inE = r.top < vh * .55 && r.bottom > vh * .45, hero = !inE && r.top > vh * .3;
@@ -506,12 +559,17 @@
     } else { env.flight = 0; env.ctx = .78; env.energy = .55; }
     if (root.classList.contains('flying') || root.classList.contains('free-fly')) { env.flight = 1; env.ctx = 1.18; env.energy = 1; }
     pickZone();
-    if (eng && ac) eng.ctrl(ac.currentTime);
+    var key = env.flight + '|' + env.ctx + '|' + env.energy;   // ctrl() writes a dozen automation events: only when the page state moved
+    if (key !== lastKey) { lastKey = key; if (eng && ac) eng.ctrl(ac.currentTime); }
   }
+  // page reading while sound is on: one rAF per frame, reads first (rects), writes after (attribute, audio params)
+  var pageRaf = 0;
+  function pageFrame() { pageRaf = 0; if (!on || d.hidden) return; readPage(); pageRaf = requestAnimationFrame(pageFrame); }
+  function pageKick() { if (!pageRaf && on && !d.hidden) pageRaf = requestAnimationFrame(pageFrame); }
   // the zone that fills most of the viewport (sections marked data-sfx-zone); pages without any keep the plain score
-  var zone = null;
+  var zone = null, zoneEls = null;
   function pickZone() {
-    var els = d.querySelectorAll('[data-sfx-zone]'); if (!els.length) return;
+    var els = zoneEls || (zoneEls = d.querySelectorAll('[data-sfx-zone]')); if (!els.length) { zoneEls = null; return; }
     var vh = innerHeight, sum = {}, best = null, bo = 0, i;
     for (i = 0; i < els.length; i++) { var r = els[i].getBoundingClientRect(), ov = Math.min(r.bottom, vh) - Math.max(r.top, 0); if (ov > 0) { var z = els[i].getAttribute('data-sfx-zone'); sum[z] = (sum[z] || 0) + ov; } }
     for (var k in sum) { var v = sum[k] * (k === zone ? 1.12 : 1); if (v > bo) { bo = v; best = k; } }
@@ -527,16 +585,15 @@
     if (ac) return true;
     if (!Ctx) return false;
     try {
-      ac = new Ctx(); env.T = sceneT(); readPage();
+      ac = new Ctx(); env.T = sceneT(); readPage(true);
       eng = Engine(ac, env, { power: true });
       fadeG = ac.createGain(); fadeG.gain.value = 0; uiG = ac.createGain(); uiG.gain.value = .9;
       // Subtle scroll-velocity wind layer (active during orbital descent & KL drone flight)
       var wLen = ac.sampleRate * 2, wBuf = ac.createBuffer(1, wLen, ac.sampleRate), wData = wBuf.getChannelData(0), b0 = 0, b1 = 0, b2 = 0;
       for (var wi = 0; wi < wLen; wi++) { var wh = Math.random() * 2 - 1; b0 = .997 * b0 + wh * .029; b1 = .985 * b1 + wh * .032; b2 = .95 * b2 + wh * .048; wData[wi] = (b0 + b1 + b2 + wh * .018) * .3; }
-      var wSrc = ac.createBufferSource(); wSrc.buffer = wBuf; wSrc.loop = true;
       windF = ac.createBiquadFilter(); windF.type = 'bandpass'; windF.frequency.value = 320; windF.Q.value = 1.5;
-      windG = ac.createGain(); windG.gain.value = .0001;
-      wSrc.connect(windF); windF.connect(windG); windG.connect(fadeG); wSrc.start();
+      windG = ac.createGain(); windG.gain.value = .0001; windL = mkLoop(ac, wBuf, windF, 1.5);   // runs only while the page is scrolling in the descent or flight
+      windF.connect(windG); windG.connect(fadeG);
       var clip = ac.createWaveShaper(); clip.curve = new Float32Array([-.97, .97]);
       eng.out.connect(fadeG); uiG.connect(fadeG); fadeG.connect(clip); clip.connect(ac.destination);
       an = ac.createAnalyser(); an.fftSize = 256; an.smoothingTimeConstant = .78; clip.connect(an);
@@ -552,8 +609,9 @@
   function onState() {
     if (!ac || !on) return;
     if (ac.state === 'running') {
-      armed = false; hideHint(); disarm(); if (eng) { var t = ac.currentTime + .02; eng.setZone(zone || 'city', t, .6); }
+      armed = false; disarm(); if (eng) { var t = ac.currentTime + .02; eng.resync(ac.currentTime); eng.setZone(zone || 'city', t, .6); }
       if (!chimed) { chimed = true; setTimeout(function () { if (on && ac) { tone(523.25, .04, .4, 'sine'); tone(783.99, .03, .5, 'sine', .08); } }, 250); }
+      if (pendCue && eng) { var pc = pendCue; pendCue = null; playCue(pc); }
       sync();
     }
   }
@@ -566,21 +624,22 @@
     }
     timer = setTimeout(loop, 40);
   }
-  function closeAc() { if (on || !ac) return; chimed = false; clearTimeout(timer); try { ac.close(); } catch (e) {} ac = null; eng = null; fadeG = null; uiG = null; windG = null; windF = null; an = null; }
+  var offTimer = 0;
   function set(v, quiet) {
     v = !!v;
     if (v) {
       if (!ensure()) { on = false; sync(); return; }
-      on = true; started = performance.now(); armed = ac.state !== 'running'; var pr = ac.resume(); if (pr && pr.then) pr.then(onState, function () {}); fadeTo(vgain(), 1.5); loop(); if (!armed) onState();
+      on = true; started = performance.now(); armed = ac.state !== 'running'; clearTimeout(offTimer); var pr = ac.resume(); if (pr && pr.then) pr.then(onState, function () {}); fadeTo(vgain(), 1.5); loop(); pageKick(); if (!armed) onState();
     } else {
-      on = false; armed = false; disarm(); if (ac) { fadeTo(0, 1.5); setTimeout(closeAc, 1700); }
+      on = false; armed = false; disarm(); if (ac) { fadeTo(0, 1.5); clearTimeout(offTimer); offTimer = setTimeout(function () { if (!on && ac && ac.state === 'running') ac.suspend(); }, 1700); }   // the context is kept (nothing is rebuilt); suspended it costs nothing
     }
     if (!quiet) lsSet('sfx-on', v ? '1' : '0');
     sync(); if (v && !quiet) popShow(3500);
   }
+  var uiLive = 0;
   function tone(f, vol2, len, type, delay, slide) {
-    if (!on || !ac || ac.state !== 'running' || !uiG) return;
-    var t = ac.currentTime + (delay || 0), o = ac.createOscillator(), g = ac.createGain();
+    if (!on || !ac || ac.state !== 'running' || !uiG || uiLive >= 24) return;   // cap on UI one-shots in flight
+    uiLive++; var t = ac.currentTime + (delay || 0), o = ac.createOscillator(), g = ac.createGain(); o.onended = function () { uiLive--; };
     o.type = type || 'sine'; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f * slide), t + len);
     g.gain.setValueAtTime(vol2, t); g.gain.exponentialRampToValueAtTime(.0001, t + len);
     o.connect(g); g.connect(uiG); o.start(t); o.stop(t + len + .02);
@@ -682,12 +741,18 @@
   }
   d.addEventListener('click', function (e) { if (on && e.target.closest && e.target.closest('a, button, [role=tab], summary')) api.tick(); }, true);
   d.addEventListener('click', function (e) { if (popOpen && pop && !pop.contains(e.target) && e.target !== btn && !(btn && btn.contains(e.target))) { popOpen = false; pop.classList.remove('open'); } });
-  d.addEventListener('sfx-cue', function (e) { var n = e.detail && e.detail.name; if (!n || !on || !ac || !eng || ac.state !== 'running' || d.hidden) return; eng.cue(n, ac.currentTime + .03); if (n === 'flight-start') { env.flight = 1; eng.ctrl(ac.currentTime); } });
+  var pendCue = null;
+  function playCue(n) { eng.cue(n, ac.currentTime + .03); if (n === 'flight-start') { env.flight = 1; eng.ctrl(ac.currentTime); } }
+  d.addEventListener('sfx-cue', function (e) {
+    var n = e.detail && e.detail.name; if (!n || !on || !ac || !eng || d.hidden) return;
+    if (ac.state !== 'running') { if (n === 'gate') pendCue = n; return; }   // the gate click is the first gesture: the context may still be resuming
+    playCue(n);
+  });
   d.addEventListener('sec-change', function (e) { if (on) api.chime(e.detail && e.detail.index); });
   var tPend = 0;
   d.addEventListener('scenetime', function (e) { sawScene = true; env.T = clamp(+(e.detail && e.detail.t) || 0, 0, 2); if (!tPend) tPend = setTimeout(function () { tPend = 0; if (eng && ac) eng.ctrl(ac.currentTime); }, 250); });
   new MutationObserver(function () { if (!sawScene) { env.T = themeT(); if (eng && ac) eng.ctrl(ac.currentTime); } }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
-  var pend = 0, lastSy = scrollY, lastSt = performance.now(), windCalm = 0;
+  var pend = 0, lastSy = scrollY, lastSt = performance.now(), windCalm = 0, windOff = 0;
   function onScroll() {
     if (pend) return;
     pend = requestAnimationFrame(function () {
@@ -700,48 +765,32 @@
         var activeZone = env.flight > .5 || inDs;
         var v = activeZone ? clamp(vel * .42, 0, 1) : 0;
         var t = ac.currentTime;
+        if (v > .02 && windL) { clearTimeout(windOff); windL.start(t); }
         windG.gain.setTargetAtTime(v > .02 ? .004 + v * .11 : .0001, t, .08);
         windF.frequency.setTargetAtTime(240 + v * 920 + (inDs ? 180 : 0), t, .1);
         clearTimeout(windCalm);
-        windCalm = setTimeout(function () { if (ac && windG) windG.gain.setTargetAtTime(.0001, ac.currentTime, .22); }, 180);
+        windCalm = setTimeout(function () { if (ac && windG) windG.gain.setTargetAtTime(.0001, ac.currentTime, .22); clearTimeout(windOff); windOff = setTimeout(function () { if (ac && windL) windL.stop(ac.currentTime); }, 1500); }, 180);
       }
     });
   }
   addEventListener('scroll', onScroll, { passive: true }); addEventListener('resize', onScroll);
-  d.addEventListener('visibilitychange', function () { if (!ac || !on) return; if (d.hidden) ac.suspend(); else { ac.resume(); meterKick(); } });
-  var armGate = 0, hint = null, armEvs = ['pointerdown', 'pointerup', 'touchstart', 'touchend', 'keydown', 'click'];
-  function showHint() {
-    if (hint || !d.body) return;
-    var st = d.createElement('style');
-    st.textContent = '.sfxhint{position:fixed;z-index:95;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 24px);padding:13px 20px;border-radius:999px;background:var(--accent,#0a6c74);color:var(--accent-ink,#fff);box-shadow:0 12px 36px rgba(0,0,0,.3);font:700 .92rem/1.2 var(--f-mono,ui-monospace,monospace);letter-spacing:.03em;pointer-events:none;opacity:0;transition:opacity .5s;animation:sfxhp 1.8s ease-in-out infinite}.sfxhint.on{opacity:1}.sfxhint i{width:9px;height:9px;border-radius:50%;background:currentColor}@keyframes sfxhp{50%{transform:translateY(3px)}}@media (prefers-reduced-motion:reduce){.sfxhint{animation:none}}';
-    d.head.appendChild(st); hint = d.createElement('div'); hint.className = 'sfxhint'; hint.setAttribute('role', 'status'); hint.innerHTML = '<i></i>Sound on · tap anywhere'; d.body.appendChild(hint); placeHint();
-    requestAnimationFrame(function () { if (hint) hint.classList.add('on'); });
-  }
-  function placeHint() {
-    if (!hint) return; var r = btn && btn.getBoundingClientRect();
-    // bottom centre: the top strip holds the flight compass and HDG readout
-    if (innerWidth < 700) { hint.style.top = '78px'; hint.style.bottom = 'auto'; hint.style.left = '50%'; hint.style.right = 'auto'; hint.style.marginLeft = '-' + Math.round(hint.offsetWidth / 2) + 'px'; return; }
-    // phones: under the site bar, clear of the telemetry and tabs at the bottom
-    { hint.style.bottom = '24px'; hint.style.left = '50%'; hint.style.right = 'auto'; hint.style.top = 'auto'; hint.style.marginLeft = '-' + Math.round(hint.offsetWidth / 2) + 'px'; }
-  }
-  function hideHint() { if (!hint) return; var h = hint; hint = null; h.classList.remove('on'); setTimeout(function () { if (h.parentNode) h.parentNode.removeChild(h); }, 800); }
+  d.addEventListener('visibilitychange', function () { if (!ac || !on) return; if (d.hidden) ac.suspend(); else { var pr = ac.resume(); if (eng) eng.resync(ac.currentTime); if (pr && pr.then) pr.then(function () { if (eng && ac) eng.resync(ac.currentTime); onState(); }, function () {}); meterKick(); pageKick(); } });
+  var armGate = 0, armEvs = ['pointerdown', 'pointerup', 'touchstart', 'touchend', 'keydown', 'click'];
   function go(e) {
     if (e && e.type === 'keydown' && (e.key === 'Escape' || e.key === 'Shift' || e.key === 'Control' || e.key === 'Alt' || e.key === 'Meta')) return;   // those do not count as a user activation
     armGate = performance.now();
     if (!on) { if (lsGet('sfx-on') === '0') { disarm(); return; } set(true, true); }
     else if (ac && ac.state !== 'running') { var pr = ac.resume(); if (pr && pr.then) pr.then(onState, function () {}); }
   }
-  function disarm() { armEvs.forEach(function (n) { removeEventListener(n, go, true); }); if (!on && !armed) hideHint(); }
+  function disarm() { armEvs.forEach(function (n) { removeEventListener(n, go, true); }); }
   // On by default on every page, and wherever sound was left on; a stored "0" always means off.
   var stored = lsGet('sfx-on'), frontPage = true; // on by default on every page (owner's call, 22 Nov)
   if (Ctx && (stored === '1' || (stored == null && frontPage))) {
     armed = true;   // allowed to play; browsers need a real tap or key first (wheel and scroll do not count as user activation)
     armEvs.forEach(function (n) { addEventListener(n, go, { capture: true, passive: true }); });
-    // no hint pill: try to start right away (browsers that allow autoplay, e.g. Chrome for returning visitors, play at once);
-    // where the browser blocks it, the first click, tap or key starts it silently
-    try { go(); } catch (e) {}
+    // no engine at load and no autoplay attempt: nothing is built until the first real click, tap or key, which builds the engine and
+    // starts it (silent fade-in). A stored "0" means off.
   }
-  setInterval(function () { if (!d.hidden) readPage(); }, 700);
   if (!Ctx && btn) btn.hidden = true;
-  readPage(); sync();
+  readPage(true); sync();
 })();

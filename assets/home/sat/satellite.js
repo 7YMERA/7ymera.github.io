@@ -1,10 +1,16 @@
-/* Satellite: the hero of the orbit chapter. When you scroll into space the first thing you meet is a NASA satellite, big and
- * centred, lit like a photograph; keep scrolling and it flies past the camera and the fall to Kuala Lumpur carries on.
+/* Satellite inspector: a NASA satellite, big and centred, lit like a photograph, with an x-ray, an explode and three models.
  *
- * Scroll: #descent carries data-hold (a share of the section's scroll). While raw progress is inside the hold, descent.js keeps its
- * own map at 0 and this file owns the stage: arrival, hero (slow sway, mouse parallax), exit. The exit starts at 50 % of the hold.
+ * Where it lives: the /play/ lab, cabinet "Satellite inspector" (play/index.html, section[data-view="sat"], host #sat-stage). Mode
+ * 'cabinet': no scroll listener, no readScroll (the stage is always fully in), it sizes from its own container (ResizeObserver), and it
+ * only loads and renders while the cabinet is open: the 'play-view' event (id 'sat') starts it, any other id stops it. Nothing is fetched
+ * (three.js, the loaders, the glb files) until the first open, and the glb are cached for the next open. Styles: assets/play/sat.css.
+ * (It used to be the hero of the home page's orbit chapter. The 'scroll' mode below is that old path: #descent with data-hold; it
+ * is no longer booted anywhere, the home page just links to /play/#sat.)
  *
- * Models: GPM, TRMM and AIM from NASA 3D Resources (free to use, credited on screen), Draco glb. Loaded when the chapter is near,
+ * Scroll mode (unused): #descent carries data-hold (a share of the section's scroll). While raw progress is inside the hold,
+ * descent.js keeps its own map at 0 and this file owns the stage: arrival, hero (slow sway, mouse parallax), exit.
+ *
+ * Models: GPM, TRMM and AIM from NASA 3D Resources (free to use, credited on screen), Draco glb. Loaded when the cabinet opens,
  * three.js r128 + GLTFLoader + DRACOLoader. The glb carry flat colour materials only, so each material is classed by name
  * (cells, foil, metal, panel) and given a real PBR look: metalness, roughness, a procedural solar cell grid and an environment map
  * (PMREM from a small procedural space room: sun softbox, cool rim strip, Earth-bounce glow), a key light, a rim light, ACES.
@@ -26,6 +32,7 @@
   var touchy = matchMedia('(hover: none)').matches;
   var BASE = '/assets/home/sat/';
   var CDN = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/';
+  var THREE_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', THREE_SRI = 'sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu';
   var LIBS = [
     [CDN + 'loaders/GLTFLoader.js', 'sha384-fljlqkjWlmSFjkESkQvm77heIZpoWmXEOzlCA7kOpGUH+95Zk0yGfQieWM2q136E'],
     [CDN + 'loaders/DRACOLoader.js', 'sha384-TNRcLasZnnfIJJskDY5XlrfmsKTjBSy98MtyLuX+3rQWRbpSQvtFIdikNpcOh3SN']
@@ -75,13 +82,15 @@
   function loadScript(src, integrity) {
     return new Promise(function (res, rej) {
       var s = d.createElement('script'); s.src = src; s.crossOrigin = 'anonymous'; if (integrity) s.integrity = integrity;
-      s.onload = function () { res(); }; s.onerror = function () { rej(new Error('script ' + src)); };
+      s.onload = function () { res(); }; s.onerror = function () { s.remove(); rej(new Error('script ' + src)); };
       d.head.appendChild(s);
     });
   }
   var libsJob = null;
   function loadLibs() {
     if (libsJob) return libsJob;
+    // three.js: the home page ships its own; /play/ does not, so inject the same r128 build (same SRI) on first need
+    if (!window.THREE && !d.querySelector('script[src*="three.min.js"]')) loadScript(THREE_SRC, THREE_SRI).catch(function () { /* the wait below times out */ });
     libsJob = new Promise(function (res, rej) {
       var t0 = performance.now();
       (function wait() {
@@ -234,15 +243,17 @@
   };
 
   /* ---------- the controller ---------- */
-  function Sat(section) {
-    var me = this;
-    this.sec = section; this.stage = section.querySelector('.ds-stage');
-    this.hold = parseFloat(section.getAttribute('data-hold')) || 0.2;
+  function Sat(section, opts) {
+    var me = this; opts = opts || {};
+    this.cab = opts.mode === 'cabinet';
+    this.sec = section; this.stage = this.cab ? opts.stage : section.querySelector('.ds-stage');
+    this.hold = this.cab ? 0 : (parseFloat(section.getAttribute('data-hold')) || 0.2);
+    this.frames = 0; // render count (a debug counter: it stops rising when the cabinet closes)
     this.THREE = null; this.renderer = null; this.cache = {}; this.cur = null;
     this.mob = innerWidth < 720;
     this.curKey = this.mob ? 'aim' : 'gpm';
     try { var qs = /[?&]sat=(gpm|trmm|aim)\b/.exec(location.search); if (qs) this.curKey = qs[1]; } catch (e) { /* default */ }
-    this.arr = 0; this.u = 0; this.x = 0; this.alpha = 0; this.uiA = 0; this.near = false; this.on = false;
+    this.arr = this.cab ? 1 : 0; this.u = 0; this.x = 0; this.alpha = this.cab ? 1 : 0; this.uiA = 0; this.near = false; this.on = false;
     this.ready = false; this.failed = false; this.loading = false; this.raf = 0; this.last = 0; this.t = 0; this.swap = 1;
     this.e = 0; this.eT = 0; this.zoom = 1; this.zoomT = 1; this.auto = false;
     this.yaw = 0; this.pitch = 0; this.vyaw = 0; this.vpitch = 0; this.drag = null;
@@ -255,12 +266,12 @@
 
   /* ---------- DOM ---------- */
   Sat.prototype.build = function () {
-    var me = this, st = this.stage, base = st.querySelector('canvas');
+    var me = this, st = this.stage, base = this.cab ? null : st.querySelector('canvas');
     var cv = el('canvas', 'sat-cv'); cv.setAttribute('aria-hidden', 'true'); this.cv = cv;
-    base.parentNode.insertBefore(cv, base.nextSibling);
     var fx = el('div', 'sat-fx'); fx.setAttribute('aria-hidden', 'true');
     fx.innerHTML = '<i class="sat-glow"></i><i class="sat-halo"></i><i class="sat-streak"></i><i class="sat-gh g1"></i><i class="sat-gh g2"></i><i class="sat-gh g3"></i>';
-    base.parentNode.insertBefore(fx, cv); this.fx = fx; this.fxs = [].slice.call(fx.children);
+    if (base) { base.parentNode.insertBefore(cv, base.nextSibling); base.parentNode.insertBefore(fx, cv); } else { st.appendChild(fx); st.appendChild(cv); }
+    this.fx = fx; this.fxs = [].slice.call(fx.children);
     this.svg = d.createElementNS('http://www.w3.org/2000/svg', 'svg'); this.svg.setAttribute('class', 'sat-lines'); this.svg.setAttribute('aria-hidden', 'true');
     st.appendChild(this.svg);
     this.pathAmb = d.createElementNS('http://www.w3.org/2000/svg', 'path'); this.svg.appendChild(this.pathAmb);
@@ -278,7 +289,8 @@
     st.appendChild(ui); this.ui = ui; this.tag = ui.querySelector('.sat-tag'); this.labs = ui.querySelector('.sat-labs');
     this.exBtn = ui.querySelector('.sat-ex'); this.xrBtn = ui.querySelector('.sat-xr'); this.hint = ui.querySelector('.sat-hint');
     this.swBtns = [].slice.call(ui.querySelectorAll('.sat-sw button'));
-    this.gap = st.querySelector('.ds-ph[data-a="-.05"]');
+    this.gap = this.cab ? null : st.querySelector('.ds-ph[data-a="-.05"]');
+    if (this.cab) { this.msg = el('p', 'sat-msg', 'The 3D models did not load. Check your connection and open this cabinet again.'); this.msg.setAttribute('role', 'status'); st.appendChild(this.msg); }
     this.pathsL = []; this.setText();
     this.hint.textContent = touchy ? 'Drag a finger across the satellite to x-ray it' : 'Move your cursor over the satellite to x-ray it';
   };
@@ -299,7 +311,7 @@
     this.ui.querySelector('.sat-zo').addEventListener('click', function () { me.zoomT = clamp(me.zoomT / 1.22, .7, 1.9); me.kick(); });
     this.swBtns.forEach(function (b) { b.addEventListener('click', function () { me.switchTo(b.dataset.m); }); });
     // mouse: the scan follows the cursor wherever it is on the stage
-    addEventListener('pointermove', function (e) { if (e.pointerType === 'touch') return; me.pointer(e.clientX, e.clientY); }, { passive: true });
+    addEventListener('pointermove', function (e) { if (e.pointerType === 'touch' || (me.cab && !me.near)) return; me.pointer(e.clientX, e.clientY); }, { passive: true });
     d.addEventListener('pointerleave', function () { me.inside = false; });
     // touch: the finger scans while it drags over the stage (vertical drags are still the page's: the canvas is touch-action pan-y)
     function tp(e) { if (e.pointerType === 'touch') me.pointer(e.clientX, e.clientY, true); }
@@ -320,12 +332,28 @@
       if (e.key === 'x' || e.key === 'X') me.setAuto(!me.auto);
     });
     // when to run
-    new IntersectionObserver(function (en) { me.near = en[0].isIntersecting; me.check(); }, { rootMargin: '10% 0px' }).observe(this.sec);
-    addEventListener('scroll', function () { me.readScroll(); if (!me.ready && !me.loading && !me.failed && me.sec.getBoundingClientRect().top < innerHeight * 1.6) me.preload(); me.check(); }, { passive: true });
     new ResizeObserver(function () { me.size(); me.kick(); }).observe(this.stage);
     d.addEventListener('visibilitychange', function () { if (d.hidden) me.stop(); else me.kick(); });
+    if (this.cab) {
+      // cabinet: no scroll path. play.js announces the open view; we run only while ours is the one showing
+      d.addEventListener('play-view', function (e) { if (e.detail && e.detail.id === 'sat') me.open(); else me.close(); });
+      return;
+    }
+    new IntersectionObserver(function (en) { me.near = en[0].isIntersecting; me.check(); }, { rootMargin: '10% 0px' }).observe(this.sec);
+    addEventListener('scroll', function () { me.readScroll(); if (!me.ready && !me.loading && !me.failed && me.sec.getBoundingClientRect().top < innerHeight * 1.6) me.preload(); me.check(); }, { passive: true });
     this.readScroll();
     if (this.sec.getBoundingClientRect().top < innerHeight * 1.6) this.preload();
+  };
+  // cabinet open / close: open loads on first use and starts the loop, close stops it (the renderer is released a few seconds later)
+  Sat.prototype.open = function () {
+    this.near = true; this.size();
+    if (this.failed && !(navigator.connection && navigator.connection.saveData)) { this.failed = false; this.stage.classList.remove('sat-failed'); }
+    if (!this.ready) this.preload(); // a no-op if it is already loading
+    this.check(); this.kick();
+  };
+  Sat.prototype.close = function () {
+    if (!this.near) return;
+    this.near = false; this.check(); this.stop();
   };
   Sat.prototype.pointer = function (cx, cy, touch) {
     var r = this.stage.getBoundingClientRect(); if (r.height < 2) return;
@@ -346,6 +374,7 @@
     if (v > .5 && was <= .5) cue('sat-explode'); else if (v <= .5 && was > .5) cue('sat-assemble'); this.kick();
   };
   Sat.prototype.readScroll = function () {
+    if (this.cab) return; // the cabinet is always fully in: arr 1, x 0, alpha 1
     var r = this.sec.getBoundingClientRect(), vh = innerHeight, span = Math.max(1, r.height - vh);
     this.arr = clamp(1 - r.top / vh, 0, 1);
     this.u = (-r.top) / Math.max(1, this.hold * span);
@@ -354,10 +383,10 @@
   };
   Sat.prototype.running = function () { return this.ready && this.near && !d.hidden && this.alpha > .004; };
   Sat.prototype.check = function () {
-    var onNow = this.alpha > .35; if (onNow !== this.on) { this.on = onNow; cue(onNow ? 'sat-on' : 'sat-off'); if (!onNow) { this.act = 0; this.samples.length = 0; if (this.auto) this.setAuto(false); if (this.eT > 0) this.setExplode(0); } }
-    var a = this.alpha, hide = a < .004;
+    var onNow = this.alpha > .35 && (!this.cab || this.near); if (onNow !== this.on) { this.on = onNow; cue(onNow ? 'sat-on' : 'sat-off'); if (!onNow) { this.act = 0; this.samples.length = 0; if (this.auto) this.setAuto(false); if (this.eT > 0) this.setExplode(0); } }
+    var a = this.alpha, hide = a < .004 || (this.cab && !this.near);
     this.ui.style.visibility = hide ? 'hidden' : 'visible'; this.fx.style.visibility = hide ? 'hidden' : 'visible'; this.svg.style.visibility = hide ? 'hidden' : 'visible';
-    this.cv.style.visibility = hide ? 'hidden' : 'visible'; this.cv.style.pointerEvents = a > .5 ? 'auto' : 'none';
+    this.cv.style.visibility = hide ? 'hidden' : 'visible'; this.cv.style.pointerEvents = hide ? 'none' : a > .5 ? 'auto' : 'none';
     this.ui.style.pointerEvents = a > .5 ? '' : 'none';
     this.stage.classList.toggle('sat-hero', !hide);
     if (this.gap && !this.failed) this.gap.style.setProperty('--sat-gap', (1 - sstep(.05, .5, a)).toFixed(3));
@@ -601,7 +630,7 @@
     this.plex.group.position.copy(this.pivot.position); this.plex.group.scale.setScalar(this.pivot.scale.x * (1 + .9 * this.x * this.x));
     this.plex.points.material.opacity = .95 * a * (1 - this.x * .6); this.plex.lines.material.opacity = a;
     this.plex.update(this.t, dt, this.cam, (this.inside ? this.pmx : 9), (this.inside ? -this.pmy : 9), !reduce);
-    this.renderer.render(this.scene, this.cam);
+    this.renderer.render(this.scene, this.cam); this.frames++;
     this.overlay();
     this.raf = requestAnimationFrame(this._loop);
   };
@@ -671,6 +700,8 @@
   };
 
   function boot() {
+    var host = d.getElementById('sat-stage');
+    if (host) { window.SatelliteStage = new Sat(null, { mode: 'cabinet', stage: host }); return; }
     var sec = d.getElementById('descent'); if (!sec || !sec.querySelector('.ds-stage')) return;
     window.SatelliteStage = new Sat(sec);
   }

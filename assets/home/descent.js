@@ -108,8 +108,8 @@
 
   Descent.prototype.readScroll = function () {
     var r = this.sec.getBoundingClientRect(), span = Math.max(1, r.height - innerHeight), q = clamp(-r.top / span, 0, 1), h = this.hold;
-    // the first `hold` of the section's scroll belongs to the satellite (satellite.js); the map stays at 0, then runs so that it still
-    // reaches RIDE_FROM (where scene.js starts the drone flight) at the same raw .88 of the section
+    // the first `hold` of the section's scroll can be kept for something else (the satellite used to own .2 here; now #descent has no data-hold, so hold is 0
+    // and p is simply q). The map stays at 0 inside the hold, then runs so that it still reaches RIDE_FROM (where scene.js starts the drone flight) at the same raw .88 of the section
     this.p = q <= h ? 0 : clamp((q - h) / (RIDE_FROM - h) * RIDE_FROM, 0, 1);
   };
 
@@ -472,6 +472,7 @@
     for (var i = 0; i < this.phases.length; i++) {
       var e = this.phases[i], a0 = +e.dataset.a, b0 = +e.dataset.b, f = sstep(a0, a0 + .05, p) * (1 - sstep(b0 - .05, b0, p));
       var q = f.toFixed(3); if (e.__q !== q) { e.__q = q; e.style.setProperty('--o', q); e.style.setProperty('--y', ((1 - f) * 18).toFixed(1) + 'px'); }
+      if (e.hasAttribute('data-hit')) e.classList.toggle('hit', f > .5); // a phase with a link: clickable only while it is showing
     }
   };
 
