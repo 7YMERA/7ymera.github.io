@@ -43,7 +43,8 @@
       }
     });
     new IntersectionObserver(function (en) { me.visible = en[0].isIntersecting; if (me.visible) { me.read(); me.kick(); } }, { rootMargin: '30% 0px' }).observe(sec);
-    addEventListener('scroll', function () { me.read(); me.kick(); }, { passive: true });
+    if (window.ScrollBus) window.ScrollBus.read(function () { me.read(); return function () { me.kick(); }; });
+    else addEventListener('scroll', function () { me.read(); me.kick(); }, { passive: true });
     addEventListener('resize', function () { me.small = matchMedia('(max-width: 640px)').matches; me.read(); me.kick(); });
     this._loop = function (t) { me.frame(t); };
     this.read(); this.x = this.target; this.apply(this.x);

@@ -16,15 +16,15 @@
       return '<span class="ch' + (c === '.' ? ' dot' : '') + '" aria-hidden="true" style="--i:' + (i++) + '">' + c + '</span>';
     }).join('');
   }
+  // Pointer moves are coalesced by ScrollBus (assets/scrollbus.js, loaded first): once per frame, last event, rect read before any write. Without it each move is handled as it comes.
+  var SBm = window.ScrollBus ? window.ScrollBus.move : function (f, el) { (el || window).addEventListener('pointermove', function (e) { var w = f(e); if (typeof w === 'function') w(); }, { passive: true }); };
   // A soft spotlight follows the cursor around the curtain (mouse only).
   var spot = document.getElementById('cur-spot'), fr = document.getElementById('cur-frame');
   if (spot && fr && !calm && matchMedia('(hover: hover) and (pointer: fine)').matches) {
-    var sx = 0, sy = 0, sq = false;
-    fr.addEventListener('pointermove', function (e) {
-      var r = fr.getBoundingClientRect(); sx = e.clientX - r.left; sy = e.clientY - r.top;
-      fr.classList.add('lit');
-      if (!sq) { sq = true; requestAnimationFrame(function () { sq = false; spot.style.transform = 'translate3d(' + sx + 'px,' + sy + 'px,0)'; }); }
-    });
+    SBm(function (e) {
+      var r = fr.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top;
+      return function () { fr.classList.add('lit'); spot.style.transform = 'translate3d(' + sx + 'px,' + sy + 'px,0)'; };
+    }, fr);
     fr.addEventListener('pointerleave', function () { fr.classList.remove('lit'); });
   }
   if (cur) {
@@ -127,9 +127,12 @@
       addEventListener('resize', function () { measure(); apply(1); calmTick(); }); calmTick();
     } else {
       var busy = false, lastP = -1, lastE = -1;
-      var tick = function () {
-        busy = false;
+      var readTick = function () { // read phase (ScrollBus): the one rect and the heights; the writes follow in the returned function
         var E = estLen(), s = Math.max(0, -cur.getBoundingClientRect().top), rg = range();
+        return function () { writeTick(E, s, rg); };
+      };
+      var tick = function () { busy = false; readTick()(); };
+      var writeTick = function (E, s, rg) {
         // the city alone for the first two thirds of EST, then the curtain comes in over the last third
         var e = E ? clamp((s - E * .66) / (E * .34)) : 1;
         // with the establishing stage: hold the name card, play the acts (they finish at p = .86), hold the headline
@@ -151,7 +154,7 @@
         if (Math.abs(curP - lastP) > .0002 || Math.abs(curE - lastE) > .0002 || !gliding) { lastP = curP; lastE = curE; apply(curP, curE); cueState(curE); }
         if (gliding) requestAnimationFrame(glide);
       };
-      addEventListener('scroll', function () { if (!busy) { busy = true; requestAnimationFrame(tick); } }, { passive: true });
+      if (window.ScrollBus) window.ScrollBus.read(readTick); else addEventListener('scroll', function () { if (!busy) { busy = true; requestAnimationFrame(tick); } }, { passive: true });
       addEventListener('resize', function () { measure(); lastP = -1; tick(); }); tick();
       // scene.js drops the `gl` class if WebGL turns out to be missing: fall back to the plain curtain.
       if ('MutationObserver' in window) new MutationObserver(function () { measure(); lastP = -1; tick(); }).observe(root, { attributes: true, attributeFilter: ['class'] });
@@ -186,19 +189,22 @@
   if (tl) {
     var beam = tl.querySelector('.beam i'), items = tl.querySelectorAll('li');
     var ticking = false;
-    function update() {
-      ticking = false;
-      var r = tl.getBoundingClientRect(), mark = innerHeight * .6;
+    function readTl() { // every rect first, then the writes (the dot rects used to be read after the beam height was written)
+      var r = tl.getBoundingClientRect(), mark = innerHeight * .6, lit = [];
       var p = Math.max(0, Math.min(1, (mark - r.top) / r.height));
-      beam.style.height = (p * 100) + '%';
       items.forEach(function (li) {
         var dot = li.querySelector('.jr-dot, .rail i');
-        if (dot) li.classList.toggle('lit', dot.getBoundingClientRect().top < mark);
+        lit.push(dot ? dot.getBoundingClientRect().top < mark : null);
       });
+      return function () {
+        beam.style.height = (p * 100) + '%';
+        items.forEach(function (li, i) { if (lit[i] !== null) li.classList.toggle('lit', lit[i]); });
+      };
     }
+    function update() { ticking = false; readTl()(); }
     if (calm) { beam.style.height = '100%'; items.forEach(function (li) { li.classList.add('lit'); }); }
     else {
-      addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+      if (window.ScrollBus) window.ScrollBus.read(readTl); else addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
       addEventListener('resize', update);
       update();
     }
@@ -208,11 +214,10 @@
   // spotlight script on the page already sets --mx and --my; this covers
   // the before/after "earlier work" boxes too.
   document.querySelectorAll('.earlier article').forEach(function (c) {
-    c.addEventListener('pointermove', function (e) {
-      var r = c.getBoundingClientRect();
-      c.style.setProperty('--mx', (e.clientX - r.left) + 'px');
-      c.style.setProperty('--my', (e.clientY - r.top) + 'px');
-    });
+    SBm(function (e) {
+      var r = c.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+      return function () { c.style.setProperty('--mx', x + 'px'); c.style.setProperty('--my', y + 'px'); };
+    }, c);
   });
 
   // Pause the looping animations while they're off-screen, to save battery.
@@ -459,6 +464,27 @@
       whyWrap.style.opacity = f.toFixed(3);
     }
   }
-  addEventListener('scroll', function () { if (!busy) { busy = true; requestAnimationFrame(tick); } }, { passive: true });
+  // Steady state (the sideways move is on): rects first, writes after, in ScrollBus's one pass. A change of state (on/off, the fork-side class changes the layout it measures) takes the plain sequential path above.
+  function readFork() {
+    if (!on || !root.classList.contains('gl') || root.classList.contains('brief')) return function () { tick(); };
+    var r = fork.getBoundingClientRect(), vh = innerHeight, range = r.height - vh;
+    if (r.bottom < -vh || r.top > vh * 2) return null;
+    var wt = 0, padT = 0, H = 0;
+    if (whyWrap) { wt = why.getBoundingClientRect().top; padT = parseFloat(getComputedStyle(why).paddingTop) || 0; H = whyWrap.offsetHeight; }
+    return function () {
+      var p = range > 0 ? Math.min(1, Math.max(0, -r.top / range)) : 0;
+      var t = Math.min(1, Math.max(0, (p - .58) / .42)); t = t * t * (3 - 2 * t);
+      card.style.transform = 'translate3d(' + (-t * 115).toFixed(2) + 'vw, 0, 0)'; card.style.opacity = (1 - t * .6).toFixed(3);
+      if (whyWrap) {
+        var Tc = Math.max(66, Math.min(Math.max(84, (vh - H) / 2 + 24), vh - H - 8)), wtp = wt + padT,
+            prog = Math.min(1, Math.max(0, (Tc - wtp) / (vh * .6))),
+            u = prog * prog * (3 - 2 * prog), f = Math.min(1, prog / .7); f = f * f * (3 - 2 * f);
+        whyWrap.style.setProperty('--why-top', Tc.toFixed(1) + 'px');
+        whyWrap.style.transform = 'translate3d(' + ((1 - u) * 100).toFixed(2) + 'vw, 0, 0)';
+        whyWrap.style.opacity = f.toFixed(3);
+      }
+    };
+  }
+  if (window.ScrollBus) window.ScrollBus.read(readFork); else addEventListener('scroll', function () { if (!busy) { busy = true; requestAnimationFrame(tick); } }, { passive: true });
   addEventListener('resize', tick); tick();
 })();

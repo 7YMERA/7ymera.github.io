@@ -30,6 +30,16 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · 3.4: Get started gate, /lab/ split, performance and audio pass
+
+- **Gate** (`assets/home/gate.js`, `gate.css`, `earth.js`, `home/earth/*.webp`): a Get started screen on `/` over a NASA Earth (owner's GLB textures reprojected to equirect; clouds/lights/spec from three.js examples, eoimages.gsfc.nasa.gov was blocked). Its click unlocks audio (`gate` cue). Once per session; `?gate=1` forces, `?gate=0` skips. glass-reveal and home.js's 6.5 s fallback wait for it.
+- **Lab**: the satellite inspector left `/` (teaser removed too) and opens `/lab/` as a live hero (`satellite.js` `hero` mode); lab cabinets moved there; `/play/` is games + SQL toys + egg (8 cabinets); old `/play/#sat|orbit|lab|glass|anatomy|lglass` redirect. Lab link in the nav on /, portfolio, notes index, play, lab. `#descent` 700svh with hold .2 → 600svh, no hold; ride still starts at 0.88.
+- **Audio** (`sfx.js`): one AudioContext (suspend/resume), engine built on first gesture, stale-clock resync, reverbs 6.4/5 s → 3.4/3.0 s, zone-gated noise loops, readPage per rAF only while on, voice caps, dead hint code removed.
+- **Perf**: `assets/scrollbus.js` (one scroll + pointermove dispatcher, reads before writes) used by descent, deck, scene, delight, daycycle, cursor, home, extras, folders, halcyon, glass; `#skybg` fixed layer replaces `background-attachment: fixed`; front page defers the district JSON and landmark models to after first paint; DPR cap 1.5 everywhere; no animated blur in site.css; fewer `will-change`.
+- Measured (Playwright, CPU ×4, software GL, so noisy; / measured with ?gate=0 after): long tasks 1300 px 16 / 8.1 s → 11 / 5.1 s, 390 px 22 / 7.2 s → 25 / 6.3 s; satellite requests on / 2 → 0; requests 45 → 37–39; scroll-frame averages fell but are dominated by software GL.
+- Not done: P15 `.card` shadow (overflow:hidden and both pseudo-elements in use); P17 nothing to measure (no `.aurora` on live pages); P6 moot (cosmos.js not loaded); feed entry for slb-screens held for the owner. Not verified: real-GPU fps, how the gate and the new reverbs sound, real touch.
+- Open questions for the owner: cosmos layer restore or drop docs; delete curved-reel/glance/glass.js or keep; slb-screens in the feed; SQL toys on /play/ or /lab/. Key 20261122s.
+
 ## 2026-11-22 · Finale buttons clear of the horizon gauge
 
 - The cockpit horizon gauge (`.cp-adi`, bottom centre) sat under "Fly it again" and "Take control · Free fly". `scene.js` now sets `html.fly-end` while the finale buttons show, and `scene.css` hides the gauge then. Not screenshot-verified (software GL never reaches the finale). Key 20261122r.

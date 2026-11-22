@@ -131,6 +131,7 @@
   function onUp() { prT = 1; cu.classList.remove('pr'); kick(); }
   function onLeave() { shown = false; cu.classList.remove('on'); }
   function onScroll() { if (mode === 'link') { dirty = true; kick(); } }
+  var sbOn = false; // the page's one scroll dispatcher (assets/scrollbus.js) calls this in its write phase; the rect itself is re-read in frame(), at most every 90 ms
   var rzT = 0; function onResize() { clearTimeout(rzT); rzT = setTimeout(resize, 120); }
   var mo = null;
 
@@ -138,7 +139,7 @@
     if (active) return; active = true; build(); readColors();
     d.addEventListener('pointermove', onMove, { passive: true }); d.addEventListener('pointerover', onOver, { passive: true });
     d.addEventListener('pointerdown', onDown, { passive: true }); addEventListener('pointerup', onUp, { passive: true }); addEventListener('pointercancel', onUp);
-    root.addEventListener('pointerleave', onLeave); addEventListener('blur', onLeave); addEventListener('scroll', onScroll, { passive: true }); addEventListener('resize', onResize);
+    root.addEventListener('pointerleave', onLeave); addEventListener('blur', onLeave); if (window.ScrollBus && !sbOn) { sbOn = true; window.ScrollBus.write(function () { if (active) onScroll(); }); } else if (!window.ScrollBus) addEventListener('scroll', onScroll, { passive: true }); addEventListener('resize', onResize);
     d.addEventListener('scenetime', colorsSoon);
     mo = new MutationObserver(colorsSoon); mo.observe(root, { attributes: true, attributeFilter: ['data-theme', 'style', 'class'] });
   }
@@ -146,7 +147,7 @@
     if (!active) return; active = false; root.classList.remove('cu-on'); shown = false;
     d.removeEventListener('pointermove', onMove); d.removeEventListener('pointerover', onOver); d.removeEventListener('pointerdown', onDown);
     removeEventListener('pointerup', onUp); removeEventListener('pointercancel', onUp); root.removeEventListener('pointerleave', onLeave); removeEventListener('blur', onLeave);
-    removeEventListener('scroll', onScroll); removeEventListener('resize', onResize); d.removeEventListener('scenetime', colorsSoon); if (mo) mo.disconnect();
+    if (!window.ScrollBus) removeEventListener('scroll', onScroll); removeEventListener('resize', onResize); d.removeEventListener('scenetime', colorsSoon); if (mo) mo.disconnect();
     if (cu) cu.classList.remove('on'); if (cx) cx.clearRect(0, 0, W, H); if (raf) { cancelAnimationFrame(raf); raf = 0; }
   }
   function want() { return mqFine.matches && !mqRed.matches; }

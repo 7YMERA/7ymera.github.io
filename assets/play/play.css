@@ -263,3 +263,31 @@ body.play .top { z-index: 20; }
 @media (min-width: 981px) { .hero-in > *, .hero-play .hero-in .lede { max-width: min(46vw, 36rem); } }
 @media (max-width: 980px) { .hero-show { position: relative; right: auto; top: auto; justify-items: start; margin: 16px; } .hs-dots { flex-wrap: wrap; } }
 @media (prefers-reduced-motion: reduce) { .hero-play.hs-swap #attract, .hero-play h1 .l2.hs-in { animation: none; } }
+
+/* ---------- the door between /play/ and /lab/ (a big card, not a small link) ---------- */
+.lab-door { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px 28px; margin-top: clamp(48px, 8vw, 88px); padding: clamp(22px, 3.4vw, 38px); border: 2px solid var(--ink); border-radius: 22px; background: #050b1a; color: #eaf3ff; text-decoration: none; box-shadow: 8px 8px 0 #2c5fd0; transition: transform .2s cubic-bezier(.2, .8, .2, 1), box-shadow .2s; }
+.lab-door:hover, .lab-door:focus-visible { transform: translate(-3px, -3px); box-shadow: 12px 12px 0 #2c5fd0; }
+.lab-door:focus-visible { outline: 3px solid var(--gold); outline-offset: 6px; }
+.lab-door-eye { grid-column: 1; font: 500 .72rem var(--f-mono); letter-spacing: .2em; text-transform: uppercase; color: #ffd27a; }
+.lab-door-t { grid-column: 1; font: 800 clamp(2.4rem, 7vw, 4.6rem)/.95 var(--f-display, var(--f-body)); letter-spacing: -.03em; color: #fff; }
+.lab-door-d { grid-column: 1; max-width: 52ch; font-size: clamp(.95rem, 1.4vw, 1.1rem); line-height: 1.55; color: #c3d4ee; }
+.lab-door-go { grid-column: 2; grid-row: 1 / span 3; display: inline-flex; align-items: center; gap: 12px; min-height: 60px; padding: 0 26px; border-radius: 14px; background: #ffd27a; color: #050912; font: 600 1.25rem var(--f-pix); text-transform: uppercase; letter-spacing: .05em; }
+.lab-door-go svg { width: 22px; height: 22px; }
+.lab-door:hover .lab-door-go, .lab-door:focus-visible .lab-door-go { background: #fff; }
+.lab-door-games { background: var(--surface); color: var(--ink); box-shadow: 8px 8px 0 var(--gold); }
+.lab-door-games:hover, .lab-door-games:focus-visible { box-shadow: 12px 12px 0 var(--gold); }
+.lab-door-games .lab-door-eye { color: var(--gold); } .lab-door-games .lab-door-t { color: var(--ink); } .lab-door-games .lab-door-d { color: var(--muted); }
+.lab-door-games .lab-door-go { background: var(--ink); color: var(--bg); }
+.lab-door-games:hover .lab-door-go, .lab-door-games:focus-visible .lab-door-go { background: var(--gold); color: #fff; }
+@media (max-width: 640px) { .lab-door { grid-template-columns: minmax(0, 1fr); box-shadow: 5px 5px 0 #2c5fd0; } .lab-door-go { grid-column: 1; grid-row: auto; justify-self: stretch; justify-content: center; margin-top: 12px; } .lab-door-games { box-shadow: 5px 5px 0 var(--gold); } }
+@media (prefers-reduced-motion: reduce) { .lab-door { transition: none; } }
+
+/* ---------- /lab/: the first screen is the satellite inspector (satellite.js, [data-sat-hero]) ---------- */
+.lab-hero { position: relative; height: max(640px, calc(100svh - 62px)); min-height: 640px; border-bottom: 2px solid var(--ink); background: #02040c; overflow: hidden; }
+.lab-hero .sat-stage { position: absolute; inset: 0; }
+.lab-scroll { position: absolute; z-index: 5; right: clamp(16px, 3vw, 40px); top: 18px; display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 20px; border: 1px solid rgba(159, 208, 255, .5); border-radius: 12px; background: rgba(4, 10, 26, .78); color: #fff; font: 600 .85rem var(--f-mono); letter-spacing: .14em; text-transform: uppercase; text-decoration: none; }
+.lab-scroll:hover, .lab-scroll:focus-visible { border-color: #fff; background: rgba(159, 208, 255, .22); }
+.lab-scroll:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.lab-scroll svg { width: 18px; height: 18px; }
+.lab-more { padding-top: clamp(40px, 6vw, 72px); }
+@media (max-width: 700px) { .lab-hero { height: max(700px, calc(100svh - 62px)); min-height: 700px; } .lab-scroll { top: auto; bottom: 12px; right: 16px; left: 16px; justify-content: center; min-height: 46px; } }

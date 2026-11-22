@@ -62,15 +62,15 @@
       if (on) { if (openOne && openOne !== root) setOpen(openOne, false); openOne = root; }
       else if (openOne === root) openOne = null;
     }
+    var SBm = window.ScrollBus ? window.ScrollBus.move : function (f, el) { (el || window).addEventListener('pointermove', function (e) { var w = f(e); if (typeof w === 'function') w(); }, { passive: true }); };
     roots.forEach(function (root) {
       if (!root.classList.contains('fd--master')) root.querySelector('.fd-hit').addEventListener('click', function () { setOpen(root, !root.hasAttribute('data-open')); });
       // the light follows the cursor (mouse only), written straight to the element
-      var raf = 0, px = 0, py = 0;
-      root.addEventListener('pointermove', function (e) {
+      SBm(function (e) { // once per frame with the last move (ScrollBus), rect read first, write after
         if (e.pointerType !== 'mouse') return;
-        var r = root.getBoundingClientRect(); px = ((e.clientX - r.left) / r.width) * 2 - 1; py = ((e.clientY - r.top) / r.height) * 2 - 1;
-        if (!raf) raf = requestAnimationFrame(function () { raf = 0; root.style.setProperty('--px', px.toFixed(3)); root.style.setProperty('--py', py.toFixed(3)); });
-      });
+        var r = root.getBoundingClientRect(), px = ((e.clientX - r.left) / r.width) * 2 - 1, py = ((e.clientY - r.top) / r.height) * 2 - 1;
+        return function () { root.style.setProperty('--px', px.toFixed(3)); root.style.setProperty('--py', py.toFixed(3)); };
+      }, root);
       root.addEventListener('pointerleave', function () { root.style.setProperty('--px', 0); root.style.setProperty('--py', 0); });
     });
     document.addEventListener('keydown', function (e) {

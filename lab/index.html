@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lab · Alif Najmi</title>
+<link rel="canonical" href="https://7ymera.github.io/lab/">
+<meta name="description" content="The lab: a NASA satellite you can x-ray and pull apart, a dotted globe, particles that become the KL skyline, exploded landmarks and glass shaders.">
+<meta property="og:title" content="Lab · Alif Najmi">
+<meta property="og:description" content="The lab: x-ray a NASA satellite, spin a globe, explode the Kuala Lumpur skyline and bend light through glass, all in your browser.">
+<meta property="og:image" content="https://7ymera.github.io/assets/og-skyline-3.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Kuala Lumpur skyline at night with all four landmarks.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Alif Najmi">
+<meta property="og:locale" content="en_MY">
+<meta property="og:url" content="https://7ymera.github.io/lab/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Lab · Alif Najmi">
+<meta name="twitter:description" content="The lab: x-ray a NASA satellite, spin a globe, explode the Kuala Lumpur skyline and bend light through glass, all in your browser.">
+<meta name="twitter:image" content="https://7ymera.github.io/assets/og-skyline-3.jpg">
+<meta name="theme-color" content="#f3f6f6">
+<meta name="theme-color" content="#081114" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/favicon-192.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@500;600&display=swap">
+<link rel="stylesheet" href="/assets/site.css?v=20261122s">
+<link rel="stylesheet" href="/assets/fx.css?v=20261122s">
+<link rel="stylesheet" href="/assets/cursor.css?v=20261122s">
+<link rel="stylesheet" href="/assets/arcade.css?v=20261122s">
+<link rel="stylesheet" href="/assets/halcyon.css?v=20261122s">
+<link rel="stylesheet" href="/assets/play/play.css?v=20261122s">
+<link rel="stylesheet" href="/assets/play/anatomy.css?v=20261122s">
+<link rel="stylesheet" href="/assets/play/sat.css?v=20261122s">
+<script>/* #sat is the hero itself */if(location.hash==="#sat")location.replace("#satellite");</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Lab","url":"https://7ymera.github.io/lab/","description":"Experiments by Alif Najmi: a NASA satellite inspector, a globe, particles, exploded landmarks and glass shaders.","isPartOf":{"@type":"WebSite","name":"Alif Najmi","url":"https://7ymera.github.io/"}}</script>
+</head>
+<body class="play lab" data-page="lab">
+<a class="skip-link" href="#experiments">Skip to the experiments</a>
+
+<div id="hall">
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="/" aria-label="7YMERA, home"><span class="badge av"><img src="/assets/icons/favicon-192.png" alt="" width="32" height="32" decoding="async"></span><span class="mark-t">7YMERA</span></a>
+    <nav class="nav" aria-label="Site">
+      <a href="/">Home</a>
+      <a href="/portfolio/">Portfolio</a>
+      <a href="/play/">Play</a>
+      <a href="/lab/" aria-current="page">Lab</a>
+      <a href="/notes/">Notes</a>
+    </nav>
+    <button class="icon-btn sfx-btn" id="sfx-btn" type="button" aria-pressed="false" aria-label="Sound off. Turn sound on"><span class="sfx-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+    <button class="icon-btn" id="theme-btn" type="button" aria-pressed="false" aria-label="Switch light or dark theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+  <section class="lab-hero" id="satellite" aria-labelledby="lab-h1">
+    <h1 class="sr-only" id="lab-h1">The lab: satellite inspector</h1>
+    <div class="sat-stage" id="sat-hero" data-sat-hero data-cursor="Scan"></div>
+    <a class="lab-scroll" href="#experiments">More in the lab <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14m-6-6 6 6 6-6"/></svg></a>
+  </section>
+
+  <div class="wrap bays" id="experiments">
+    <section class="bay lab-more" aria-labelledby="bay-1">
+      <header class="bay-head"><span class="bay-no" aria-hidden="true">01</span><h2 id="bay-1">More experiments</h2><p>Toys from my side projects. Nothing to win, a lot to poke. Each one opens full screen.</p></header>
+      <div class="cabs">
+        <a class="cab" id="orbit" href="#orbit" data-open="orbit" data-tone="blue">
+          <span class="cab-sign"><b>Orbit</b><i class="tag">Halcyon</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="orbit" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">A dotted globe with arcs out of Kuala Lumpur and three NASA satellites. Drag to spin, tap a city.</span><span class="cab-keys"><kbd>Drag</kbd><kbd>Tap</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" id="lab" href="#lab" data-open="lab" data-tone="teal">
+          <span class="cab-sign"><b>Particle lab</b><i class="tag">Halcyon</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="lab" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">Four thousand specks of dust that become Petronas, a plexus, a helix. Pull any shape apart.</span><span class="cab-keys"><kbd>Drag</kbd><kbd>Tap</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" id="glass" href="#glass" data-open="glass" data-tone="gold">
+          <span class="cab-sign"><b>Glass lab</b><i class="tag">WebGL</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="glass" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">A reeded-glass panel in one shader. Slide the light across it, then bend, frost and re-rib it.</span><span class="cab-keys"><kbd>Move</kbd><kbd>Drag</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" id="anatomy-cab" href="#anatomy-cab" data-open="anatomy" data-tone="gold">
+          <span class="cab-sign"><b>Skyline anatomy</b><i class="tag">New</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="anatomy" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">Explode Petronas, Merdeka 118, Menara KL and Exchange 106 into 5 architectural strata like a watch movement.</span><span class="cab-keys"><kbd>Drag</kbd><kbd>Scrub</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" id="lglass" href="#lglass" data-open="lglass" data-tone="blue">
+          <span class="cab-sign"><b>Liquid glass lab</b><i class="tag">New</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="lglass" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">Tune the front page’s WebGL2 optical shader live: dispersion, corner shape, rim light, or paste any custom SVG.</span><span class="cab-keys"><kbd>Move</kbd><kbd>Sliders</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+      </div>
+    </section>
+
+    <a class="lab-door lab-door-games" href="/play/">
+      <span class="lab-door-eye">Next door</span>
+      <b class="lab-door-t">The games</b>
+      <span class="lab-door-d">Stack the Kuala Lumpur skyline, ride the last train, triage the backlog and run real SQL in your browser.</span>
+      <span class="lab-door-go">Play<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>
+    </a>
+  </div>
+</main>
+<footer class="play-foot"><div class="wrap"><span>&copy; 2026 Muhammad Alif Najmi</span><span><a href="/">Home</a> &middot; <a href="/portfolio/">Portfolio</a> &middot; <a href="/play/">Play</a> &middot; <a href="/notes/">Notes</a></span></div></footer>
+</div>
+
+<div class="stage" id="stage" role="dialog" aria-modal="true" aria-labelledby="stage-title" hidden>
+  <div class="stage-bar">
+    <button class="sbtn" id="stage-close" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>Back to the lab</span><kbd>Esc</kbd></button>
+    <div class="stage-id"><p class="eyebrow" id="stage-sub"></p><h2 id="stage-title" tabindex="-1">Play</h2></div>
+    <div class="stage-tools">
+      <button class="sbtn sbtn-icon sfx-btn" id="stage-sound" type="button" aria-pressed="false" aria-label="Sound off. Turn sound on"><span class="sfx-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+      <button class="sbtn sbtn-icon" id="stage-full" type="button" aria-label="Full screen" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    </div>
+  </div>
+  <div class="stage-body" id="stage-body">
+
+    <section class="view view-pad" data-view="halcyon" hidden>
+<div class="arc-wrap" id="halcyon">
+        <div class="arc-tabs" role="tablist" aria-label="Choose a piece of Halcyon">
+          <button class="arc-tab" role="tab" type="button" data-hx="orbit" aria-selected="true" id="hx-tab-orbit" aria-controls="hx-pan-orbit">Orbit<small>a globe, arcs and satellites</small></button>
+          <button class="arc-tab" role="tab" type="button" data-hx="lab" aria-selected="false" tabindex="-1" id="hx-tab-lab" aria-controls="hx-pan-lab">Particle lab<small>dust that becomes a skyline</small></button>
+        </div>
+
+        <div class="arc-panel" role="tabpanel" data-hx="orbit" id="hx-pan-orbit" aria-labelledby="hx-tab-orbit">
+          <div class="hx-stage">
+            <canvas id="hx-globe" data-cursor="Drag" width="800" height="450" role="img" aria-label="A dotted globe from orbit with glowing arcs from Kuala Lumpur to cities around the world and three satellites"></canvas>
+            <div class="hx-probe" id="hx-probe" hidden></div>
+          </div>
+          <div class="hx-bar">
+            <button class="arc-btn" id="hx-kl" type="button">Face Kuala Lumpur</button>
+            <button class="arc-btn alt" id="hx-me" type="button">Where I guess you are</button>
+            <button class="arc-sound" id="hx-spin" type="button" aria-pressed="true">Auto-spin <b>On</b></button>
+          </div>
+          <p class="hx-read" id="hx-read" role="status"></p>
+          <p class="hx-credit">Outlines: Natural Earth (public domain). Satellites: the NASA models behind <a href="https://halcyon-xmr.vercel.app/" target="_blank" rel="noopener">Halcyon</a> (AIM, GPM, TRMM). Your place is guessed from your time zone in this browser only.</p>
+        </div>
+
+        <div class="arc-panel" role="tabpanel" data-hx="lab" id="hx-pan-lab" aria-labelledby="hx-tab-lab" hidden>
+          <div class="hx-stage">
+            <canvas id="hx-lab" data-cursor="Drag" width="800" height="450" role="img" aria-label="A cloud of glowing particles that morphs between shapes, including the Petronas Towers and other Kuala Lumpur landmarks"></canvas>
+            <p class="hx-name" id="hx-form" role="status" aria-live="polite">Chladni plate</p>
+          </div>
+          <div class="hx-chips" id="hx-chips" role="group" aria-label="Shapes"></div>
+          <div class="hx-bar">
+            <button class="arc-sound" id="hx-explode" type="button" aria-pressed="false">Explode <b>Off</b></button>
+            <button class="arc-sound" id="hx-auto" type="button" aria-pressed="true">Auto-morph <b>On</b></button>
+          </div>
+          <p class="hx-credit">The landmarks are my own KL models, turned into points. Heights are to scale: Merdeka 118 is the tallest.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="view view-glass" data-view="glass" hidden>
+      <iframe id="glass-frame" title="Glass lab" loading="lazy" allow="fullscreen"></iframe>
+    </section>
+
+    <section class="view view-pad" data-view="anatomy" hidden>
+      <div class="an-wrap" id="anatomy">
+        <div class="arc-tabs" id="an-tabs" role="tablist" aria-label="Choose a Kuala Lumpur landmark"></div>
+        <div class="an-grid">
+          <div class="an-stage">
+            <canvas id="an-canvas" data-cursor="Drag" width="840" height="520" role="img" aria-label="Exploded 3D architectural diagram of a Kuala Lumpur landmark sliced into five vertical strata."></canvas>
+            <div class="an-controls">
+              <label class="an-slider"><span>Explode</span><input id="an-explode" type="range" min="0" max="100" value="55"><b id="an-pct">55%</b></label>
+              <button class="arc-sound" id="an-spin" type="button" aria-pressed="true">Auto-spin <b>On</b></button>
+            </div>
+          </div>
+          <aside class="an-side" aria-label="Landmark stratum details">
+            <h3 id="an-name">Petronas Twin Towers</h3>
+            <p class="an-meta" id="an-meta">452 m · 1998</p>
+            <p class="an-note" id="an-note"></p>
+            <div class="an-strata" id="an-strata" role="group" aria-label="Inspect architectural strata"></div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  try { var saved = localStorage.getItem('theme'); if (saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved); } catch (e) {}
+  var btn = document.getElementById('theme-btn');
+  function paint() { btn.setAttribute('aria-pressed', root.getAttribute('data-theme') === 'dark' ? 'true' : 'false'); }
+  btn.addEventListener('click', function (e) {
+    var cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var next = cur === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', next); paint();
+    try { localStorage.setItem('theme', next); } catch (er) {}
+    if (e && e.detail > 0) btn.blur();
+  });
+  paint();
+})();
+</script>
+<script src="/assets/sfx.js?v=20261122s" defer></script>
+<script src="/assets/fx.js?v=20261122s" defer></script>
+<script src="/assets/cursor.js?v=20261122s" defer></script>
+<script src="/assets/halcyon.js?v=20261122s" defer></script>
+<script src="/assets/play/anatomy.js?v=20261122s" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous" defer></script>
+<script src="/assets/home/sat/satellite.js?v=20261122s" defer></script>
+<script src="/assets/play/pad.js?v=20261122s" defer></script>
+<script src="/assets/play/play.js?v=20261122s" defer></script>
+</body>
+</html>

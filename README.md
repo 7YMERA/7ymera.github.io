@@ -103,6 +103,7 @@ The site splits into a front page, a recruiter portfolio and a play page. The ci
 | **3.1** | 22 Nov | **Solstice.** Living Optical Airlock on `/` (pointer-tracked rim light + scroll-driven circular aperture morph into orbit), Halcyon city hover probe & beacon arcs on Descent, Live KL (MYT) atmosphere mode + *Take control · Free fly* unlock at the flight finale, chromatic accent-synced Project Deck with counter, contrast-locked `/portfolio/` circadian flip with *Pin daylight* & MYT solar clock, scroll-velocity wind in `sfx.js`, and two new `/play/` cabinets (*Skyline Anatomy* exploded KL meshes + *Liquid Glass Lab*). | `fe27877`, `444d4da` |
 | **3.2** | 22 Nov | **Immersion.** The glass reveal rests glossy, sound on by default on `/` with glass / cosmos / city zones, a NASA satellite inspector in the orbit chapter (x-ray, explode), every Malaysian rail line on the descent map (ECRL included), and one continuous drone sequence from the top view. | `995bbfe` |
 | **3.3** | 22 Nov | **Orbit hero.** The orbit chapter opens on a big, richly lit NASA satellite with a cursor-targeted x-ray (re-made from the mirage study), plexus and lens flare, then it flies past into the KL zoom. Sound on by default everywhere with no hint pill; the rail map is just coloured lines. | `0b8df91`, `74d2942` |
+| **3.4** | 22 Nov | **Gate and lab.** A cinematic **Get started** gate on `/` over a realistic NASA Earth (it unlocks the sound with a power-up cue). The satellite inspector moved to a new **`/lab/`** page that opens on it; `/play/` is games only. Performance pass: one scroll dispatcher, deferred city models, sky on a fixed layer, DPR 1.5, no animated blur; sound keeps one AudioContext, shorter reverbs, gated noise loops. | this commit |
 
 Tried and dropped along the way (still in git history): a clothes-rail project gallery (`5c68a02`), a ring and then a conveyor of floating screens, a Masjid Negara you could fly into, and a 5 second phone loading screen. The longer story of the 3D city is in *The 3D city and the flight* below.
 
@@ -117,7 +118,7 @@ A short film you scroll through. Light by default, dark supported.
 | Chapter | What it is | Built with |
 |---|---|---|
 | **00 · Mark** (`#reveal`) | The `\7` monogram bent by a clear glass tile, then the name and a one-line role. It plays once with a glass chime, then rests glossy (a sheen, a slow breath, a rim light that follows the pointer); no replay. The GL context is freed once you scroll past. | `assets/home/glass-reveal.js` (ported from the 21st.dev Liquid Glass Logo Reveal, shader and spring timeline from zanwei/glass-icon-reveal, MIT) |
-| **01 · Descent** (`#descent`) | Opens on a big NASA satellite (GPM, TRMM or AIM as big tabs) lit like the Mirage reference, with a plexus, a lens flare and a **cursor-targeted x-ray**: only the patch under the cursor turns see-through, it grows with cursor speed, trails, and closes about a second after you stop. Explode pulls it apart with labelled parts. The satellite owns the first 20% of the section (`data-hold`), then flies past the camera. Then from 408 km up: stars, the Earth's limb, Malaysia traced in gold with its rail network drawn as plain coloured lines (a design, no names or legend), a telemetry readout counting down, then through the clouds to the city. | `assets/home/sat/satellite.js` (three.js r128 + GLTF/Draco from jsdelivr, models from NASA 3D Resources), `assets/home/descent.js` (canvas 2D, `assets/halcyon/land.json`) |
+| **01 · Descent** (`#descent`) | From 408 km up: stars, the Earth's limb, Malaysia traced in gold with its rail network drawn as plain coloured lines (a design, no names or legend), a telemetry readout counting down, then through the clouds to the city. The orbit chapter carries one big card, *The satellite inspector is in the lab*, linking to `/play/#sat` (the satellite used to be the hero here; it moved to the lab, so the front page loads no 3D models or satellite code). `#descent` is 600svh with no `data-hold` (the old satellite hold of 20% is gone, the map runs from the first pixel of scroll); the drone flight still starts at `RIDE_FROM` = .88 of the section, kept in step between `descent.js` and `scene.js`. A phase with `data-hit` (the card) is only clickable while it shows. | `assets/home/descent.js` (canvas 2D, `assets/halcyon/land.json`) |
 | **02 · The flight** (`#enter`) | The 3D drone flight over KL, with a big **Plain / Golden hour / Night / Live KL** picker in the HUD (first visit starts on **Live KL**, the real time in Malaysia) and a free-fly unlock at the finale. | `scene.js`, `timeofday.js` |
 | **03 · Projects** (`#projects`) | A deck of real project screenshots dealt onto the screen as you scroll: each card rises leaning back and blurred, then lands sharp. | `assets/home/project-deck.js` (port of Project Deck by Aakash Mehra, via 21st.dev) |
 | **04 · Choose a door** (`#doors`) | Two full-width doors: **Portfolio** (for recruiters) and **Play** (for everyone else). | `assets/home/home.js`, `home.css` |
@@ -154,28 +155,35 @@ The old home page's content, reordered for someone with 30 seconds: Download CV,
 | **Selected work** | **Journey** |
 | ![Selected work](docs/screens/work.webp) | ![Journey](docs/screens/journey.webp) |
 
-### `/play/` · games and labs (`play/index.html`, `assets/play/`)
+### `/play/` · the games (`play/index.html`, `assets/play/`)
 
-An arcade hall. Last Train plays itself behind the title; every cabinet below has a live preview and opens full screen (Esc or Back closes it, `#stack` style links open one directly). Best scores are kept on the device; games take touch, keyboard and a gamepad (`pad.js`).
+An arcade hall, games only. Last Train plays itself behind the title, and the hero slideshow turns through the four games (`HS` in `play.js`). Every cabinet below has a live preview and opens full screen (Esc or Back closes it, `#stack` style links open one directly). Best scores are kept on the device; games take touch, keyboard and a gamepad (`pad.js`). The experiments moved to `/lab/`: a big **The lab** card (and a hero button) links there, and old links such as `/play/#sat` or `/play/#anatomy` redirect to `/lab/#...` with a small inline script in the page head. `play.js` serves both pages: `<body data-page="play|lab">` picks which cabinets (`LAB_IDS` in `play.js`) and whether the hero exists.
 
 | Cabinet | What it is | File |
 |---|---|---|
 | **Skyline Stack** | One-button stacker past Menara TM, KL Tower, The Exchange 106, Petronas and Merdeka 118 at their real heights. | `assets/play/stack.js` |
 | **Last Train**, **Scope Creep**, **Spec Match** | The three original arcade games. | `assets/arcade.js` |
-| **Orbit**, **Particle lab** | The Halcyon globe and the morphing particle cloud. | `assets/halcyon.js` |
-| **Skyline anatomy** | The real landmark meshes sliced into strata, with an Explode slider. | `assets/play/anatomy.js` |
-| **Glass lab**, **Liquid Glass Lab** | The glass shader toys, with sliders. | `lab/glass.html`, `lab/liquid-glass.html` |
-| **Company SQL**, **Jom Al-Quran SQL**, **Join Atlas** | The playgrounds from the database notes, loaded from those notes at run time. | `db-playground.js`, `join-atlas.js` |
+| **Company SQL**, **Jom Al-Quran SQL**, **Join Atlas** | The data toys (bay 2): the playgrounds from the database notes, loaded from those notes at run time. | `db-playground.js`, `join-atlas.js` |
 | **Out of order** | The hidden train, found. | `assets/play/play.js` |
 
 | The hall | The cabinets |
 |---|---|
 | ![Play, the hall](docs/screens/v3-play.webp) | ![Play, the cabinets](docs/screens/v3-play-cabinets.webp) |
 
+### `/lab/` · the lab (`lab/index.html`, `assets/play/`)
+
+The experiments, split off `/play/`. It **starts with the satellite inspector**: the first screen is the live inspector, not a card you open. Below it, five cabinets (Orbit, Particle lab, Glass lab, Skyline anatomy, Liquid glass lab) open full screen exactly as on `/play/` (same `play.js`, `play.css`, stage dialog; `/lab/#anatomy` opens one directly), and a big **The games** card links back to `/play/`. `Lab` sits between Play and Notes in the nav.
+
+| Part | What it is | File |
+|---|---|---|
+| **Satellite inspector** (the hero, `#satellite`) | The NASA satellite from the old home page: GPM, TRMM and AIM as big tabs, lit like the Mirage reference, with a plexus and lens flare. A **cursor-targeted x-ray** turns only the patch under the cursor see-through (it grows with cursor speed, trails, closes about a second after you stop; on touch the finger scans while it drags, or press X-ray for an automatic sweep). Explode pulls the parts apart with labelled leader lines; drag spins it; zoom buttons. Built with three.js r128 + GLTF/Draco from jsdelivr and the NASA 3D Resources models (`assets/home/sat/*.glb`, credited on screen). It is mounted by `new Sat(null, { mode: 'cabinet', hero: true, stage })` on the `[data-sat-hero]` element: three.js (cdnjs r128 + SRI), the loaders and the glb load on `/lab/` only; it renders only while the hero is on screen (IntersectionObserver), the tab is visible and no cabinet is open over it (the GL context is freed a few seconds after it stops, the models stay cached), and it sizes from its own stage with a ResizeObserver. `SatelliteStage.frames` counts renders (a debug counter). Sound cues `sat-on`, `sat-off`, `sat-xray`, `sat-explode`, `sat-assemble` go out as `sfx-cue` events as before. The front page's orbit chapter links to `/play/#sat`, which redirects here. | `assets/home/sat/satellite.js`, `assets/play/sat.css` |
+| **Orbit**, **Particle lab** | The Halcyon globe and the morphing particle cloud. | `assets/halcyon.js` |
+| **Skyline anatomy** | The real landmark meshes sliced into strata, with an Explode slider. | `assets/play/anatomy.js` |
+| **Glass lab**, **Liquid Glass Lab** | The glass shader toys, with sliders. | `lab/glass.html`, `lab/liquid-glass.html` |
 ### On every page
 
 - **Time of day:** `window.SceneTime` in `scene.js` (t 0 day, 1 golden hour, 2 night), blended in the shader with a few uniforms. The flight's picker is `timeofday.js`; the portfolio's scroll is `daycycle.js`.
-- **Music:** `sfx.js`, a composed piece (about 3 min 40) that follows the time of day and gets louder during the flight. **On by default on every page**: it tries to start at load, and where the browser blocks autoplay (all of them do until the first click, tap or key) it starts silently on that first interaction. There is no hint pill. The meter button in the header turns it off, and that choice is remembered.
+- **Music:** `sfx.js`, a composed piece (about 3 min 40) that follows the time of day and gets louder during the flight. **On by default on every page**. Browsers block audio until the first click, tap or key, so nothing is built before that: on the front page the entry gate's **Get started** button is that gesture (a `gate` power-up cue, then the score fades in); elsewhere the first interaction starts it silently. One AudioContext lives for the whole visit: turning sound off suspends it, on resumes it. The meter button in the header turns it off, and that choice is remembered.
 - **Cursor:** `cursor.js`, bracket corners that wrap links, a caret over text and a crosshair with coordinates over canvases. Off on touch screens and with reduced motion.
 - **Ctrl+K** quick jump, the shared top bar (Home · Portfolio · Play · Notes), and the city as a still picture behind the notes pages.
 
@@ -295,7 +303,7 @@ Scroll-stacking cards. The original uses `motion/react` springs; the port uses o
 ### Our own pieces (not from 21st.dev)
 
 - **Cosmos** (`cosmos.js`, `cosmos.css`): sky layer on `#cosmos` (z-index -1, after `#gl`), telemetry `#tele` (left readout and right rail at 1320 px+, corner brackets at 900 px+), hidden in the flight and Highlights mode.
-- **Sound** (`sfx.js`): a generative score, all synthesised (no audio files), on by default (see Music above). On the front page it follows zones (`data-sfx-zone`: glass, cosmos, city, with 2.5 s crossfades) and cues sent as `sfx-cue` events (glass, sat-on/off, sat-xray, sat-explode/assemble, flight-start). Layers: pad, sub, shimmer, bells (space) and hum, arpeggio, trains, chimes (city, mixed in by scroll depth). `window.__sfx` has `beep`, `tick`, `glyph`, `lock`, `done`, `chime`; the arcade's Sound button drives the same switch. **fx.js** also does the click ripples, the theme pulse and the chromatic headings.
+- **Sound** (`sfx.js`): a generative score, all synthesised (no audio files), on by default (see Music above). On the front page it follows zones (`data-sfx-zone`: glass, cosmos, city, with 2.5 s crossfades) and cues sent as `sfx-cue` events (glass, flight-start on the front page; sat-on/off, sat-xray, sat-explode/assemble from the Satellite inspector cabinet on `/play/`; the handler is page-wide, so it plays wherever the sound is on). Layers: pad, sub, shimmer, bells (space) and hum, arpeggio, trains, chimes (city, mixed in by scroll depth). `window.__sfx` has `beep`, `tick`, `glyph`, `lock`, `done`, `chime`; the arcade's Sound button drives the same switch. **fx.js** also does the click ripples, the theme pulse and the chromatic headings.
 - **Quality-of-life layer** (`delight.js` + `delight.css`): `?` shortcuts sheet, `j`/`k` section stepping, `t` theme, `/` quick jump; tab title follows the section and nudges when hidden; Kuala Lumpur clock and Share button in Contact; labelled Back to top; print rules; click the name five times (or use Ctrl+K, "hidden train") for a train.
 
 - **The opening:** a sticky stage whose progress drives the photo columns, name, reel and headline in three acts, all with `transform` and `opacity`.
@@ -442,10 +450,11 @@ Measured with Playwright and Chrome DevTools' CPU throttling (×4), scrolling th
 1. **Animate only `transform` and `opacity`**, and write them straight to the element that moves. Changing a CSS variable on a big subtree restyles the whole subtree.
 2. **No live blur over moving things.** No `backdrop-filter` over the aurora (the header and dock are near-solid instead), and no animated `filter: blur`.
 3. **No `mask-image` and no rounded `clip-path` on anything containing 3D.** A plain rectangle clip is cheap; rounded corners and masks are not.
-4. **Pre-render what you can:** the aurora is an image, and diagrams are SVG drawn once.
-5. **Pause what's off-screen** with `IntersectionObserver` (`.offscreen` class → `animation-play-state: paused`).
-6. **Respect `prefers-reduced-motion`.** Every animated piece has a still fallback.
-7. **Bump the cache key.** Stylesheets and scripts load as `file.css?v=YYYYMMDDx`. Change it on every CSS/JS change, or visitors keep the old file. When replacing an image, use a new filename.
+4. **One scroll dispatcher.** `assets/scrollbus.js` runs a single passive scroll listener: every reader measures first, then the writes run, so nothing forces a layout mid-frame. Pointer moves are coalesced to one per frame the same way. Cache section offsets on load/resize (ResizeObserver), not per scroll.
+5. **Pre-render what you can:** the aurora is an image, and diagrams are SVG drawn once.
+6. **Pause what's off-screen** with `IntersectionObserver` (`.offscreen` class → `animation-play-state: paused`).
+7. **Respect `prefers-reduced-motion`.** Every animated piece has a still fallback.
+8. **Bump the cache key.** Stylesheets and scripts load as `file.css?v=YYYYMMDDx`. Change it on every CSS/JS change, or visitors keep the old file. When replacing an image, use a new filename.
 
 ## The notes
 
@@ -479,9 +488,10 @@ The note pages share one template. Their themed SVG diagrams (flowcharts, sequen
 ```
 index.html               the front page (chapters listed above), scripts in assets/home/
 portfolio/index.html     the recruiter page, scripts in assets/portfolio/
-play/index.html          the games and labs page, scripts in assets/play/
+play/index.html          the games page, scripts in assets/play/
+lab/index.html           the lab page (satellite hero + experiments), same scripts plus assets/home/sat/
 flight/index.html        the drone flight on its own (panel on H)
-lab/                     glass.html and liquid-glass.html (also opened from /play/)
+lab/                     index.html, plus glass.html and liquid-glass.html (opened inside the lab cabinets)
 resume.html              the on-site résumé, generated from tools/cv/cv.html (do not hand-edit)
 404.html                 the "Signal lost" page GitHub Pages serves for a missing URL (root-absolute URLs only)
 sitemap.xml, robots.txt, feed.xml, site.webmanifest   for search engines, feed readers and home-screen icons
@@ -491,6 +501,8 @@ assets/
   scene.js, scene-glsl.js, scene.css   the 3D city, its shaders and SceneTime (day, golden hour, night)
   timeofday.js / daycycle.js           the flight's view picker / the portfolio's scroll day cycle
   sfx.js, cursor.js, fx.js             music, cursor, small effects (every page)
+  scrollbus.js                         one scroll and pointermove dispatcher, reads before writes
+  home/gate.js, gate.css, earth.js     the front page's Get started gate and its NASA Earth (home/earth/*.webp)
   home/ portfolio/ play/               per-page scripts and styles
   extras.js              opening, carousel, ticker, beam, dock, skill tree
   curved-reel.js         21st.dev Tilted Grid Hero port

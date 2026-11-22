@@ -69,7 +69,7 @@
         texSize = [im.naturalWidth, im.naturalHeight]; cv.dataset.ready = '1'; kick();
       }; im.src = src;
     }
-    cv.addEventListener('pointermove', function (e) { var r = cv.getBoundingClientRect(); st.tx = (e.clientX - r.left) / r.width; st.ty = 1 - (e.clientY - r.top) / r.height; if (calm) draw(performance.now()); else kick(); });
+    (window.ScrollBus ? window.ScrollBus.move : function (f, el) { el.addEventListener('pointermove', f); })(function (e) { var r = cv.getBoundingClientRect(); st.tx = (e.clientX - r.left) / r.width; st.ty = 1 - (e.clientY - r.top) / r.height; if (calm) draw(performance.now()); else kick(); }, cv);
     cv.addEventListener('pointerleave', function () { st.tx = .5; st.ty = .5; });
     new IntersectionObserver(function (es) { st.vis = es[0].isIntersecting; if (st.vis) kick(); }).observe(cv);
     document.addEventListener('visibilitychange', kick);

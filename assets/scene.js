@@ -105,6 +105,13 @@
   function b64(str,Type){var bin=atob(str),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Type(u.buffer)}
   var SC=H/444.138; // one scale for every landmark, so their real heights compare truthfully
   var bodyM=mat('near',{side:T.DoubleSide}),glassModelM=mat('glass2',{side:T.DoubleSide,emissive:0xffffff,emissiveIntensity:.3});
+  // Front page: the city is not on screen until the end of the descent, so the heavy loads (the district 1.6 MB, the landmark models) wait for the first drawn frame and then
+  // go one per idle slot, instead of ~3.5 MB of JSON being parsed and meshed in the first seconds. Other pages show the skyline from the first view, so they load at once.
+  var LATER=[],laterOn=false;
+  function later(f){if(!HOMEDS||laterOn)f();else LATER.push(f)}
+  function startLater(){if(laterOn)return;var ric=window.requestIdleCallback||function(f){return setTimeout(f,60)};
+    function step(){var f=LATER.shift();if(!f){laterOn=true;return}f();ric(step,{timeout:1500})}
+    ric(step,{timeout:1500})}
   function loadModel(url,x,z,ry,bm,fallback,done){
     fetch(url).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
       var pos=b64(d.positions,Float32Array),out=new T.Group();
@@ -137,8 +144,8 @@
   function warmEdges(){edgesWanted=true;pumpEdges()}
   var merEdges=edgesFor(0xd4e9ff,24,.4),klccEdges=edgesFor(0xffe7b0,14,.55),exEdges=edgesFor(0xa8ecff,16,.7);
   // In the district all four landmarks are the hand-made models (the district's own baked Menara KL is cleared out below, see CLEAR/BAKED).
-  if(DIST){loadModel(BASE+'city/klcc.json',LAY.klcc[0],LAY.klcc[1],LAY.klcc[2],bodyM,null,klccEdges);loadModel(BASE+'city/menara_kl.json',LAY.kl[0],LAY.kl[1],LAY.kl[2],bodyM,null,null);
-    loadModel(BASE+'city/merdeka118.json',LAY.mer[0],LAY.mer[1],LAY.mer[2],bodyM,null,merEdges);loadModel(BASE+'city/exchange106.json',LAY.ex[0],LAY.ex[1],LAY.ex[2],bodyM,null,exEdges)}
+  if(DIST){later(function(){loadModel(BASE+'city/klcc.json',LAY.klcc[0],LAY.klcc[1],LAY.klcc[2],bodyM,null,klccEdges)});later(function(){loadModel(BASE+'city/menara_kl.json',LAY.kl[0],LAY.kl[1],LAY.kl[2],bodyM,null,null)});
+    later(function(){loadModel(BASE+'city/merdeka118.json',LAY.mer[0],LAY.mer[1],LAY.mer[2],bodyM,null,merEdges)});later(function(){loadModel(BASE+'city/exchange106.json',LAY.ex[0],LAY.ex[1],LAY.ex[2],bodyM,null,exEdges)})}
   var gr=new T.Mesh(new T.CircleGeometry(1400,64),ground);gr.rotation.x=-Math.PI/2;gr.position.y=-.2;g.add(gr);
   // city ring
   var s=11;function rnd(){s=(s*9301+49297)%233280;return s/233280}
@@ -193,14 +200,14 @@
     for(t=0;t<nT;t++){var q=f(ix[t*3]);if(hit[t]||(rootHit[q]&&small(q)))continue;keep.push(ix[t*3],ix[t*3+1],ix[t*3+2])}
     return new Uint16Array(keep)}
   var cityMesh=null;
-  fetch(BASE+(DIST?'city/klcc_district.json':'city/kl_city.json')).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+  later(function(){fetch(BASE+(DIST?'city/klcc_district.json':'city/kl_city.json')).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
     var q=new Int16Array(b64(d.positions,Uint8Array).buffer),pos=new Float32Array(q.length);for(var k=0;k<q.length;k++)pos[k]=q[k]*d.scale;
     var geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));var ix=b64(d.indices,Uint16Array);
     if(DIST)ix=clearPlots(pos,ix); // make room: the landmarks' plots, and the district's own coarse landmarks, are cut out of the mesh
     geo.setIndex(new T.BufferAttribute(ix,1));
     geo=geo.toNonIndexed();geo.computeVertexNormals(); // flat normals: the lighting needs them
     cityMesh=new T.Mesh(geo,cityM);cityMesh.scale.setScalar(SC);g.add(cityMesh);need=true;
-  }).catch(function(){});
+  }).catch(function(){})});
   // KL Tower
   var kl=new T.Group();kl.position.set(LAY.kl[0],0,LAY.kl[1]); // stand-in, ?bg=osm only (the district always has the model)
   var shaft=new T.Mesh(new T.CylinderGeometry(2,3.4,120,8),towerB);shaft.position.y=60;
@@ -462,9 +469,11 @@
     if(add===addNow)return;addNow=add;var b=add?T.AdditiveBlending:T.NormalBlending,L=[railM,railM2,stCanM,gyroM,beamM,haloM,radarM,polyM];
     for(var i=0;i<L.length;i++)L[i].blending=b;beaconAdd=add}
   function hex3(c){return '#'+c.getHexString()}
+  var skyDiv=null;function skyEl(){if(!skyDiv){skyDiv=document.getElementById('skybg');if(!skyDiv){skyDiv=document.createElement('div');skyDiv.id='skybg';skyDiv.setAttribute('aria-hidden','true');document.body.insertBefore(skyDiv,document.body.firstChild)}}return skyDiv} // the sky gradient lives on its own fixed layer (scene.css #skybg): a fixed body background repaints the whole page on every scroll
+  if(document.body)skyEl(); // always present (scene.css gives it the day gradient); writeCss only overrides it for golden hour and night
   function writeCss(){cssTimer=0;cssAt=performance.now();if(root.hasAttribute('data-daycycle')||!document.body)return;
     // The sky behind the canvas: one inline gradient on <body>. (Not CSS variables on <html>: a variable change on the root makes the browser recompute the style of every element on the page, 15 to 20 ms on a long page; a background on body alone costs a repaint.)
-    var g='linear-gradient('+hex3(cc('sky1'))+','+hex3(cc('skyM'))+' '+(TU.uStop.value*100).toFixed(1)+'%,'+hex3(cc('sky3'))+')';if(g===cssLast)return;cssLast=g;var bs=document.body.style;bs.backgroundImage=g;bs.backgroundAttachment='fixed';bs.backgroundRepeat='no-repeat'}
+    var g='linear-gradient('+hex3(cc('sky1'))+','+hex3(cc('skyM'))+' '+(TU.uStop.value*100).toFixed(1)+'%,'+hex3(cc('sky3'))+')';if(g===cssLast)return;cssLast=g;skyEl().style.backgroundImage=g}
   function queueCss(){if(cssTimer)return;var w=100-(performance.now()-cssAt);if(w<=0)writeCss();else cssTimer=setTimeout(writeCss,w)}
   function applyTime(t){
     tLast=t;pick(t);var i,add=t>=1.5,night=t>1;
@@ -503,7 +512,7 @@
   cssOn=ST.get()>0; // a page that starts at golden hour or night (remembered choice, ?time=) needs its sky gradient written; plain day is already what the stylesheet draws
   applyTime(ST.get());tDirty=false;
   var W=0,Hh=0,mobile=false,need=true,px=0,tx=0,cr=0,tr=0,vr={v:0},vx={v:0},dtF=.016,tgtPose=mob(END),curPose=mob(END),vPose=[{v:0},{v:0},{v:0},{v:0},{v:0},{v:0},{v:0},{v:0}];
-  function size(){W=innerWidth;Hh=innerHeight;mobile=W<=820;renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile?1.5:2));renderer.setSize(W,Hh,false);renderer.getDrawingBufferSize(TU.uRes.value);cam.aspect=W/Hh;cam.updateProjectionMatrix();need=true}
+  function size(){W=innerWidth;Hh=innerHeight;mobile=W<=820;renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.setSize(W,Hh,false);renderer.getDrawingBufferSize(TU.uRes.value);cam.aspect=W/Hh;cam.updateProjectionMatrix();need=true}
   var enter=document.getElementById('enter'),caps=enter?enter.querySelectorAll('.ride-cap'):[],roll=0,rideP=null,rideT=null,rideQ=null;
   // The page scroll is split in two: first the orbit round the skyline, then (inside #enter) the flight.
   // ---- THE DIRECTOR ----
@@ -626,18 +635,19 @@
     ['descent',function(el){return RIDE_FROM*(el.offsetHeight-innerHeight)/el.offsetHeight},0,OVER],
     HOMEDS?null:['enter',0,-1,END]                                      // ... then in to where the flight starts (zoom in)                                     // the flight starts here
   ].filter(Boolean);
-  var KEYS=[],lastLay=-1;
+  var KEYS=[],eTop=0,eH=0;
   function mob(p){if(!mobile)return p;var q=p.slice(0,8);q[6]=0;if(p[8]){q[3]=p[8]}else{q[3]*=1.12;q[4]*=1.08}return q} // a portrait screen is only 0.49 of its height wide: a wide shot of the group stands much farther back there (p[8])
   function layoutKeys(){
     var vh=innerHeight,k=[];
     if(spin){sTop=spin.offsetTop;sH=spin.offsetHeight}
+    eTop=enter?enter.offsetTop:0;eH=enter?enter.offsetHeight:0; // #enter's box, read here (load, resize, ResizeObserver) and not on every scroll or frame
     DIR.forEach(function(d){
       var y=0;
       if(d[0]!=='top'){var el=document.getElementById(d[0]);if(!el||el.offsetHeight===0)return;y=el.offsetTop+(typeof d[1]==='function'?d[1](el):d[1])*el.offsetHeight+d[2]*vh}
       k.push({y:Math.max(0,y),p:d[3]})});
     k.sort(function(u,v){return u.y-v.y});
     for(var i=1;i<k.length;i++)if(k[i].y<=k[i-1].y)k[i].y=k[i-1].y+1;
-    GEO=homeGeo()||GEO;KEYS=k;lastLay=document.documentElement.scrollHeight}
+    GEO=homeGeo()||GEO;KEYS=k}
   function poseOf(k){var p=typeof k.p==='function'?k.p():k.p;return mob(p)}
   function dirPose(y){
     if(ONLY||!KEYS.length)return mob(END);
@@ -650,7 +660,7 @@
   var USEPRE=HOMEDS&&DIST&&!!enter,GEO=null,CS0=0; // CS0: the ride's progress at the drone-level knot ('start'); 0 where the flight begins the ride (/flight/, /portfolio/)
   function homeGeo(){var d=USEPRE&&document.getElementById('descent');if(!d||!enter||!d.offsetHeight)return null;var vh=innerHeight,sp=Math.max(0,d.offsetHeight-vh),g={st:d.offsetTop+RIDE_FROM*sp,rv:d.offsetTop+sp,s0:enter.offsetTop,m:enter.offsetTop+enter.offsetHeight-vh};return g.m>g.s0&&g.s0>g.rv-2&&g.rv>=g.st?g:null}
   function fr(c){return clamp((c-CS0)/Math.max(1e-6,1-CS0),0,1)} // the flight's own progress (0 at the drone-level knot, 1 at the end), what cr was before the descent was folded in
-  function rideProg(){if(!enter)return 0;var m=ONLY?document.documentElement.scrollHeight-innerHeight:enter.offsetTop+enter.offsetHeight-innerHeight,st=ONLY?0:enter.offsetTop-(HOMEDS?0:innerHeight);if(GEO&&!ONLY){m=GEO.m;st=GEO.st}return m>st?Math.min(1,Math.max(0,(scrollY-st)/(m-st))):0}
+  function rideProg(){if(!enter)return 0;var m=ONLY?document.documentElement.scrollHeight-innerHeight:eTop+eH-innerHeight,st=ONLY?0:eTop-(HOMEDS?0:innerHeight);if(GEO&&!ONLY){m=GEO.m;st=GEO.st}return m>st?Math.min(1,Math.max(0,(scrollY-st)/(m-st))):0}
   function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
   // Critically damped follow (no overshoot, no jump when a wheel notch lands): the camera glides to where the scroll bar is.
   function damp(c,t,v,st,dt){var o=2/st,x=o*dt,e=1/(1+x+.48*x*x+.235*x*x*x),ch=c-t,tmp=(v.v+o*ch)*dt;v.v=(v.v-o*tmp)*e;return t+(ch+tmp)*e}
@@ -918,7 +928,7 @@
     if(Math.abs(fF-cam.fov)>.005){cam.fov=fF;cam.updateProjectionMatrix()}
     cam.setViewOffset(W,Hh,fX,fY,W,Hh)}
   function place(time){
-    if(enter){var eEnd=enter.offsetTop+enter.offsetHeight-innerHeight+40,pc=scrollY>=enter.offsetTop-40&&scrollY<=eEnd,pin=GEO?scrollY>=GEO.st-40&&scrollY<=eEnd:pc;if(pin!==flying)flying=pin;if(pc!==root.classList.contains('flying'))root.classList.toggle('flying',pc)} // html.flying hides the dock while the captions are on screen; `flying` itself (the drone's rules: speed limit, idle drift) starts with the ride, inside the descent
+    if(enter){var eEnd=eTop+eH-innerHeight+40,pc=scrollY>=eTop-40&&scrollY<=eEnd,pin=GEO?scrollY>=GEO.st-40&&scrollY<=eEnd:pc;if(pin!==flying)flying=pin;if(pc!==root.classList.contains('flying'))root.classList.toggle('flying',pc)} // html.flying hides the dock while the captions are on screen; `flying` itself (the drone's rules: speed limit, idle drift) starts with the ride, inside the descent
     var inRide=cr>.0004&&!!rideP;
     var fc=fr(cr),rMid=inRide&&!freeOn&&fc>.05&&fc<.9;if(rMid!==root.classList.contains('ride-mid'))root.classList.toggle('ride-mid',rMid); // the view picker steps aside mid-flight so the landmark labels at the top of the HUD stay readable (timeofday.css)
     if(freeOn){
@@ -984,7 +994,7 @@
     var dt=clamp((time-last)/1000,.001,.05);last=time;dtF=dt;tick++;
     if(reduce)snap();else{for(var j=0;j<8;j++)curPose[j]=damp(curPose[j],tgtPose[j],vPose[j],.55,dt);var cr0=cr;cr=clamp(damp(cr,tr,vr,.75,dt),0,1);if(flying){var cap=.085*dt;if(cr-cr0>cap){cr=cr0+cap;vr.v=Math.min(vr.v,cap/dt)}else if(cr0-cr>cap){cr=cr0-cap;vr.v=Math.max(vr.v,-cap/dt)}} /* speed limit: a fast flick can't whip the camera */px=damp(px,tx,vx,.6,dt)}
     // Idle drift: in the drone flight, when the reader has stopped scrolling, the page creeps forward by itself so slow scrolling never shows as a stutter.
-    if(flying&&!freeOn&&enter&&!reduce&&!document.hidden&&time-lastUser>900&&scrollY>=(GEO?GEO.rv:0)&&scrollY<enter.offsetTop+enter.offsetHeight-innerHeight-6){
+    if(flying&&!freeOn&&enter&&!reduce&&!document.hidden&&time-lastUser>900&&scrollY>=(GEO?GEO.rv:0)&&scrollY<eTop+eH-innerHeight-6){
       driftAcc+=(mobile?20:28)*clamp((time-lastUser-900)/1500,0,1)*dt;
       if(driftAcc>=1){var dy=Math.floor(driftAcc);driftAcc-=dy;scrollBy({top:dy,behavior:'instant'})}}
     // Background drift: when the reader is idle outside the flight, the camera slowly swings and breathes (the page itself never moves),
@@ -997,18 +1007,21 @@
     if(tDirty){tDirty=false;applyTime(ST.get())} // the time of day changed (SceneTime): blend the three parameter sets, once per frame at most
     var moving=freeOn||Math.abs(tr-cr)>(flying?.00002:.0003);for(var j2=0;j2<8;j2++)if(Math.abs(tgtPose[j2]-curPose[j2])>.02){moving=true;break}
     // While the reader is only reading, redraw at about 15 fps (the beams and pulses still drift); while scrolling, every frame.
-    if(moving||need||(!reduce&&time-lastR>iv)){if(idleK>0&&!moving&&lastR>0&&!arcOn){dIv+=time-lastR;if(++dN>=90){if(dIv/dN>48)driftOff=true;dIv=0;dN=0}}place(reduce?0:time);renderer.render(scene,cam);need=false;lastR=time;if(!shown){shown=true;root.classList.add('gl-on')}}
+    if(moving||need||(!reduce&&time-lastR>iv)){if(idleK>0&&!moving&&lastR>0&&!arcOn){dIv+=time-lastR;if(++dN>=90){if(dIv/dN>48)driftOff=true;dIv=0;dN=0}}place(reduce?0:time);renderer.render(scene,cam);need=false;lastR=time;if(!shown){shown=true;root.classList.add('gl-on');startLater()}}
     raf=run?requestAnimationFrame(frame):0}
   var lastUser=0,driftAcc=0,idleK=0,driftOff=false,dIv=0,dN=0;
   ['wheel','touchstart','touchmove','keydown','pointerdown'].forEach(function(n){addEventListener(n,function(){lastUser=performance.now();driftAcc=0},{passive:true})});
-  function retarget(){if(document.documentElement.scrollHeight!==lastLay)layoutKeys();tgtPose=dirPose(scrollY);tr=rideProg();need=true}
-  addEventListener('scroll',retarget,{passive:true});
+  function retarget(){tgtPose=dirPose(scrollY);tr=rideProg();need=true}
+  // One scroll dispatcher (assets/scrollbus.js) when present. Layout keys are re-measured when the page's size changes (ResizeObserver), not by reading scrollHeight on every scroll.
+  var SB=window.ScrollBus||{read:function(f){addEventListener('scroll',f,{passive:true})},move:function(f){addEventListener('pointermove',f,{passive:true})}};
+  SB.read(retarget);
+  if(window.ResizeObserver)new ResizeObserver(function(){layoutKeys();retarget()}).observe(document.body)
   // the UTP coverflow says which group is in front; the shot follows it
   document.addEventListener('cf-change',function(e){if(e.target&&e.target.closest&&e.target.closest('#studied')){utpIdx=Math.max(0,Math.min(UTP.length-1,e.detail.index|0));retarget()}});
   addEventListener('load',function(){layoutKeys();retarget()});
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){layoutKeys();retarget()});
   addEventListener('resize',function(){size();buildRide();layoutKeys();retarget()});
-  addEventListener('pointermove',function(e){tx=e.clientX/innerWidth-.5});
+  SB.move(function(e){tx=e.clientX/innerWidth-.5});
   document.addEventListener('visibilitychange',function(){run=!document.hidden;if(run&&!raf){last=performance.now();raf=requestAnimationFrame(frame)}});
   setTimeout(function(){(window.requestIdleCallback||setTimeout)(warmEdges)},12000); // light theme: build the night lines in idle time, so the first switch to dark has them ready
   root.classList.add('gl'); // first: it makes #enter visible, and the scroll maths below needs its real position

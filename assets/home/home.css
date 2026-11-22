@@ -76,7 +76,7 @@ html.flying .rail { opacity: 0; pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .rv-name, .rv-tag, .rv-cue { transition: none; } .rv-cue i { animation: none; transform: none; } .gr-mask { animation: none; opacity: 1; } }
 
 /* ---------- 01 descent ---------- */
-.ds { position: relative; height: 700svh; background: transparent; }
+.ds { position: relative; height: 600svh; background: transparent; }
 .ds-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: #02040c; color: #dfeaff; --capc: #9fb8dc; }
 .ds-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .ds-stage .cap { color: var(--capc); } .ds-stage .cap span, .ds-stage .cap em { color: #ffd27a; }
@@ -111,7 +111,6 @@ html.flying .rail { opacity: 0; pointer-events: none; }
 }
 .ds-tele .ds-pct { display: none; }
 @media (min-width: 701px) { .ds-tele .ds-pct { display: flex; } }
-
 /* the flight: the enter block comes from scene.css; keep its stage transparent so the city shows */
 .enter-sticky { z-index: 1; }
 
@@ -169,65 +168,6 @@ html.flying .rail { opacity: 0; pointer-events: none; }
   .dr-media, .dr-body h3, .dr-go { transition: none; }
 }
 
-/* ---------- 01b the satellite (assets/home/sat/satellite.js): the hero of the orbit chapter ---------- */
-.sat-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 1; opacity: 0; pointer-events: none; cursor: crosshair; touch-action: pan-y; visibility: hidden; }
-.sat-cv.grab { cursor: grabbing; }
-.sat-fx { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; visibility: hidden; opacity: 0; }
-.sat-fx i { position: absolute; left: 0; top: 0; display: block; border-radius: 50%; will-change: transform; }
-.sat-glow { width: 1100px; height: 1100px; background: radial-gradient(circle, rgba(60, 120, 255, .26) 0, rgba(40, 90, 220, .1) 40%, rgba(20, 50, 160, 0) 66%); }
-.sat-halo { width: 620px; height: 620px; background: radial-gradient(circle, rgba(255, 236, 205, .7) 0, rgba(255, 205, 140, .26) 18%, rgba(255, 170, 90, .08) 44%, rgba(255, 150, 60, 0) 66%); }
-.sat-streak { width: 700px; height: 2px; opacity: .6; border-radius: 0 !important; background: linear-gradient(90deg, rgba(120, 170, 255, 0), rgba(170, 210, 255, .55) 50%, rgba(120, 170, 255, 0)); }
-.sat-gh { background: radial-gradient(circle, rgba(255, 214, 150, 0) 52%, rgba(255, 214, 150, .22) 64%, rgba(255, 214, 150, 0) 74%); width: 150px; height: 150px; }
-.sat-gh.g2 { width: 90px; height: 90px; background: radial-gradient(circle, rgba(120, 200, 255, .3) 0, rgba(120, 200, 255, .08) 55%, rgba(120, 200, 255, 0) 70%); }
-.sat-gh.g3 { width: 200px; height: 200px; background: radial-gradient(circle, rgba(255, 200, 120, 0) 55%, rgba(255, 200, 120, .16) 66%, rgba(255, 200, 120, 0) 76%); }
-.sat-lines { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; overflow: visible; visibility: hidden; }
-.sat-lines path { fill: none; stroke: #ffd27a; stroke-width: 1; opacity: 0; } .sat-lines circle { fill: #ffd27a; opacity: 0; }
-.sat-ui { position: absolute; inset: 0; z-index: 4; pointer-events: none; color: #eaf3ff; visibility: hidden; opacity: 0; }
-.sat-ui > * { position: absolute; }
-.sat-ui button { pointer-events: auto; font: inherit; cursor: pointer; }
-.sat-tag { left: 0; top: 0; width: 250px; padding: 8px 10px 8px 12px; background: rgba(4, 10, 26, .62); border-left: 1px solid rgba(255, 210, 122, .6); will-change: transform; }
-.sat-tag .cap, .sat-tag .cap span, .sat-tag .cap em { color: #ffd27a; }
-.sat-tag-full { margin: 6px 0 0; font: 500 .72rem/1.35 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: #eaf3ff; }
-.sat-tag-note { margin: 4px 0 0; font: 400 .66rem/1.45 var(--f-mono); letter-spacing: .06em; color: #8fb2d8; }
-.sat-title { left: clamp(20px, 6vw, 96px); bottom: calc(clamp(36px, 6svh, 64px) + 86px); max-width: min(720px, 88vw); }
-.sat-title .cap, .sat-title .cap em { color: #9fb8dc; } .sat-title .cap span { color: #ffd27a; }
-.sat-title h2 { margin: 8px 0 12px; font: 200 clamp(3rem, min(10vw, 17svh), 8.5rem)/.9 var(--f-body); letter-spacing: .02em; text-transform: uppercase; color: #fff; text-shadow: 0 2px 30px rgba(2, 6, 20, .7); }
-.sat-sub { margin: 0; max-width: 46ch; font: 400 clamp(.85rem, 1.1vw, 1rem)/1.5 var(--f-body); color: #c3d4ee; text-shadow: 0 1px 14px rgba(2, 6, 20, .9); }
-.sat-sw { left: clamp(20px, 6vw, 96px); bottom: clamp(36px, 6svh, 64px); display: flex; gap: 10px; }
-.sat-sw button { display: grid; justify-items: start; gap: 5px; min-width: 112px; min-height: 64px; padding: 10px 18px; border: 1px solid rgba(159, 208, 255, .38); background: rgba(4, 10, 26, .78); color: #cfe0fa; text-align: left; transition: background .2s, border-color .2s, color .2s; }
-.sat-sw b { font: 600 1.05rem/1 var(--f-mono); letter-spacing: .18em; } .sat-sw small { font: 400 .66rem/1 var(--f-mono); letter-spacing: .14em; color: #8fb2d8; }
-.sat-sw button:hover { border-color: #fff; color: #fff; }
-.sat-sw button[aria-pressed="true"] { border-color: #ffd27a; background: rgba(255, 210, 122, .16); color: #fff; box-shadow: inset 0 -3px 0 #ffd27a; }
-.sat-act { right: clamp(18px, 3vw, 40px); bottom: 164px; display: flex; gap: 10px; align-items: stretch; }
-.sat-ex, .sat-xr { display: inline-flex; align-items: center; gap: 12px; min-height: 60px; padding: 0 24px; border: 1px solid #ffd27a; background: rgba(4, 10, 26, .78); color: #fff; font: 700 .9rem/1 var(--f-mono); letter-spacing: .2em; text-transform: uppercase; transition: background .2s, color .2s; }
-.sat-ex[aria-pressed="true"], .sat-xr[aria-pressed="true"] { background: #ffd27a; color: #050912; } .sat-ex:hover, .sat-xr:hover { background: rgba(255, 210, 122, .28); } .sat-ex[aria-pressed="true"]:hover, .sat-xr[aria-pressed="true"]:hover { background: #fff; }
-.sat-xr { border-color: #7fe0ff; } .sat-xr[aria-pressed="true"] { background: #7fe0ff; } .sat-xr:hover { background: rgba(127, 224, 255, .26); }
-.sat-ex b, .sat-xr b { font: inherit; }
-.sat-ex-i { width: 22px; height: 22px; position: relative; flex: none; } .sat-ex-i::before, .sat-ex-i::after { content: ""; position: absolute; inset: 0; border: 1.5px solid currentColor; transition: transform .35s; } .sat-ex-i::after { inset: 6px; }
-.sat-ex[aria-pressed="true"] .sat-ex-i::before { transform: scale(1.25); } .sat-ex[aria-pressed="true"] .sat-ex-i::after { transform: scale(.7); }
-.sat-xr-i { width: 22px; height: 22px; position: relative; flex: none; border: 1.5px solid currentColor; border-radius: 50%; } .sat-xr-i::after { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: currentColor; }
-.sat-zm { display: inline-flex; border: 1px solid rgba(159, 208, 255, .4); background: rgba(4, 10, 26, .78); }
-.sat-zm button { width: 56px; min-height: 58px; border: 0; background: transparent; color: #fff; font: 500 1.5rem/1 var(--f-mono); } .sat-zm button + button { border-left: 1px solid rgba(159, 208, 255, .3); } .sat-zm button:hover { background: rgba(159, 208, 255, .2); }
-.sat-hint { right: clamp(18px, 3vw, 40px); bottom: 236px; margin: 0; max-width: 34ch; text-align: right; font: 500 .7rem/1.5 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: #9fd0ff; text-shadow: 0 1px 10px #000; transition: opacity .6s; }
-.sat-hint.gone { opacity: 0; }
-.sat-credit { left: clamp(20px, 6vw, 96px); bottom: 12px; margin: 0; font: 400 .6rem/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: #6f8db5; }
-.sat-labs { inset: 0; transition: opacity .2s; pointer-events: none; }
-.sat-lab { position: absolute; left: 0; top: 0; display: block; padding: 4px 0 4px 10px; font: 500 .66rem/1.2 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: #fff; text-shadow: 0 1px 8px #000; will-change: transform; }
-.sat-lab i { font-style: normal; color: #ffd27a; margin-right: 8px; } .sat-lab.l { text-align: right; padding: 4px 10px 4px 0; } .sat-lab.l i { margin: 0 0 0 8px; float: right; order: 2; }
-.sat-failed .sat-ui, .sat-failed .sat-cv, .sat-failed .sat-fx, .sat-failed .sat-lines { display: none; }
-.sat-loading .sat-title h2::after { content: " …"; opacity: .5; }
-.sat-hero .ds-tele { z-index: 5; }
-.ds-ph[data-a="-.05"] { opacity: calc(var(--o, 0) * var(--sat-gap, 1)); }
-.sat-ui button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
-@media (max-width: 700px) {
-  .sat-sw { left: 16px; right: 16px; bottom: 70px; gap: 6px; } .sat-sw button { flex: 1; min-width: 0; min-height: 58px; padding: 8px 10px; justify-items: center; text-align: center; }
-  .sat-act { left: 16px; right: 16px; bottom: 138px; gap: 6px; } .sat-ex, .sat-xr { flex: 1; min-height: 54px; padding: 0 8px; justify-content: center; font-size: .72rem; letter-spacing: .08em; gap: 7px; white-space: nowrap; } .sat-ex-i, .sat-xr-i { width: 18px; height: 18px; } .sat-xr-i::after { inset: 4px; } .sat-ex-i::after { inset: 5px; } .sat-zm button { width: 48px; min-height: 54px; }
-  .sat-title { left: 18px; right: 18px; bottom: 204px; } .sat-title h2 { font-size: clamp(2.6rem, 14vw, 4.2rem); margin: 6px 0 8px; } .sat-sub { font-size: .8rem; max-width: 34ch; }
-  .sat-hint { left: 18px; right: 18px; bottom: 204px; max-width: none; text-align: left; font-size: .6rem; display: none; } .sat-credit { display: none; }
-  .sat-tag { width: 150px; padding: 6px 8px; } .sat-tag-full { display: none; } .sat-lab { font-size: .56rem; letter-spacing: .08em; }
-}
-@media (max-height: 560px) and (min-width: 701px) { .sat-title h2 { font-size: clamp(2.4rem, 12svh, 5rem); } .sat-hint { display: none; } }
-
 /* ---------- 01c rail lines on the Malaysia map ---------- */
 .ds-rail { position: absolute; right: 26px; top: 108px; z-index: 3; width: 322px; opacity: 0; visibility: hidden; display: grid; gap: 10px; justify-items: end; }
 .rl-tog { display: inline-flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 18px; border: 1px solid #ffd27a; background: rgba(4, 10, 26, .78); color: #fff; font: 600 .78rem/1 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; cursor: pointer; transition: background .2s, color .2s; }
@@ -242,7 +182,6 @@ html.flying .rail { opacity: 0; pointer-events: none; }
 .chip { justify-self: start; font: 600 .56rem/1 var(--f-mono); font-style: normal; letter-spacing: .14em; text-transform: uppercase; padding: 3px 7px; border: 1px solid; }
 .chip.op { color: #6ff0b0; border-color: rgba(111, 240, 176, .6); } .chip.uc { color: #ffc261; border-color: rgba(255, 194, 97, .6); } .chip.soon { color: #7fc8ff; border-color: rgba(127, 200, 255, .6); }
 .rl-note { margin: 12px 0 0; font: 400 .6rem/1.4 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: #7f9cc4; }
-.sat-open .ds-rail { opacity: 0 !important; visibility: hidden !important; }
 @media (max-width: 700px) {
   .ds-rail { left: 12px; right: 12px; top: 112px; width: auto; justify-items: stretch; gap: 6px; }
   .rl-tog { justify-content: space-between; min-height: 48px; } .rl-card { padding: 10px 12px 8px; } .rl-card .cap { display: none; }

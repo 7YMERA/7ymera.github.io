@@ -72,7 +72,9 @@
     for (var j = 1; j < CURVE.length; j++) if (p <= CURVE[j][0]) { var a = CURVE[j - 1], b = CURVE[j], f = b[0] === a[0] ? 1 : (p - a[0]) / (b[0] - a[0]); f = f * f * (3 - 2 * f); return a[1] + (b[1] - a[1]) * f; }
     return CURVE[CURVE.length - 1][1];
   }
-  function progress() { var h = Math.max(1, root.scrollHeight - innerHeight); return Math.max(0, Math.min(1, (window.pageYOffset || root.scrollTop || 0) / h)); }
+  var maxS = 1; // the page's scrollable height, measured on load, resize and when the page changes size (ResizeObserver), not on every scroll tick
+  function measure() { maxS = Math.max(1, root.scrollHeight - innerHeight); }
+  function progress() { return Math.max(0, Math.min(1, (window.pageYOffset || root.scrollTop || 0) / maxS)); }
 
   // ---------- the dial and the glow ----------
   var dial, wins = {}, glow, ringC, lab, pinBtn, labTxt = '', gl = root.classList.contains('gl'), pinned = false;
@@ -139,14 +141,15 @@
     }
     if (root.classList.contains('gl')) { // the sky behind the canvas, mirrored by the city's shader (the same three colours and stop, mixed the same way)
       var sp = ((STOP[seg] + (STOP[seg + 1] - STOP[seg]) * F) * 100).toFixed(1) + '%', gr = 'linear-gradient(' + str(mix(sky[0][seg], sky[0][seg + 1], F)) + ',' + str(mix(sky[1][seg], sky[1][seg + 1], F)) + ' ' + sp + ',' + str(mix(sky[2][seg], sky[2][seg + 1], F)) + ')';
-      if (gr !== lastGrad && document.body) { lastGrad = gr; var bs = document.body.style; bs.backgroundImage = gr; bs.backgroundAttachment = 'fixed'; bs.backgroundRepeat = 'no-repeat'; }
-    } else if (lastGrad && document.body) { lastGrad = ''; document.body.style.backgroundImage = ''; }
+      if (gr !== lastGrad && document.body) { lastGrad = gr; skyEl().style.backgroundImage = gr; }
+    } else if (lastGrad && document.body) { lastGrad = ''; skyEl().style.backgroundImage = ''; }
     var th = 'light'; if (th !== theme) { theme = th; root.setAttribute('data-theme', th); }
     paintDial(t, prog);
     var c0 = performance.now(); void getComputedStyle(root).getPropertyValue('--bg'); // forces the recalculation now (it would happen on the next frame anyway) to learn what it costs
     gap = Math.max(60, Math.min(500, gap * 0.5 + (performance.now() - c0) * 4 * 0.5));
   }
-  var lastGrad = '';
+  var lastGrad = '', skyDiv = null;
+  function skyEl() { if (!skyDiv) { skyDiv = document.getElementById('skybg'); if (!skyDiv) { skyDiv = document.createElement('div'); skyDiv.id = 'skybg'; skyDiv.setAttribute('aria-hidden', 'true'); document.body.insertBefore(skyDiv, document.body.firstChild); } } return skyDiv; } // the sky gradient sits on its own fixed layer (scene.css #skybg), not on a fixed body background
   function queue() { if (wTimer) return; var w = gap - (performance.now() - lastW); if (w <= 0) write(); else wTimer = setTimeout(write, w); }
   function publish() {
     if (window.SceneTime) window.SceneTime.set(t);
@@ -162,7 +165,7 @@
     if (Math.abs(target - t) > 0.0008) raf = requestAnimationFrame(tick);
   }
   function kick() { if (!raf) { lastF = performance.now(); raf = requestAnimationFrame(tick); } }
-  function init() { build(); prog = progress(); t = target = curve(prog); write(); publish(); kick(); }
+  function init() { build(); measure(); prog = progress(); t = target = curve(prog); write(); publish(); kick(); }
   // Cost control: a token change on <html> restyles every element, so the long sections are given content-visibility:auto, which makes the browser skip the ones off screen.
   // Their remembered size is set to the real measured content size, so nothing moves (checked: scroll height and every section top identical before, after and after scrolling through).
   // Remeasured after a resize. Opt out with <html data-daycycle="nocv">.
@@ -178,11 +181,12 @@
   addEventListener('load', cvLater); addEventListener('resize', cvLater);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(cvLater);
   new MutationObserver(function () { if (theme && root.getAttribute('data-theme') !== theme) root.setAttribute('data-theme', theme); }).observe(root, { attributes: true, attributeFilter: ['data-theme'] }); // the page's own theme key or button cannot override the cycle
-  addEventListener('scroll', kick, { passive: true });
-  addEventListener('resize', kick);
-  addEventListener('load', kick);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(kick);
-  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(kick).observe(root);
+  function remeasure() { measure(); kick(); }
+  if (window.ScrollBus) window.ScrollBus.write(kick); else addEventListener('scroll', kick, { passive: true });
+  addEventListener('resize', remeasure);
+  addEventListener('load', remeasure);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure);
+  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(remeasure).observe(root);
   window.DayCycle = { get: function () { return t; }, progress: function () { return prog; }, refresh: kick, curve: curve };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
