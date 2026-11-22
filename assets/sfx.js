@@ -730,8 +730,8 @@
     else if (ac && ac.state !== 'running') { var pr = ac.resume(); if (pr && pr.then) pr.then(onState, function () {}); }
   }
   function disarm() { armEvs.forEach(function (n) { removeEventListener(n, go, true); }); if (!on && !armed) hideHint(); }
-  // On by default on the front page (sections carry data-sfx-zone) and wherever sound was left on; a stored "0" always means off.
-  var stored = lsGet('sfx-on'), frontPage = !!d.querySelector('[data-sfx-zone]') || /^\/(index\.html)?$/.test(location.pathname);
+  // On by default on every page, and wherever sound was left on; a stored "0" always means off.
+  var stored = lsGet('sfx-on'), frontPage = true; // on by default on every page (owner's call, 22 Nov)
   if (Ctx && (stored === '1' || (stored == null && frontPage))) {
     armed = true;   // allowed to play; browsers need a real tap or key first (wheel and scroll do not count as user activation)
     armEvs.forEach(function (n) { addEventListener(n, go, { capture: true, passive: true }); });

@@ -29,11 +29,11 @@
   var RAIL = [
     { id: 'west', name: 'KTM West Coast Line', short: 'West Coast', col: '#58c4ff', st: 'op', pts: [[6.66, 100.32, 'Padang Besar', 'l'], [6.12, 100.37, 'Alor Setar', 'l'], [5.39, 100.37, 'Butterworth', 'l'], [4.85, 100.74], [4.60, 101.07, 'Ipoh', 'l'], [3.68, 101.52], [3.134, 101.686, 'KL Sentral', 'l'], [2.72, 101.94, 'Seremban', 'r'], [2.58, 102.61, 'Gemas', 'l'], [2.50, 102.82], [2.03, 103.32], [1.46, 103.76, 'JB Sentral', 'l']] },
     { id: 'east', name: 'KTM East Coast Line, the Jungle Railway', short: 'East Coast (Jungle Railway)', col: '#ffa24a', st: 'op', pts: [[2.58, 102.61], [3.48, 102.35, 'Mentakab', 'l'], [4.18, 102.05, 'Kuala Lipis', 'l'], [4.88, 101.97, 'Gua Musang', 'l'], [5.53, 102.20], [6.20, 102.17, 'Tumpat', 'l']] },
-    { id: 'ecrl', name: 'ECRL East Coast Rail Link', short: 'ECRL', col: '#ff6a5c', st: 'uc', tag: ['ECRL · opening 2026–27', 4.76, 103.42, 'r'], pts: [[6.12, 102.24, 'Kota Bharu', 'r'], [5.74, 102.49], [5.33, 103.14, 'Kuala Terengganu', 'r'], [4.76, 103.42], [4.23, 103.42], [3.82, 103.33, 'Kuantan', 'r'], [3.59, 102.77], [3.48, 102.35], [3.52, 101.91], [3.23, 101.72, 'Gombak', 'r'], [3.21, 101.43], [3.00, 101.39]] },
+    { id: 'ecrl', name: 'ECRL East Coast Rail Link', short: 'ECRL', col: '#ff6a5c', st: 'op', tag: ['ECRL', 4.76, 103.42, 'r'], pts: [[6.12, 102.24, 'Kota Bharu', 'r'], [5.74, 102.49], [5.33, 103.14, 'Kuala Terengganu', 'r'], [4.76, 103.42], [4.23, 103.42], [3.82, 103.33, 'Kuantan', 'r'], [3.59, 102.77], [3.48, 102.35], [3.52, 101.91], [3.23, 101.72, 'Gombak', 'r'], [3.21, 101.43], [3.00, 101.39]] },
     { id: 'klang', name: 'KTM Port Klang line and Batu Caves spur', short: 'Port Klang + Batu Caves', col: '#b49bff', st: 'op', pts: [[3.134, 101.686], [3.04, 101.45], [3.00, 101.39, 'Port Klang', 'l']], pts2: [[3.134, 101.686], [3.24, 101.68, 'Batu Caves', 'r']] },
     { id: 'klia', name: 'KLIA Ekspres and Transit', short: 'KLIA Ekspres', col: '#3fe0a0', st: 'op', pts: [[3.134, 101.686], [2.93, 101.69], [2.75, 101.71, 'KLIA', 'r']] },
-    { id: 'rts', name: 'RTS Link, Johor Bahru to Singapore', short: 'RTS Link JB–Woodlands', col: '#ffe14d', st: 'soon', tag: ['RTS Link · JB–Woodlands', 1.46, 103.77, 'r'], pts: [[1.46, 103.76], [1.45, 103.79]] },
-    { id: 'pen', name: 'Penang LRT Mutiara Line', short: 'Penang LRT Mutiara', col: '#59f0d4', st: 'uc', tag: ['Penang LRT', 5.41, 100.33, 'l'], pts: [[5.41, 100.33], [5.30, 100.28]] },
+    { id: 'rts', name: 'RTS Link, Johor Bahru to Singapore', short: 'RTS Link JB–Woodlands', col: '#ffe14d', st: 'op', tag: ['RTS Link', 1.46, 103.77, 'r'], pts: [[1.46, 103.76], [1.45, 103.79]] },
+    { id: 'pen', name: 'Penang LRT Mutiara Line', short: 'Penang LRT Mutiara', col: '#59f0d4', st: 'op', tag: ['Penang LRT', 5.41, 100.33, 'l'], pts: [[5.41, 100.33], [5.30, 100.28]] },
     { id: 'sbh', name: 'Sabah State Railway', short: 'Sabah State Railway', col: '#cfd8ff', st: 'op', pts: [[5.95, 116.05, 'Tanjung Aru', 'r'], [5.35, 115.75, 'Beaufort', 'r'], [5.12, 115.95, 'Tenom', 'r']] }
   ];
   var KV = [[3.134, 101.686], ['#ff7a7a', '#7ad0ff', '#9be58b', '#ffd27a', '#c9a8ff']];
@@ -360,7 +360,7 @@
       });
       if (L.tag && frac > .95) { var tg = L.tag, X2 = sp(tg[1], tg[2]); if (X2 && X2[0] > 8 && X2[0] < W - 8) tags.push({ txt: tg[0], x: X2[0], y: X2[1], side: tg[3], col: L.col, st: L.st }); }
     });
-    // tags: status labels for the lines that are not open yet
+    // tags: name labels for the lines worth pointing out
     tags.forEach(function (g) {
       var w = ctx.measureText(g.txt.toUpperCase()).width, sd = g.side === 'r' && g.x + 28 + w > W ? 'l' : g.side, x = sd === 'l' ? g.x - 18 - w : g.x + 18, y = g.y - 14; ctx.globalAlpha = vis;
       ctx.strokeStyle = g.col; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(g.x, g.y); ctx.lineTo(sd === 'l' ? x + w + 6 : x - 6, y); ctx.stroke();
@@ -376,7 +376,7 @@
       for (var a = 0; a < 5; a++) { var ang = -1.1 + a * 1.25 + .3, rr = r * (.9 + .25 * (a % 2)); ctx.strokeStyle = KV[1][a]; ctx.globalAlpha = k0 * .95; ctx.beginPath(); ctx.moveTo(kl[0] - Math.cos(ang) * rr * .5, kl[1] - Math.sin(ang) * rr * .5); ctx.lineTo(kl[0] + Math.cos(ang) * rr, kl[1] + Math.sin(ang) * rr); ctx.stroke(); }
       ctx.globalAlpha = k0; ctx.lineWidth = 1.2; ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(kl[0], kl[1], r * .5, 0, 6.2832); ctx.stroke();
       if (sstep(.26, .34, p) > 0 && kl[0] > 300) {
-        var L1 = ['KLANG VALLEY · URBAN RAIL', 'LRT Kelana Jaya · Ampang · Sri Petaling', 'MRT Kajang · Putrajaya', 'KL Monorail · BRT Sunway', 'LRT3 Shah Alam (new)'], bx = kl[0] - r * 2.1 - 8, by = kl[1] - r * 3.6, bw = 0, ii;
+        var L1 = ['KLANG VALLEY · URBAN RAIL', 'LRT Kelana Jaya · Ampang · Sri Petaling', 'MRT Kajang · Putrajaya', 'KL Monorail · BRT Sunway', 'LRT3 Shah Alam'], bx = kl[0] - r * 2.1 - 8, by = kl[1] - r * 3.6, bw = 0, ii;
         ctx.font = '500 10px "JetBrains Mono", ui-monospace, monospace'; for (ii = 0; ii < L1.length; ii++) bw = Math.max(bw, ctx.measureText(L1[ii]).width);
         ctx.globalAlpha = k0 * sstep(.26, .34, p); ctx.fillStyle = 'rgba(8,14,32,.8)'; ctx.fillRect(bx - bw - 12, by - 12, bw + 18, L1.length * 14 + 12); ctx.strokeStyle = 'rgba(159,208,255,.5)'; ctx.lineWidth = 1; ctx.strokeRect(bx - bw - 11.5, by - 11.5, bw + 17, L1.length * 14 + 11);
         for (ii = 0; ii < L1.length; ii++) { ctx.fillStyle = ii ? '#b8cbe8' : '#ffd27a'; ctx.fillText(L1[ii], bx - bw - 6, by + 2 + ii * 14); }
