@@ -116,8 +116,17 @@
       var setMin = function (v) { el.classList.toggle('tod--min', v); tog.setAttribute('aria-expanded', v ? 'false' : 'true'); tog.setAttribute('aria-label', v ? 'Show all views' : 'Fold the view picker'); };
       tog.addEventListener('click', function () { setMin(!el.classList.contains('tod--min')); });
       el.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('.tod-b'); if (b && el.classList.contains('tod--min')) { e.stopPropagation(); setMin(false); } }, true);
+      // Where the page has a "Skip the flight" link (the front page) the folded picker is a compact pill on the same row, to the right of it: it starts folded and goes back to the pill after the flight's middle; elsewhere it opens again at the finale.
+      var skip = sticky.querySelector('.fly-skip');
+      if (skip) {
+        el.classList.add('tod--row');
+        var setX = function () { sticky.style.setProperty('--row-x', (skip.offsetLeft + skip.offsetWidth + 12) + 'px'); };
+        setX(); addEventListener('resize', setX); if (document.fonts && document.fonts.ready) document.fonts.ready.then(setX);
+        if (window.ResizeObserver) new ResizeObserver(setX).observe(skip);
+        setMin(true);
+      }
       var wasMid = false;
-      new MutationObserver(function () { var mid = document.documentElement.classList.contains('ride-mid') || document.documentElement.classList.contains('free-fly'); if (mid && !wasMid) setMin(true); if (!mid && wasMid) setMin(false); wasMid = mid; }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+      new MutationObserver(function () { var mid = document.documentElement.classList.contains('ride-mid') || document.documentElement.classList.contains('free-fly'); if (mid && !wasMid) setMin(true); if (!mid && wasMid) setMin(!!skip); wasMid = mid; }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     }
     var hosts = document.querySelectorAll('[data-tod-mount]');
     for (var i = 0; i < hosts.length; i++) if (!hosts[i].querySelector('.tod')) build(hosts[i], true);

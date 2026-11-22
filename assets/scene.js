@@ -593,6 +593,7 @@
   // Behind the name card: on a wide screen the opening shot itself (no move); on a tall one the group of four from higher and farther back, though not so far that it is small.
   function cardPose(){var t=clamp((TOPF.a0-W/Math.max(1,Hh))/TOPF.span,0,1),p=topPose();if(t<=0)return p;var q=P(-15,-11,65,TOPF.cr,TOPF.cy,TOPF.cty,0,0,TOPF.cr);for(var i=0;i<9;i++)q[i]=p[i]+(q[i]-p[i])*t;q[8]=q[3];return q}
   function topPose(){var t=clamp((TOPF.a0-W/Math.max(1,Hh))/TOPF.span,0,1),r=TOPF.r+TOPF.dr*t;return P(TOPF.cx+TOPF.dcx*t,-11,65,r,TOPF.y+TOPF.dy*t,TOPF.ty+TOPF.dty*t,.1*(1-t),0,r)}
+  var OVER=P(-15,-11,65,4,1250,0,0,0,4),RIDE_FROM=.88;               // OVER: straight down over the skyline. RIDE_FROM: the share of the descent's scroll at which the drone flight starts (where the clouds clear)
   var DIR=[
     ['top',0,0,function(){return topPose()}],                          // the opening: framed for the shape of the screen (see topPose)
     ['curtain',0,1.8,function(){return cardPose()}],                   // as the name card comes in (1.8 screens down, EST in extras.js): on a tall screen the camera has risen and pulled back to the whole group
@@ -621,11 +622,11 @@
     ['halcyon',.5,-.5,P(-25,9,60,360,190,70,0,0,900)],
     ['arcade',.5,-.5,P(-25,9,60,360,190,70,0,0,900)],                 // hold the pulled-back view while the arcade is on screen                 // pull right back (zoom out) ...
     // Front page (#descent): as the clouds clear, the city is seen from straight above the skyline, then the camera drops and tilts into the flight's first shot (END), so the descent runs on into the drone with no cut
-    ['descent',.6,0,P(-15,-11,65,4,1250,0,0,0,4)],
-    ['descent',.88,0,P(-15,-11,65,6,980,0,0,0,6)],
-    ['descent',.96,0,P(-15,-11,40,60,640,20,0,0,70)],
-    ['enter',0,HOMEDS?0:-1,END]                                         // ... then in to where the flight starts (zoom in)                                     // the flight starts here
-  ];
+    // The straight-down view is held from .6 to the place where the drone flight itself begins (RIDE_FROM of the descent, see homeGeo): from there the flight's own keyframes carry the camera (the first ones are this same pose), so nothing changes hands mid-move.
+    ['descent',.6,0,OVER],
+    ['descent',function(el){return RIDE_FROM*(el.offsetHeight-innerHeight)/el.offsetHeight},0,OVER],
+    HOMEDS?null:['enter',0,-1,END]                                      // ... then in to where the flight starts (zoom in)                                     // the flight starts here
+  ].filter(Boolean);
   var KEYS=[],lastLay=-1;
   function mob(p){if(!mobile)return p;var q=p.slice(0,8);q[6]=0;if(p[8]){q[3]=p[8]}else{q[3]*=1.12;q[4]*=1.08}return q} // a portrait screen is only 0.49 of its height wide: a wide shot of the group stands much farther back there (p[8])
   function layoutKeys(){
@@ -633,11 +634,11 @@
     if(spin){sTop=spin.offsetTop;sH=spin.offsetHeight}
     DIR.forEach(function(d){
       var y=0;
-      if(d[0]!=='top'){var el=document.getElementById(d[0]);if(!el||el.offsetHeight===0)return;y=el.offsetTop+d[1]*el.offsetHeight+d[2]*vh}
+      if(d[0]!=='top'){var el=document.getElementById(d[0]);if(!el||el.offsetHeight===0)return;y=el.offsetTop+(typeof d[1]==='function'?d[1](el):d[1])*el.offsetHeight+d[2]*vh}
       k.push({y:Math.max(0,y),p:d[3]})});
     k.sort(function(u,v){return u.y-v.y});
     for(var i=1;i<k.length;i++)if(k[i].y<=k[i-1].y)k[i].y=k[i-1].y+1;
-    KEYS=k;lastLay=document.documentElement.scrollHeight}
+    GEO=homeGeo()||GEO;KEYS=k;lastLay=document.documentElement.scrollHeight}
   function poseOf(k){var p=typeof k.p==='function'?k.p():k.p;return mob(p)}
   function dirPose(y){
     if(ONLY||!KEYS.length)return mob(END);
@@ -646,7 +647,11 @@
       if(y<=KEYS[i].y){var a=poseOf(KEYS[i-1]),b=poseOf(KEYS[i]),t=(y-KEYS[i-1].y)/Math.max(1,KEYS[i].y-KEYS[i-1].y);t=t*t*(3-2*t);
         var o=[];for(var j=0;j<8;j++)o.push(a[j]+(b[j]-a[j])*t);return o}}
     return poseOf(KEYS[KEYS.length-1])}
-  function rideProg(){if(!enter)return 0;var m=ONLY?document.documentElement.scrollHeight-innerHeight:enter.offsetTop+enter.offsetHeight-innerHeight,st=ONLY?0:enter.offsetTop-(HOMEDS?0:innerHeight);return m>st?Math.min(1,Math.max(0,(scrollY-st)/(m-st))):0}
+  // The front page's drone flight starts inside the descent. homeGeo: st = where the ride starts (88 % through the descent), rv = where the sky stage has scrolled off and the city shows, s0 = top of #enter (the camera is level there, the drone proper), m = end of the ride.
+  var USEPRE=HOMEDS&&DIST&&!!enter,GEO=null,CS0=0; // CS0: the ride's progress at the drone-level knot ('start'); 0 where the flight begins the ride (/flight/, /portfolio/)
+  function homeGeo(){var d=USEPRE&&document.getElementById('descent');if(!d||!enter||!d.offsetHeight)return null;var vh=innerHeight,sp=Math.max(0,d.offsetHeight-vh),g={st:d.offsetTop+RIDE_FROM*sp,rv:d.offsetTop+sp,s0:enter.offsetTop,m:enter.offsetTop+enter.offsetHeight-vh};return g.m>g.s0&&g.s0>g.rv-2&&g.rv>=g.st?g:null}
+  function fr(c){return clamp((c-CS0)/Math.max(1e-6,1-CS0),0,1)} // the flight's own progress (0 at the drone-level knot, 1 at the end), what cr was before the descent was folded in
+  function rideProg(){if(!enter)return 0;var m=ONLY?document.documentElement.scrollHeight-innerHeight:enter.offsetTop+enter.offsetHeight-innerHeight,st=ONLY?0:enter.offsetTop-(HOMEDS?0:innerHeight);if(GEO&&!ONLY){m=GEO.m;st=GEO.st}return m>st?Math.min(1,Math.max(0,(scrollY-st)/(m-st))):0}
   function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
   // Critically damped follow (no overshoot, no jump when a wheel notch lands): the camera glides to where the scroll bar is.
   function damp(c,t,v,st,dt){var o=2/st,x=o*dt,e=1/(1+x+.48*x*x+.235*x*x*x),ch=c-t,tmp=(v.v+o*ch)*dt;v.v=(v.v-o*tmp)*e;return t+(ch+tmp)*e}
@@ -669,6 +674,7 @@
   // [name, camera position, look-at point, slow factor of the stretch that FOLLOWS it (bigger = more scroll spent there)]
   var KF=null,CAPS=DIST?[['start','bridge'],['bridge','exit'],['exit','sw1'],['sw1','e0'],['e0','sk0'],['sk0','end']]:[['start','front'],['front','over'],['over','out'],['out','m4'],['m4','pass'],['pass','end']];
   function railNear(x,z){var b=1e9,s=0,q=new T.Vector3();for(var i=0;i<600;i++){skyCurve.getPointAt(i/600,q);var d=Math.hypot(q.x-x,q.z-z);if(d<b){b=d;s=i/600}}return s} // the sky rail's parameter nearest to a world point (build time only)
+  var PREL=false; // set by buildRide: the ride has the overhead opening in front of the flight
   function buildKF(){
     var o=DIST?poseCam(END):orbitPose(1,0),m1=arcAt(90,55,96,112),m2=arcAt(130,55,116,132),m3=arcAt(180,55,138,150),m4=arcAt(230,55,166,178),m5=arcAt(270,55,200,205);
     if(DIST){
@@ -695,7 +701,11 @@
         for(var i=0;i<=n;i++){var f=i/n,th=(th0+(th1-th0)*f)*RAD,r=r0+(r1-r0)*f,y=y0+(y1-y0)*f;
           KF.push([pre+i,A(c.u+Math.cos(th)*r,c.w+Math.sin(th)*r,y),A(c.u,c.w,typeof look==='function'?look(y):y+look),slow,(bank||0)*Math.sin(f*Math.PI)])}}
       function row(name,p,y,a,ay,slow,roll){KF.push([name,A(p.u,p.w,y),A(a.u,a.w,ay),slow,roll||0])}
-      KF=[['start',o.pos,o.tgt,.8,0]];
+      KF=[];
+      if(PREL){ // THE OVERHEAD OPENING (front page): the flight itself begins looking straight down over the skyline, holds there while the sky stage scrolls away, then falls and tips level into the first beat ('start').
+        // Every knot keeps the same heading (the camera sits on a bearing from the skyline's middle and looks at it, bearing 65 degrees easing to 45), so the view tilts from straight down to level without ever passing through the vertical: no flip, no gimbal snap.
+        [[65,4,1250,0],[65,4,1250,0],[62,30,900,10],[54,110,480,40],[49,175,250,70]].forEach(function(q,j){var c=poseCam(P(-15,-11,q[0],q[1],q[2],q[3],0,0,q[1]));KF.push(['ov'+j,c.pos,c.tgt,1,0])})}
+      KF.push(['start',o.pos,o.tgt,.8,0]);
       // 1 drop-in: from the opening pose (street side) straight down to street level, then a rush along the free lane at w = -52 (the blocks on both sides streaming past), the towers growing ahead on the right
       var D1=[[170,-30,62,66],[140,-44,34,64],[108,-52,18,62],[74,-52,16,60],[38,-52,22,60]];
       for(i=0;i<D1.length;i++)row('dive'+(i+1),{u:D1[i][0],w:D1[i][1]},D1[i][2],P0,D1[i][3],.8);
@@ -770,7 +780,7 @@
       ['pass',A(-30,-125,226),A(-30,-60,150),2.6],
       ['end',A(175,-250,330),A(-55,-45,70),1.5]];
   }
-  var HOLD0=.86; // the flight itself uses the first 86 % of the scroll; the last 14 % holds the finale (with a slow drift)
+  var HOLD0=.86; // the flight itself uses the first 86 % of its scroll; the last 14 % holds the finale (with a slow drift). With the overhead opening buildRide recomputes it for the whole ride
   var KI={},SEG=null,CX=null,CM=null;
   function pchip(X,Y){ // monotone cubic through (X,Y): smooth speed, never runs backwards
     var n=X.length,h=[],d=[],m=[],i;for(i=0;i<n-1;i++){h[i]=X[i+1]-X[i];d[i]=(Y[i+1]-Y[i])/h[i]}
@@ -779,23 +789,36 @@
     return function(x){if(x<=X[0])return Y[0];if(x>=X[n-1])return Y[n-1];var k=0;while(x>X[k+1])k++;
       var t=(x-X[k])/h[k],t2=t*t,t3=t2*t;return(2*t3-3*t2+1)*Y[k]+(t3-2*t2+t)*h[k]*m[k]+(-2*t3+3*t2)*Y[k+1]+(t3-t2)*h[k]*m[k+1]}}
   function buildRide(){
-    buildKF();var n=KF.length,i;
+    GEO=homeGeo()||null;PREL=!!GEO;
+    root.classList.toggle('home-ds',PREL); // front page: the drone's chrome is held back until html.drone-ready (scene.css)
+    buildKF();var n=KF.length,i,nP=0;
+    if(PREL)for(i=0;i<n;i++)if(KF[i][0]==='start'){nP=i;break}
     rideP=new T.CatmullRomCurve3(KF.map(function(k){return k[1]}),false,'catmullrom',.5);
     rideT=new T.CatmullRomCurve3(KF.map(function(k){return k[2]}),false,'catmullrom',.5); // same knot spacing as the camera path, so the two stay in step
     // Scroll share of each stretch = its length x its slow factor, so the speed is even and slow where we want to look.
-    var share=[],tot=0,a,b,k;
-    for(i=0;i<n-1;i++){var len=0,prev=rideP.getPoint(i/(n-1));for(k=1;k<=20;k++){var q=rideP.getPoint((i+k/20)/(n-1));len+=q.distanceTo(prev);prev=q}
-      share[i]=len*KF[i][3];tot+=share[i]}
+    // With the overhead opening (nP > 0) the stretches before 'start' get their own fixed share of the scroll (they are laid on the page: a hold while the sky stage scrolls away, then the fall), and the flight keeps the length it always had.
+    var share=[],tot=0,a,b,k,len,sp=[],preSpan=0,Sf;
+    HOLD0=.86;
+    if(PREL){var R=GEO.m-GEO.st,Lf=GEO.m-GEO.s0;preSpan=(GEO.s0-GEO.st)/R;HOLD0=1-.14*Lf/R}
+    Sf=HOLD0-preSpan;
+    for(i=0;i<n-1;i++){len=0;var prev=rideP.getPoint(i/(n-1));for(k=1;k<=20;k++){var q=rideP.getPoint((i+k/20)/(n-1));len+=q.distanceTo(prev);prev=q}
+      share[i]=len*KF[i][3];if(i>=nP)tot+=share[i]}
     if(DIST){ // a turn budget: a stretch where the view swings round gets at least enough scroll that the view turns no faster than ROT degrees per unit of scroll (6.5 degrees per 1/400 of it), whatever the slow factors say
       var ROT=2600,an=[],va=new T.Vector3(),vb=new T.Vector3(),it;
-      for(i=0;i<n-1;i++){va.copy(KF[i][2]).sub(KF[i][1]).normalize();vb.copy(KF[i+1][2]).sub(KF[i+1][1]).normalize();an[i]=Math.acos(clamp(va.dot(vb),-1,1))*180/Math.PI}
-      for(it=0;it<8;it++){tot=0;for(i=0;i<n-1;i++)tot+=share[i];for(i=0;i<n-1;i++){var need=an[i]/ROT/HOLD0*tot;if(share[i]<need)share[i]=need}}
-      tot=0;for(i=0;i<n-1;i++)tot+=share[i]}
-    CX=[0];CM=[0];var acc=0;for(i=0;i<n-1;i++){acc+=share[i]/tot;CX.push(acc*HOLD0);CM.push((i+1)/(n-1))} // the last 3% of the scroll holds the final shot
+      for(i=nP;i<n-1;i++){va.copy(KF[i][2]).sub(KF[i][1]).normalize();vb.copy(KF[i+1][2]).sub(KF[i+1][1]).normalize();an[i]=Math.acos(clamp(va.dot(vb),-1,1))*180/Math.PI}
+      for(it=0;it<8;it++){tot=0;for(i=nP;i<n-1;i++)tot+=share[i];for(i=nP;i<n-1;i++){var need=an[i]/ROT/Sf*tot;if(share[i]<need)share[i]=need}}
+      tot=0;for(i=nP;i<n-1;i++)tot+=share[i]}
+    for(i=nP;i<n-1;i++)sp[i]=share[i]/tot*Sf;
+    if(nP){ // the overhead opening: segment 0 is the hold (until the sky stage has gone), the rest fall to the drone-level knot with a slightly slower arrival
+      var hold=(GEO.rv-GEO.st)/R,fall=preSpan-hold,wsum=0,w=[];sp[0]=hold;
+      for(i=1;i<nP;i++){w[i]=share[i]*(i>=nP-2?1.25:1);wsum+=w[i]}
+      for(i=1;i<nP;i++)sp[i]=fall*w[i]/wsum}
+    CX=[0];CM=[0];var acc=0;for(i=0;i<n-1;i++){acc+=sp[i];CX.push(acc);CM.push((i+1)/(n-1))}
     rideU=pchip(CX,CM);
     rollK=KF.map(function(k){return k[4]||0});
-    flightTabs();
     KI={};KF.forEach(function(k,j){KI[k[0]]=CX[j]});
+    CS0=nP?KI['start']:0;
+    flightTabs();
     for(i=0;i<caps.length&&i<CAPS.length;i++){caps[i].dataset.from=Math.max(.012,KI[CAPS[i][0]]);caps[i].dataset.to=i===CAPS.length-1?1.01:KI[CAPS[i][1]]}
     hudBuild()}
   var rideU=function(c){return c},rollK=[];
@@ -813,10 +836,10 @@
       var cr2=(la>1e-4&&lb>1e-4)?(a.z*b.x-a.x*b.z)/(la*lb):0; // sin of the heading change; > 0 is a turn to the left
       kap.push(Math.asin(clamp(cr2,-1,1))/ds);spd.push(V.copy(P[i1]).sub(P[i0]).length()/((i1-i0)*HOLD0/NT))}
     function smooth(arr,w){var o=[];for(var i=0;i<arr.length;i++){var s=0,n=0;for(var j=-w;j<=w;j++){var k=i+j;if(k>=0&&k<arr.length){var wt=w+1-Math.abs(j);s+=arr[k]*wt;n+=wt}}o.push(s/n)}return o}
-    var kS=smooth(kap,10),sS=smooth(spd,8),sorted=sS.slice().sort(function(x,y){return x-y}),lo=sorted[Math.floor(NT*.15)],hi=sorted[Math.floor(NT*.92)];
-    for(i=0;i<=NT;i++){bankTab[i]=clamp(kS[i]*9,-.13,.13); // 0.0125 per unit (a circle of radius 80) leans about 14 degrees; at most 18
-      var sp=clamp((sS[i]-lo)/Math.max(1e-6,hi-lo),0,1);fovTab[i]=9*sp*sp*(3-2*sp)}
-    bankTab[0]=0;bankTab[NT]=0;fovTab[NT]=0;for(i=0;i<=4;i++)fovTab[i]=fovTab[i]*i/4}
+    var iS=Math.min(NT-1,Math.ceil(CS0/HOLD0*NT-1e-6)),kS=smooth(kap,10),sS=smooth(spd,8),sorted=sS.slice(iS).sort(function(x,y){return x-y}),nS=sorted.length-1,lo=sorted[Math.floor(nS*.15)],hi=sorted[Math.floor(nS*.92)]; // iS: the first sample of the drone flight proper (the overhead fall before it has no bank and no lens stretch)
+    for(i=0;i<=NT;i++){var pre=iS===0?1:i<iS?0:clamp((i-iS)/6,0,1);bankTab[i]=clamp(kS[i]*9,-.13,.13)*pre; // 0.0125 per unit (a circle of radius 80) leans about 14 degrees; at most 18
+      var sp=clamp((sS[i]-lo)/Math.max(1e-6,hi-lo),0,1);fovTab[i]=i<iS?0:9*sp*sp*(3-2*sp)}
+    bankTab[0]=0;bankTab[NT]=0;fovTab[NT]=0;for(i=iS;i<=iS+4&&i<=NT;i++)fovTab[i]=fovTab[i]*(i-iS)/4}
   function rollAt(u){return 0; /* no barrel roll: the owner tried it twice and turned it off twice. Do not turn it back on unless asked. The drone still banks into turns. */var n=rollK.length;if(n<2)return 0;var f=clamp(u,0,1)*(n-1),i=Math.min(n-2,Math.floor(f)),t=f-i;t=t*t*(3-2*t);return rollK[i]+(rollK[i+1]-rollK[i])*t}
   // ---- HUD (DOM) ----
   var hud=document.getElementById('hud'),hTags=[],hAlt=document.getElementById('h-alt'),hSec=document.getElementById('h-sec'),hFill=document.getElementById('h-fill'),hTicks=[],hLast=-1,hSecLast=-1;
@@ -824,7 +847,7 @@
     e.innerHTML='<i class="lm-dot"></i><b></b><span></span>';e.querySelector('b').textContent=l.name;tg.appendChild(e);hTags.push(e)})}
   function hudBuild(){
     if(!hud)return;var rail=hud.querySelector('.hud-ticks');if(!rail)return;rail.textContent='';hTicks=[];
-    for(var i=0;i<CAPS.length;i++){var e=document.createElement('li');e.style.top=(KI[CAPS[i][0]]/HOLD0*100)+'%';e.innerHTML='<i></i><b>'+('0'+(i+1)).slice(-2)+'</b>';rail.appendChild(e);hTicks.push(e)}}
+    for(var i=0;i<CAPS.length;i++){var e=document.createElement('li');e.style.top=(clamp((KI[CAPS[i][0]]-CS0)/(HOLD0-CS0),0,1)*100)+'%';e.innerHTML='<i></i><b>'+('0'+(i+1)).slice(-2)+'</b>';rail.appendChild(e);hTicks.push(e)}}
   // ---- COCKPIT: what a drone pilot sees ----
   // Built into #hud (so the home page and /flight/ both get it): compass tape, artificial horizon, speed and vertical speed, REC timer and battery,
   // a crosshair and the drone's status. Everything moves with transform or text only.
@@ -857,23 +880,27 @@
     if(!cpPrev)cpPrev=new T.Vector3();cpPrev.copy(cam.position);cpPrevT=time;
     if(cpTick++%3===0){
       cp.hdg.textContent='HDG '+('00'+Math.round(hdg)).slice(-3)+'°';cp.spd.textContent=Math.round(spdS);cp.vs.textContent=(vsS>=0?'+':'')+Math.round(vsS);
-      var f=clamp(c/HOLD0,0,1),sec=Math.round(f*150),bat=Math.round(100-42*f);
+      var f=clamp((c-CS0)/(HOLD0-CS0),0,1),sec=Math.round(f*150),bat=Math.round(100-42*f);
       cp.rec.textContent='REC '+('0'+Math.floor(sec/60)).slice(-2)+':'+('0'+sec%60).slice(-2);cp.bat.textContent=bat+'%';cp.batt.style.transform='scaleX('+(bat/100).toFixed(2)+')'}}
   var tv=new T.Vector3();
   function hudUpdate(inRide,u,c){
-    if(!hud)return;var on=inRide&&(ONLY||flying); /* only once the flight section fills the screen, not while the last Journey cards are still showing */ hud.classList.toggle('on',on);if(!on){cpPrev=null;return}
+    if(!hud)return;var on=inRide&&(ONLY||flying); /* only once the flight section fills the screen, not while the last Journey cards are still showing */
+    // Front page: nothing of the drone's chrome (picker, skip link, gauges, labels) shows while the camera is still coming down from the overhead view. Once it has levelled into the drone angle html.drone-ready fades it all in (scene.css, timeofday.css), with a little hysteresis so it cannot flicker at the edge.
+    if(on&&USEPRE&&CS0>0)on=c>=CS0-(droneReady?.012:0);
+    if(on!==droneReady){droneReady=on;root.classList.toggle('drone-ready',on);if(on&&HOMEDS&&USEPRE){try{document.dispatchEvent(new CustomEvent('sfx-cue',{detail:{name:'flight-start'}}))}catch(e){}}}
+    hud.classList.toggle('on',on);if(!on){cpPrev=null;return}
     if(!cp.ready)cockpitBuild();cockpitUpdate(c,performance.now());
-    hFill.style.transform='scaleY('+clamp(c/HOLD0,0,1).toFixed(4)+')';
+    hFill.style.transform='scaleY('+clamp((c-CS0)/(HOLD0-CS0),0,1).toFixed(4)+')';
     var alt=Math.round(cam.position.y*KU/5)*5;if(alt!==hLast){hLast=alt;hAlt.textContent=alt}
     var sec=0;for(var i=0;i<caps.length;i++)if(c>=+caps[i].dataset.from)sec=i;
     if(sec!==hSecLast){hSecLast=sec;var b=caps[sec]&&caps[sec].querySelector('b');hSec.textContent=b?b.textContent:'';for(i=0;i<hTicks.length;i++)hTicks[i].classList.toggle('on',i<=sec)}
     for(var k=0;k<LM.length;k++){
       tv.copy(LM[k].top);var dist=tv.distanceTo(cam.position);tv.project(cam);
-      var vis=tv.z<1&&Math.abs(tv.x)<.94&&Math.abs(tv.y)<.9&&dist>24&&dist<760,e=hTags[k];
+      var vis=tv.z<1&&Math.abs(tv.x)<.94&&Math.abs(tv.y)<.9&&(.5-tv.y*.5)*Hh>(mobile?100:116)&&dist>24&&dist<760,e=hTags[k]; /* a label never rides up into the compass strip at the top */
       if(vis!==e.classList.contains('show'))e.classList.toggle('show',vis);
       if(vis){e.style.transform='translate3d('+((tv.x*.5+.5)*W).toFixed(1)+'px,'+((-tv.y*.5+.5)*Hh).toFixed(1)+'px,0)';
         if(tick%8===0)e.lastChild.textContent=Math.round(LM[k].real)+' m · '+Math.round(dist*KU/10)*10+' m away'}}}
-  var tick=0;
+  var tick=0,droneReady=false;
   // the lead-in sections show their label while they are on screen
   if('IntersectionObserver' in window){var stObs=new IntersectionObserver(function(es){es.forEach(function(e){e.target.classList.toggle('on',e.isIntersecting&&e.intersectionRatio>.55)})},{threshold:[0,.55,1]});document.querySelectorAll('.stage').forEach(function(el){stObs.observe(el)})}
   function ringUpdate(){} // the screens that floated behind the towers (ring, then conveyor) were removed; see docs/claude-log.md
@@ -892,9 +919,9 @@
     if(Math.abs(fF-cam.fov)>.005){cam.fov=fF;cam.updateProjectionMatrix()}
     cam.setViewOffset(W,Hh,fX,fY,W,Hh)}
   function place(time){
-    if(enter){var pin=scrollY>=enter.offsetTop-40&&scrollY<=enter.offsetTop+enter.offsetHeight-innerHeight+40;if(pin!==flying){flying=pin;root.classList.toggle('flying',pin)}} // hides the dock while the captions are on screen
+    if(enter){var eEnd=enter.offsetTop+enter.offsetHeight-innerHeight+40,pc=scrollY>=enter.offsetTop-40&&scrollY<=eEnd,pin=GEO?scrollY>=GEO.st-40&&scrollY<=eEnd:pc;if(pin!==flying)flying=pin;if(pc!==root.classList.contains('flying'))root.classList.toggle('flying',pc)} // html.flying hides the dock while the captions are on screen; `flying` itself (the drone's rules: speed limit, idle drift) starts with the ride, inside the descent
     var inRide=cr>.0004&&!!rideP;
-    var rMid=inRide&&!freeOn&&cr>.05&&cr<.9;if(rMid!==root.classList.contains('ride-mid'))root.classList.toggle('ride-mid',rMid); // the view picker steps aside mid-flight so the landmark labels at the top of the HUD stay readable (timeofday.css)
+    var fc=fr(cr),rMid=inRide&&!freeOn&&fc>.05&&fc<.9;if(rMid!==root.classList.contains('ride-mid'))root.classList.toggle('ride-mid',rMid); // the view picker steps aside mid-flight so the landmark labels at the top of the HUD stay readable (timeofday.css)
     if(freeOn){
       // WASD: move the point the camera circles (and the camera with it) along the ground, relative to where it faces; Q/E down and up; arrows turn and tilt; Shift is faster
       var fsp=(fKeys.Shift?260:120)*Math.min(dtF,.05),fwx=freeState.cx-cam.position.x,fwz=freeState.cz-cam.position.z,fl=Math.hypot(fwx,fwz)||1;fwx/=fl;fwz/=fl;
@@ -930,7 +957,7 @@
       cam.lookAt(tgtV);cam.setViewOffset(W,Hh,0,0,W,Hh);
       // finale: widen the view (phones a lot, desktop a little) and push the fog back, so the whole skyline is in frame
       var ke=KI['sweep1']!=null?KI['sweep1']:(KI['pass']!=null?KI['pass']:.7),ke2=KI['end']||HOLD0,fs=clamp((cr-ke-.4*(ke2-ke))/(.6*(ke2-ke)),0,1);fs=fs*fs*(3-2*fs);
-      var kk=Math.sin(Math.PI*clamp(cr/.07,0,1)),fv=42+(mobile?30:10)*fs+26*kk*kk+(reduce?0:tabAt(fovTab,cr)*(1-fs)*(1-kk*kk)); /* speed feel: up to +9 degrees of lens in the fast beats, none at the start, in the finale or in reduced motion */ /* kk: a gentle push-in that starts and ends at the normal lens, so entering the flight never snaps */if(Math.abs(fv-cam.fov)>.01){cam.fov=fv;cam.updateProjectionMatrix()}
+      var kk=Math.sin(Math.PI*clamp((cr-CS0)/.07,0,1)),fv=42+(mobile?30:10)*fs+26*kk*kk+(reduce?0:tabAt(fovTab,cr)*(1-fs)*(1-kk*kk)); /* speed feel: up to +9 degrees of lens in the fast beats, none at the start, in the finale or in reduced motion */ /* kk: a gentle push-in that starts and ends at the normal lens, so entering the flight never snaps */if(Math.abs(fv-cam.fov)>.01){cam.fov=fv;cam.updateProjectionMatrix()}
       if(scene.fog){scene.fog.near=fogN0+260*fs;scene.fog.far=fogF0+560*fs}
       // Ease the rotation: the view turns towards where it should look with a short lag (time constant about 0.2 s), so a sharp
       // turn in the route can never show as a jolt. Reset when the flight starts, and when snapping.
@@ -946,7 +973,7 @@
     }
     followCam(dtF);
     for(var ci=0;ci<caps.length;ci++){var c=caps[ci],on=cr>=+c.dataset.from&&cr<+c.dataset.to;if(on!==c.classList.contains('on'))c.classList.toggle('on',on)}
-    if(again){if(DBGCR)again.dataset.cr=cr.toFixed(3);var aOn=(inRide&&cr>.93)||freeOn;if(aOn!==again.classList.contains('on'))again.classList.toggle('on',aOn);if(freeBtn&&aOn!==freeBtn.classList.contains('on'))freeBtn.classList.toggle('on',aOn)}
+    if(again){if(DBGCR)again.dataset.cr=cr.toFixed(3);var aOn=(inRide&&fc>.93)||freeOn;if(aOn!==again.classList.contains('on'))again.classList.toggle('on',aOn);if(freeBtn&&aOn!==freeBtn.classList.contains('on'))freeBtn.classList.toggle('on',aOn)}
     if(spin&&sH){var sy=scrollY-(sTop-innerHeight),sf=sy/Math.max(1,sH),sOn=sf>.18&&sf<.95;if(sOn!==spin.classList.contains('on'))spin.classList.toggle('on',sOn)} // the coordinates tag
     ringUpdate(time,inRide);
     orb.rotation.y=time*.0004;ring.rotation.z=time*.0006;orb.position.y=230+Math.sin(time*.0009)*3;
@@ -958,7 +985,7 @@
     var dt=clamp((time-last)/1000,.001,.05);last=time;dtF=dt;tick++;
     if(reduce)snap();else{for(var j=0;j<8;j++)curPose[j]=damp(curPose[j],tgtPose[j],vPose[j],.55,dt);var cr0=cr;cr=clamp(damp(cr,tr,vr,.75,dt),0,1);if(flying){var cap=.085*dt;if(cr-cr0>cap){cr=cr0+cap;vr.v=Math.min(vr.v,cap/dt)}else if(cr0-cr>cap){cr=cr0-cap;vr.v=Math.max(vr.v,-cap/dt)}} /* speed limit: a fast flick can't whip the camera */px=damp(px,tx,vx,.6,dt)}
     // Idle drift: in the drone flight, when the reader has stopped scrolling, the page creeps forward by itself so slow scrolling never shows as a stutter.
-    if(flying&&!freeOn&&enter&&!reduce&&!document.hidden&&time-lastUser>900&&scrollY<enter.offsetTop+enter.offsetHeight-innerHeight-6){
+    if(flying&&!freeOn&&enter&&!reduce&&!document.hidden&&time-lastUser>900&&scrollY>=(GEO?GEO.rv:0)&&scrollY<enter.offsetTop+enter.offsetHeight-innerHeight-6){
       driftAcc+=(mobile?20:28)*clamp((time-lastUser-900)/1500,0,1)*dt;
       if(driftAcc>=1){var dy=Math.floor(driftAcc);driftAcc-=dy;scrollBy({top:dy,behavior:'instant'})}}
     // Background drift: when the reader is idle outside the flight, the camera slowly swings and breathes (the page itself never moves),

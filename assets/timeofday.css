@@ -59,3 +59,21 @@
 .tod--hud.tod--min{left:max(16px,env(safe-area-inset-left,0px));transform:none;top:140px}
 .tod--hud.tod--min.tod--nohead{top:84px}
 @media (max-width:700px){.tod--hud.tod--min{top:auto;bottom:260px}}
+
+/* The folded picker as a pill on the "Skip the flight" row (front page; timeofday.js adds .tod--row and sets --row-x, the right edge of the skip link). Folded: View + the choice in use, one compact horizontal pill. Open: the tiles grow to the right into the empty area, the same top edge, and the compass tape steps aside while it is open. */
+.tod.tod--hud.tod--row{left:var(--row-x,210px);top:78px;transform:none;align-items:flex-start}
+.tod.tod--hud.tod--row.tod--min{height:46px;padding:0 6px 0 5px;gap:4px;align-items:center;flex-wrap:nowrap;border-radius:999px;box-shadow:3px 3px 0 var(--hard)}
+.tod--row.tod--min .tod-tog{display:flex;flex-direction:row;gap:6px;min-width:0;height:34px;padding:0 10px 0 13px;border-radius:999px}
+.tod--row.tod--min .tod-tog svg{width:16px;height:16px}
+.tod--row.tod--min .tod-b[aria-checked="true"]{display:flex;flex-direction:row;align-items:center;gap:8px;width:auto;height:34px;padding:0 13px 0 5px;border-radius:999px;box-shadow:none;transform:none}
+.tod--row.tod--min .tod-sw{width:38px;height:22px;aspect-ratio:auto;border-radius:6px}
+.tod--row.tod--min .tod-t small{display:none}
+.tod--row.tod--min .tod-t b{font-size:.9rem;white-space:nowrap}
+html:has(.tod--row:not(.tod--min)) .hud .cp-compass{opacity:0!important}
+@media (max-width:1000px){.tod--row:not(.tod--min) .tod-b{width:92px}}
+@media (max-width:600px){
+  .tod.tod--hud.tod--row{top:auto;bottom:196px;left:var(--row-x,170px);width:auto;max-width:none}
+  .tod.tod--hud.tod--row.tod--min{height:44px}
+  .tod.tod--hud.tod--row:not(.tod--min){left:12px;right:12px;width:auto;bottom:250px}
+  html:has(.tod--row:not(.tod--min)) .hud .cp-compass{opacity:1!important}
+}

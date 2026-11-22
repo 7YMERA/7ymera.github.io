@@ -328,3 +328,34 @@ html.gl .cur-cta .mouse i{background:currentColor}
   html.gl .cur-facts li{grid-template-columns:5.2rem 1fr;align-items:baseline;border-left:0;border-top:1px solid var(--line);padding:8px 12px}
   html.gl .cur-facts li:first-child{border-top:0}
 }
+
+/* ---- Front page: the drone's chrome waits for the drone ----
+   scene.js sets html.home-ds on the front page (the flight starts overhead, inside the descent) and html.drone-ready once the camera has levelled into the drone angle.
+   Until then the skip link, the view picker, the hint and the cockpit stay out of sight; they sit in the sticky stage, so when they come they only fade (opacity and a small translate), staggered. */
+html.home-ds .fly-skip,html.home-ds .tod--hud,html.home-ds .ride-hint,
+html.home-ds .hud .hud-c,html.home-ds .hud .hud-side,html.home-ds .hud .cp>*{opacity:0;visibility:hidden;translate:0 -10px;transition:opacity .35s ease,translate .35s ease,visibility 0s .35s}
+html.home-ds .ride-hint{translate:0 10px}
+html.home-ds.drone-ready .fly-skip,html.home-ds.drone-ready .tod--hud,html.home-ds.drone-ready .ride-hint,
+html.home-ds.drone-ready .hud .hud-c,html.home-ds.drone-ready .hud .hud-side,html.home-ds.drone-ready .hud .cp>*{opacity:1;visibility:visible;translate:0 0;transition:opacity .6s ease var(--d,0s),translate .6s ease var(--d,0s),visibility 0s var(--d,0s)}
+html.home-ds.drone-ready .hud .hud-c{opacity:.85}
+html.home-ds.drone-ready .fly-skip{--d:.05s}
+html.home-ds.drone-ready .tod--hud{--d:.2s}
+html.home-ds.drone-ready .hud .hud-c{--d:.1s}
+html.home-ds.drone-ready .hud .cp-compass{--d:.15s}
+html.home-ds.drone-ready .hud .hud-side{--d:.3s}
+html.home-ds.drone-ready .hud .cp-spd{--d:.25s}
+html.home-ds.drone-ready .hud .cp-adi{--d:.32s}
+html.home-ds.drone-ready .hud .cp-id{--d:.38s}
+html.home-ds.drone-ready .hud .cp-rec{--d:.44s}
+html.home-ds.drone-ready .hud .cp-cross{--d:.5s}
+html.home-ds.drone-ready .ride-hint{--d:.55s}
+@media (prefers-reduced-motion:reduce){html.home-ds .fly-skip,html.home-ds .tod--hud,html.home-ds .ride-hint,html.home-ds .hud .hud-c,html.home-ds .hud .hud-side,html.home-ds .hud .cp>*{transition:none!important}}
+/* the compass strip sits at the very top of the stage, under the site bar, with its heading readout beside the tape (not under it), so neither meets the scene's focus area or a landmark's label */
+.cp-compass{top:68px}
+.cp-hdg{position:absolute;left:calc(100% + 10px);top:3px;margin:0;white-space:nowrap}
+.cp-compass{transition:opacity .25s}
+@media (max-width:700px){
+  .cp-compass{top:68px;width:min(190px,46vw)}
+  .cp-adi{top:132px}
+  .cp-rec{top:132px}
+}
