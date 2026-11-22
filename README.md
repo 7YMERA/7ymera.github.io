@@ -6,7 +6,9 @@ Plain HTML, CSS and JavaScript, served by GitHub Pages. There is no framework, n
 
 > **AI agents:** start with [`CLAUDE.md`](CLAUDE.md) and the latest entry in [`docs/claude-log.md`](docs/claude-log.md), then read only the README section you need.
 
-![The site today: the opening, after scrolling](docs/screens/opening-scrolled.webp)
+![The front page today: the liquid glass \7 reveal](docs/screens/v3-home-reveal.webp)
+
+The site has three pages: **[`/`](https://7ymera.github.io)** (the cinematic front page), **[`/portfolio/`](https://7ymera.github.io/portfolio/)** (for recruiters) and **[`/play/`](https://7ymera.github.io/play/)** (games and labs). The drone flight also stands alone at [`/flight/`](https://7ymera.github.io/flight/).
 
 ---
 
@@ -14,7 +16,7 @@ Plain HTML, CSS and JavaScript, served by GitHub Pages. There is no framework, n
 
 1. [How it started](#how-it-started)
 2. [Version history](#version-history)
-3. [What's on the page](#whats-on-the-page)
+3. [The three pages](#the-three-pages)
 4. [21st.dev components, ported to plain JS](#21stdev-components-ported-to-plain-js) ← start here if you're an agent borrowing code
 5. [The 3D city and the flight](#the-3d-city-and-the-flight)
 6. [Rules that kept it fast](#rules-that-kept-it-fast)
@@ -39,6 +41,12 @@ The REQ-001 card and the teal-and-gold palette survived. (The "I write the spec.
 
 **Current version: 3.1.** Numbering: the first number changes when the site changes character (1.0 was a static page, 2.0 became the 3D city). The second number goes up for a major overhaul or a notable new feature. Small fixes and tweaks do not get a number; they live in [`docs/claude-log.md`](docs/claude-log.md). Dates come from the work log. Commit ids are on `main`: `git show <id>`.
 
+### Early versions (1.x): one flat page, October to early November 2026
+
+A static page that grew a curtain opening, an aurora, folders, a coverflow and live SQL. The first 3D skyline appeared at the end of this era as a separate preview.
+
+![The first version of the site, October 2026](docs/screens/2026-10-first-version.webp)
+
 | Version | Date | What changed | Commit |
 |---|---|---|---|
 | **1.0** | 25 Oct 2026 | The first page: a manifesto, the REQ-001 "Hire Alif" card, three case studies and a timeline. Teal and gold. | (before this history) |
@@ -49,6 +57,17 @@ The REQ-001 card and the teal-and-gold palette survived. (The "I write the spec.
 | **1.5** | 9 Nov | The first low-poly Kuala Lumpur skyline, as a separate `/v2/` preview with floating windows. | `88e63a8` |
 | **1.6** | 10 Nov | A real 3D scene: scroll-driven camera, the real Petronas Towers, Merdeka 118, Menara KL and The Exchange 106, an OpenStreetMap city with windows lit at night. | `a77da07` to `6818a90` |
 | **1.7** | 10 Nov | The whole home page merged into the 3D version, with a calm one-way flight and a sci-fi HUD. | `c5ca5b5`, `a1478db` |
+
+### Middle versions (2.x): the 3D city becomes the site, 10 to 20 November 2026
+
+One long page over a live 3D Kuala Lumpur: a camera shot per section, the drone flight, trains, night lighting, then the arcade, the Halcyon section and the first sound.
+
+| The 3D home page at night | The drone flight |
+|---|---|
+| ![The 3D home page in dark mode](docs/screens/city-hero-dark.webp) | ![The drone flight, wide](docs/screens/city-flight-wide.webp) |
+
+| Version | Date | What changed | Commit |
+|---|---|---|---|
 | **2.0** | 10 Nov | **One site.** The 3D city became the home page at `/`; no more `/v2/`. The flat-aurora site is kept at commit `f3b9f08`. | `76230a4` |
 | **2.1** | 10 Nov | The notes pages re-skinned to match, `/flight/` (the flight on its own, with a viewer panel), a scroll buffer after the opening where the city turns. | `2759adb`, `ea000cd` |
 | **2.2** | 11 Nov | A camera shot for every section (a director): the UTP shots follow the coverflow, the skill tree splits round Merdeka 118. The KLCC district becomes the map. | `183c59e`, `8e7c9aa`, `209e535` |
@@ -69,6 +88,17 @@ The REQ-001 card and the teal-and-gold palette survived. (The "I write the spec.
 | **2.17** | 20 Nov | **From Halcyon.** Ideas and data brought over from my separate Halcyon project (a scroll descent from orbit to KL): a new `#halcyon` section with an *Orbit* globe (real country outlines as dots, arcs from KL, NASA satellite rings, an arc from where you are, guessed from your time zone only) and a *Particle lab* (dust that morphs between a Chladni plate, the Earth and the real KL landmark models, with an Explode slider); plus a trailing cursor ring, scrambling labels and faint rules (`fx.js`). | (this commit) |
 | **2.18** | 20 Nov | **The Mirage study.** Techniques from my scan of the Mirage reference, applied from scratch: site-wide synthesised sound with a four-bar audio meter in the header (`sfx.js`: scroll-driven drone, section chimes, decode tones), a ring ripple on every press and a gold pulse from the theme switch, headings that arrive with a brief colour split, bracket-corner buttons, `+` labels and blinking `_` captions, and in the Halcyon section a lens flare with chromatic spread, a cursor-proximity scan lens, a plexus network around a satellite and a full Plexus form in the lab. | (this commit) |
 | **2.19** | 20 Nov | **A city seen from orbit.** The sound is now a generative score (`sfx.js`): a gliding pad, shimmer and bell pings through a long reverb for space, and as you scroll down a sub bass, traffic hum, a plucked arpeggio and trains passing with a station chime for the city; night plays Am9 / Fmaj7#11 / Cmaj9 / G6/9, day a brighter set. Space becomes the page's second backdrop (`cosmos.js`): parallax stars, haze, comets and an orbit arc with satellites over the 3D sky, a telemetry readout (altitude falling from 408 km), a clickable descent rail of the sections, viewfinder corners, and a slowly turning orbit behind every section heading. | (this commit) |
+
+### Latest versions (3.x): three pages and a time of day, from 21 November 2026
+
+The site splits into a front page, a recruiter portfolio and a play page. The city gets a real time of day (plain, golden hour, night), a composed score plays under it, and a HUD cursor follows the pointer.
+
+| Day | Golden hour | Night |
+|---|---|---|
+| ![The flight finale by day](docs/screens/v3-flight-day.webp) | ![The flight finale at golden hour](docs/screens/v3-flight-golden.webp) | ![The flight finale at night](docs/screens/v3-flight-night.webp) |
+
+| Version | Date | What changed | Commit |
+|---|---|---|---|
 | **3.0** | 21 Nov | The site splits in three. `/` is a cinematic front page (liquid-glass `\7` reveal ported from 21st.dev, orbit-to-KL descent, the drone flight with a Plain / Golden hour / Night picker, a scroll-stacked project deck, two doors). `/portfolio/` is the recruiter page; scrolling it turns day into golden hour into night. `/play/` is the arcade hall with the new Skyline Stack. A composed score (`sfx.js`) and a HUD cursor (`cursor.js`) on every page. | `4fb9124` |
 | **3.1** | 22 Nov | **Solstice.** Living Optical Airlock on `/` (pointer-tracked rim light + scroll-driven circular aperture morph into orbit), Halcyon city hover probe & beacon arcs on Descent, Live KL (MYT) atmosphere mode + *Take control · Free fly* unlock at the flight finale, chromatic accent-synced Project Deck with counter, contrast-locked `/portfolio/` circadian flip with *Pin daylight* & MYT solar clock, scroll-velocity wind in `sfx.js`, and two new `/play/` cabinets (*Skyline Anatomy* exploded KL meshes + *Liquid Glass Lab*). | `fe27877`, `444d4da` |
 
@@ -76,13 +106,34 @@ Tried and dropped along the way (still in git history): a clothes-rail project g
 
 ---
 
-## What's on the page
+## The three pages
 
-The home page, top to bottom:
+### `/` · the front page (`index.html`, `assets/home/`)
+
+A short film you scroll through. Light by default, dark supported.
+
+| Chapter | What it is | Built with |
+|---|---|---|
+| **00 · Mark** (`#reveal`) | The `\7` monogram bent by a clear glass tile, then the name and a one-line role. Click to replay. The GL context is freed once you scroll past. | `assets/home/glass-reveal.js` (ported from the 21st.dev Liquid Glass Logo Reveal, shader and spring timeline from zanwei/glass-icon-reveal, MIT) |
+| **01 · Descent** (`#descent`) | From 408 km up: stars, the Earth's limb, Malaysia traced in gold, a telemetry readout counting down, then through the clouds to the city. | `assets/home/descent.js` (canvas 2D, `assets/halcyon/land.json`) |
+| **02 · The flight** (`#enter`) | The 3D drone flight over KL, with a big **Plain / Golden hour / Night** picker in the HUD and a free-fly unlock at the finale. | `scene.js`, `timeofday.js` |
+| **03 · Projects** (`#projects`) | A deck of real project screenshots dealt onto the screen as you scroll: each card rises leaning back and blurred, then lands sharp. | `assets/home/project-deck.js` (port of Project Deck by Aakash Mehra, via 21st.dev) |
+| **04 · Choose a door** (`#doors`) | Two full-width doors: **Portfolio** (for recruiters) and **Play** (for everyone else). | `assets/home/home.js`, `home.css` |
+
+| Descent | The flight at golden hour |
+|---|---|
+| ![The descent from orbit](docs/screens/v3-home-descent.webp) | ![The drone flight at golden hour](docs/screens/v3-flight-golden.webp) |
+
+### `/portfolio/` · for recruiters (`portfolio/index.html`, `assets/portfolio/`)
+
+The old home page's content, reordered for someone with 30 seconds: Download CV, Email, LinkedIn and GitHub in the first screen, then *At a glance* (facts and four numbers taken from the page itself), then the work. A big **Highlights | Full story** switch hides the extras (`?view=brief` forces it). The 3D city stays behind the page, and **scrolling turns it from day to golden hour to night** (`assets/daycycle.js`); a sun and moon dial in the corner shows where you are, and the page's own colours cross over with it.
+
+| Top of the page, day | Halfway, golden hour | The end, night |
+|---|---|---|
+| ![Portfolio by day](docs/screens/v3-portfolio-day.webp) | ![Portfolio at golden hour](docs/screens/v3-portfolio-golden.webp) | ![Portfolio at night](docs/screens/v3-portfolio-night.webp) |
 
 | Section | What it is | Built with |
 |---|---|---|
-| **Opening** (`#curtain`) | Name, two columns of convocation photos, and outer columns of *spec* (sketches, flowcharts, ERDs, requirement cards) and *built* (app screens). The spinning reel sits faintly behind. Scrolling parts the photos, fades the name, brings the reel forward and lands on two buttons (See my work, Read the stories) with no slogan. | `extras.js`, `glance.js` (the live skyline strip), `curved-reel.js` |
 | **This is me** (`#me`) | Intro and links, the REQ-001 card holding a five-slide carousel (slide 2, *Why hire me*, swaps the photo for a spec sheet and lists the acceptance criteria), and six fact tiles (based in, day job, side, studied, speaks, learning Mandarin). | `extras.js` |
 | **Why I do this** (`#why`) | Three goals. | CSS only |
 | **Notes** (`#notes`) | One glass folder per project. Opening one fans out the stories, demos, diagrams and repos. | `folders.js` |
@@ -91,8 +142,6 @@ The home page, top to bottom:
 | **Selected work** (`#work`) | Seven projects, with filters, screenshots and before/after sliders. | inline script in `index.html` |
 | **Pulse** (`#pulse`) | Status report: stat tiles, project board, 17-week commit map and a recent-activity feed. The feed tries GitHub's public events API and falls back to the snapshot. | `assets/pulse.js`, `assets/pulse-data.json` |
 | **Journey** (`#journey`) | Alternating cards on a centre line, coloured by kind, with a beam that fills as you scroll. | `extras.js` |
-| **Halcyon** (`#halcyon`) | Two canvas-2D pieces ported from the Halcyon project. *Orbit*: dotted globe from `assets/halcyon/land.json` (a 360x180, 2-bit land bitmap made from Natural Earth, public domain), pulsing great-circle arcs from KL, AIM/GPM/TRMM rings, a "you" arc from the browser's time zone. *Particle lab*: ~4,200 points morphing between forms; landmarks are sampled from `assets/city/*.json` at one scale. Both loops stop off screen. Hidden in Highlights mode. | `halcyon.js`, `halcyon.css` |
-| **Arcade** (`#arcade`) | Three small games: Last Train (canvas runner), Scope Creep (triage), Spec Match (memory pairs). Best scores in `localStorage` (`arc-best`). While a game runs, `html.arc-on` makes the city redraw at about 8 fps. Hidden in Highlights mode. | `arcade.js`, `arcade.css` |
 | **Contact** | Links and the CV. | |
 
 | This is me | Notes as folders |
@@ -103,7 +152,30 @@ The home page, top to bottom:
 | **Selected work** | **Journey** |
 | ![Selected work](docs/screens/work.webp) | ![Journey](docs/screens/journey.webp) |
 
-Also on every page: a light/dark switch (light by default, choice remembered), **Ctrl+K** quick jump, the city as the backdrop (live 3D on the home page, a still picture on the notes pages), and on phones a labelled Menu button in the top bar (the bottom dock was removed from phones).
+### `/play/` · games and labs (`play/index.html`, `assets/play/`)
+
+An arcade hall. Last Train plays itself behind the title; every cabinet below has a live preview and opens full screen (Esc or Back closes it, `#stack` style links open one directly). Best scores are kept on the device; games take touch, keyboard and a gamepad (`pad.js`).
+
+| Cabinet | What it is | File |
+|---|---|---|
+| **Skyline Stack** | One-button stacker past Menara TM, KL Tower, The Exchange 106, Petronas and Merdeka 118 at their real heights. | `assets/play/stack.js` |
+| **Last Train**, **Scope Creep**, **Spec Match** | The three original arcade games. | `assets/arcade.js` |
+| **Orbit**, **Particle lab** | The Halcyon globe and the morphing particle cloud. | `assets/halcyon.js` |
+| **Skyline anatomy** | The real landmark meshes sliced into strata, with an Explode slider. | `assets/play/anatomy.js` |
+| **Glass lab**, **Liquid Glass Lab** | The glass shader toys, with sliders. | `lab/glass.html`, `lab/liquid-glass.html` |
+| **Company SQL**, **Jom Al-Quran SQL**, **Join Atlas** | The playgrounds from the database notes, loaded from those notes at run time. | `db-playground.js`, `join-atlas.js` |
+| **Out of order** | The hidden train, found. | `assets/play/play.js` |
+
+| The hall | The cabinets |
+|---|---|
+| ![Play, the hall](docs/screens/v3-play.webp) | ![Play, the cabinets](docs/screens/v3-play-cabinets.webp) |
+
+### On every page
+
+- **Time of day:** `window.SceneTime` in `scene.js` (t 0 day, 1 golden hour, 2 night), blended in the shader with a few uniforms. The flight's picker is `timeofday.js`; the portfolio's scroll is `daycycle.js`.
+- **Music:** `sfx.js`, a composed piece (about 3 min 40) that follows the time of day and gets louder during the flight. Off until you press the meter button in the header; hover it for the volume.
+- **Cursor:** `cursor.js`, bracket corners that wrap links, a caret over text and a crosshair with coordinates over canvases. Off on touch screens and with reduced motion.
+- **Ctrl+K** quick jump, the shared top bar (Home · Portfolio · Play · Notes), and the city as a still picture behind the notes pages.
 
 ---
 
@@ -209,6 +281,14 @@ Every interactive piece below started as a React + Tailwind component on [21st.d
 - **Border spotlight:** a card edge glows under the cursor via `--mx` / `--my`.
 - **Dock:** a phone-only bottom bar that highlights the section you're in and can be tucked away (remembered in `localStorage`).
 - **Marquee:** the scrolling tool names above the skill tree.
+
+### 9 · Liquid Glass Logo Reveal → `assets/home/glass-reveal.js`
+
+The front page's opening. The original is a React component (one WebGL2 pass: a signed distance field of the logo, a superellipse glass tile refracted per wavelength in 20 taps, and a spring timeline). Ported line for line to a plain class, `new GlassReveal(el, opts)` with `replay()`, `setLook()` and `dispose()`; the shader and timeline come from zanwei/glass-icon-reveal (MIT). Changes: the owner's `\7` mark instead of the 21st.dev one, play once and rest on the mark (no loop), the tile sits above centre (`centerY`), the canvas is disposed when you scroll past, and a CSS mask shows the flat mark without WebGL2. Lesson: the 1024 px SDF is built on the main thread, so build it once per logo and cache it.
+
+### 10 · Project Deck (Aakash Mehra) → `assets/home/project-deck.js`
+
+Scroll-stacking cards. The original uses `motion/react` springs; the port uses one critically damped spring on the scroll progress, and every card's `transform`, `filter` and dim are computed from it in one rAF. The cut-out corner with the visit button is two small SVG quarter-circles filled with the page ground. Reduced motion: no travel, each card simply appears. The sample sites and their embedded screenshots were not used; the cards are the owner's projects.
 
 ### Our own pieces (not from 21st.dev)
 
@@ -395,13 +475,21 @@ The note pages share one template. Their themed SVG diagrams (flowcharts, sequen
 ## Repository layout
 
 ```
-index.html               the home page (sections listed above)
+index.html               the front page (chapters listed above), scripts in assets/home/
+portfolio/index.html     the recruiter page, scripts in assets/portfolio/
+play/index.html          the games and labs page, scripts in assets/play/
+flight/index.html        the drone flight on its own (panel on H)
+lab/                     glass.html and liquid-glass.html (also opened from /play/)
 resume.html              the on-site résumé, generated from tools/cv/cv.html (do not hand-edit)
 404.html                 the "Signal lost" page GitHub Pages serves for a missing URL (root-absolute URLs only)
 sitemap.xml, robots.txt, feed.xml, site.webmanifest   for search engines, feed readers and home-screen icons
 notes/                   the notes, plus notes/index.html
 assets/
-  site.css               all site styles, one file, with a comment heading per component
+  site.css               shared site styles, one file, with a comment heading per component
+  scene.js, scene-glsl.js, scene.css   the 3D city, its shaders and SceneTime (day, golden hour, night)
+  timeofday.js / daycycle.js           the flight's view picker / the portfolio's scroll day cycle
+  sfx.js, cursor.js, fx.js             music, cursor, small effects (every page)
+  home/ portfolio/ play/               per-page scripts and styles
   extras.js              opening, carousel, ticker, beam, dock, skill tree
   curved-reel.js         21st.dev Tilted Grid Hero port
   tumble-deck.js         21st.dev Tumble Deck Showcase port (not on the page now)
