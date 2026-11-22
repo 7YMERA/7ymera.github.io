@@ -76,6 +76,12 @@ body.pf .top .wrap { max-width: var(--pf-w); }
 
 /* ---------- Sections stand straight on the city, as on the old home page: no sheet behind them; side-l / side-r leave the other half of the screen to the landmark the camera is showing (camera keys in scene.js, by section id) ---------- */
 html body.pf main > section.pf-s.block { margin-bottom: var(--pf-gap); }
+/* full-width sections (At a glance, Work, Credentials, Activity, Why) read across the whole city, so they keep a calm sheet; the side sections and the split skill tree stand on the city */
+html body.pf main > section.pf-s.block:not(.side-l):not(.side-r):not(.tree-split) {
+  width: min(calc(100% - 32px), var(--pf-w)); margin: 0 auto var(--pf-gap); padding: var(--pf-pad);
+  background: color-mix(in srgb, var(--bg) 96%, transparent); border: 1px solid var(--line); border-radius: 28px; box-shadow: var(--pf-shadow);
+}
+html body.pf main > section.pf-s.block:not(.side-l):not(.side-r):not(.tree-split) > .wrap { max-width: none; padding-inline: 0; }
 .pf-s .sec-head { margin-bottom: clamp(28px, 4vw, 52px); align-items: end; gap: 24px; }
 .pf-s .sec-head > div:first-child { gap: 14px; max-width: 46em; }
 .pf-s .sec-head h2, .nb-head h2 { font: 400 clamp(2.4rem, 4.8vw, 4.1rem)/1.02 var(--f-serif); letter-spacing: -.022em; color: var(--ink); }

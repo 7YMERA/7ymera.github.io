@@ -505,7 +505,7 @@
   }
   function aLoop(ms) {
     aRaf = 0; if (!aOn || !aVis || d.hidden || cur) return;
-    if (ms - aLast >= 16) { aLast = ms; aDraw(ms / 1000); }
+    if (ms - aLast >= 16) { aLast = ms; if (!hsCv || hsCur() === 'train') aDraw(ms / 1000); }
     if (!calm()) aRaf = requestAnimationFrame(aLoop);
   }
   function aWake() { if (!aRaf && aOn && aVis && !cur && !calm()) aRaf = requestAnimationFrame(aLoop); }
@@ -520,8 +520,8 @@
      the hero's showcase: every cabinet in turn, a live screen on the right; the second line of the title, the lede and Insert coin follow it
      ===================================================================== */
   var HS = [
-    ['stack', 'Game', 'Skyline Stack', 'the skyline.', 'One button, one tower. Stack Kuala Lumpur floor by floor, past Menara TM, KL Tower and Petronas, all the way up Merdeka 118.'],
-    ['train', 'Game', 'Last Train', 'the last train.', 'Ride the KL line, jump the scope creep and grab every requirement before the last train home.'],
+    ['train', 'Game', 'Last Train', 'the skyline.', 'An arcade, a lab and a toy box in one room. Ride the KL line, jump the scope creep and grab every requirement before the last train home.'],
+    ['stack', 'Game', 'Skyline Stack', 'the tower.', 'One button, one tower. Stack Kuala Lumpur floor by floor, past Menara TM, KL Tower and Petronas, all the way up Merdeka 118.'],
     ['creep', 'Game', 'Scope Creep', 'the backlog.', 'Forty-five seconds of triage. Real requirement or creep? Build it or park it.'],
     ['match', 'Game', 'Spec Match', 'the stack.', 'Pair each tool with the project it shipped in. Fewest moves wins.'],
     ['orbit', 'Lab', 'Orbit', 'the planet.', 'Spin the Earth from 408 km up, with arcs flying out of Kuala Lumpur.'],
@@ -530,22 +530,31 @@
     ['lglass', 'Lab', 'Liquid Glass Lab', 'with glass.', 'Bend light through a liquid glass lens, tune every slider, paste your own logo.'],
     ['sql-company', 'Toy', 'Company SQL', 'with data.', 'A real database and a real SQL engine, running in your browser. Break nothing, query anything.']
   ];
-  var hsI = 0, hsCv = $('#hs-cv'), hsG = hsCv && hsCv.getContext('2d'), hsRaf = 0, hsLast = 0, hsHold = false, hsTimer = 0, hsVis = true;
+  var hsI = 0, hsCv = $('#hero-show'), hsRaf = 0, hsLast = 0, hsHold = false, hsTimer = 0, hsVis = true, hsFade = 1;
   function hsCur() { return hsCv ? HS[hsI][0] : 'stack'; }
   function hsPvKey(id) { return id.indexOf('sql') === 0 ? 'sql' : id; }
-  function hsDraw(t) { if (!hsG) return; var fn = PV[hsPvKey(hsCur())]; hsG.setTransform(hsCv.width / PW, 0, 0, hsCv.height / PH, 0, 0); hsG.textBaseline = 'alphabetic'; hsG.textAlign = 'left'; try { fn(hsG, t); } catch (e) {} }
-  function hsLoop(ms) { hsRaf = 0; if (!hsVis || d.hidden || cur) return; if (ms - hsLast >= 32) { hsLast = ms; hsDraw(ms / 1000); } if (!calm()) hsRaf = requestAnimationFrame(hsLoop); }
+  // every slide fills the whole hero: Last Train on the hero's own renderer, the others are their cabinet previews drawn full bleed (vector, so sharp at any size), cover-fitted with their middle at 64 % across so the title keeps the left
+  function hsDraw(t) {
+    if (!aw) return; var id = hsCur();
+    if (id === 'train') { aDraw(t); return; }
+    var g = ag, fn = PV[hsPvKey(id)], s = Math.max(aw / PW, ah / PH), tx = Math.min(0, Math.max(aw - PW * s, aw * .64 - PW * s / 2)), ty = (ah - PH * s) / 2;
+    g.setTransform(adpr, 0, 0, adpr, 0, 0); g.clearRect(0, 0, aw, ah);
+    g.setTransform(adpr * s, 0, 0, adpr * s, adpr * tx, adpr * ty); g.textBaseline = 'alphabetic'; g.textAlign = 'left'; g.globalAlpha = 1;
+    try { fn(g, t); } catch (e) {}
+    g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1;
+  }
+  function hsLoop(ms) { hsRaf = 0; if (!hsVis || d.hidden || cur) return; if (hsCur() !== 'train' && ms - hsLast >= 32) { hsLast = ms; hsDraw(ms / 1000); } if (!calm() && hsCur() !== 'train') hsRaf = requestAnimationFrame(hsLoop); }
   function hsWake() { if (!hsRaf && hsCv) hsRaf = requestAnimationFrame(hsLoop); }
   function hsSet(i, user) {
     if (!hsCv) return; hsI = (i + HS.length) % HS.length; var s = HS[hsI];
-    var sh = $('#hero-show'); sh.classList.remove('hs-swap'); void sh.offsetWidth; sh.classList.add('hs-swap');
+    var dark = s[0] !== 'train'; hero.classList.toggle('hs-dark', dark); hero.classList.remove('hs-swap'); void hero.offsetWidth; hero.classList.add('hs-swap');
     $('#hs-kind').textContent = s[1]; $('#hs-name').textContent = s[2];
     var l2 = $('#hs-l2'), le = $('#hs-lede');
     if (l2) { l2.classList.remove('hs-in'); void l2.offsetWidth; l2.textContent = s[3]; l2.classList.add('hs-in'); }
     if (le) le.textContent = s[4];
     $$('#hs-dots button').forEach(function (b, k) { b.setAttribute('aria-selected', k === hsI ? 'true' : 'false'); b.tabIndex = k === hsI ? 0 : -1; });
     var tg = $('.attract-tag'); if (tg) tg.lastChild.textContent = 'Now showing · ' + s[2];
-    hsDraw(performance.now() / 1000); hsArm(user);
+    hsDraw(performance.now() / 1000); hsWake(); aWake(); hsArm(user);
   }
   function hsArm(user) { clearTimeout(hsTimer); if (calm()) return; hsTimer = setTimeout(function () { if (hsHold || cur || d.hidden || !hsVis) { hsArm(); return; } hsSet(hsI + 1); }, user ? 9000 : 5200); }
   if (hsCv) {

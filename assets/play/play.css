@@ -228,29 +228,38 @@ body.play .top { z-index: 20; }
   .stk-banner.on { animation: none; opacity: 1; }
 }
 
-/* the hero's showcase (play.js, HS): a big live screen on the right that turns through every cabinet; big arrows and dots, click the screen to play */
-.hero-show { position: absolute; z-index: 2; right: clamp(16px, 5vw, 80px); top: clamp(70px, 14vh, 140px); width: min(44vw, 620px); display: grid; gap: 14px; }
-.hs-screen { position: relative; display: block; width: 100%; padding: 0; border: 3px solid var(--ink); border-radius: 18px; overflow: hidden; background: #071420; box-shadow: 8px 8px 0 color-mix(in srgb, var(--ink) 85%, transparent); cursor: pointer; transition: transform .2s; }
-.hs-screen:hover { transform: translate(-2px, -2px); }
-.hs-screen:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
-.hs-screen canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; }
-.hs-tag { position: absolute; left: 12px; bottom: 12px; display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; background: rgba(4, 12, 20, .78); color: #eaf6f7; font: 600 .8125rem var(--f-body); }
-.hs-tag i { width: 8px; height: 8px; border-radius: 50%; background: #e14b3b; animation: led 1.2s ease-in-out infinite; }
-.hs-tag b { font: 600 .6875rem var(--f-pix); letter-spacing: .12em; text-transform: uppercase; color: var(--gold, #d9a441); }
-.hs-go { position: absolute; right: 12px; bottom: 12px; padding: 9px 16px; border-radius: 10px; background: var(--gold, #b47a16); color: #fff; font: 600 .9375rem var(--f-pix); letter-spacing: .06em; box-shadow: 3px 3px 0 rgba(0,0,0,.4); }
-.hs-ctrl { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+/* the hero's showcase (play.js, HS): the whole hero background turns through the cabinets; Last Train is the hero's own scene, the others are their previews full bleed. On those (html .hs-dark) the title goes light over a dark scrim from the left. */
+.hero-play::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0; transition: opacity .5s; background: linear-gradient(90deg, rgba(3, 9, 16, .9) 0%, rgba(3, 9, 16, .72) 34%, rgba(3, 9, 16, .15) 62%, rgba(3, 9, 16, 0) 78%); }
+.hero-play.hs-dark { background: #071420; }
+.hero-play.hs-dark::before { opacity: 1; }
+#attract { z-index: -1; }
+.hero-play.hs-swap #attract { animation: hsFlick .5s steps(3) both; }
+@keyframes hsFlick { 0% { opacity: .15; } 40% { opacity: .7; } 70% { opacity: .35; } 100% { opacity: 1; } }
+.hero-in, .hero-foot, .hero-show { position: relative; z-index: 1; }
+.hero-play.hs-dark h1 .l1, .hero-play.hs-dark .lede, .hero-play.hs-dark .hero-eye, .hero-play.hs-dark .attract-tag { color: #eef6f8; }
+.hero-play.hs-dark h1 .l2 { color: #ffc44d; }
+.hero-play.hs-dark .ghost-btn { background: rgba(255,255,255,.1); color: #fff; border-color: rgba(255,255,255,.5); }
+.hero-show { position: absolute; z-index: 2; right: clamp(16px, 5vw, 80px); top: clamp(86px, 16vh, 160px); display: grid; justify-items: end; gap: 12px; }
+.hs-now { display: inline-flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 10px 8px 16px; border: 2.5px solid var(--ink); border-radius: 16px; background: var(--surface); color: var(--ink); box-shadow: 4px 4px 0 var(--ink); cursor: pointer; text-align: left; }
+.hero-play.hs-dark .hs-now { border-color: #eef6f8; box-shadow: 4px 4px 0 rgba(0,0,0,.6); }
+.hs-now > i { width: 10px; height: 10px; border-radius: 50%; background: #e14b3b; animation: led 1.2s ease-in-out infinite; }
+.hs-now-t { display: grid; line-height: 1.15; }
+.hs-now-t b { font: 600 .6875rem var(--f-pix); letter-spacing: .14em; text-transform: uppercase; color: var(--gold, #a86d12); }
+.hs-now-t span { font: 700 1.05rem var(--f-display, var(--f-body)); }
+.hs-go { padding: 9px 14px; border-radius: 10px; background: var(--gold, #b47a16); color: #fff; font: 600 .9rem var(--f-pix); letter-spacing: .06em; }
+.hs-now:hover { transform: translate(-2px, -2px); }
+.hs-now:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+.hs-ctrl { display: flex; align-items: center; gap: 12px; }
 .hs-btn { display: grid; place-items: center; width: 52px; height: 52px; flex: none; border: 2.5px solid var(--ink); border-radius: 14px; background: var(--surface); color: var(--ink); cursor: pointer; box-shadow: 3px 3px 0 var(--ink); }
 .hs-btn svg { width: 24px; height: 24px; }
 .hs-btn:hover { background: var(--accent); color: var(--accent-ink, #fff); }
 .hs-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
-.hs-dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.hs-dots { display: flex; gap: 8px; padding: 8px 10px; border-radius: 999px; background: var(--surface); border: 2px solid var(--ink); }
 .hs-dots button { width: 14px; height: 14px; padding: 0; border: 2px solid var(--ink); border-radius: 50%; background: transparent; cursor: pointer; transition: transform .2s; }
 .hs-dots button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); transform: scale(1.25); }
-.hero-show.hs-swap .hs-screen canvas { animation: hsFlick .45s steps(3) both; }
-@keyframes hsFlick { 0% { opacity: .2; transform: scaleY(.92); } 50% { opacity: .8; } 100% { opacity: 1; transform: none; } }
 .hero-play h1 .l2.hs-in { animation: hsIn .5s cubic-bezier(.2,.9,.3,1.2) both; }
 @keyframes hsIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-.hero-play .lede { min-height: 4.6em; max-width: 34em; }
-@media (min-width: 981px) { .hero-in > *, .hero-play .hero-in .lede { max-width: min(40vw, 34rem); } }
-@media (max-width: 980px) { .hero-show { position: relative; right: auto; top: auto; width: auto; margin: 18px 16px 0; } }
-@media (prefers-reduced-motion: reduce) { .hero-show.hs-swap .hs-screen canvas, .hero-play h1 .l2.hs-in { animation: none; } }
+.hero-play .lede { min-height: 4.6em; }
+@media (min-width: 981px) { .hero-in > *, .hero-play .hero-in .lede { max-width: min(46vw, 36rem); } }
+@media (max-width: 980px) { .hero-show { position: relative; right: auto; top: auto; justify-items: start; margin: 16px; } .hs-dots { flex-wrap: wrap; } }
+@media (prefers-reduced-motion: reduce) { .hero-play.hs-swap #attract, .hero-play h1 .l2.hs-in { animation: none; } }

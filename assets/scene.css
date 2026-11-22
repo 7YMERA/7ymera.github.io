@@ -274,9 +274,22 @@ html.gl.gl-on #fx-grain{opacity:.5}
 .fly-free:hover{transform:translate3d(-50%,-2px,0)}
 .fly-free[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink,#fff)}
 .fly-free:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
-.fly-free-hint{position:absolute;left:50%;bottom:clamp(8px,2.2svh,22px);transform:translateX(-50%);margin:0;padding:4px 12px;border-radius:999px;background:rgba(5,10,24,.72);color:#dfeaff;font:500 .68rem/1.3 var(--f-mono,ui-monospace,monospace);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .3s;z-index:6}
-.fly-free-hint.on{opacity:1}
-html.free-fly,html.free-fly body{overflow:hidden!important}
+.fly-free-hint{position:absolute;left:max(16px,env(safe-area-inset-left,0px));bottom:clamp(90px,14svh,140px);margin:0;display:grid;grid-template-columns:auto 1fr;gap:10px 14px;align-items:center;padding:16px 18px;border-radius:16px;background:rgba(5,10,24,.8);color:#dfeaff;font:500 .78rem/1.3 var(--f-body,system-ui);opacity:0;visibility:hidden;transition:opacity .3s,visibility 0s .3s;pointer-events:none;max-width:340px}
+.fly-free-hint.on{opacity:1;visibility:visible;transition:opacity .3s}
+.fly-free-hint .ffk{display:grid;justify-items:center;gap:4px}.fly-free-hint .ffk>span{display:flex;gap:4px}
+.fly-free-hint kbd{display:inline-grid;place-items:center;min-width:30px;height:30px;padding:0 6px;border:1.5px solid rgba(223,234,255,.55);border-bottom-width:3px;border-radius:7px;background:rgba(255,255,255,.08);color:#fff;font:700 .8rem var(--f-mono,ui-monospace,monospace)}
+.fly-free-hint kbd.wide{min-width:58px;font-size:.7rem;letter-spacing:.06em}
+.fly-free-hint .ffl{display:grid;gap:1px;color:#b9c8e6}.fly-free-hint .ffl b{color:#fff;font-weight:700;font-size:.85rem}
+.fly-free-time{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:clamp(90px,14svh,140px);display:grid;gap:8px;padding:10px;border-radius:16px;background:rgba(5,10,24,.8);opacity:0;visibility:hidden;transition:opacity .3s,visibility 0s .3s}
+.fly-free-time.on{opacity:1;visibility:visible;transition:opacity .3s}
+.fly-free-time button{display:flex;align-items:center;gap:10px;min-height:46px;min-width:170px;padding:0 14px;border:2px solid rgba(223,234,255,.25);border-radius:12px;background:rgba(255,255,255,.06);color:#eaf2ff;font:600 .9rem var(--f-body,system-ui);cursor:pointer;text-align:left}
+.fly-free-time button:hover{border-color:rgba(223,234,255,.7)}
+.fly-free-time button[aria-pressed="true"]{background:#eaf2ff;color:#0b1a3a;border-color:#eaf2ff}
+.fly-free-time i{width:26px;height:18px;border-radius:5px;flex:none}
+.fft-day{background:linear-gradient(#bfe0ff,#eaf5ff)}.fft-golden{background:linear-gradient(#3a60a2,#eea25f 60%,#ffd79a)}.fft-night{background:linear-gradient(#050a1a,#141f52)}.fft-live{background:conic-gradient(#050a1a 0 25%,#eea25f 0 50%,#bfe0ff 0 75%,#3a60a2 0)}
+@media (max-width:700px){.fly-free-hint{display:none}.fly-free-time{left:16px;right:16px;bottom:240px;grid-template-columns:1fr 1fr}.fly-free-time button{min-width:0}}
+/* free fly keeps the page still by catching the wheel and keys in scene.js; overflow:hidden on html and body made body the scroller, which threw the sticky flight overlay (buttons, hints) off screen */
+html.free-fly{overscroll-behavior:none}
 html.free-fly .ride-caps,html.free-fly .ride-hint,html.free-fly .fly-again{opacity:0!important;pointer-events:none!important}
 html.free-fly .enter-sticky{cursor:grab}
 html.free-fly .enter-sticky:active{cursor:grabbing}

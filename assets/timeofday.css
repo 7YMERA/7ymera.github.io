@@ -48,6 +48,14 @@
 }
 @media (prefers-reduced-motion:reduce){.tod .tod-b,.tod-orb,.tod-glow,.tod-st{transition:none;animation:none!important}}
 
-/* mid-flight the picker steps aside (scene.js sets html.ride-mid between 5 % and 90 % of the flight), so the landmark labels it covered can be read; it is back at the start and at the finale */
-.tod--hud{transition:opacity .35s,transform .35s}
-html.ride-mid .tod--hud{opacity:0;transform:translate(-50%,-14px);pointer-events:none;visibility:hidden;transition:opacity .35s,transform .35s,visibility 0s .35s}
+/* the fold: a tall "View" tab on the left; folded, only the view in use shows (tap it or the tab to open all four). Mid-flight it folds itself (timeofday.js watches html.ride-mid). */
+.tod-tog{appearance:none;display:grid;place-items:center;gap:4px;align-content:center;min-width:56px;padding:6px 8px;border:2px solid var(--fx);border-radius:10px;background:var(--surface);color:var(--ink);font:700 .72rem var(--f-mono,ui-monospace,monospace);letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.tod-tog svg{width:20px;height:20px;transition:transform .3s}
+.tod-tog:hover{background:var(--accent-soft)}
+.tod-tog:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.tod--min .tod-tog svg{transform:rotate(180deg)}
+.tod--min .tod-b:not([aria-checked="true"]){display:none}
+.tod--min .tod-b[aria-checked="true"]{cursor:pointer}
+.tod--hud.tod--min{left:max(16px,env(safe-area-inset-left,0px));transform:none;top:140px}
+.tod--hud.tod--min.tod--nohead{top:84px}
+@media (max-width:700px){.tod--hud.tod--min{top:auto;bottom:260px}}

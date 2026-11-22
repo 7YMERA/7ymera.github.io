@@ -109,6 +109,15 @@
       var el = build(sticky, false);
       el.classList.add('tod--hud');
       if (!document.querySelector('header.top, .top')) el.classList.add('tod--nohead');
+      // collapsible: a big "View" tab folds the picker down to the choice in use and opens it again; mid-flight it folds itself (scene.js sets html.ride-mid) so the landmark labels show, and stays as you leave it after that
+      var tog = document.createElement('button'); tog.type = 'button'; tog.className = 'tod-tog'; tog.setAttribute('aria-expanded', 'true');
+      tog.innerHTML = '<span>View</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>';
+      el.insertBefore(tog, el.firstChild);
+      var setMin = function (v) { el.classList.toggle('tod--min', v); tog.setAttribute('aria-expanded', v ? 'false' : 'true'); tog.setAttribute('aria-label', v ? 'Show all views' : 'Fold the view picker'); };
+      tog.addEventListener('click', function () { setMin(!el.classList.contains('tod--min')); });
+      el.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('.tod-b'); if (b && el.classList.contains('tod--min')) { e.stopPropagation(); setMin(false); } }, true);
+      var wasMid = false;
+      new MutationObserver(function () { var mid = document.documentElement.classList.contains('ride-mid') || document.documentElement.classList.contains('free-fly'); if (mid && !wasMid) setMin(true); if (!mid && wasMid) setMin(false); wasMid = mid; }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     }
     var hosts = document.querySelectorAll('[data-tod-mount]');
     for (var i = 0; i < hosts.length; i++) if (!hosts[i].querySelector('.tod')) build(hosts[i], true);

@@ -30,6 +30,12 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · Free fly with WASD, a foldable picker, Play's background slideshow, readable At a glance
+- Free fly (`scene.js`): WASD moves along the ground relative to the view, Q/E down/up, Shift faster, arrows turn and zoom; a key sheet on the left and Day / Golden hour / Night / Live KL buttons on the right (`.fly-free-hint`, `.fly-free-time`). Fixed Gemini's bug: `overflow:hidden` on html and body made body the scroller and threw the sticky flight overlay off screen, so the free-fly buttons were invisible; the page is now held still by catching wheel, keys and touch.
+- `timeofday.js`: the HUD picker folds (a big View tab) instead of disappearing; it folds itself mid-flight and in free fly, and you can open it any time.
+- `/play/`: the hero's whole background is the slideshow now (Last Train on its own renderer, the other cabinets' previews full bleed with a dark scrim behind the title), controls top right.
+- Portfolio: full-width sections (At a glance, Work, Credentials, Activity, Why) keep a light sheet again so they read over the city; the side sections stay bare. Notes camera pulled back (it sat behind a building). "Merdeka Maybank" labels renamed Merdeka 118. Key `20261122f`.
+
 ## 2026-11-22 · Play: a showcase in the hero, a clean Skyline anatomy
 - Owner: the cabinets felt hidden and the anatomy lab looked like white noise. `play.js` (`HS`): the hero now has a big live screen on the right that turns through nine cabinets every 5 s (games, labs, a data toy), with big arrows and dots; the title's second line ("the skyline." / "the last train." / "with buildings." ...), the lede and Insert coin follow it, and a click on the screen plays it. Pauses on hover and focus, no auto-turn with reduced motion.
 - `anatomy.js`: the mesh kept every Nth triangle, so it was full of holes and read as static; it now keeps the 3000 largest faces (1400 glass), fits the stack's height, and draws no outline on every triangle (only the picked stratum). Key `20261122d`.

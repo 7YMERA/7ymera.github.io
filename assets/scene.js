@@ -220,7 +220,7 @@
   var KU=3.42; // metres per world unit (Petronas Towers 132 units = about 452 m)
   var LM=[
     {name:'Petronas Twin Towers',real:452,top:new T.Vector3(crown('klcc')[0],134,crown('klcc')[1])},
-    {name:'Merdeka Maybank',real:679,top:new T.Vector3(crown('mer')[0],194,crown('mer')[1])},
+    {name:'Merdeka 118',real:679,top:new T.Vector3(crown('mer')[0],194,crown('mer')[1])},
     {name:'Menara Kuala Lumpur',real:421,top:new T.Vector3(crown('kl')[0],DIST?127:130,crown('kl')[1])},
     {name:'The Exchange 106',real:445,top:new T.Vector3(crown('ex')[0],DIST?132:136,crown('ex')[1])}]; // tops derived from LAY (crown axis, height as before)
   var fx=[],fxGroup=new T.Group();scene.add(fxGroup);
@@ -516,12 +516,12 @@
   // spaced so a shot holds while its section is read and the move to the next one happens in the gap between them.
   // "Fly it again ...": shown over the finale. It cycles the view (plain, golden hour, night) and goes back to the start of the flight. The big picker in the flight HUD (assets/timeofday.js) does the same by choice.
   var again=document.getElementById('fly-again'),DBGCR=/[?&]dbg/.test(location.search);
-  var freeBtn=null,freeHint=null,freeOn=false,freeDrag=false,freeLx=0,freeLy=0;
+  var freeBtn=null,freeHint=null,freeTime=null,freeOn=false,freeDrag=false,freeLx=0,freeLy=0,fKeys={}; // fKeys: the movement keys held down in free fly (WASD, Q/E, arrows, Shift)
   var freeState={a:48*Math.PI/180,ta:48*Math.PI/180,y:112,ty:112,r:280,tr:280,cx:0,cz:-40,cy:72};
   function setFree(v){
     v=!!v;if(v===freeOn)return;freeOn=v;root.classList.toggle('free-fly',v);
     if(freeBtn){freeBtn.setAttribute('aria-pressed',v?'true':'false');var b=freeBtn.querySelector('b');if(b)b.textContent=v?'Resume scroll':'Take control · Free fly'}
-    if(freeHint)freeHint.classList.toggle('on',v);
+    if(freeHint)freeHint.classList.toggle('on',v);if(freeTime)freeTime.classList.toggle('on',v);if(!v)fKeys={};
     if(v){
       // seed free-fly orbit from the current camera so there is zero jump
       var dx=cam.position.x-GC[0],dz=cam.position.z-GC[1];
@@ -546,13 +546,25 @@
       freeBtn.addEventListener('click',function(){setFree(!freeOn)});
       parent.insertBefore(freeBtn,again.nextSibling);
       freeHint=document.createElement('p');freeHint.className='fly-free-hint';freeHint.setAttribute('aria-hidden','true');
-      freeHint.textContent='Drag to orbit · Scroll to zoom · Esc to resume';
+      freeHint.innerHTML='<span class="ffk"><kbd>W</kbd><span><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span></span><span class="ffl"><b>Move</b>forward, left, back, right</span><span class="ffk"><span><kbd>Q</kbd><kbd>E</kbd></span></span><span class="ffl"><b>Down / up</b>Shift to go faster</span><span class="ffk"><kbd class="wide">Drag</kbd></span><span class="ffl"><b>Look round</b>arrows turn too, wheel zooms</span><span class="ffk"><kbd class="wide">Esc</kbd></span><span class="ffl"><b>Back to the film</b></span>';
       parent.insertBefore(freeHint,freeBtn.nextSibling);
+      // the time of day, one tap away while flying: SceneTime blends it, so the change is seamless
+      freeTime=document.createElement('div');freeTime.className='fly-free-time';freeTime.setAttribute('role','group');freeTime.setAttribute('aria-label','Time of day');
+      [['day','Day'],['golden','Golden hour'],['night','Night'],['live','Live KL']].forEach(function(m){var b=document.createElement('button');b.type='button';b.dataset.m=m[0];b.innerHTML='<i class="fft-'+m[0]+'" aria-hidden="true"></i><span>'+m[1]+'</span>';b.addEventListener('click',function(){if(window.TimeOfDay)TimeOfDay.choose(m[0]);else ST.mode(m[0]==='live'?'day':m[0])});freeTime.appendChild(b)});
+      function ftSync(){var n=ST.nearest(),bs=freeTime.querySelectorAll('button');for(var q=0;q<bs.length;q++)bs[q].setAttribute('aria-pressed',bs[q].dataset.m===n?'true':'false')}
+      document.addEventListener('scenetime',ftSync);ftSync();
+      parent.insertBefore(freeTime,freeHint.nextSibling);
       window.addEventListener('pointerdown',function(e){if(!freeOn)return;if(e.target&&e.target.closest&&e.target.closest('button,a,.tod'))return;freeDrag=true;freeLx=e.clientX;freeLy=e.clientY});
-      window.addEventListener('pointermove',function(e){if(!freeOn||!freeDrag)return;var dx=e.clientX-freeLx,dy=e.clientY-freeLy;freeLx=e.clientX;freeLy=e.clientY;freeState.ta-=dx*.0055;freeState.ty=clamp(freeState.ty+dy*.45,18,280);need=true},{passive:true});
+      window.addEventListener('pointermove',function(e){if(!freeOn||!freeDrag)return;var dx=e.clientX-freeLx,dy=e.clientY-freeLy;freeLx=e.clientX;freeLy=e.clientY;freeState.ta-=dx*.0055;freeState.ty=clamp(freeState.ty+dy*.45,12,420);need=true},{passive:true});
       window.addEventListener('pointerup',function(){freeDrag=false});
-      window.addEventListener('wheel',function(e){if(!freeOn)return;e.preventDefault();freeState.tr=clamp(freeState.tr+e.deltaY*.22,95,520);need=true},{passive:false});
-      window.addEventListener('keydown',function(e){if(freeOn&&e.key==='Escape'){e.preventDefault();setFree(false)}});
+      window.addEventListener('wheel',function(e){if(!freeOn)return;e.preventDefault();freeState.tr=clamp(freeState.tr+e.deltaY*.22,60,520);need=true},{passive:false});
+      window.addEventListener('keydown',function(e){if(!freeOn)return;if(e.key==='Escape'){e.preventDefault();setFree(false);return}
+        var tg=e.target;if(tg&&(tg.tagName==='INPUT'||tg.tagName==='TEXTAREA'||tg.isContentEditable))return;
+        if(e.key===' '||e.key==='PageDown'||e.key==='PageUp'||e.key==='Home'||e.key==='End'){e.preventDefault();return} // the page holds still while you fly
+        var k=e.key.length===1?e.key.toLowerCase():e.key;if('wasdqe'.indexOf(k)>=0&&k.length===1||k==='ArrowLeft'||k==='ArrowRight'||k==='ArrowUp'||k==='ArrowDown'||k==='Shift'){fKeys[k]=true;e.preventDefault();need=true}});
+      window.addEventListener('keyup',function(e){var k=e.key.length===1?e.key.toLowerCase():e.key;delete fKeys[k]});
+      window.addEventListener('blur',function(){fKeys={}});
+      window.addEventListener('touchmove',function(e){if(freeOn&&!(e.target.closest&&e.target.closest('button,a')))e.preventDefault()},{passive:false});
     }
   })()}
   var spin=document.getElementById('spin'),SP0=.06,SPW=.28,sTop=0,sH=0; // sTop/sH: the buffer's place (read on layout, not per frame)
@@ -588,9 +600,9 @@
     ['spin',1,-1,P(-95,-11,150,250,100,100,0,0,390)],
     ['me',.2,-.5,P(-95,-11,150,250,100,100,0,0,390)],
     ['why',.5,-.5,P(-95,-91,190,290,100,100,0,0,550)],
-    ['notes',.14,-.5,P(0,0,45,76,12,100,.22)],            // Notes: under the towers, looking up ...
-    ['notes',.52,-.5,P(0,0,72,86,50,88,.22)],             // ... then climbing as you read
-    ['notes',.9,-.5,P(0,0,98,130,98,74,.22)],
+    ['notes',.14,-.5,P(0,0,65,190,34,118,.22)],            // Notes: under the towers, looking up ...
+    ['notes',.52,-.5,P(0,0,72,215,70,108,.22)],             // ... then climbing as you read
+    ['notes',.9,-.5,P(0,0,82,250,110,92,.22)],
     ['studied',.14,-.5,function(){return UTP[utpIdx]}],   // UTP: the shot follows the group you pick
     ['studied',.9,-.5,function(){return UTP[utpIdx]}],
     // The shots at one landmark look at it from the side away from the group (bearing from the group's middle to the landmark), so the others stand behind it.
@@ -884,6 +896,13 @@
     var inRide=cr>.0004&&!!rideP;
     var rMid=inRide&&!freeOn&&cr>.05&&cr<.9;if(rMid!==root.classList.contains('ride-mid'))root.classList.toggle('ride-mid',rMid); // the view picker steps aside mid-flight so the landmark labels at the top of the HUD stay readable (timeofday.css)
     if(freeOn){
+      // WASD: move the point the camera circles (and the camera with it) along the ground, relative to where it faces; Q/E down and up; arrows turn and tilt; Shift is faster
+      var fsp=(fKeys.Shift?260:120)*Math.min(dtF,.05),fwx=freeState.cx-cam.position.x,fwz=freeState.cz-cam.position.z,fl=Math.hypot(fwx,fwz)||1;fwx/=fl;fwz/=fl;
+      var mf=(fKeys.w?1:0)-(fKeys.s?1:0)+(fKeys.ArrowUp&&false?1:0),ms=(fKeys.d?1:0)-(fKeys.a?1:0);
+      if(mf||ms){var nx=freeState.cx+(fwx*mf-fwz*ms)*fsp,nz=freeState.cz+(fwz*mf+fwx*ms)*fsp,rr=Math.hypot(nx-GC[0],nz-GC[1]);if(rr>620){nx=GC[0]+(nx-GC[0])*620/rr;nz=GC[1]+(nz-GC[1])*620/rr}freeState.cx=nx;freeState.cz=nz}
+      if(fKeys.q||fKeys.e){var dv=((fKeys.e?1:0)-(fKeys.q?1:0))*(fKeys.Shift?160:80)*Math.min(dtF,.05);freeState.ty=clamp(freeState.ty+dv,12,420);freeState.cy=clamp(freeState.cy+dv*.6,0,300)}
+      if(fKeys.ArrowLeft||fKeys.ArrowRight)freeState.ta+=((fKeys.ArrowLeft?1:0)-(fKeys.ArrowRight?1:0))*1.4*Math.min(dtF,.05);
+      if(fKeys.ArrowUp||fKeys.ArrowDown)freeState.tr=clamp(freeState.tr+((fKeys.ArrowDown?1:0)-(fKeys.ArrowUp?1:0))*220*Math.min(dtF,.05),60,520);
       var fk=reduce?1:1-Math.exp(-dtF*7);
       freeState.a+=(freeState.ta-freeState.a)*fk;
       freeState.y+=(freeState.ty-freeState.y)*fk;
