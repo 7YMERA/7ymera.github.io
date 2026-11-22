@@ -30,6 +30,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · Rail lines as pure design; README caught up
+
+- Descent rail layer is now just coloured lines: no station dots or names, no tags, no train beads, no Klang Valley label box, and the toggle + legend card are removed from `index.html` (code paths in `descent.js` are switched off with `if (false)`; the `.ds-rail`/`.rl-*` CSS is unused). README: Mark, Descent, Music and Sound rows updated for 3.2/3.3. Key 20261122n.
+
 ## 2026-11-22 · No sound pill
 
 - `sfx.js`: the "Sound on · tap anywhere" pill is gone. Sound tries to start at page load (plays at once where the browser allows autoplay); otherwise the first click, tap or key starts it silently. Browsers cannot be forced past that. Key 20261122m.

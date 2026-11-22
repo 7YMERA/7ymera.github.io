@@ -343,13 +343,13 @@
         ctx.setLineDash([]); ctx.globalAlpha = .2 * vis; ctx.lineWidth = 8; path(); ctx.stroke();
         ctx.globalAlpha = .95 * vis; ctx.lineWidth = L.st === 'op' ? 2.6 : 2.2; ctx.setLineDash(L.st === 'uc' ? [9, 7] : L.st === 'soon' ? [2, 6] : []); path(); ctx.stroke(); ctx.setLineDash([]);
         // the train: a bright bead sliding along the revealed part of an operating line
-        if (L.st === 'op' && !me.reduce && frac > .98 && tot > 40) {
+        if (false) {   // no train beads: the lines are a design, nothing more
           var target = ((t * .045 + li * .31 + si * .5) % 1) * tot, j = 1; while (j < cum.length - 1 && cum[j] < target) j++;
           var a = P[j - 1], b = P[j];
           if (a && b) { var u = (target - cum[j - 1]) / Math.max(1e-6, cum[j] - cum[j - 1]), x = a[0] + (b[0] - a[0]) * u, y = a[1] + (b[1] - a[1]) * u, g = ctx.createRadialGradient(x, y, 0, x, y, 12); g.addColorStop(0, 'rgba(255,255,255,.95)'); g.addColorStop(.25, L.col); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.globalAlpha = vis; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 12, 0, 6.2832); ctx.fill(); }
         }
-        // stations
-        if (frac > .9) {
+        // no stations or labels: just the coloured lines
+        if (false) {
           var src = L.srcs[si];
           for (var k = 0; k < src.length; k++) {
             var st = src[k]; if (!st[2]) continue;
@@ -361,7 +361,7 @@
           }
         }
       });
-      if (L.tag && frac > .95) { var tg = L.tag, X2 = sp(tg[1], tg[2]); if (X2 && X2[0] > 8 && X2[0] < W - 8) tags.push({ txt: tg[0], x: X2[0], y: X2[1], side: tg[3], col: L.col, st: L.st }); }
+      if (false) { var tg = L.tag, X2 = sp(tg[1], tg[2]); if (X2 && X2[0] > 8 && X2[0] < W - 8) tags.push({ txt: tg[0], x: X2[0], y: X2[1], side: tg[3], col: L.col, st: L.st }); }
     });
     // tags: name labels for the lines worth pointing out
     tags.forEach(function (g) {
@@ -377,8 +377,7 @@
       ctx.globalAlpha = k0; ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(kl[0], kl[1], r * 2, 0, 6.2832); ctx.fill();
       ctx.lineWidth = 2.4;
       for (var a = 0; a < 5; a++) { var ang = -1.1 + a * 1.25 + .3, rr = r * (.9 + .25 * (a % 2)); ctx.strokeStyle = KV[1][a]; ctx.globalAlpha = k0 * .95; ctx.beginPath(); ctx.moveTo(kl[0] - Math.cos(ang) * rr * .5, kl[1] - Math.sin(ang) * rr * .5); ctx.lineTo(kl[0] + Math.cos(ang) * rr, kl[1] + Math.sin(ang) * rr); ctx.stroke(); }
-      ctx.globalAlpha = k0; ctx.lineWidth = 1.2; ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(kl[0], kl[1], r * .5, 0, 6.2832); ctx.stroke();
-      if (sstep(.26, .34, p) > 0 && kl[0] > 300) {
+      if (false) {
         var L1 = ['KLANG VALLEY · URBAN RAIL', 'LRT Kelana Jaya · Ampang · Sri Petaling', 'MRT Kajang · Putrajaya', 'KL Monorail · BRT Sunway', 'LRT3 Shah Alam'], bx = kl[0] - r * 2.1 - 8, by = kl[1] - r * 3.6, bw = 0, ii;
         ctx.font = '500 10px "JetBrains Mono", ui-monospace, monospace'; for (ii = 0; ii < L1.length; ii++) bw = Math.max(bw, ctx.measureText(L1[ii]).width);
         ctx.globalAlpha = k0 * sstep(.26, .34, p); ctx.fillStyle = 'rgba(8,14,32,.8)'; ctx.fillRect(bx - bw - 12, by - 12, bw + 18, L1.length * 14 + 12); ctx.strokeStyle = 'rgba(159,208,255,.5)'; ctx.lineWidth = 1; ctx.strokeRect(bx - bw - 11.5, by - 11.5, bw + 17, L1.length * 14 + 11);
