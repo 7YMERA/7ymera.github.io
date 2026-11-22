@@ -56,11 +56,11 @@
   }
   if (gl) {
     if (rv && !reduce) {
-      rv.addEventListener('pointermove', function (e) {
+      (window.ScrollBus ? window.ScrollBus.move : function (f, el) { el.addEventListener('pointermove', f, { passive: true }); })(function (e) {
         if (!gr) return;
         var r = rv.getBoundingClientRect();
         gr.setPointer(((e.clientX - r.left) / Math.max(1, r.width)) * 2 - 1, ((e.clientY - r.top) / Math.max(1, r.height)) * 2 - 1, true);
-      }, { passive: true });
+      }, rv);
       rv.addEventListener('pointerleave', function () { if (gr) gr.setPointer(0, 0, false); });
     }
     var go = function () { makeGlass(reduce); };
@@ -72,7 +72,9 @@
       else if (near && !gr && wasFar) { wasFar = false; makeGlass(true); }
     }, { rootMargin: '80% 0px 80% 0px' }).observe(rv);
     // if WebGL never gets going, the text still has to arrive
-    setTimeout(function () { if (!arrivedOnce) arrive(); }, 6500);
+    // (counted from when the entry gate opens, if there is one, so the name never shows behind it)
+    var fallback = function () { setTimeout(function () { if (!arrivedOnce) arrive(); }, 6500); };
+    if (window.__gate && !window.__gate.open && window.__gate.then) window.__gate.then(fallback); else fallback();
   }
   new MutationObserver(function () { if (gr) gr.setLook(isDark() ? 'dark' : 'light', ground()); }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
 
@@ -87,31 +89,30 @@
   /* ---- scroll director: city on/off, header tone, chapter rail ---- */
   var enter = $('#enter'), bar = $('#top-bar'), fill = $('#rail-fill'), links = [].slice.call(d.querySelectorAll('.rail a')), secs = {}, ticking = false;
   links.forEach(function (a) { secs[a.dataset.ch] = d.getElementById(a.dataset.ch); });
-  function tick() {
-    ticking = false;
-    var y = scrollY, vh = innerHeight, i;
+  // The scroll director reads every rect first (ScrollBus read phase), then writes: aperture, city-on, header tone, rail.
+  function readTick() {
+    var y = scrollY, vh = innerHeight, ap = -1, city = false, i;
     // optical airlock: as the reader scrolls out of #reveal into #descent, relax the glass tile into a circular orbital lens
-    if (gr && rv && !reduce) {
-      var ap = clamp((y - vh * .05) / (vh * .78), 0, 1);
-      gr.setAperture(ap);
-    }
+    if (gr && rv && !reduce) ap = clamp((y - vh * .05) / (vh * .78), 0, 1);
     // the 3D city only shows from the end of the descent to the end of the flight (the CSS fades it); outside that it stays hidden
-    var city = false;
     if (enter && enter.offsetHeight) { var top = enter.offsetTop, bot = top + enter.offsetHeight; city = y > top - vh * 1.18 && y < bot + vh * .2; }
-    root.classList.toggle('city-on', city);
     // header tone: light type over the dark descent stage
     var dr = dsEl ? dsEl.getBoundingClientRect() : null, onDark = !!dr && dr.top < 60 && dr.bottom > 60 && !(dsStage && +dsStage.style.opacity < .35);
-    root.classList.toggle('h-dark', onDark);
-    bar.classList.toggle('solid', y > vh * .6);
-    // rail
-    var span = Math.max(1, d.documentElement.scrollHeight - vh);
-    if (fill) fill.style.setProperty('--rp', clamp(y / span, 0, 1).toFixed(4));
-    var cur = '', mid = vh * .5;
+    var span = Math.max(1, d.documentElement.scrollHeight - vh), cur = '', mid = vh * .5;
     for (var k in secs) { var s = secs[k]; if (!s) continue; var r = s.getBoundingClientRect(); if (r.top <= mid && r.bottom > mid) cur = k; }
-    if (cur !== tick.cur) { tick.cur = cur; links.forEach(function (a) { a.classList.toggle('on', a.dataset.ch === cur); if (a.dataset.ch === cur) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); }); }
+    return function () {
+      if (ap >= 0) gr.setAperture(ap);
+      root.classList.toggle('city-on', city);
+      root.classList.toggle('h-dark', onDark);
+      bar.classList.toggle('solid', y > vh * .6);
+      if (fill) fill.style.setProperty('--rp', clamp(y / span, 0, 1).toFixed(4));
+      if (cur !== tick.cur) { tick.cur = cur; links.forEach(function (a) { a.classList.toggle('on', a.dataset.ch === cur); if (a.dataset.ch === cur) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); }); }
+    };
   }
+  function tick() { ticking = false; readTick()(); }
   function req() { if (!ticking) { ticking = true; requestAnimationFrame(tick); } }
-  addEventListener('scroll', req, { passive: true }); addEventListener('resize', req); tick();
+  if (window.ScrollBus) window.ScrollBus.read(readTick); else addEventListener('scroll', req, { passive: true });
+  addEventListener('resize', req); tick();
   if (d.fonts && d.fonts.ready) d.fonts.ready.then(req);
 
 })();

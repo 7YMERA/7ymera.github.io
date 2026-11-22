@@ -41,16 +41,17 @@
   up.addEventListener('click', function () { scrollTo({ top: 0, behavior: calm ? 'auto' : 'smooth' }); });
   d.body.appendChild(up);
 
-  var tick = 0;
-  function onScroll() {
-    if (tick) return; tick = requestAnimationFrame(function () {
-      tick = 0;
-      up.classList.toggle('on', scrollY > innerHeight * 1.6);
-      var c = current(), name = c.at > -1 ? c.list[c.at][1] : '';
+  // Scroll: read the section rects first (ScrollBus read phase), write the class and title after.
+  function readScroll() {
+    var on = scrollY > innerHeight * 1.6, c = current(), name = c.at > -1 ? c.list[c.at][1] : '';
+    return function () {
+      up.classList.toggle('on', on);
       if (name !== lastName) { lastName = name; title(); if (c.at > -1) d.dispatchEvent(new CustomEvent('sec-change', { detail: { index: c.at, name: name } })); }
-    });
+    };
   }
-  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  if (window.ScrollBus) window.ScrollBus.read(readScroll);
+  else { var tick = 0; addEventListener('scroll', function () { if (tick) return; tick = requestAnimationFrame(function () { tick = 0; readScroll()(); }); }, { passive: true }); }
+  readScroll()();
 
   /* ---- Kuala Lumpur clock ---- */
   var clock = $('kl-clock');

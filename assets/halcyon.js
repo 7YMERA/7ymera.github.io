@@ -50,10 +50,10 @@
   function drag(cv, st, onMove) {
     var down = false, lx = 0, ly = 0, moved = 0;
     cv.addEventListener('pointerdown', function (e) { down = true; lx = e.clientX; ly = e.clientY; moved = 0; try { cv.setPointerCapture(e.pointerId); } catch (x) { /* fine */ } });
-    cv.addEventListener('pointermove', function (e) {
+    (window.ScrollBus ? window.ScrollBus.move : function (f, el) { el.addEventListener('pointermove', f); })(function (e) { // once per frame with the last move (ScrollBus); dx and dy are measured from the last handled move, so the drag adds up the same
       if (down) { var dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY; moved += Math.abs(dx) + Math.abs(dy); st.vy = dx * .006; st.vp = dy * .004; st.yaw += dx * .006; st.pitch = clamp(st.pitch + dy * .004, -1.2, 1.2); st.touched = performance.now(); }
       if (onMove) onMove(e, down);
-    });
+    }, cv);
     function up() { down = false; }
     cv.addEventListener('pointerup', function (e) { up(); if (moved < 6 && st.onTap) st.onTap(e); });
     cv.addEventListener('pointercancel', up); cv.addEventListener('lostpointercapture', up);

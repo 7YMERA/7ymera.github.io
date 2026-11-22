@@ -593,6 +593,9 @@ void main() {
     this.ro.observe(this.el);
   };
   GlassReveal.prototype.start = function () {
+    /* the entry gate (assets/home/gate.js) holds the reveal until it opens; with no gate it starts at once */
+    var gt = window.__gate, self = this;
+    if (gt && !gt.open && !this._gateWait) { this._gateWait = true; gt.then(function () { if (!self.disposed) self.start(); }); return; }
     var P = this.settings(), end = endOf(P);
     this.time = this.instant ? end : 0; this.playing = !this.instant;
     this.released = this.instant; this.finished = false; this.dirty = true;

@@ -21,7 +21,12 @@
 /* the scene behind everything */
 #gl{position:fixed;inset:0;width:100%;height:100%;z-index:-1;display:none}
 html.gl #gl{display:block}
-html.gl body{background:linear-gradient(var(--sky1),var(--sky-mid) var(--sky-stop),var(--sky3)) fixed} /* one three-stop sky for day, golden hour and night; scene.js mirrors these stops in the shader (uSky1..3, uStop) and SceneTime blends the variables */
+html.gl:not(.home){background:var(--sky-mid)} /* what shows past the ends of the page (overscroll) */
+html.gl body{background:none}
+/* The sky gradient is its own fixed layer behind the canvas, not a fixed body background (that repaints the whole page on every scroll). scene.js and daycycle.js write the blended gradient onto #skybg's inline style. */
+#skybg{display:none}
+html.gl #skybg{display:block;position:fixed;inset:0;z-index:-2;pointer-events:none;background:linear-gradient(var(--sky1),var(--sky-mid) var(--sky-stop),var(--sky3))}
+html.home #skybg{background:none} /* the front page's body is its own flat --hg (home.css); #skybg only shows there once scene.js writes a golden or night gradient */ /* one three-stop sky for day, golden hour and night; scene.js mirrors these stops in the shader (uSky1..3, uStop) and SceneTime blends the variables */
 
 /* Readability: every section sits on a solid paper panel with a hard offset shadow (the hard-shadow window look), and the city shows in the gaps.
    No backdrop-filter: it would sample the moving scene on every frame. */

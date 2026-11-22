@@ -90,13 +90,19 @@
     var self = this;
     if ('ResizeObserver' in window) new ResizeObserver(function () { self.size(); self.cache = {}; self.kick(); }).observe(this.stage);
     new IntersectionObserver(function (en) { self.visible = en[0].isIntersecting; if (self.visible) self.kick(); }, { rootMargin: '10% 0px' }).observe(section);
-    addEventListener('scroll', function () { self.readScroll(); self.kick(); }, { passive: true });
-    addEventListener('pointermove', function (e) {
-      self.tmx = e.clientX / innerWidth - .5; self.tmy = e.clientY / innerHeight - .5;
+    var SB = window.ScrollBus || {
+      read: function (f) { addEventListener('scroll', function () { var w = f(); if (w) w(); }, { passive: true }); },
+      move: function (f) { addEventListener('pointermove', function (e) { var w = f(e); if (w) w(); }, { passive: true }); }
+    };
+    SB.read(function () { self.readScroll(); return function () { self.kick(); }; });
+    SB.move(function (e) {
       var r = self.stage.getBoundingClientRect();
-      self.px = e.clientX - r.left; self.py = e.clientY - r.top;
-      if (self.visible) self.kick();
-    }, { passive: true });
+      return function () {
+        self.tmx = e.clientX / innerWidth - .5; self.tmy = e.clientY / innerHeight - .5;
+        self.px = e.clientX - r.left; self.py = e.clientY - r.top;
+        if (self.visible) self.kick();
+      };
+    });
     new MutationObserver(function () { self.readSky(); self.cache = {}; self.kick(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     this.readScroll(); this.ps = this.p; this.kick();
   }

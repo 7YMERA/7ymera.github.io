@@ -53,7 +53,7 @@
     lab: { view: 'halcyon', title: 'Particle lab', sub: 'The lab · Halcyon', pick: 'lab' },
     glass: { view: 'glass', title: 'Glass lab', sub: 'The lab · one WebGL shader', src: '/lab/glass.html' },
     anatomy: { view: 'anatomy', title: 'Skyline anatomy', sub: 'The lab · exploded KL meshes' },
-    sat: { view: 'sat', title: 'Satellite inspector', sub: 'The lab · NASA 3D models, x-ray and explode' },
+    sat: { view: 'sat', title: 'Satellite inspector', sub: 'The lab · NASA models' },
     lglass: { view: 'glass', title: 'Liquid glass lab', sub: 'The lab · WebGL2 optical shader', src: '/lab/liquid-glass.html' },
     'sql-company': { view: 'sql', title: 'Company SQL', sub: 'Data toys · SQLite in your browser', sql: 'company' },
     'sql-jom': { view: 'sql', title: 'Jom Al-Quran SQL', sub: 'Data toys · SQLite in your browser', sql: 'jom' },
