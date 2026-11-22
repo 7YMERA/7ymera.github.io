@@ -60,7 +60,7 @@
 
   function Descent(section, opts) {
     opts = opts || {};
-    this.sec = section; this.cv = section.querySelector('canvas'); this.ctx = this.cv.getContext('2d', { alpha: false });
+    this.sec = section; this.cv = section.querySelector('canvas'); this.ctx = this.cv.getContext('2d');   // transparent: with the orbit stage the HD Earth shows through
     this.stage = section.querySelector('.ds-stage');
     this.hold = clamp(parseFloat(section.getAttribute('data-hold')) || 0, 0, .6);
     this.reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -75,6 +75,7 @@
     var tg = section.querySelector('#rl-tog'), me0 = this;
     if (tg) tg.addEventListener('click', function () { me0.railOn = !me0.railOn; tg.setAttribute('aria-pressed', me0.railOn ? 'true' : 'false'); tg.querySelector('b').textContent = me0.railOn ? 'On' : 'Off'; if (me0.leg) me0.leg.classList.toggle('off', !me0.railOn); me0.kick(); });
     this.onProgress = opts.onProgress || null;
+    if (window.OrbitStage) window.OrbitStage.descent = this;   // the stage reads our progress (ps) to move the camera
     this.off = document.createElement('canvas'); this.offCtx = this.off.getContext('2d');
     this.stars = []; this.mkStars(); this.mkClouds();
     this.phases = [].slice.call(section.querySelectorAll('[data-a]'));
@@ -166,7 +167,7 @@
     if (this.reduce) { this.ps = this.p; this.v = 0; }
     else { var o = 2 / .35, x = o * dt, e = 1 / (1 + x + .48 * x * x + .235 * x * x * x), ch = this.ps - this.p, tmp = (this.v + o * ch) * dt; this.v = (this.v - o * tmp) * e; this.ps = this.p + (ch + tmp) * e; }
     var dm = 1 - Math.exp(-dt * 4); this.mx += (this.tmx - this.mx) * dm; this.my += (this.tmy - this.my) * dm;
-    this.draw();
+    this.draw(t);
     if (this.onProgress) this.onProgress(this.ps);
     if (!this.reduce || Math.abs(this.ps - this.p) > 1e-4) this.raf = requestAnimationFrame(this._loop);
   };
@@ -186,12 +187,39 @@
   };
   // lat, lon (deg) -> screen offsets relative to the globe centre (x right, y up), and visibility
   Descent.prototype.proj = function (lat, lon, v, noCull) {
+    if (v.S) { var q0 = v.S.project(lat, lon); return [q0.x, -q0.y, noCull || q0.visible]; }   // the stage's own projection (screen px, y down -> y up here)
     var f = lat * D2R, dl = lon * D2R - v.lon0, cf = Math.cos(f), sf = Math.sin(f);
     var vis = v.sin0 * sf + v.cos0 * cf * Math.cos(dl);
     return [v.R * cf * Math.sin(dl), v.R * (v.cos0 * sf - v.sin0 * cf * Math.cos(dl)), noCull || vis > 0];
   };
 
-  Descent.prototype.draw = function () {
+  /* With the orbit stage (assets/home/orbit.js) the Earth is the HD one drawn behind this canvas; this canvas only draws what lies on it.
+     The stage owns the camera (zoom about KL, tilt), and stage.project(lat, lon) puts every overlay on the real map. The old canvas-2D Earth
+     below is the fallback when the stage could not start (no WebGL, three.js or textures). */
+  Descent.prototype.drawOrbit = function (S, now) {
+    var ctx = this.ctx, W = this.W, H = this.H, d = this.dpr, p = this.ps;
+    var z = clamp((p - .05) / .8, 0, 1), cloudK = sstep(.72, .93, p), wash = sstep(.9, .985, p);
+    ctx.setTransform(d, 0, 0, d, 0, 0); ctx.clearRect(0, 0, W, H);
+    S.frame(now, false);
+    var ek = S.live ? S.ek : (p > .24 ? 0 : 1), flat = 1 - ek;
+    this.ek0 = ek;
+    if (flat > 0) {   // past the imagery: the deep blue the old globe faded to, which the clouds and then the sky wash build on
+      var f0 = sstep(.55, .95, z); ctx.globalAlpha = flat; ctx.fillStyle = 'rgb(' + Math.round(8 + 20 * f0) + ',' + Math.round(30 + 40 * f0) + ',' + Math.round(64 + 60 * f0) + ')'; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
+    }
+    if (S.live && p < .92) {
+      var a = S.project(KL[0], KL[1]), b = S.project(KL[0], KL[1] + .02), pxDeg = Math.max(.01, Math.hypot(b.x - a.x, b.y - a.y) / .02);
+      var v = { S: S, cx: 0, cy: 0, R: pxDeg / D2R, tx: a.x, ty: a.y };
+      this.view = v;
+      this.drawGraticule(ctx, v, z); this.drawCoast(ctx, v, z, p); this.drawRail(ctx, v, z, p); this.drawCities(ctx, v, z, p); this.drawReticle(ctx, v, z, p);
+    } else if (this.probe) this.probe.classList.remove('on');
+    if (cloudK > 0) this.drawClouds(ctx, cloudK, p);
+    if (wash > 0) { ctx.globalAlpha = wash; var s = ctx.createLinearGradient(0, 0, 0, H); s.addColorStop(0, this.sky[1]); s.addColorStop(1, this.sky[0]); ctx.fillStyle = s; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
+    this.readouts(p, z);
+  };
+
+  Descent.prototype.draw = function (now) {
+    var S = window.OrbitStage;
+    if (S && S.intent) { this.drawOrbit(S, now); return; }
     var ctx = this.ctx, W = this.W, H = this.H, d = this.dpr, p = this.ps;
     var z = clamp((p - .05) / .8, 0, 1), cloudK = sstep(.72, .93, p), wash = sstep(.9, .985, p);
     ctx.setTransform(d, 0, 0, d, 0, 0);
@@ -284,7 +312,7 @@
   Descent.prototype.drawGraticule = function (ctx, v, z) {
     var pxDeg = v.R * D2R, step = [10, 5, 2, 1, .5, .2, .1, .05, .02, .01, .005, .002, .001], st = 10, i;
     for (i = 0; i < step.length; i++) { st = step[i]; if (pxDeg * st < 220) { /* keep going finer while lines are far apart */ } if (pxDeg * step[i] >= 150) break; }
-    var a = (.1 + .22 * sstep(.2, .6, z)) * (1 - sstep(.86, .92, this.ps));
+    var a = (.1 + .22 * sstep(.2, .6, z)) * (1 - sstep(.86, .92, this.ps)) * (v.S ? 1 - .6 * (this.ek0 || 0) : 1);   // fainter over the real photo
     ctx.strokeStyle = 'rgba(150,210,255,' + a.toFixed(3) + ')'; ctx.lineWidth = 1; ctx.beginPath();
     var span = Math.min(80, Math.max(st * 6, Math.hypot(this.W, this.H) / pxDeg * .75)), la0 = Math.floor((KL[0] - span) / st) * st, la1 = KL[0] + span, lo0 = Math.floor((KL[1] - span) / st) * st, lo1 = KL[1] + span, la, lo, n = 0;
     var seg = Math.max(st / 2, span / 36);
@@ -313,7 +341,7 @@
       for (var i = 0; i < pts.length; i++) { var q = me.proj(pts[i][0], pts[i][1], v); if (!q[2]) continue; var X = v.cx + q[0], Y = v.cy - q[1]; if (any) ctx.lineTo(X, Y); else ctx.moveTo(X, Y); any = true; }
       ctx.closePath(); ctx.fill();
     }
-    ctx.globalAlpha = fade * .22 * sstep(.3, .5, p + .1); ctx.fillStyle = '#ffb938'; fillPoly(PEN); fillPoly(BOR.concat(BORC));
+    ctx.globalAlpha = fade * .22 * sstep(.3, .5, p + .1) * (1 - .75 * sstep(.45, .62, p)); ctx.fillStyle = '#ffb938';   // the fill thins out as the outline leaves the screen fillPoly(PEN); fillPoly(BOR.concat(BORC));
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     ctx.globalAlpha = fade * .35; ctx.strokeStyle = '#ffb938'; ctx.lineWidth = 7; trace(PEN, k); trace(BOR, k);
     ctx.globalAlpha = fade; ctx.strokeStyle = '#ffd27a'; ctx.lineWidth = 1.8; trace(PEN, k); trace(BOR, k);

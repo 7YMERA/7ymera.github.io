@@ -15,6 +15,11 @@
  *                                 onRelease: fn, onDone: fn });
  *   g.replay();  g.setLook('dark', '#050912');  g.dispose();
  *
+ * Over the Earth (assets/home/orbit.js): g.setEarth(stage) switches to an overlay mode. The picture is no longer a flat colour: the shader
+ * samples the stage's Earth canvas (re-uploaded after every Earth render, in the same task, because a WebGL canvas is blank to a later task)
+ * so the glass refracts the real planet (the 20 spectral taps each sample the Earth at their own refracted point), and the canvas is transparent
+ * outside the tile and its glow, so the Earth canvas underneath shows through at full sharpness and the page can scroll the tile away over it.
+ *
  * Also: IntersectionObserver pause, ResizeObserver, context loss and restore, prefers-reduced-motion (one still frame of the
  * finished mark), and the CSS mask fallback when WebGL2 is missing.
  */
@@ -207,11 +212,24 @@ uniform float uSheen;
 uniform float uSweep;
 uniform float uLightAng;
 
+uniform sampler2D uEarth;
+uniform float uEarthOn;
+uniform float uOver;
+uniform vec4 uEr;
+
 uniform vec3 uBg;
 uniform vec3 uPlateCol;
 uniform vec3 uLogoCol;
 
 float px;
+vec4 ov;
+void over(vec3 c, float a) { ov.rgb = c * a + ov.rgb * (1.0 - a); ov.a = a + ov.a * (1.0 - a); }
+// the Earth canvas behind the page: q is in plate units, uEr = (canvas top below the viewport top, viewport w, viewport h, canvas h), all in device px
+vec3 earthAt(vec2 q) {
+  vec2 f = uCenter + q / px;
+  vec3 sp = vec3(0.008, 0.015, 0.04);
+  return mix(sp, texture(uEarth, vec2(f.x / uEr.y, (uEr.w - f.y + uEr.x) / uEr.z)).rgb, uEarthOn);
+}
 
 vec2 rot(vec2 v, float a) { float c = cos(a), s = sin(a); return vec2(c * v.x - s * v.y, s * v.x + c * v.y); }
 
@@ -309,17 +327,22 @@ void main() {
     bg *= 1.0 - uGhost * 0.03 * uLightScene * exp(-max(gsd, 0.0) / 0.12) * step(0.0, gsd);
   }
   float outside = max(sd, 0.0);
+  float aRip = 0.0;
   if (uRipA > 0.001) {
     float d0 = (uRipR - 1.0) * uPlateScale;
     float rx = (sd - d0) / 0.022;
     float ring = exp(-rx * rx);
+    aRip = clamp(uRipA * ring * 0.07, 0.0, 1.0);
     bg += uRipA * ring * (0.04 * (0.55 + 0.45 * dot(nOut, normalize(vec2(-0.5, 0.8))))) * mix(0.5, 1.0, uLightScene);
     bg -= uRipA * 0.016 * uLightScene * exp(-(rx - 1.6) * (rx - 1.6));
   }
   float shadowFall = max(sd, 0.0) / (0.9 * uPlateScale);
   bg *= 1.0 - uShadow * 0.03 * exp(-shadowFall * shadowFall) * step(0.0, sd);
   vec3 haloCol = mix(vec3(0.62, 0.69, 0.80), vec3(1.0), uLightScene);
-  bg = mix(bg, haloCol, clamp(uHalo * (0.30 * exp(-outside / (0.025 * uPlateScale)) + 0.07 * exp(-outside / (0.12 * uPlateScale))), 0.0, 1.0) * step(0.0, sd));
+  float aHalo = clamp(uHalo * (0.30 * exp(-outside / (0.025 * uPlateScale)) + 0.07 * exp(-outside / (0.12 * uPlateScale))), 0.0, 1.0) * step(0.0, sd);
+  float aSh = uShadow * 0.03 * exp(-shadowFall * shadowFall) * step(0.0, sd);
+  bg = mix(bg, haloCol, aHalo);
+  vec3 glassC = vec3(0.0); float covC = 0.0;
 
   vec3 col = bg;
   float soft = px + uBlur * 0.8 + 0.06 * uDissolve * (1.0 - uKeep) * uPlateScale;
@@ -337,6 +360,7 @@ void main() {
     vec2 grad = -(db + dd) * nOut + gDome;
 
     vec3 back = mix(uBg, uPlateCol, uIconPlate);
+    if (uOver > 0.5) back = mix(earthAt(p), uPlateCol, 0.2);
     vec3 liftG = mix(back + vec3(0.06), mix(back, vec3(1.0), 0.55), uLightGlass);
     float rblur = uBlur + 0.05 * length(qc - p) + min(uGlow * uOptics * (1.0 - xf) * foot / px, 0.04);
 
@@ -358,7 +382,9 @@ void main() {
       sp *= 1.0 + uFaceDisp * cf * faceOnly;
       vec4 l = logoAt(sp, rblur + 0.12 * streak + uFaceDisp * 0.5 * max(c, 0.0) * faceOnly, foot);
       vec3 w = spectrum(lam);
-      acc += mix(back, l.rgb, l.a) * w;
+      vec3 bk = back;
+      if (uOver > 0.5) bk = mix(earthAt(sp), uPlateCol, 0.2);
+      acc += mix(bk, l.rgb, l.a) * w;
       wsum += w;
     }
     vec3 trans = acc / wsum;
@@ -404,8 +430,19 @@ void main() {
 
     float cov = clamp(0.5 - sd / soft, 0.0, 1.0);
     col = mix(bg, glass, cov);
+    glassC = glass; covC = cov;
   }
 
+  if (uOver > 0.5) {
+    ov = vec4(0.0);
+    over(vec3(0.0), aSh);
+    over(haloCol, aHalo * 0.65);
+    over(vec3(1.0), aRip);
+    over(lg.rgb, lg.a * uBare * (1.0 - uPlateAlpha));
+    over(glassC, covC * uPlateAlpha);
+    outColor = vec4(ov.rgb / max(ov.a, 1e-4) + (hash(gl_FragCoord.xy) - 0.5) / 255.0, ov.a);
+    return;
+  }
   vec3 outc = mix(plain, col, uPlateAlpha);
   outc += (hash(gl_FragCoord.xy) - 0.5) / 255.0;
   outColor = vec4(outc, 1.0);
@@ -429,8 +466,8 @@ void main() {
     var loc = gl.getAttribLocation(prog, 'aPos'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     var U = {}, count = gl.getProgramParameter(prog, gl.ACTIVE_UNIFORMS), i;
     for (i = 0; i < count; i++) { var info = gl.getActiveUniform(prog, i); U[info.name] = gl.getUniformLocation(prog, info.name); }
-    var sdfTex = gl.createTexture(), colTex = gl.createTexture();
-    gl.uniform1i(U.uSdf, 0); gl.uniform1i(U.uCol, 1);
+    var sdfTex = gl.createTexture(), colTex = gl.createTexture(), earthTex = null;
+    gl.uniform1i(U.uSdf, 0); gl.uniform1i(U.uCol, 1); gl.uniform1i(U.uEarth, 2);
     var hasLogo = false;
     function params(filter) {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -448,7 +485,14 @@ void main() {
         gl.generateMipmap(gl.TEXTURE_2D); params(gl.LINEAR_MIPMAP_LINEAR);
         hasLogo = true;
       },
-      render: function (fr, w, h, tilePx, cy) {
+      /* take the Earth canvas as a texture (call right after the Earth rendered, in the same task) */
+      setEarth: function (src) {
+        gl.activeTexture(gl.TEXTURE2);
+        if (!earthTex) { earthTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, earthTex); params(gl.LINEAR); } else gl.bindTexture(gl.TEXTURE_2D, earthTex);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, src);
+      },
+      render: function (fr, w, h, tilePx, cy, er, amt) {
         if (!hasLogo) return;
         gl.viewport(0, 0, w, h);
         gl.uniform2f(U.uCenter, w / 2, cy);
@@ -456,6 +500,7 @@ void main() {
         for (var k in fr) { var v = fr[k]; if (typeof v === 'number' && U[k]) gl.uniform1f(U[k], v); }
         gl.uniform3fv(U.uBg, fr.uBg); gl.uniform3fv(U.uPlateCol, fr.uPlateCol); gl.uniform3fv(U.uLogoCol, fr.uLogoCol);
         gl.uniform2fv(U.uLogoOff, fr.uLogoOff);
+        gl.uniform1f(U.uOver, er ? 1 : 0); gl.uniform1f(U.uEarthOn, er ? amt : 0); if (er) gl.uniform4f(U.uEr, er[0], er[1], er[2], er[3]);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
       },
       dispose: function () { var e = null; try { e = gl.getExtension('WEBGL_lose_context'); } catch (x) { /* gone */ } if (e) { try { e.loseContext(); } catch (y) { /* ignore */ } } }
@@ -682,17 +727,40 @@ void main() {
       var cyc = (ts % 6.2) / 1.7; sweep = cyc < 1 ? cyc * cyc * (3 - 2 * cyc) : 1.2;
       if (now - (this.lastDraw || 0) > 30) this.dirty = true;
     }
+    this._d = { P: P, end: end, live: live, sweep: sweep, breath: breath, restOn: restOn };
     if (this.dirty && this.renderer) {
       this.lastDraw = now;
-      var cv = this.cv, dpr = Math.min(window.devicePixelRatio || 1, 2), cw = cv.clientWidth, ch = cv.clientHeight;
-      var w = Math.max(1, Math.round(cw * dpr)), h = Math.max(1, Math.round(ch * dpr));
-      if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
-      var tile = Math.min(P.tileSize, Math.min(cw, ch) / 1.75);
-      var cyFrac = this.opts.centerY == null ? .5 : this.opts.centerY;
-      this.renderer.render(frameAt(Math.min(this.time, end), P, 0, { ptrX: this.ptrX, ptrY: this.ptrY, hover: this.hover, aperture: this.aperture, live: live, breath: breath, sweep: restOn ? sweep : undefined }), w, h, tile * dpr, h * (1 - cyFrac));
-      this.dirty = false;
+      var st = this.stage;
+      if (st && st.live && this.hasEarth) { st.frame(now, true); if (this.dirty) this.draw(); }   // the stage's frame callback (earthFrame) draws, right after the Earth
+      else this.draw();
     }
     if (this.visible && (this.playing || moving || restOn)) this.raf = requestAnimationFrame(this._tick);
+  };
+
+  /* one pass of the shader for the state the last tick worked out */
+  GlassReveal.prototype.draw = function () {
+    var D = this._d; if (!D || !this.renderer || this.lost || this.disposed) return;
+    var cv = this.cv, dpr = Math.min(window.devicePixelRatio || 1, 2), cw = cv.clientWidth, ch = cv.clientHeight;
+    var w = Math.max(1, Math.round(cw * dpr)), h = Math.max(1, Math.round(ch * dpr)), P = D.P;
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+    var tile = Math.min(P.tileSize, Math.min(cw, ch) / 1.75);
+    var cyFrac = this.opts.centerY == null ? .5 : this.opts.centerY, er = null, amt = 0, st = this.stage;
+    if (st && st.intent) {   // over the stage: the Earth itself once it is up, plain space until then (the tile is the only opaque part either way)
+      if (st.live && this.hasEarth) { er = [cv.getBoundingClientRect().top * dpr, st.W * dpr, st.H * dpr, h]; amt = st.amt; } else er = [0, 1, 1, 1];
+    }
+    this.renderer.render(frameAt(Math.min(this.time, D.end), P, 0, { ptrX: this.ptrX, ptrY: this.ptrY, hover: this.hover, aperture: this.aperture, live: D.live, breath: D.breath, sweep: D.restOn ? D.sweep : undefined }), w, h, tile * dpr, h * (1 - cyFrac), er, amt);
+    this.dirty = false;
+  };
+  /* sit on the orbit stage's Earth (see the header): the stage calls earthFrame(canvas) after each Earth render */
+  GlassReveal.prototype.setEarth = function (stage) {
+    var me = this; if (this.stage && this._ef) this.stage.offFrame(this._ef);
+    this.stage = stage || null; this.hasEarth = false;
+    if (stage) stage.onFrame(this._ef = function (canvas) { me.earthFrame(canvas); });
+    this.dirty = true; this.kick();
+  };
+  GlassReveal.prototype.earthFrame = function (canvas) {
+    if (!this.renderer || this.disposed || this.lost || !this.logo || !this.visible || !this._d) return;
+    this.renderer.setEarth(canvas); this.hasEarth = true; this.draw();
   };
 
   /* no WebGL2: the same mark, flat, through a CSS mask */
@@ -713,6 +781,7 @@ void main() {
     if (this.disposed) return; this.disposed = true;
     if (this.raf) cancelAnimationFrame(this.raf); this.raf = 0;
     if (this.ro) this.ro.disconnect(); if (this.io) this.io.disconnect();
+    if (this.stage && this._ef) this.stage.offFrame(this._ef);
     if (this.renderer) this.renderer.dispose();
     if (this.cv && this.cv.parentNode) this.cv.parentNode.removeChild(this.cv);
     if (this.maskEl && this.maskEl.parentNode) this.maskEl.parentNode.removeChild(this.maskEl);

@@ -34,6 +34,13 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · 3.5: the \7 on the Earth, one shot from gate to KL
+
+- New `assets/home/orbit.js` (OrbitStage): one fixed `#orbit` OrbitEarth canvas behind #reveal and #descent. The gate hands its live Earth over (`window.__orbitEarth`, `attach()`), the glass shader samples the Earth canvas per spectral tap (re-uploaded each Earth frame), the limb rises behind the tile, scroll eases the camera to the 408 KM UP frame, then zooms/tilts onto KL with the gold outline, rails and reticle registered via `OrbitStage.project()`. Earth fades by p .4, disposed at .9; the city hand-over at .88 is unchanged. Reveal is dark space in both themes.
+- `earth.js`: zoom/tilt/pin/sunK view params, `project()`, `setSpace()`, `attach()`; an affine `reg()` fixes the NASA map's ~4° misregistration over South-East Asia. descent.js keeps its 2D Earth only as a fallback.
+- Also today: gate on every front-page load (scroll back to top), cosmos on /portfolio/, SQL toys on /lab/, slb-screens in the feed, Blue Marble credit. Key 20261122v.
+- Not verified: real-GPU smoothness, the limb-rise timing after the gate, descent zoom curve on a real GPU; the outline is ~15 px off at the closest zoom; a subtle star change as the gate halves slide away.
+
 ## 2026-11-22 · Cosmos back on the portfolio
 
 - Owner asked to apply cosmos: `cosmos.css`/`cosmos.js` (key 20261122t) now load on `/portfolio/` only: stars, an orbit arc with AIM/GPM over the 3D sky, corner brackets, and at 1320 px+ the left telemetry readout and right descent rail. No page errors, no sideways scroll at 1440 and 390. Note: its clock is the real MYT time, while the portfolio dial shows the scroll's time of day.

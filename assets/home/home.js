@@ -46,13 +46,18 @@
     arrivedOnce = true;
   }
   function hideText() { if (rvText) rvText.classList.remove('in'); }
+  // over the orbit stage (orbit.js) the reveal is always the dark glass on space, in both themes; it refracts the stage's Earth
+  function onStage() { return !!(window.OrbitStage && window.OrbitStage.intent); }
+  function lookNow() { return onStage() || isDark() ? 'dark' : 'light'; }
+  function groundNow() { return onStage() ? '#000000' : ground(); }
   function makeGlass(instant) {
     if (gr || !window.GlassReveal || !gl) return;
     gr = new GlassReveal(gl, {
-      logo: LOGO, look: isDark() ? 'dark' : 'light', background: ground(), instant: instant, tileSize: 560, centerY: innerWidth < 720 ? .36 : .4, tuning: { finalScale: 1.1 },
+      logo: LOGO, look: lookNow(), background: groundNow(), instant: instant, tileSize: 560, centerY: innerWidth < 720 ? (onStage() ? .46 : .36) : (onStage() ? .44 : .4), tuning: { finalScale: 1.1 },
       onRelease: function () { if (!instant) arrive(); },
       onDone: function () { if (instant && !arrivedOnce) arrive(); }
     });
+    if (onStage()) gr.setEarth(window.OrbitStage);
   }
   if (gl) {
     if (rv && !reduce) {
@@ -76,7 +81,9 @@
     var fallback = function () { setTimeout(function () { if (!arrivedOnce) arrive(); }, 6500); };
     if (window.__gate && !window.__gate.open && window.__gate.then) window.__gate.then(fallback); else fallback();
   }
-  new MutationObserver(function () { if (gr) gr.setLook(isDark() ? 'dark' : 'light', ground()); }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+  new MutationObserver(function () { if (gr) gr.setLook(lookNow(), groundNow()); }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+  // the stage gave up (no WebGL, three.js or textures): the reveal goes back to the flat glass on the page colour
+  d.addEventListener('orbit-state', function () { if (gr) { gr.setEarth(null); gr.setLook(lookNow(), groundNow()); } });
 
   /* ---- 01 · the descent ---- */
   var dsEl = $('#descent'), ds = null, dsStage = $('#ds-stage');
@@ -98,6 +105,7 @@
     if (enter && enter.offsetHeight) { var top = enter.offsetTop, bot = top + enter.offsetHeight; city = y > top - vh * 1.18 && y < bot + vh * .2; }
     // header tone: light type over the dark descent stage
     var dr = dsEl ? dsEl.getBoundingClientRect() : null, onDark = !!dr && dr.top < 60 && dr.bottom > 60 && !(dsStage && +dsStage.style.opacity < .35);
+    if (!onDark && rv && onStage()) { var rr = rv.getBoundingClientRect(); onDark = rr.top < 60 && rr.bottom > 60; }
     var span = Math.max(1, d.documentElement.scrollHeight - vh), cur = '', mid = vh * .5;
     for (var k in secs) { var s = secs[k]; if (!s) continue; var r = s.getBoundingClientRect(); if (r.top <= mid && r.bottom > mid) cur = k; }
     return function () {

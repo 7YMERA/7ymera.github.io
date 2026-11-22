@@ -126,7 +126,7 @@
     root.classList.remove('gate-on');   // the overlay covers the page now; the pre-paint cover can go
     try { rootEl.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
 
-    var live = $('.gate-live'), cv = $('.gate-cv'), ctx = cv.getContext('2d'), kl = $('.gate-kl'), E = null, earthDone = false, earthOn = false;
+    var live = $('.gate-live'), cv = $('.gate-cv'), ctx = cv.getContext('2d'), kl = $('.gate-kl'), E = null, earthDone = false, earthOn = false, handed = null;
     var num = $('.gate-num'), bar = $('.gate-bar i'), lines = [].slice.call(rootEl.querySelectorAll('.gate-lines p'));
     var status = $('.gate-status'), clock = $('.gate-clock'), cta = $('.gate-cta'), btn = $('.gate-btn'), nos = $('.gate-nosound'), wrap = $('.gate-btn-wrap');
     var label = $('.gate-btn-label'), txt = $('.gate-btn-txt'), word = [].slice.call(rootEl.querySelectorAll('.gw i'));
@@ -355,6 +355,9 @@
     function opened() {
       if (gate.open) return;
       gate.open = true; root.classList.remove('gate-lock');
+      /* hand the live Earth to the page (assets/home/orbit.js picks it up in its gate.then callback below): the reveal behind the halves is the
+         same instance, same view, so the shot does not cut. If nobody takes it, finish() disposes it as before. */
+      if (E && earthOn && !w.__orbitEarth) { drawEarth(0); handed = E; w.__orbitEarth = E; E = null; earthOn = false; }
       behind.forEach(function (b) { if (b.a == null) b.n.removeAttribute('aria-hidden'); else b.n.setAttribute('aria-hidden', b.a); if (!b.i) b.n.removeAttribute('inert'); });
       try { d.dispatchEvent(new CustomEvent('gate-open')); } catch (e) { /* ignore */ }
       var f = waiting.splice(0); f.forEach(function (fn) { try { fn(); } catch (e) { if (w.console) console.warn(e); } });
@@ -363,6 +366,7 @@
       if (dead) return; dead = true; cancelAnimationFrame(raf); timers.forEach(function (t) { clearTimeout(t); clearInterval(t); });
       w.removeEventListener('pointermove', onMove);
       if (E) { E.dispose(); E = null; }
+      if (handed && w.__orbitEarth === handed) { handed.dispose(); w.__orbitEarth = null; }   // not taken: free it
       cv.width = cv.height = 0; earth = null; stars = [];
       [].slice.call(rootEl.querySelectorAll('canvas')).forEach(function (c) { c.width = c.height = 0; });
       rootEl.remove(); root.classList.remove('gate-lock', 'gate-on'); G = null;

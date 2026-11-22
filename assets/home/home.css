@@ -187,3 +187,16 @@ html.flying .rail { opacity: 0; pointer-events: none; }
   .rl-tog { justify-content: space-between; min-height: 48px; } .rl-card { padding: 10px 12px 8px; } .rl-card .cap { display: none; }
   .rl-card ul { gap: 5px; } .rl-card li { grid-template-columns: 22px 1fr auto; gap: 0 8px; font-size: .62rem; } .rl-card li i { grid-row: auto; } .rl-card li span { grid-column: 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .rl-card li .chip { grid-column: 3; font-size: .46rem; padding: 2px 4px; } .rl-note { margin-top: 6px; font-size: .5rem; }
 }
+
+/* ---------- the orbit stage: one HD Earth behind 00 Mark and 01 Descent (assets/home/orbit.js) ---------- */
+.orbit { position: fixed; left: 0; top: 0; width: 100%; height: 100vh; height: 100svh; z-index: 0; pointer-events: none; overflow: hidden; background: linear-gradient(#02040c, #070d22); transition: opacity .24s ease; }
+.orbit.gone { visibility: hidden; }
+.orbit.swap { opacity: 0; }   /* reduced motion: fade through black between the three still frames */
+.orbit-earth { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* both chapters are space in both themes: the stage shows through, and the reveal's type turns light */
+html.orbit-live .reveal { background: transparent; --ink: #f2f7ff; --capc: #a9bddb; }
+html.orbit-live .reveal .cap span { color: #ffd27a; }
+html.orbit-live .reveal .hc { color: #9fd0ff; }
+html.orbit-live .rv-name { text-shadow: 0 2px 28px rgba(2, 6, 20, .85), 0 0 2px rgba(2, 6, 20, .6); }
+html.orbit-live .rv-tag { text-shadow: 0 1px 14px rgba(2, 6, 20, .9); color: #c4d4ee; }
+html.orbit-live .ds-stage { background: transparent; }
