@@ -42,7 +42,7 @@
     if (!rvText) return;
     rvText.classList.add('in');
     scramble(nameEl, NAME, 900);
-    setTimeout(function () { scramble(tagEl, TAG, 800); }, 380);
+    if (tagEl) setTimeout(function () { scramble(tagEl, TAG, 800); }, 380);
     arrivedOnce = true;
   }
   function hideText() { if (rvText) rvText.classList.remove('in'); }
