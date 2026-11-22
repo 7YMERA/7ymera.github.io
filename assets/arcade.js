@@ -56,7 +56,7 @@
      ===================================================================== */
   var runner = (function () {
     var cv = $('#arc-canvas'), ctx = cv.getContext('2d'), over = $('#arc-over'), overTitle = $('#arc-over-title'), overText = $('#arc-over-text'), go = $('#arc-go'), jumpBtn = $('#arc-jump'), live = $('#arc-live');
-    var W = 720, H = 270, GY = 218, DPR = 1, scale = 1;
+    var W = 720, H = 270, GY = 218, DPR = 1, scale = 1, oy = 0, VH = 270, topPad = 12; // W is the visible width in world units (720 in the card; wider on a full-bleed stage), oy the world's top inset so the 270-high scene sits centred with sky above and ground below
     var state = 'idle', raf = 0, last = 0, visible = false, hold = false;
     var P, obs, toks, speed, dist, score, got, nextObs, shake, sky, col, theme = '';
 
@@ -68,8 +68,11 @@
     }
 
     function resize() {
-      var w = cv.clientWidth || W; DPR = Math.min(window.devicePixelRatio || 1, 2);
-      cv.width = Math.round(w * DPR); cv.height = Math.round(w * H / W * DPR); scale = cv.width / W;
+      var cw = cv.clientWidth || 720, ch = cv.clientHeight || cw * 270 / 720; DPR = Math.min(window.devicePixelRatio || 1, 2);
+      // fit: the scene keeps its 270 world units of height (so jumps and speeds feel the same) and shows between 640 and 1000 units of width
+      var s = Math.max(Math.min(ch / 270, cw / 640), cw / 1000);
+      W = cw / s; VH = ch / s; oy = (VH - 270) / 2; topPad = cw < 560 ? 80 : 12; // on a phone the score sits below the tab strip
+      cv.width = Math.round(cw * DPR); cv.height = Math.round(ch * DPR); scale = DPR * s;
       if (state !== 'playing') draw(0);
     }
     if ('ResizeObserver' in window) new ResizeObserver(function () { if (!box.hidden) resize(); }).observe(cv);
@@ -160,10 +163,11 @@
 
     function draw(dt) {
       if (!col || theme !== root.getAttribute('data-theme')) colours();
-      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = col.bg; ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.setTransform(scale, 0, 0, scale, 0, oy * scale);
       var sx = shake > 0 ? (Math.random() - .5) * 10 * Math.min(1, shake * 4) : 0; if (shake > 0) shake = Math.max(0, shake - dt * 1.2);
       ctx.save(); ctx.translate(sx, 0);
-      ctx.fillStyle = col.bg; ctx.fillRect(-10, 0, W + 20, H);
+      ctx.fillStyle = col.bg; ctx.fillRect(-10, -oy, W + 20, VH);
       var s = sky || { far: 0, near: 0, ground: 0 };
       landmarks(s.far, GY - 6, col.soft);
       // near blocks
@@ -173,7 +177,8 @@
       // rail bed
       ctx.fillStyle = col.line; ctx.fillRect(0, GY, W, 3);
       ctx.fillStyle = col.ink; ctx.globalAlpha = .18; for (var k = -1; k < W / 40 + 1; k++) ctx.fillRect(k * 40 - s.ground, GY + 6, 22, 4); ctx.globalAlpha = 1;
-      ctx.fillStyle = col.surface; ctx.fillRect(0, GY + 12, W, H - GY);
+      ctx.fillStyle = oy > 1 ? col.soft : col.surface; ctx.fillRect(0, GY + 12, W, H - GY);
+      ctx.fillStyle = col.soft; ctx.fillRect(0, H, W, VH);
       if (P) {
         // tokens
         toks.forEach(function (o) {
@@ -199,8 +204,8 @@
       ctx.restore();
       // score
       ctx.fillStyle = col.ink; ctx.font = '700 15px ui-monospace,Menlo,monospace'; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
-      ctx.fillText(String(Math.floor(score || 0)).padStart(5, '0'), W - 14, 12);
-      ctx.globalAlpha = .6; ctx.fillText('best ' + (best.train || 0), W - 14, 32); ctx.globalAlpha = 1;
+      ctx.fillText(String(Math.floor(score || 0)).padStart(5, '0'), W - 14, topPad - oy);
+      ctx.globalAlpha = .6; ctx.fillText('best ' + (best.train || 0), W - 14, topPad + 20 - oy); ctx.globalAlpha = 1;
     }
 
     // controls

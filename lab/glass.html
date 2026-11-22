@@ -10,7 +10,16 @@
 @media (prefers-color-scheme:dark){:root{--bg:#081114;--surface:#0f1b20;--ink:#e6eff1;--muted:#93a7ae;--line:#1f3238;--accent:#4fc2c8;--accent-ink:#04211f}}
 :root[data-theme=dark]{--bg:#081114;--surface:#0f1b20;--ink:#e6eff1;--muted:#93a7ae;--line:#1f3238;--accent:#4fc2c8;--accent-ink:#04211f}
 :root[data-theme=light]{--bg:#f3f6f6;--surface:#fff;--ink:#0f1e24;--muted:#52636a;--line:#d6e0e2;--accent:#0a6c74;--accent-ink:#fff}
-.embed h1,.embed .w>p,.embed .note{display:none}.embed body{padding:12px}.embed .stage{border-radius:14px}
+.embed h1,.embed .w>p,.embed .note{display:none}
+.embed body{padding:0;overflow:hidden;background:#040915}.embed .w{max-width:none;margin:0}
+.embed .stage{position:fixed;inset:0;border:0;border-radius:0;aspect-ratio:auto;background:#040915}
+.embed .tag{left:16px;top:16px;bottom:auto}
+.embed .ctl{position:fixed;left:12px;right:12px;bottom:12px;margin:0;padding:10px 12px;gap:10px 16px;grid-template-columns:auto repeat(3,minmax(120px,1fr));align-items:center;background:rgba(6,12,28,.86);border:1px solid rgba(160,196,255,.28);border-radius:16px;color:#eaf1ff;max-height:46vh;overflow:auto}
+.embed .ctl label span{color:#9db6dc}
+.embed .ctl button{background:rgba(255,255,255,.08);color:#eaf1ff;border-color:rgba(160,196,255,.28)}
+.embed .ctl button[aria-pressed=true]{background:#2f6fe0;border-color:#8fb8ff;color:#fff}
+.embed input[type=range]{accent-color:#6aa8ff}
+@media (max-width:760px){.embed .ctl{grid-template-columns:1fr 1fr}.embed .ctl .row{grid-column:1/-1}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Albert Sans",system-ui,sans-serif;padding:0 16px 48px}
 .w{max-width:1000px;margin:0 auto}h1{font-size:clamp(1.8rem,5vw,2.8rem);line-height:1.1;margin:32px 0 8px}p{color:var(--muted);margin:0 0 16px;max-width:42em}
 .stage{position:relative;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--surface);aspect-ratio:16/10;touch-action:pan-y}
@@ -50,7 +59,7 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:32px}
     <p><b>Cost:</b> one full-screen triangle, eight texture taps per pixel, canvas capped at 1.5x pixel ratio. It stops drawing when off screen or in a hidden tab. With reduced motion it draws a single still frame and only redraws when you move the pointer.</p>
   </div>
 </div>
-<script src="../assets/glass.js?v=20261123a"></script>
+<script src="../assets/glass.js?v=20261123b"></script>
 <script>
 (function () {
   var cv = document.getElementById('cv'), stage = document.getElementById('stage');

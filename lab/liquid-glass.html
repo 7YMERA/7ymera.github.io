@@ -33,6 +33,13 @@ h1{margin:0;font:700 18px/1.2 "Bricolage Grotesque",sans-serif}
 .btn.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 textarea{width:100%;min-height:70px;resize:vertical;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:400 11px/1.4 "JetBrains Mono",monospace}
 @media (max-width:780px){.wrap{grid-template-columns:1fr;grid-template-rows:52vh auto;height:auto;min-height:100%}.panel{border-left:0;border-top:1px solid var(--line)}}
+/* inside the lab stage (?embed=1): the glass fills the view, the controls float over it as a dark panel */
+.embed body{overflow:hidden}.embed .wrap{display:block;height:100%;min-height:0}
+.embed .stage{position:absolute;inset:0;min-height:0}
+.embed .panel{position:absolute;z-index:2;right:12px;top:12px;bottom:12px;width:300px;max-height:calc(100% - 24px);border:1px solid rgba(160,196,255,.28);border-radius:16px;background:rgba(6,12,28,.86);color:#eaf1ff;--ink:#eaf1ff;--muted:#9db6dc;--line:rgba(160,196,255,.28);--accent:#6aa8ff;--accent-ink:#050912;--bg:#0c1428}
+.embed .panel h1{color:#eaf1ff}
+.embed .stage-hud{right:332px;color:#c5d6f2}
+@media (max-width:780px){.embed .panel{top:auto;left:12px;right:12px;bottom:12px;width:auto;max-height:42%}.embed .stage-hud{right:16px;bottom:auto;top:12px}.embed .stage-hud span:last-child{display:none}}
 </style>
 </head>
 <body>
@@ -65,13 +72,14 @@ textarea{width:100%;min-height:70px;resize:vertical;padding:8px;border-radius:8p
     </div>
   </aside>
 </div>
-<script src="/assets/home/glass-reveal.js?v=20261123a"></script>
+<script src="/assets/home/glass-reveal.js?v=20261123b"></script>
 <script>
 (function () {
   'use strict';
   var q = new URLSearchParams(location.search);
   var root = document.documentElement;
   if (q.get('theme') === 'dark') root.setAttribute('data-theme', 'dark');
+  if (q.get('embed')) root.classList.add('embed');
 
   var MARKS = [
     { name: '\\7 Mark', svg: '<svg xmlns="http://www.w3.org/2000/svg" width="312" height="224" viewBox="0 0 156 112"><path d="M12 8H40L81 108H53Z M94 8H154V29L122 108H96L127 31H94Z" fill="#000"/></svg>' },

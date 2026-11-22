@@ -34,6 +34,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-23 · Lab and game views fill the screen
+
+- `assets/play/play.css` (immersive + arcade blocks at the end; `.stage` grid fix `minmax(0,1fr)` stops a 390 px overflow), `play.js` (sets `data-v` on the stage), `lab/index.html` (`.hx-dock`), `lab/glass.html` + `lab/liquid-glass.html` (embed styles; liquid-glass gained `?embed=1`), `arcade.js` (Last Train fits 640–1000 world units wide, 270 high unchanged, spawns just off the visible edge). Every lab view and game fills the view under a dark header; controls float on dark panels; big Jump button bottom-centre. SQL toys left as they were (readability). Checked at 1920/1300/390, light and dark, all 6 lab and 5 play cabinets: no errors, Esc works. Key 20261123b.
+
 ## 2026-11-23 · Notes index on one centre axis
 
 - `assets/notes-index.css` rewritten: one container width (`--ni-w`, the top bar's 1128 px) for every section; centred hero card; the image stream is a flat full-width band centred on the page (lost its tilt on purpose); centred section heads; folder grids flex-wrap so a short last row sits on the centre; note list in the same container, odd last card centred. Measured: every container 0 px off the viewport centre at 1920/1440/1300/768/390, light and dark (was -268 px for the hero, +299–454 px for the stream). Satellite: starts zoomed out, smaller x-ray. Key 20261123a.
