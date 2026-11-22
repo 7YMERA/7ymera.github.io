@@ -73,8 +73,16 @@
       // collect triangles, subsampled to ~2200 max for silky 60fps 2D rendering on every device
       var strata = [[], [], [], [], []];
       function collect(idx, isGlass) {
-        var tris = idx.length / 3, step = Math.max(1, Math.floor(tris / (isGlass ? 900 : 1200)));
-        for (var t = 0; t < tris; t += step) {
+        // keep the biggest faces, not every Nth one: taking every Nth left the mesh full of holes and it read as static; the large faces carry the silhouette, the tiny ones are detail you cannot see at this size
+        var tris = idx.length / 3, cap = isGlass ? 1400 : 3000, order = [], t;
+        for (t = 0; t < tris; t++) {
+          var j0 = idx[t * 3] * 3, j1 = idx[t * 3 + 1] * 3, j2 = idx[t * 3 + 2] * 3;
+          var ex = pos[j1] - pos[j0], ey = pos[j1 + 1] - pos[j0 + 1], ez = pos[j1 + 2] - pos[j0 + 2], fx = pos[j2] - pos[j0], fy = pos[j2 + 1] - pos[j0 + 1], fz = pos[j2 + 2] - pos[j0 + 2];
+          order.push([Math.hypot(ey * fz - ez * fy, ez * fx - ex * fz, ex * fy - ey * fx), t]);
+        }
+        if (tris > cap) { order.sort(function (p, q) { return q[0] - p[0]; }); order.length = cap; }
+        for (var oi = 0; oi < order.length; oi++) {
+          t = order[oi][1];
           var i0 = idx[t * 3] * 3, i1 = idx[t * 3 + 1] * 3, i2 = idx[t * 3 + 2] * 3;
           var ax = (pos[i0] - cx) * scale, ay = (pos[i0 + 1] - minY) * scale, az = (pos[i0 + 2] - cz) * scale;
           var bx = (pos[i1] - cx) * scale, by = (pos[i1 + 1] - minY) * scale, bz = (pos[i1 + 2] - cz) * scale;
@@ -96,7 +104,7 @@
       }
       collect(bIdx, false);
       collect(gIdx, true);
-      var out = { strata: strata, hNorm: spanY * scale };
+      var out = { strata: strata, hNorm: spanY * scale, wNorm: Math.max(maxX - minX, maxZ - minZ) * scale };
       cache[lm.id] = out;
       return out;
     });
@@ -221,7 +229,7 @@
       var cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
       var spread = explode * 0.48;
       var totalH = data.hNorm + spread * 4;
-      var sc = Math.min(W, H) * 0.68 / Math.max(0.85, totalH * 0.92);
+      var sc = Math.min(H * 0.74 / Math.max(0.5, totalH), W * 0.9 / Math.max(0.3, data.wNorm || 0.6)); // fit the height of the stack (towers are tall and thin, fitting the shorter side left them tiny)
       var ox = W * 0.5, oy = H * 0.5 + (totalH * 0.44) * sc;
 
       // vertical axis centerline when exploded
@@ -278,8 +286,7 @@
           ctx.strokeStyle = 'rgba(100,145,210,0.08)';
         }
         ctx.fill();
-        ctx.lineWidth = 0.6 * dpr;
-        ctx.stroke();
+        if (activeBand === item.b) { ctx.lineWidth = 0.6 * dpr; ctx.stroke(); }
       }
 
       // callout ticks on the right for each stratum when exploded

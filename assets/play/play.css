@@ -227,3 +227,30 @@ body.play .top { z-index: 20; }
   .stage.is-open { animation: none; }
   .stk-banner.on { animation: none; opacity: 1; }
 }
+
+/* the hero's showcase (play.js, HS): a big live screen on the right that turns through every cabinet; big arrows and dots, click the screen to play */
+.hero-show { position: absolute; z-index: 2; right: clamp(16px, 5vw, 80px); top: clamp(70px, 14vh, 140px); width: min(44vw, 620px); display: grid; gap: 14px; }
+.hs-screen { position: relative; display: block; width: 100%; padding: 0; border: 3px solid var(--ink); border-radius: 18px; overflow: hidden; background: #071420; box-shadow: 8px 8px 0 color-mix(in srgb, var(--ink) 85%, transparent); cursor: pointer; transition: transform .2s; }
+.hs-screen:hover { transform: translate(-2px, -2px); }
+.hs-screen:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+.hs-screen canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; }
+.hs-tag { position: absolute; left: 12px; bottom: 12px; display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; background: rgba(4, 12, 20, .78); color: #eaf6f7; font: 600 .8125rem var(--f-body); }
+.hs-tag i { width: 8px; height: 8px; border-radius: 50%; background: #e14b3b; animation: led 1.2s ease-in-out infinite; }
+.hs-tag b { font: 600 .6875rem var(--f-pix); letter-spacing: .12em; text-transform: uppercase; color: var(--gold, #d9a441); }
+.hs-go { position: absolute; right: 12px; bottom: 12px; padding: 9px 16px; border-radius: 10px; background: var(--gold, #b47a16); color: #fff; font: 600 .9375rem var(--f-pix); letter-spacing: .06em; box-shadow: 3px 3px 0 rgba(0,0,0,.4); }
+.hs-ctrl { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.hs-btn { display: grid; place-items: center; width: 52px; height: 52px; flex: none; border: 2.5px solid var(--ink); border-radius: 14px; background: var(--surface); color: var(--ink); cursor: pointer; box-shadow: 3px 3px 0 var(--ink); }
+.hs-btn svg { width: 24px; height: 24px; }
+.hs-btn:hover { background: var(--accent); color: var(--accent-ink, #fff); }
+.hs-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.hs-dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.hs-dots button { width: 14px; height: 14px; padding: 0; border: 2px solid var(--ink); border-radius: 50%; background: transparent; cursor: pointer; transition: transform .2s; }
+.hs-dots button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); transform: scale(1.25); }
+.hero-show.hs-swap .hs-screen canvas { animation: hsFlick .45s steps(3) both; }
+@keyframes hsFlick { 0% { opacity: .2; transform: scaleY(.92); } 50% { opacity: .8; } 100% { opacity: 1; transform: none; } }
+.hero-play h1 .l2.hs-in { animation: hsIn .5s cubic-bezier(.2,.9,.3,1.2) both; }
+@keyframes hsIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.hero-play .lede { min-height: 4.6em; max-width: 34em; }
+@media (min-width: 981px) { .hero-in > *, .hero-play .hero-in .lede { max-width: min(40vw, 34rem); } }
+@media (max-width: 980px) { .hero-show { position: relative; right: auto; top: auto; width: auto; margin: 18px 16px 0; } }
+@media (prefers-reduced-motion: reduce) { .hero-show.hs-swap .hs-screen canvas, .hero-play h1 .l2.hs-in { animation: none; } }

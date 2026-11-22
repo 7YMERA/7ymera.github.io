@@ -29,14 +29,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@500;600&display=swap">
-<link rel="stylesheet" href="/assets/site.css?v=20261122c">
-<link rel="stylesheet" href="/assets/fx.css?v=20261122c">
-<link rel="stylesheet" href="/assets/cursor.css?v=20261122c">
-<link rel="stylesheet" href="/assets/arcade.css?v=20261122c">
-<link rel="stylesheet" href="/assets/halcyon.css?v=20261122c">
-<link rel="stylesheet" href="/assets/join-atlas.css?v=20261122c">
-<link rel="stylesheet" href="/assets/play/play.css?v=20261122c">
-<link rel="stylesheet" href="/assets/play/anatomy.css?v=20261122c">
+<link rel="stylesheet" href="/assets/site.css?v=20261122d">
+<link rel="stylesheet" href="/assets/fx.css?v=20261122d">
+<link rel="stylesheet" href="/assets/cursor.css?v=20261122d">
+<link rel="stylesheet" href="/assets/arcade.css?v=20261122d">
+<link rel="stylesheet" href="/assets/halcyon.css?v=20261122d">
+<link rel="stylesheet" href="/assets/join-atlas.css?v=20261122d">
+<link rel="stylesheet" href="/assets/play/play.css?v=20261122d">
+<link rel="stylesheet" href="/assets/play/anatomy.css?v=20261122d">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Play","url":"https://7ymera.github.io/play/","description":"Games and toys by Alif Najmi.","isPartOf":{"@type":"WebSite","name":"Alif Najmi","url":"https://7ymera.github.io/"}}</script>
 </head>
 <body class="play">
@@ -64,11 +64,19 @@
     <canvas id="attract" aria-hidden="true"></canvas>
     <div class="wrap hero-in">
       <p class="eyebrow hero-eye"><span class="led" aria-hidden="true"></span>Arcade hall · 13 cabinets · no coins needed</p>
-      <h1 id="play-h1"><span class="l1">Play</span><span class="l2">the skyline.</span></h1>
-      <p class="lede">An arcade, a lab and a toy box in one room. Stack Kuala Lumpur higher than Merdeka 118, ride the last train, spin the Earth, or run a real database in your browser.</p>
+      <h1 id="play-h1"><span class="l1">Play</span><span class="l2" id="hs-l2">the skyline.</span></h1>
+      <p class="lede" id="hs-lede">An arcade, a lab and a toy box in one room. Stack Kuala Lumpur higher than Merdeka 118, ride the last train, spin the Earth, or run a real database in your browser.</p>
       <div class="hero-cta">
         <button class="pix-btn" id="coin" type="button"><span class="pix-slot" aria-hidden="true"></span><span>Insert coin</span><small>Enter · Start</small></button>
         <a class="ghost-btn" href="#cabinets">See all cabinets</a>
+      </div>
+    </div>
+    <div class="hero-show" id="hero-show" role="region" aria-roledescription="carousel" aria-label="Now showing: every cabinet in turn">
+      <button class="hs-screen" id="hs-open" type="button" aria-label="Play the cabinet now showing"><canvas id="hs-cv" width="640" height="400" aria-hidden="true"></canvas><span class="hs-tag"><i aria-hidden="true"></i><b id="hs-kind">Game</b><span id="hs-name">Skyline Stack</span></span><span class="hs-go" aria-hidden="true">Play &#9654;</span></button>
+      <div class="hs-ctrl">
+        <button class="hs-btn" id="hs-prev" type="button" aria-label="Previous cabinet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>
+        <div class="hs-dots" id="hs-dots" role="tablist" aria-label="Choose a cabinet"></div>
+        <button class="hs-btn" id="hs-next" type="button" aria-label="Next cabinet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
       </div>
     </div>
     <div class="wrap hero-foot">
@@ -359,14 +367,14 @@
   paint();
 })();
 </script>
-<script src="/assets/sfx.js?v=20261122c" defer></script>
-<script src="/assets/fx.js?v=20261122c" defer></script>
-<script src="/assets/cursor.js?v=20261122c" defer></script>
-<script src="/assets/arcade.js?v=20261122c" defer></script>
-<script src="/assets/halcyon.js?v=20261122c" defer></script>
-<script src="/assets/play/stack.js?v=20261122c" defer></script>
-<script src="/assets/play/anatomy.js?v=20261122c" defer></script>
-<script src="/assets/play/pad.js?v=20261122c" defer></script>
-<script src="/assets/play/play.js?v=20261122c" defer></script>
+<script src="/assets/sfx.js?v=20261122d" defer></script>
+<script src="/assets/fx.js?v=20261122d" defer></script>
+<script src="/assets/cursor.js?v=20261122d" defer></script>
+<script src="/assets/arcade.js?v=20261122d" defer></script>
+<script src="/assets/halcyon.js?v=20261122d" defer></script>
+<script src="/assets/play/stack.js?v=20261122d" defer></script>
+<script src="/assets/play/anatomy.js?v=20261122d" defer></script>
+<script src="/assets/play/pad.js?v=20261122d" defer></script>
+<script src="/assets/play/play.js?v=20261122d" defer></script>
 </body>
 </html>

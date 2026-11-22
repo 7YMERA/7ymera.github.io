@@ -30,6 +30,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · Play: a showcase in the hero, a clean Skyline anatomy
+- Owner: the cabinets felt hidden and the anatomy lab looked like white noise. `play.js` (`HS`): the hero now has a big live screen on the right that turns through nine cabinets every 5 s (games, labs, a data toy), with big arrows and dots; the title's second line ("the skyline." / "the last train." / "with buildings." ...), the lede and Insert coin follow it, and a click on the screen plays it. Pauses on hover and focus, no auto-turn with reduced motion.
+- `anatomy.js`: the mesh kept every Nth triangle, so it was full of holes and read as static; it now keeps the 3000 largest faces (1400 glass), fits the stack's height, and draws no outline on every triangle (only the picked stratum). Key `20261122d`.
+
 ## 2026-11-22 · Portfolio back on the city, a light dusk instead of night
 - Owner: the centred panel looked plain and the night was too dark and hard on the eyes; wanted the old side layout with the camera showing the landmarks, and the grey wash at the day/night flip gone. `portfolio.css`: the sheet behind every section is gone; Notes and UTP sit left (`side-l`), Experience right (`side-r`), the split skill tree is back, and the `#workstage` (Menara KL) and `#merdekastage` (Merdeka 118) spacers return so the director's shots show again.
 - `daycycle.js`: the end of the cycle is a light dusk (`DUSK` tokens: periwinkle paper, navy ink) instead of the dark theme, the sky ends lilac and peach, the city stops at t 1.7 (windows lit, sky light), and `data-theme` never flips, so there is no grey crossover. Dial says Day / Golden hour / Dusk. Key `20261122c`.

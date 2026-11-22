@@ -227,7 +227,7 @@
   function coin() {
     var b = $('#coin'); if (b) { b.classList.remove('drop'); void b.offsetWidth; b.classList.add('drop'); }
     beep(988, .07, 'square', .05); setTimeout(function () { beep(1319, .3, 'square', .05); }, 80);
-    setTimeout(function () { open('stack', { opener: $('.cab[data-open="stack"]') }); }, calm() ? 0 : 320);
+    var id = hsCur(); setTimeout(function () { open(id, { opener: $('.cab[data-open="' + id + '"]') }); }, calm() ? 0 : 320);
   }
   $('#coin').addEventListener('click', coin);
 
@@ -515,6 +515,52 @@
   new MutationObserver(function () { aTheme = ''; if (calm() || !aRaf) aDraw(performance.now() / 1000); }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
   aPal(); aResize(); aWake();
   if (calm()) aDraw(7.3);
+
+  /* =====================================================================
+     the hero's showcase: every cabinet in turn, a live screen on the right; the second line of the title, the lede and Insert coin follow it
+     ===================================================================== */
+  var HS = [
+    ['stack', 'Game', 'Skyline Stack', 'the skyline.', 'One button, one tower. Stack Kuala Lumpur floor by floor, past Menara TM, KL Tower and Petronas, all the way up Merdeka 118.'],
+    ['train', 'Game', 'Last Train', 'the last train.', 'Ride the KL line, jump the scope creep and grab every requirement before the last train home.'],
+    ['creep', 'Game', 'Scope Creep', 'the backlog.', 'Forty-five seconds of triage. Real requirement or creep? Build it or park it.'],
+    ['match', 'Game', 'Spec Match', 'the stack.', 'Pair each tool with the project it shipped in. Fewest moves wins.'],
+    ['orbit', 'Lab', 'Orbit', 'the planet.', 'Spin the Earth from 408 km up, with arcs flying out of Kuala Lumpur.'],
+    ['lab', 'Lab', 'Particle lab', 'with particles.', 'Thousands of points that morph between a Chladni plate, the Earth and the KL towers.'],
+    ['anatomy', 'Lab', 'Skyline anatomy', 'with buildings.', 'The real tower models sliced into floors. Pull the slider and they come apart like a watch.'],
+    ['lglass', 'Lab', 'Liquid Glass Lab', 'with glass.', 'Bend light through a liquid glass lens, tune every slider, paste your own logo.'],
+    ['sql-company', 'Toy', 'Company SQL', 'with data.', 'A real database and a real SQL engine, running in your browser. Break nothing, query anything.']
+  ];
+  var hsI = 0, hsCv = $('#hs-cv'), hsG = hsCv && hsCv.getContext('2d'), hsRaf = 0, hsLast = 0, hsHold = false, hsTimer = 0, hsVis = true;
+  function hsCur() { return hsCv ? HS[hsI][0] : 'stack'; }
+  function hsPvKey(id) { return id.indexOf('sql') === 0 ? 'sql' : id; }
+  function hsDraw(t) { if (!hsG) return; var fn = PV[hsPvKey(hsCur())]; hsG.setTransform(hsCv.width / PW, 0, 0, hsCv.height / PH, 0, 0); hsG.textBaseline = 'alphabetic'; hsG.textAlign = 'left'; try { fn(hsG, t); } catch (e) {} }
+  function hsLoop(ms) { hsRaf = 0; if (!hsVis || d.hidden || cur) return; if (ms - hsLast >= 32) { hsLast = ms; hsDraw(ms / 1000); } if (!calm()) hsRaf = requestAnimationFrame(hsLoop); }
+  function hsWake() { if (!hsRaf && hsCv) hsRaf = requestAnimationFrame(hsLoop); }
+  function hsSet(i, user) {
+    if (!hsCv) return; hsI = (i + HS.length) % HS.length; var s = HS[hsI];
+    var sh = $('#hero-show'); sh.classList.remove('hs-swap'); void sh.offsetWidth; sh.classList.add('hs-swap');
+    $('#hs-kind').textContent = s[1]; $('#hs-name').textContent = s[2];
+    var l2 = $('#hs-l2'), le = $('#hs-lede');
+    if (l2) { l2.classList.remove('hs-in'); void l2.offsetWidth; l2.textContent = s[3]; l2.classList.add('hs-in'); }
+    if (le) le.textContent = s[4];
+    $$('#hs-dots button').forEach(function (b, k) { b.setAttribute('aria-selected', k === hsI ? 'true' : 'false'); b.tabIndex = k === hsI ? 0 : -1; });
+    var tg = $('.attract-tag'); if (tg) tg.lastChild.textContent = 'Now showing · ' + s[2];
+    hsDraw(performance.now() / 1000); hsArm(user);
+  }
+  function hsArm(user) { clearTimeout(hsTimer); if (calm()) return; hsTimer = setTimeout(function () { if (hsHold || cur || d.hidden || !hsVis) { hsArm(); return; } hsSet(hsI + 1); }, user ? 9000 : 5200); }
+  if (hsCv) {
+    var dots = $('#hs-dots');
+    HS.forEach(function (s, k) { var b = d.createElement('button'); b.type = 'button'; b.setAttribute('role', 'tab'); b.setAttribute('aria-label', s[2]); b.title = s[2]; b.addEventListener('click', function () { hsSet(k, true); }); dots.appendChild(b); });
+    $('#hs-prev').addEventListener('click', function () { hsSet(hsI - 1, true); });
+    $('#hs-next').addEventListener('click', function () { hsSet(hsI + 1, true); });
+    $('#hs-open').addEventListener('click', function () { var id = hsCur(); open(id, { opener: $('.cab[data-open="' + id + '"]') }); });
+    var shw = $('#hero-show');
+    shw.addEventListener('pointerenter', function () { hsHold = true; }); shw.addEventListener('pointerleave', function () { hsHold = false; });
+    shw.addEventListener('focusin', function () { hsHold = true; }); shw.addEventListener('focusout', function () { hsHold = false; });
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (en) { hsVis = en[0].isIntersecting; hsWake(); }).observe(shw);
+    d.addEventListener('visibilitychange', hsWake); d.addEventListener('play-view', function (e) { if (!e.detail.id) setTimeout(hsWake, 0); });
+    hsSet(0); hsWake(); if (calm()) hsDraw(2.4);
+  }
 
   /* =====================================================================
      start up
