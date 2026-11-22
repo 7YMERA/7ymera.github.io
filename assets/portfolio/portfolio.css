@@ -234,7 +234,7 @@ html body.pf .contact h2 em { padding-right: 0; }
 html body.pf #notes { width: auto; }
 #notes .nb-head { justify-content: center; text-align: center; }
 #notes .nb-head > div { justify-items: center; margin-inline: auto; max-width: 40rem; }
-.nb-rail { display: flex; align-items: flex-end; gap: 40px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: none; margin-inline: calc(50% - 50vw); padding: 110px max(24px, calc(50vw - 720px)) 28px; justify-content: safe center; }
+.nb-rail { display: flex; align-items: flex-end; gap: 28px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: none; margin-inline: calc(50% - 50vw); padding: 110px max(24px, calc(50vw - 720px)) 28px; justify-content: safe center; }
 .nb-rail::-webkit-scrollbar { display: none; }
 .nb-rail:focus-visible { outline: 3px solid var(--accent); outline-offset: -6px; }
 .nb-rail > .fd-grid { display: contents; }
@@ -252,5 +252,13 @@ html body.pf #notes { width: auto; }
 .nb-rail-ctrl .hs-btn svg { width: 24px; height: 24px; }
 .nb-rail-ctrl .hs-btn:hover { background: var(--accent); color: var(--accent-ink, #fff); }
 @media (min-width: 1500px) { .nb-rail-ctrl { display: none; } }
-.nb-rail .fd { width: 330px; }
+.nb-rail .fd { width: 310px; }
 #notes .nb-head { display: grid; justify-items: center; padding: 22px 28px; margin: 0 auto; max-width: 44rem; background: color-mix(in srgb, var(--bg) 92%, transparent); border: 2px solid var(--fx); border-radius: 16px; box-shadow: 5px 5px 0 var(--hard); }
+
+/* the "master file": the last folder is every note, a darker navy folder that peeks open on hover and is one big link to /notes/ (folders.js, f.link) */
+.fd--master .fd-tint { background: linear-gradient(180deg, rgba(20, 30, 70, .92), rgba(12, 18, 46, .96)) !important; }
+.fd--master .fd-title, .fd--master .fd-meta { color: #fff !important; }
+.fd--master .fd-kicker { color: #ffc44d !important; }
+.fd--master .fd-open-hint { background: #ffc44d !important; color: #1a1300 !important; }
+.fd--master .fd-hit { display: block; }
+.fd--master:hover, .fd--master:focus-within { --hinge: -16deg; --lift: -60px; --spread: 22px; --fan: 3deg; --stack: 18px; }

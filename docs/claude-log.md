@@ -30,6 +30,9 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · The "master file"
+- Owner: make See all a folder too. `folders.js` takes `link`, `hint`, `metaText`, `linkLabel` on a folder: such a folder (`.fd--master`, dark navy in `portfolio.css`) peeks its files open on hover and is one big link. The portfolio row ends on "All notes · Master file", linking to /notes/. Folders 310 px, gap 28 px so all four fit at 1440 px. Key `20261122i`.
+
 ## 2026-11-22 · Portfolio notes: one centred row ending on "See all"
 - Owner: the 2 + 1 folder layout looked lopsided. `#notes` is no longer `side-l`: a centred heading, then one full-width row (`.nb-rail`, scrolls sideways with snap, arrows under 1500 px) of the three pinned folders ending on a dark "See all 12 notes" card. Key `20261122h`.
 

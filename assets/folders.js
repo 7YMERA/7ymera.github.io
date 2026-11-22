@@ -35,7 +35,8 @@
           art + '<span class="fd-sheet-head"><span class="fd-sheet-name">' + esc(file.name) + '</span>' + (file.meta ? '<span class="fd-sheet-meta">' + esc(file.meta) + '</span>' : '') + '</span></a>';
       }).join('');
       var count = f.files.length + (f.files.length === 1 ? ' item' : ' items');
-      return '<div class="fd" data-tone="' + (f.tone || 'light') + '">' +
+      var link = f.link ? ' href="' + esc(f.link) + '"' : ''; // a folder with a link (the "master file") is one big link: it peeks open on hover and takes you there on click
+      return '<div class="fd' + (f.link ? ' fd--master' : '') + '" data-tone="' + (f.tone || 'light') + '">' +
         '<div class="fd-stage"><div class="fd-tilt">' +
           '<div class="fd-shadow" aria-hidden="true"></div>' +
           '<div class="fd-back" style="clip-path:path(\'' + BACK + '\')" aria-hidden="true"><img class="fd-art" src="' + esc(f.cover) + '" alt="" loading="lazy" draggable="false"><div class="fd-back-sheen"></div></div>' +
@@ -44,9 +45,9 @@
           '<div class="fd-front" style="clip-path:path(\'' + FRONT + '\')">' +
             '<div class="fd-tint" aria-hidden="true"></div>' +
             '<svg class="fd-rim fd-front-rim" viewBox="0 0 ' + W + ' ' + FRONT_H + '" aria-hidden="true"><defs><linearGradient id="fd-rim-' + fi + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".35" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient></defs><path d="' + FRONT + '" stroke="url(#fd-rim-' + fi + ')"/></svg>' +
-            '<button type="button" class="fd-hit" aria-expanded="false" aria-label="Open ' + esc(f.label) + ', ' + count + '"></button>' +
-            '<div class="fd-label"><span class="fd-kicker">' + esc(f.kicker || '') + '</span><span class="fd-title">' + esc(f.label) + '</span><span class="fd-meta">' + count + '</span></div>' +
-            '<span class="fd-open-hint" aria-hidden="true">Open <b>→</b></span>' +
+            (f.link ? '<a class="fd-hit"' + link + ' aria-label="' + esc(f.label) + ': ' + esc(f.linkLabel || 'open') + '"></a>' : '<button type="button" class="fd-hit" aria-expanded="false" aria-label="Open ' + esc(f.label) + ', ' + count + '"></button>') +
+            '<div class="fd-label"><span class="fd-kicker">' + esc(f.kicker || '') + '</span><span class="fd-title">' + esc(f.label) + '</span><span class="fd-meta">' + esc(f.metaText || count) + '</span></div>' +
+            '<span class="fd-open-hint" aria-hidden="true">' + esc(f.hint || 'Open') + ' <b>→</b></span>' +
           '</div>' +
         '</div></div></div>';
     }).join('');
@@ -62,7 +63,7 @@
       else if (openOne === root) openOne = null;
     }
     roots.forEach(function (root) {
-      root.querySelector('.fd-hit').addEventListener('click', function () { setOpen(root, !root.hasAttribute('data-open')); });
+      if (!root.classList.contains('fd--master')) root.querySelector('.fd-hit').addEventListener('click', function () { setOpen(root, !root.hasAttribute('data-open')); });
       // the light follows the cursor (mouse only), written straight to the element
       var raf = 0, px = 0, py = 0;
       root.addEventListener('pointermove', function (e) {
