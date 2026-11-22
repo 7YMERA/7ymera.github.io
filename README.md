@@ -200,7 +200,7 @@ Every interactive piece below started as a React + Tailwind component on [21st.d
 | 1 | **Tilted Grid Hero** | A single row of screenshots running round the inside of a cylinder ("Spin" reel) | `assets/curved-reel.js` | Behind the opening | ✅ live |
 | 2 | **Aurora Background** | A pre-rendered aurora *image* that slides with `transform` | CSS `.sky`, `.aurora` + `assets/aurora-*.webp` | Nothing now: the home page and the notes pages both use the city (the CSS is kept in `site.css`) | 💤 unused |
 | 3 | **Tumble Deck Showcase** | A scroll-driven stack of cards that tip forward one by one | `assets/tumble-deck.js` | — | 💤 in the repo, not on the page |
-| 4 | **Image Stream Hero** | One-sided corridor of images flowing towards you | `assets/image-stream.js` | Notes page header (`notes/`) | ✅ live |
+| 4 | **Image Stream Hero** | One-sided corridor of images flowing towards you | `assets/image-stream.js` | Notes page header (`notes/`), as a flat centred band | ✅ live |
 | 5 | **Circular Testimonials** | Photo carousel with side photos tilted behind, text that blurs in word by word | `extras.js` (*This is me* block) | REQ-001 card | ✅ live |
 | 6 | **Coverflow Carousel** | Album-style covers turned away on each side, detail panel below | `assets/coverflow.js` | UTP section | ✅ live |
 | 7 | **Glassmorphism Folder Cards** | Glass folders that lean on hover and fan out their files when opened | `assets/folders.js` | Notes section | ✅ live |
@@ -464,6 +464,8 @@ Measured with Playwright and Chrome DevTools' CPU throttling (×4), scrolling th
 ## The notes
 
 Long-form write-ups in `notes/`, linked from the Notes folders and listed at [`/notes/`](https://7ymera.github.io/notes/):
+
+The index page (`notes/index.html`, `assets/notes-index.css`) is built on one centre axis: a centred hero card, a flat full-width image stream whose wall is centred on the page, centred section heads, flex-wrapped folder grids (a short last row stays on the middle line) and the note list, all inside the same container as the top bar (`--ni-w`). Keep new blocks in that container.
 
 | Note | About |
 |---|---|

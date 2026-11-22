@@ -34,6 +34,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-23 · Notes index on one centre axis
+
+- `assets/notes-index.css` rewritten: one container width (`--ni-w`, the top bar's 1128 px) for every section; centred hero card; the image stream is a flat full-width band centred on the page (lost its tilt on purpose); centred section heads; folder grids flex-wrap so a short last row sits on the centre; note list in the same container, odd last card centred. Measured: every container 0 px off the viewport centre at 1920/1440/1300/768/390, light and dark (was -268 px for the hero, +299–454 px for the stream). Satellite: starts zoomed out, smaller x-ray. Key 20261123a.
+
 ## 2026-11-22 · Hide HUD in the drone view; a hold before free fly
 
 - `scene.js` + `scene.css`: a big "Hide HUD" toggle (top right of the flight, front page only; /flight/ has its own UI switch) hides the cockpit, captions, picker, skip, hints and finale buttons; remembered in localStorage `hud-off`.
