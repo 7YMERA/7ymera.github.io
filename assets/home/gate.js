@@ -27,8 +27,12 @@
   var forced = q === '1';
   var path = location.pathname.replace(/index\.html$/, '');
   var onFront = path === '/' || path === '';
-  if (!(forced || (onFront && !ss('gate-seen') && !location.hash)) || q === '0') return;
+  // every load of the front page starts at the gate (owner, 22 Nov): it is also the gesture that lets the sound play
+  if (!(forced || (onFront && !location.hash)) || q === '0') return;
   if (!d.addEventListener || !w.requestAnimationFrame) return;
+  // a refresh lands back at the top, at the gate, not mid-flight where the browser would restore the scroll
+  try { if ("scrollRestoration" in history) history.scrollRestoration = "manual"; } catch (e) { /* ignore */ }
+  w.scrollTo(0, 0);
 
   var reduce = !!(w.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   var waiting = [], gate = { open: false, then: function (fn) { if (gate.open) { try { fn(); } catch (e) { /* ignore */ } } else waiting.push(fn); } };
@@ -96,7 +100,7 @@
           '</div>' +
         '</div>' +
         '<p class="gate-hp" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4.5" height="7" rx="1.6"/><rect x="16.5" y="14" width="4.5" height="7" rx="1.6"/></svg><span>Best with headphones</span></p>' +
-        '<p class="gate-credit" aria-hidden="true">Earth: NASA 3D Resources</p>' +
+        '<p class="gate-credit" aria-hidden="true">Earth: NASA 3D Resources · NASA Blue Marble</p>' +
       '</div>' +
       '<p class="gate-sr" id="gate-desc">Entry screen. Choose Get started to enter with sound, or Enter without sound.</p>';
 
