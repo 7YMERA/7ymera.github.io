@@ -720,6 +720,8 @@
   function placeHint() {
     if (!hint) return; var r = btn && btn.getBoundingClientRect();
     // bottom centre: the top strip holds the flight compass and HDG readout
+    if (innerWidth < 700) { hint.style.top = '78px'; hint.style.bottom = 'auto'; hint.style.left = '50%'; hint.style.right = 'auto'; hint.style.marginLeft = '-' + Math.round(hint.offsetWidth / 2) + 'px'; return; }
+    // phones: under the site bar, clear of the telemetry and tabs at the bottom
     { hint.style.bottom = '24px'; hint.style.left = '50%'; hint.style.right = 'auto'; hint.style.top = 'auto'; hint.style.marginLeft = '-' + Math.round(hint.offsetWidth / 2) + 'px'; }
   }
   function hideHint() { if (!hint) return; var h = hint; hint = null; h.classList.remove('on'); setTimeout(function () { if (h.parentNode) h.parentNode.removeChild(h); }, 800); }

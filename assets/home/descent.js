@@ -10,7 +10,7 @@
  */
 (function () {
   'use strict';
-  var KL = [3.139, 101.687], D2R = Math.PI / 180;
+  var KL = [3.139, 101.687], D2R = Math.PI / 180, RIDE_FROM = .88; // RIDE_FROM: same constant as scene.js
   var CITIES = [
     { name: 'Kuala Lumpur', tag: 'HOME · HQ', lat: 3.139, lon: 101.687, km: 0 },
     { name: 'UTP · Seri Iskandar', tag: 'ALMA MATER', lat: 4.382, lon: 100.979, km: 158 },
@@ -62,6 +62,7 @@
     opts = opts || {};
     this.sec = section; this.cv = section.querySelector('canvas'); this.ctx = this.cv.getContext('2d', { alpha: false });
     this.stage = section.querySelector('.ds-stage');
+    this.hold = clamp(parseFloat(section.getAttribute('data-hold')) || 0, 0, .6);
     this.reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.p = 0; this.ps = 0; this.v = 0; this.visible = false; this.raf = 0; this.last = 0; this.cache = {}; this.t = 0;
     this.land = null; this.mx = 0; this.my = 0; this.tmx = 0; this.tmy = 0; this.px = -999; this.py = -999;
@@ -106,8 +107,10 @@
   };
 
   Descent.prototype.readScroll = function () {
-    var r = this.sec.getBoundingClientRect(), span = Math.max(1, r.height - innerHeight);
-    this.p = clamp(-r.top / span, 0, 1);
+    var r = this.sec.getBoundingClientRect(), span = Math.max(1, r.height - innerHeight), q = clamp(-r.top / span, 0, 1), h = this.hold;
+    // the first `hold` of the section's scroll belongs to the satellite (satellite.js); the map stays at 0, then runs so that it still
+    // reaches RIDE_FROM (where scene.js starts the drone flight) at the same raw .88 of the section
+    this.p = q <= h ? 0 : clamp((q - h) / (RIDE_FROM - h) * RIDE_FROM, 0, 1);
   };
 
   Descent.prototype.loadLand = function () {

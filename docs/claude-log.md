@@ -30,6 +30,13 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · Hero satellite with the mirage x-ray (3.3)
+
+- Orbit chapter opens on a big hero satellite (`assets/home/sat/satellite.js` rewritten): PBR look per material, PMREM space env, ACES; plexus, lens flare, follow label. DataScan x-ray re-made from the mirage study: a cursor-targeted, speed-grown, noise-edged reveal with a comet trail over the whole model, closing ~1 s after the cursor stops. GPM/TRMM/AIM as big tabs; Explode with part labels; X-ray sweep button (key x). The Inspect overlay is gone.
+- `#descent` is 700svh with `data-hold=".2"`: the satellite owns the first 20%, then flies past and the KL zoom runs; the flight still starts at 0.88.
+- Sound on by default on every page. Rail map: every line drawn plainly, no status chips. Sound hint sits under the site bar on phones. Key 20261122l.
+- Open: no real-GPU fps check, real touch drag untested, GPM x-ray at 390 untested.
+
 ## 2026-11-22 · Immersion pass (3.2)
 
 - Front page: the glass reveal plays once and rests glossy (sheen, breath, pointer rim light), no replay. Sound is on by default on `/` (starts on the first tap/click/key; scroll can't start audio), with glass / cosmos / city zones and cues.
