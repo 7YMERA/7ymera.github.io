@@ -180,14 +180,14 @@ html.flying .rail { opacity: 0; pointer-events: none; }
 .sat-tag .cap { color: #ffd27a; } .sat-tag .cap span, .sat-tag .cap em { color: #ffd27a; }
 .sat-tag-full { margin: 6px 0 0; font: 500 .72rem/1.35 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: #eaf3ff; }
 .sat-tag-note { margin: 4px 0 0; font: 400 .66rem/1.45 var(--f-mono); letter-spacing: .06em; color: #8fb2d8; }
-.sat-go { position: absolute; right: 26px; bottom: 214px; display: inline-flex; align-items: center; gap: 14px; min-height: 64px; padding: 10px 22px 10px 16px; border: 1px solid #ffd27a; background: rgba(4, 10, 26, .72); color: #fff; font: inherit; text-align: left; cursor: pointer; transition: background .25s, color .25s, transform .25s; }
+.sat-go { position: absolute; right: 70px; bottom: 214px; display: inline-flex; align-items: center; gap: 14px; min-height: 64px; padding: 10px 22px 10px 16px; border: 1px solid #ffd27a; background: rgba(4, 10, 26, .72); color: #fff; font: inherit; text-align: left; cursor: pointer; transition: background .25s, color .25s, transform .25s; }
 .sat-go svg { width: 34px; height: 34px; color: #ffd27a; flex: none; transition: color .25s; }
 .sat-go small { display: block; font: 500 .625rem/1 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: #9fb8dc; margin-bottom: 7px; transition: color .25s; }
 .sat-go b { display: block; font: 600 1.125rem/1 var(--f-body); letter-spacing: .06em; text-transform: uppercase; }
 .sat-go:hover, .sat-go:focus-visible { background: #ffd27a; color: #050912; transform: translateY(-2px); } .sat-go:hover svg, .sat-go:hover small, .sat-go:focus-visible svg, .sat-go:focus-visible small { color: #050912; }
 .sat-go::before { content: ""; position: absolute; inset: -6px; border: 1px solid rgba(255, 210, 122, .35); animation: satPulse 2.6s ease-out infinite; pointer-events: none; }
 @keyframes satPulse { 0% { opacity: .9; transform: scale(.98); } 100% { opacity: 0; transform: scale(1.06, 1.25); } }
-.sat-credit { position: absolute; margin: 0; right: 26px; bottom: 186px; font: 400 .625rem/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: #7f9cc4; }
+.sat-credit { position: absolute; margin: 0; right: 70px; bottom: 186px; font: 400 .625rem/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: #7f9cc4; }
 .sat-failed .sat-amb, .sat-failed .sat-ins, .sat-failed .sat-cv { display: none; }
 .sat-loading .sat-go b::after { content: " …"; }
 /* inspector */
@@ -255,5 +255,5 @@ html.flying .rail { opacity: 0; pointer-events: none; }
 @media (max-width: 700px) {
   .ds-rail { left: 12px; right: 12px; top: 112px; width: auto; justify-items: stretch; gap: 6px; }
   .rl-tog { justify-content: space-between; min-height: 48px; } .rl-card { padding: 10px 12px 8px; } .rl-card .cap { display: none; }
-  .rl-card ul { grid-template-columns: 1fr 1fr; gap: 6px 10px; } .rl-card li { grid-template-columns: 18px 1fr; font-size: .6rem; } .rl-card li span { grid-column: 2; } .chip { font-size: .5rem; padding: 2px 5px; } .rl-note { margin-top: 8px; font-size: .52rem; }
+  .rl-card ul { gap: 5px; } .rl-card li { grid-template-columns: 22px 1fr auto; gap: 0 8px; font-size: .62rem; } .rl-card li i { grid-row: auto; } .rl-card li span { grid-column: 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .rl-card li .chip { grid-column: 3; font-size: .46rem; padding: 2px 4px; } .rl-note { margin-top: 6px; font-size: .5rem; }
 }

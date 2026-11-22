@@ -41,7 +41,7 @@
     [/glass|lens/i, 'Optics'], [/white/i, 'White panels']
   ];
   function cleanName(raw, rules) {
-    var s = String(raw || '').replace(/^TRMM\s*\[|\]$/g, '').replace(/^Pivot-/, '');
+    var s = String(raw || '').replace(/^TRMM[_ ]*\[?|\]$/g, '').replace(/^Pivot-/, '').replace(/_\d+$/, '').replace(/([a-z])([A-Z])/g, '$1 $2');
     if (rules) {
       for (var i = 0; i < RULES.length; i++) if (RULES[i][0].test(s)) return RULES[i][1];
     }
@@ -77,12 +77,14 @@
   var XVERT = 'varying vec3 vN; varying vec3 vV; varying vec3 vP;\nvoid main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz); vP = (modelMatrix * vec4(position, 1.0)).xyz; gl_Position = projectionMatrix * mv; }';
   var XFRAG = 'uniform float uX; uniform float uT; uniform float uScan; uniform float uW; uniform vec3 uCol;\nvarying vec3 vN; varying vec3 vV; varying vec3 vP;\n' +
     'void main(){ float f = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), 2.2); float dy = (vP.y - uScan) / uW; float scan = exp(-dy * dy); float hatch = 0.55 + 0.45 * sin(vP.y * 140.0 - uT * 3.0);\n' +
-    'vec3 c = uCol * (f * 1.25 + 0.05) + vec3(0.55, 0.92, 1.0) * scan * (0.55 + 0.45 * hatch) * 1.1; gl_FragColor = vec4(c * uX, 1.0); }';
+    'vec3 c = uCol * (f * 2.2 + 0.1) + vec3(0.55, 0.92, 1.0) * scan * (0.55 + 0.45 * hatch) * 2.2; gl_FragColor = vec4(c * uX * 0.16, 1.0); }';
 
+  var XDARK = null;
   function Sat(section) {
     var me = this;
     this.sec = section; this.stage = section.querySelector('.ds-stage');
     this.THREE = null; this.renderer = null; this.cache = {}; this.cur = null; this.curKey = 'gpm';
+    try { var qs = /[?&]sat=(gpm|trmm|aim)\b/.exec(location.search); if (qs) this.curKey = qs[1]; } catch (e) { /* default */ }
     this.open = false; this.k = 0; this.kT = 0; this.e = 0; this.eT = 0; this.x = 0; this.xT = 0; this.xForce = false; this.hover = false; this.hoverPart = -1;
     this.zoom = 1; this.zoomT = 1; this.vx = 0; this.vy = 0; this.drag = null; this.ptrs = {}; this.pinch0 = 0; this.idle = 0;
     this.p = 0; this.near = false; this.far = false; this.raf = 0; this.last = 0; this.lastDraw = 0; this.t = 0; this.alpha = 0; this.ready = false; this.failed = false;
@@ -169,7 +171,7 @@
   };
   Sat.prototype.stop = function () {
     if (this.raf) cancelAnimationFrame(this.raf); this.raf = 0;
-    var me = this;
+    var me = this; if (!this.open && (this.p >= .3 || !this.near)) { this.amb.style.visibility = 'hidden'; this.amb.style.opacity = 0; this.cv.style.opacity = 0; }
     if (this.renderer && !this.relT) this.relT = setTimeout(function () { me.relT = 0; if (!me.running()) me.release(); }, 3500);
   };
   Sat.prototype.release = function () {
@@ -223,12 +225,12 @@
       items.push({ geo: g, mat: o.material, mesh: o.name || '', matName: (o.material && o.material.name) || '' });
     });
     var c = box.getCenter(new T.Vector3()), s = 1 / (box.getSize(new T.Vector3()).length() / 2);
-    var useMat = items.length > 1 && items.every(function (it) { return /^(Fake|Mesh|Object|Group|Cube|Scene)/i.test(it.mesh) || !it.mesh; });
+    var GEN = /^(Fake|Mesh\d*|Object|Group|Cube|Scene|BrowserInput)/i;
     var tris = 0;
     items.forEach(function (it, n) {
       it.geo.translate(-c.x, -c.y, -c.z); it.geo.scale(s, s, s); it.geo.computeBoundingBox(); it.geo.computeBoundingSphere();
       it.box = it.geo.boundingBox.clone(); it.center = it.box.getCenter(new T.Vector3()); it.diag = it.box.getSize(new T.Vector3()).length();
-      it.label = cleanName(useMat ? it.matName : (it.mesh || it.matName), useMat); it.n = n;
+      it.label = GEN.test(it.mesh) || !it.mesh ? cleanName(it.matName, true) : cleanName(it.mesh, false); it.n = n;
       tris += (it.geo.index ? it.geo.index.count : it.geo.attributes.position.count) / 3;
       var len = it.center.length(), dir = it.center.clone();
       if (len < .09) { var a = (n * 2.399963) % 6.2832, y = ((n * .618) % 1) * 2 - 1, r = Math.sqrt(1 - y * y); dir.set(Math.cos(a) * r, y, Math.sin(a) * r); len = .09; }
@@ -245,33 +247,23 @@
     if (this.renderer) return true;
     var T = this.THREE; if (!T) return false;
     var r;
-    try { r = new T.WebGLRenderer({ canvas: this.cv, alpha: true, antialias: true, powerPreference: 'high-performance' }); } catch (e) { this.failed = true; this.stage.classList.add('sat-failed'); return false; }
+    try { r = new T.WebGLRenderer({ canvas: this.cv, alpha: true, antialias: this.W >= 720, powerPreference: 'high-performance' }); } catch (e) { this.failed = true; this.stage.classList.add('sat-failed'); return false; }
     r.setClearColor(0x000000, 0); r.outputEncoding = T.sRGBEncoding; r.toneMapping = T.ACESFilmicToneMapping; r.toneMappingExposure = 1.15;
     this.renderer = r;
     if (!this.scene) {
       var sc = this.scene = new T.Scene(), cam = this.cam = new T.PerspectiveCamera(32, 1, .1, 50); cam.position.set(0, 0, 6.4);
-      var key = new T.DirectionalLight(0xfff1dc, 2.6); key.position.set(-3, 3.2, 4); sc.add(key);
+      var key = new T.DirectionalLight(0xfff1dc, 2.0); key.position.set(-3, 3.2, 4); sc.add(key);
       var rim = new T.DirectionalLight(0x6fb4ff, 2.2); rim.position.set(4, -1, -3); sc.add(rim);
-      var fill = new T.HemisphereLight(0x9fc4ff, 0x10203c, .55); sc.add(fill);
+      var fill = new T.HemisphereLight(0xa9ccff, 0x1b2d52, .8); sc.add(fill);
       this.pivot = new T.Group(); sc.add(this.pivot); this.holder = new T.Group(); this.pivot.add(this.holder);
       this.pivot.quaternion.setFromEuler(new T.Euler(.5, -.75, .12));
-      this.xmat = new T.ShaderMaterial({ uniforms: { uX: { value: 0 }, uT: { value: 0 }, uScan: { value: 0 }, uW: { value: .09 }, uCol: { value: new T.Color(.18, .62, 1) } }, vertexShader: XVERT, fragmentShader: XFRAG, transparent: true, blending: T.AdditiveBlending, depthTest: false, depthWrite: false, side: T.DoubleSide });
+      this.xmat = new T.ShaderMaterial({ uniforms: { uX: { value: 0 }, uT: { value: 0 }, uScan: { value: 0 }, uW: { value: .09 }, uCol: { value: new T.Color(.18, .62, 1) } }, vertexShader: XVERT, fragmentShader: XFRAG, transparent: true, blending: T.AdditiveBlending, depthTest: false, depthWrite: false, side: T.FrontSide });
       this.wmat = new T.MeshBasicMaterial({ color: 0x3aa8ff, wireframe: true, transparent: true, opacity: 0, blending: T.AdditiveBlending, depthTest: false, depthWrite: false });
       this.ray = new T.Raycaster(); this.inv = new T.Matrix4(); this.v3 = new T.Vector3(); this.q = new T.Quaternion(); this.q2 = new T.Quaternion();
     }
-    this.envFor(r);
     this.size();
     if (this.cur) this.attach(this.cur);
     return true;
-  };
-  Sat.prototype.envFor = function (r) {
-    var T = this.THREE, es = new T.Scene(), g = new T.SphereGeometry(10, 24, 16);
-    var m = new T.ShaderMaterial({ side: T.BackSide, depthWrite: false, vertexShader: 'varying vec3 p; void main(){ p = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-      fragmentShader: 'varying vec3 p; void main(){ float u = p.y * .5 + .5; vec3 space = vec3(.01, .02, .05); vec3 earth = vec3(.10, .26, .55) * 1.6; vec3 c = mix(earth, space, smoothstep(.15, .55, u)); c += vec3(.45, .6, .9) * pow(max(0., 1. - abs(p.y + .08) * 6.), 2.) * .6; gl_FragColor = vec4(c, 1.); }' });
-    es.add(new T.Mesh(g, m));
-    function panel(x, y, z, w, h, col, k) { var q = new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshBasicMaterial({ color: new T.Color(col).multiplyScalar(k), side: T.DoubleSide })); q.position.set(x, y, z); q.lookAt(0, 0, 0); es.add(q); }
-    panel(-5, 5, 4, 5, 3, 0xfff0d8, 9); panel(6, 1, -4, 3, 6, 0x7fb8ff, 5); panel(0, -6, 3, 6, 2, 0x5a96ff, 3);
-    var pm = new T.PMREMGenerator(r); this.scene.environment = pm.fromScene(es, .02).texture; pm.dispose(); g.dispose(); m.dispose();
   };
   Sat.prototype.useModel = function (key, m) {
     this.curKey = key; this.cur = m; this.setText();
@@ -280,13 +272,13 @@
   };
   Sat.prototype.ensureRendererIfNeeded = function () { return this.near ? this.ensureRenderer() : false; };
   Sat.prototype.attach = function (m) {
-    var T = this.THREE, h = this.holder, me = this;
+    var T = this.THREE, h = this.holder, me = this; if (!XDARK) XDARK = new T.Color(.004, .014, .04);
     while (h.children.length) h.remove(h.children[0]);
     this.mats = []; var seenM = {};
     m.items.forEach(function (it) {
       if (!it.solid) {
-        var mat = it.mat; if (mat.metalness > .5) mat.roughness = Math.max(mat.roughness || 0, .32); mat.envMapIntensity = 1.2;
-        if (!mat.__b) { mat.__b = { c: mat.color ? mat.color.clone() : null, e: 1.2 }; }
+        var mat = it.mat; if (mat.metalness > .5) mat.roughness = Math.max(mat.roughness || 0, .32); 
+        if (!mat.__b) { mat.__b = { c: mat.color ? mat.color.clone() : null, e: 0 }; }
         it.solid = new T.Mesh(it.geo, mat); it.xr = new T.Mesh(it.geo, me.xmat); it.xr.renderOrder = 20;
         it.wf = m.tris < 400000 ? new T.Mesh(it.geo, me.wmat) : null; if (it.wf) it.wf.renderOrder = 21;
         it.group = new T.Group(); it.group.add(it.solid); it.group.add(it.xr); if (it.wf) it.group.add(it.wf);
@@ -300,8 +292,8 @@
   Sat.prototype.tinted = function (x) {
     if (Math.abs(x - this.xApplied) < .004) return; this.xApplied = x;
     var k = 1 - .86 * x, wire = this.cur && this.cur.items[0] && this.cur.items[0].wf;
-    this.mats.forEach(function (m) { if (m.__b.c && m.color) m.color.copy(m.__b.c).multiplyScalar(k); m.envMapIntensity = m.__b.e * (1 - .93 * x); m.needsUpdate = false; });
-    this.xmat.uniforms.uX.value = x; this.wmat.opacity = (wire ? .16 : 0) * x;
+    this.mats.forEach(function (m) { if (m.__b.c && m.color) m.color.copy(m.__b.c).lerp(XDARK, x); m.needsUpdate = false; });
+    this.xmat.uniforms.uX.value = x; this.wmat.opacity = (wire ? clamp(4500 / this.cur.tris, .012, .14) : 0) * x;
     var on = x > .01;
     this.cur.items.forEach(function (it) { it.xr.visible = on; if (it.wf) it.wf.visible = on; });
   };
@@ -339,7 +331,7 @@
   Sat.prototype.spin = function (ax, ay) {
     if (!this.pivot) return; var T = this.THREE;
     this.q.setFromAxisAngle(this.v3.set(0, 1, 0), ax); this.q2.setFromAxisAngle(this.v3.set(1, 0, 0), ay);
-    this.pivot.quaternion.premultiply(this.q).premultiply(this.q2); if (this.raf === 0) this.kick();
+    this.pivot.quaternion.premultiply(this.q).premultiply(this.q2); if (this.raf === 0 && !this.inFrame) this.kick();
   };
 
   Sat.prototype.size = function () {
@@ -353,15 +345,15 @@
 
   /* ---------- frame ---------- */
   Sat.prototype.frame = function (now) {
-    this.raf = 0; if (!this.running()) return;
-    if (!this.renderer && !this.ensureRenderer()) return;
-    var dt = this.last ? Math.min(.05, (now - this.last) / 1000) : .016; this.last = now; this.t += dt;
+    this.raf = 0; if (!this.running()) return; this.inFrame = true;
+    if (!this.renderer && !this.ensureRenderer()) { this.inFrame = false; return; }
+    var dt = this.last ? Math.min(.1, (now - this.last) / 1000) : .016; this.last = now; this.t += dt;
     this.readScroll();
     var W = this.W, H = this.H, T = this.THREE, open = this.open, mob = W < 720;
     // fades: the satellite belongs to the first quarter of the descent
     var a = open ? 1 : 1 - sstep(.19, .29, this.p); this.alpha = a;
     this.cv.style.opacity = (a * (this.swap < 1 ? .0 + this.swap : 1)).toFixed(3);
-    this.amb.style.opacity = a.toFixed(3); this.amb.style.visibility = a < .02 ? 'hidden' : 'visible'; this.amb.style.pointerEvents = a < .5 ? 'none' : '';
+    this.amb.style.opacity = (a * (1 - this.k)).toFixed(3); this.amb.style.visibility = a < .02 ? 'hidden' : 'visible'; this.amb.style.pointerEvents = a < .5 ? 'none' : '';
     // eased state
     var kk = reduce ? 1 : 1 - Math.exp(-dt * 5), ke = reduce ? 1 : 1 - Math.exp(-dt * 4.2), kx = reduce ? 1 : 1 - Math.exp(-dt * 9);
     this.k += (this.kT - this.k) * kk; if (Math.abs(this.kT - this.k) < .002) this.k = this.kT;
@@ -392,15 +384,15 @@
     // draw (ambient is capped near 30 fps)
     if (open || this.x > .01 || now - this.lastDraw > 30) { this.lastDraw = now; this.renderer.render(this.scene, this.cam); }
     this.overlay(ease, e);
-    this.raf = requestAnimationFrame(this._loop);
+    this.inFrame = false; this.raf = requestAnimationFrame(this._loop);
   };
 
   // where the model sits: ambient over the limb (upper right), or centre stage when inspected
   Sat.prototype.layout = function (ease) {
     var W = this.W, H = this.H, mob = W < 720, cam = this.cam, hh = Math.tan(cam.fov * Math.PI / 360) * cam.position.z, hw = hh * cam.aspect;
     var m = Math.min(W, H);
-    var rA = mob ? W * .2 : m * .17, rI = mob ? W * .34 : m * .31;
-    var nxA = mob ? .22 : .5, nyA = (mob ? .34 : .22) + this.p * 1.5, nxI = 0, nyI = mob ? .02 : .0;
+    var rA = mob ? W * .2 : m * .17, rI = mob ? W * .42 : m * .31;
+    var nxA = mob ? .22 : .42, nyA = (mob ? .34 : .22) + this.p * 1.5, nxI = 0, nyI = mob ? .02 : .0;
     var nx = nxA + (nxI - nxA) * ease, ny = nyA + (nyI - nyA) * ease, rpx = rA + (rI - rA) * ease;
     var bob = reduce ? 0 : Math.sin(this.t * .55) * .012;
     var ez = 1 / (1 + .5 * this.e), z = (1 + (this.zoom - 1) * ease), sw = .55 + .45 * this.swap;
@@ -433,7 +425,7 @@
   Sat.prototype.overlay = function (ease, e) {
     var W = this.W, H = this.H, s = this.scr, T = this.THREE, mob = W < 720, a = this.alpha;
     // ambient tag + leader
-    var tx = mob ? Math.max(14, s.x - s.r * .1) : Math.min(W - 270, s.x + s.r * 1.25), ty = mob ? s.y + s.r * 1.2 : s.y - s.r * 1.05;
+    var tx = mob ? clamp(s.x - s.r * .1, 14, W - 206) : Math.min(W - 330, s.x + s.r * 1.2), ty = mob ? s.y + s.r * 1.2 : s.y - s.r * 1.05;
     this.tag.style.transform = 'translate3d(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px,0)'; this.tag.style.opacity = ((1 - ease) * a).toFixed(3);
     var sx = s.x + (mob ? 0 : s.r * .7), sy = s.y - (mob ? -s.r * .9 : s.r * .7);
     this.pathAmb.setAttribute('d', ease < .98 ? 'M' + sx.toFixed(1) + ',' + sy.toFixed(1) + 'L' + (mob ? tx : tx - 14).toFixed(1) + ',' + (mob ? ty : ty + 10).toFixed(1) : ''); this.pathAmb.style.opacity = ((1 - ease) * a * .8).toFixed(3);
@@ -446,12 +438,13 @@
       var b = labs[i], c = b.it.center.clone().addScaledVector(b.it.off, e); v.copy(c).applyMatrix4(this.pivot.matrixWorld).project(cam);
       b.px = (v.x * .5 + .5) * W; b.py = (-v.y * .5 + .5) * H; (b.px > s.x ? R : L).push(b);
     }
-    var self = this;
+    var self = this, leftMin = mob ? 14 : 300;
+    if (s.x - s.r * (mob ? 1.15 : 1.45) - lw < leftMin) { R = R.concat(L); L = []; }
     function place(arr, right) {
       arr.sort(function (p, q) { return p.py - q.py; });
       var y = top - gap; arr.forEach(function (b) { y = Math.max(clamp(b.py, top, bot), y + gap); b.ly = y; });
       var over = y - bot; if (over > 0) arr.forEach(function (b) { b.ly -= over; });
-      var colX = right ? Math.min(W - 14 - lw, s.x + s.r * (mob ? 1.15 : 1.45)) : Math.max(14 + lw, s.x - s.r * (mob ? 1.15 : 1.45));
+      var colX = right ? Math.min(W - (mob ? 14 : 70) - lw, s.x + s.r * (mob ? 1.15 : 1.45)) : Math.max(leftMin + lw, s.x - s.r * (mob ? 1.15 : 1.45));
       arr.forEach(function (b) {
         b.lx = colX; var ex = right ? colX - 10 : colX + 10;
         b.e.style.transform = 'translate3d(' + (right ? colX : colX - lw) + 'px,' + (b.ly - 12) + 'px,0)'; b.e.classList.toggle('l', !right); b.e.style.width = lw + 'px';

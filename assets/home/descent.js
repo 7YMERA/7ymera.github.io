@@ -315,15 +315,15 @@
   Descent.prototype.drawRail = function (ctx, v, z, p) {
     var me = this, on = this.railOn ? 1 : 0;
     this.railA += (on - this.railA) * (this.reduce ? 1 : .14); if (Math.abs(on - this.railA) < .003) this.railA = on;
-    var vis = (1 - sstep(.58, .7, p)) * this.railA, legA = sstep(.25, .31, p) * (1 - sstep(.6, .68, p));
+    var vis = (1 - sstep(.58, .7, p)) * this.railA, legA = sstep(.2, .27, p) * (1 - sstep(.6, .68, p));
     if (this.leg) { var q = legA.toFixed(2); if (this.leg.__q !== q) { this.leg.__q = q; this.leg.style.opacity = q; this.leg.style.visibility = legA < .02 ? 'hidden' : 'visible'; } }
-    if (vis <= .01 || sstep(.12, .3, p) <= 0) return;
+    if (vis <= .01 || sstep(.08, .2, p) <= 0) return;
     var t = this.t, W = this.W, H = this.H, placed = [], tags = [];
     ctx.save(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     ctx.font = '500 10.5px "JetBrains Mono", ui-monospace, monospace';
     function sp(lat, lon) { var q = me.proj(lat, lon, v); return q[2] ? [v.cx + q[0], v.cy - q[1]] : null; }
     RAIL.forEach(function (L, li) {
-      var frac = sstep(.16 + .014 * li, .36 + .014 * li, p); if (frac <= 0) return;
+      var frac = sstep(.1 + .012 * li, .25 + .012 * li, p); if (frac <= 0) return;
       L.segs.forEach(function (sg, si) {
         var P = [], i, tot = 0, cum = [0], d = sg.d;
         for (i = 0; i < d.length; i++) { var s = sp(d[i][0], d[i][1]); P.push(s); if (i && s && P[i - 1]) { tot += Math.hypot(s[0] - P[i - 1][0], s[1] - P[i - 1][1]); } cum.push(tot); }
@@ -362,8 +362,8 @@
     });
     // tags: status labels for the lines that are not open yet
     tags.forEach(function (g) {
-      var w = ctx.measureText(g.txt.toUpperCase()).width, x = g.side === 'l' ? g.x - 18 - w : g.x + 18, y = g.y - 14; ctx.globalAlpha = vis;
-      ctx.strokeStyle = g.col; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(g.x, g.y); ctx.lineTo(g.side === 'l' ? x + w + 6 : x - 6, y); ctx.stroke();
+      var w = ctx.measureText(g.txt.toUpperCase()).width, sd = g.side === 'r' && g.x + 28 + w > W ? 'l' : g.side, x = sd === 'l' ? g.x - 18 - w : g.x + 18, y = g.y - 14; ctx.globalAlpha = vis;
+      ctx.strokeStyle = g.col; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(g.x, g.y); ctx.lineTo(sd === 'l' ? x + w + 6 : x - 6, y); ctx.stroke();
       ctx.fillStyle = 'rgba(8,14,32,.78)'; ctx.fillRect(x - 5, y - 11, w + 10, 17); ctx.strokeRect(x - 5.5, y - 11.5, w + 11, 18); ctx.fillStyle = g.col; ctx.fillText(g.txt.toUpperCase(), x, y + 2);
     });
     // the Klang Valley: too dense at this scale, so a glowing knot of urban lines
@@ -375,10 +375,10 @@
       ctx.lineWidth = 2.4;
       for (var a = 0; a < 5; a++) { var ang = -1.1 + a * 1.25 + .3, rr = r * (.9 + .25 * (a % 2)); ctx.strokeStyle = KV[1][a]; ctx.globalAlpha = k0 * .95; ctx.beginPath(); ctx.moveTo(kl[0] - Math.cos(ang) * rr * .5, kl[1] - Math.sin(ang) * rr * .5); ctx.lineTo(kl[0] + Math.cos(ang) * rr, kl[1] + Math.sin(ang) * rr); ctx.stroke(); }
       ctx.globalAlpha = k0; ctx.lineWidth = 1.2; ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(kl[0], kl[1], r * .5, 0, 6.2832); ctx.stroke();
-      if (sstep(.34, .44, p) > 0 && kl[0] > 300) {
-        var L1 = ['KLANG VALLEY · URBAN RAIL', 'LRT Kelana Jaya · Ampang · Sri Petaling', 'MRT Kajang · Putrajaya', 'KL Monorail · BRT Sunway', 'LRT3 Shah Alam (new)'], bx = kl[0] - r * 2.1 - 8, by = kl[1] + r * 1.3, bw = 0, ii;
+      if (sstep(.26, .34, p) > 0 && kl[0] > 300) {
+        var L1 = ['KLANG VALLEY · URBAN RAIL', 'LRT Kelana Jaya · Ampang · Sri Petaling', 'MRT Kajang · Putrajaya', 'KL Monorail · BRT Sunway', 'LRT3 Shah Alam (new)'], bx = kl[0] - r * 2.1 - 8, by = kl[1] - r * 3.6, bw = 0, ii;
         ctx.font = '500 10px "JetBrains Mono", ui-monospace, monospace'; for (ii = 0; ii < L1.length; ii++) bw = Math.max(bw, ctx.measureText(L1[ii]).width);
-        ctx.globalAlpha = k0 * sstep(.34, .44, p); ctx.fillStyle = 'rgba(8,14,32,.8)'; ctx.fillRect(bx - bw - 12, by - 12, bw + 18, L1.length * 14 + 12); ctx.strokeStyle = 'rgba(159,208,255,.5)'; ctx.lineWidth = 1; ctx.strokeRect(bx - bw - 11.5, by - 11.5, bw + 17, L1.length * 14 + 11);
+        ctx.globalAlpha = k0 * sstep(.26, .34, p); ctx.fillStyle = 'rgba(8,14,32,.8)'; ctx.fillRect(bx - bw - 12, by - 12, bw + 18, L1.length * 14 + 12); ctx.strokeStyle = 'rgba(159,208,255,.5)'; ctx.lineWidth = 1; ctx.strokeRect(bx - bw - 11.5, by - 11.5, bw + 17, L1.length * 14 + 11);
         for (ii = 0; ii < L1.length; ii++) { ctx.fillStyle = ii ? '#b8cbe8' : '#ffd27a'; ctx.fillText(L1[ii], bx - bw - 6, by + 2 + ii * 14); }
       }
     }

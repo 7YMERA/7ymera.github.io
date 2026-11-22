@@ -30,6 +30,14 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · Immersion pass (3.2)
+
+- Front page: the glass reveal plays once and rests glossy (sheen, breath, pointer rim light), no replay. Sound is on by default on `/` (starts on the first tap/click/key; scroll can't start audio), with glass / cosmos / city zones and cues.
+- Orbit chapter: NASA satellite inspector (`assets/home/sat/`, GPM/TRMM/AIM .glb, Draco, three r128 loaders from jsdelivr): Inspect button, drag/zoom, x-ray on hover, explode slider.
+- Descent map: Malaysian rail layer (KTM West/East Coast, ECRL "opening 2026–27", Port Klang/Batu Caves, KLIA Ekspres, RTS Link, Penang LRT, Sabah in the legend), toggle + legend.
+- Flight: starts from the top view, chrome fades in at drone level, picker pill beside Skip, compass at top. Sound hint moved to bottom centre. Key 20261122j.
+- Open: GPM inspect not tested (282k tris, software GL too slow); no real-GPU fps check; confirm ECRL/LRT3/Penang statuses with the owner.
+
 ## 2026-11-22 · The "master file"
 - Owner: make See all a folder too. `folders.js` takes `link`, `hint`, `metaText`, `linkLabel` on a folder: such a folder (`.fd--master`, dark navy in `portfolio.css`) peeks its files open on hover and is one big link. The portfolio row ends on "All notes · Master file", linking to /notes/. Folders 310 px, gap 28 px so all four fit at 1440 px. Key `20261122i`.
 

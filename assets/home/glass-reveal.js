@@ -7,8 +7,9 @@
  * Ported as is: the fragment shader (superellipse plate, bevel refraction, 20-tap spectral dispersion, corner focus, rim and
  * sheen), the exact distance transform and signed-distance builder (fitToTexture / buildSdf / edt), the closed-form spring
  * timeline (frameAt) and the LIGHT / dark looks. Changed for the web page: a small class instead of hooks, the plate may sit
- * above the middle of the canvas (centerY), a CSS mask fallback, and the hold-then-fade loop is replaced by play once and rest
- * on the finished mark.
+ * above the middle of the canvas (centerY), a CSS mask fallback, and the hold-then-fade loop is replaced by: play once, then rest on the
+ * glass at T = REST (1.7 s: tile still glossy, mark inside, corners fringing) and stay alive (sheen sweep every ~6 s, breath, pointer rim light, ~30 fps).
+ * No click-to-replay. Dispatches 'sfx-cue' {name:'glass'} when the reveal starts.
  *
  *   var g = new GlassReveal(el, { logo: svgString, look: 'light'|'dark', background: '#e7eef7', tileSize: 420, centerY: .42,
  *                                 onRelease: fn, onDone: fn });
