@@ -34,6 +34,12 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · Chess grid entry, boot HUD kept, glass halo guard
+
+- `assets/home/chess-grid.js`: plain-JS port of the 21st.dev Chess Grid Transition (Hyperiux Vault), Web Animations, transform only. Get started now covers the gate with navy blocks (gold hairline), hands the Earth over, and the blocks sweep away onto the glass; the split seam is the fallback.
+- Gate ready state keeps the boot sequence: log bottom-left, 100% counter bottom-right, progress line, clock and KL marker (FLIP glide, transform only).
+- Glass halo (owner's screenshot: a huge blurred rounded outline and haze over the Earth): not reproduced on software GL. Likely cause: the shader wrote straight alpha, leaving full-strength halo/ripple colour in near-zero-alpha pixels up to ~1.4 plate widths out, which a premultiplied compositor adds as light. Fixed by premultiplied output with exact zero outside, no ripple over the Earth, halo cut close to the tile; nav gets a dark text-shadow. If a ring still shows on a real GPU, the next suspect is the scroll aperture (scales the plate 2.35x). Key 20261122w.
+
 ## 2026-11-22 · 3.5: the \7 on the Earth, one shot from gate to KL
 
 - New `assets/home/orbit.js` (OrbitStage): one fixed `#orbit` OrbitEarth canvas behind #reveal and #descent. The gate hands its live Earth over (`window.__orbitEarth`, `attach()`), the glass shader samples the Earth canvas per spectral tap (re-uploaded each Earth frame), the limb rises behind the tile, scroll eases the camera to the 408 KM UP frame, then zooms/tilts onto KL with the gold outline, rails and reticle registered via `OrbitStage.project()`. Earth fades by p .4, disposed at .9; the city hand-over at .88 is unchanged. Reveal is dark space in both themes.

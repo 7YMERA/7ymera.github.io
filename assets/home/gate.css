@@ -73,7 +73,14 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
 .gate-pct { font: 500 .8rem/1 var(--f-mono, ui-monospace, Menlo, Consolas, monospace); color: var(--g-dim); letter-spacing: .1em; }
 .gate-bar { width: min(320px, 76vw); height: 1px; background: rgba(255, 255, 255, .16); overflow: hidden; }
 .gate-bar i { display: block; width: 100%; height: 100%; background: var(--g-gold); transform: scaleX(0); transform-origin: 0 50%; }
-.gate.ready .gate-boot { opacity: 0; transform: translate3d(0, -12px, 0); pointer-events: none; }
+.gate.ready .gate-boot { display: contents; }
+/* ready: the loading sequence stays on screen, docked at the bottom. Lines bottom-left above the clock, the 100 counter bottom-right above
+   ENTRY 001, the progress line along the very bottom edge (gate.js flips them there from the centre) */
+.gate.ready .gate-lines { position: absolute; left: max(18px, env(safe-area-inset-left)); bottom: 68px; width: auto; z-index: 5; }
+.gate.ready .gate-count { position: absolute; right: max(18px, env(safe-area-inset-right)); bottom: 78px; z-index: 5; gap: 4px; }
+.gate.ready .gate-num { font-size: clamp(2.2rem, 3.4vw, 3rem); }
+.gate.ready .gate-pct { font-size: .7rem; }
+.gate.ready .gate-bar { position: absolute; left: 0; right: 0; bottom: 0; width: auto; height: 2px; z-index: 7; background: rgba(255, 255, 255, .12); }
 
 /* the button */
 .gate-cta { display: grid; justify-items: center; gap: 14px; width: 100%; animation: gate-rise .9s var(--g-ease) both; }
@@ -108,9 +115,9 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
 
 /* leaving: flash, rings, glitch, then the split */
 .gate-flash { position: absolute; z-index: 7; width: 420px; height: 420px; margin: -210px 0 0 -210px; border-radius: 50%; pointer-events: none; background: radial-gradient(closest-side, rgba(255, 244, 220, .95), rgba(255, 210, 122, .35) 50%, transparent); animation: gate-flash .7s ease-out forwards; }
-@keyframes gate-flash { 0% { transform: scale(.3); opacity: 0; } 25% { opacity: 1; } 100% { transform: scale(4); opacity: 0; } }
+@keyframes gate-flash { 0% { transform: scale(.3); opacity: 0; } 25% { opacity: 1; } 100% { transform: scale(2.6); opacity: 0; } }
 .gate-pulse { position: absolute; z-index: 7; width: 80px; height: 80px; margin: -40px 0 0 -40px; border-radius: 50%; pointer-events: none; border: 2px solid rgba(255, 220, 150, .9); opacity: 0; animation: gate-pulse 1s cubic-bezier(.2, .7, .2, 1) forwards; }
-@keyframes gate-pulse { 0% { transform: scale(.4); opacity: .9; } 100% { transform: scale(26); opacity: 0; } }
+@keyframes gate-pulse { 0% { transform: scale(.4); opacity: .9; } 100% { transform: scale(10); opacity: 0; } }
 .gate.leaving .gate-core, .gate.leaving .gate-hud, .gate.leaving .gate-hp, .gate.leaving .gate-kl { animation: gate-glitch .55s steps(1) forwards; }
 @keyframes gate-glitch {
   0% { transform: translate3d(0, 0, 0); opacity: 1; } 12% { transform: translate3d(-9px, 0, 0) skewX(6deg); opacity: .8; } 24% { transform: translate3d(11px, 2px, 0) skewX(-8deg); opacity: 1; }
@@ -147,7 +154,12 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
 @media (max-width: 639px) {
   .gate-core { padding: 56px 16px 118px; gap: 20px; }
   .gate-hud { font-size: .625rem; letter-spacing: .12em; }
-  .gate-hud.br, .gate-hud.bl { display: none; }
+  .gate-hud.br { display: none; }
+  .gate-hud.bl { top: max(18px, env(safe-area-inset-top)); bottom: auto; left: 50%; transform: translateX(-50%); }
+  .gate-hud.bl i { display: none; }
+  .gate.ready .gate-lines { left: 16px; bottom: 82px; max-width: calc(100% - 128px); }
+  .gate.ready .gate-count { right: 16px; bottom: 80px; }
+  .gate.ready .gate-num { font-size: 2.3rem; }
   .gate-tag { font-size: .6875rem; letter-spacing: .14em; }
   .gate-kl span { font-size: .5625rem; left: 20px; top: -26px; }
   .gate-btn { min-height: 84px; gap: 12px; padding: 0 20px 0 16px; }
@@ -157,7 +169,8 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
 @media (max-height: 560px) and (orientation: landscape) {
   .gate-core { flex-direction: row; gap: 32px; padding: 20px 24px 20px; }
   .gate-mark { width: 44px; } .gate-word { font-size: 2.4rem; }
-  .gate-hp, .gate-hud.bl, .gate-hud.br { display: none; }
+  .gate-hp, .gate-hud.br { display: none; }
+  .gate.ready .gate-lines { bottom: 52px; } .gate.ready .gate-count { bottom: 56px; }
 }
 .gate-credit { position: absolute; z-index: 6; right: max(18px, env(safe-area-inset-right)); bottom: max(18px, env(safe-area-inset-bottom)); margin: 0; font: 500 .5625rem/1 var(--f-mono, ui-monospace, Menlo, Consolas, monospace); letter-spacing: .12em; text-transform: uppercase; color: rgba(200, 220, 255, .38); pointer-events: none; }
 @media (max-width: 639px) { .gate-credit { right: 0; left: 0; text-align: center; bottom: 6px; } }

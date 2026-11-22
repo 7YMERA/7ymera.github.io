@@ -328,7 +328,9 @@ void main() {
   }
   float outside = max(sd, 0.0);
   float aRip = 0.0;
-  if (uRipA > 0.001) {
+  // the ripple is a ring that travels out to ~1.4 plate widths and freezes there at rest: on the flat page it was a faint tone, over the Earth
+  // (uOver) it became a viewport-sized ghost outline around the tile, so it is only drawn on the flat page
+  if (uRipA > 0.001 && uOver < 0.5) {
     float d0 = (uRipR - 1.0) * uPlateScale;
     float rx = (sd - d0) / 0.022;
     float ring = exp(-rx * rx);
@@ -339,7 +341,8 @@ void main() {
   float shadowFall = max(sd, 0.0) / (0.9 * uPlateScale);
   bg *= 1.0 - uShadow * 0.03 * exp(-shadowFall * shadowFall) * step(0.0, sd);
   vec3 haloCol = mix(vec3(0.62, 0.69, 0.80), vec3(1.0), uLightScene);
-  float aHalo = clamp(uHalo * (0.30 * exp(-outside / (0.025 * uPlateScale)) + 0.07 * exp(-outside / (0.12 * uPlateScale))), 0.0, 1.0) * step(0.0, sd);
+  // the glow hugs the tile and is cut off well inside one plate width, so no haze can reach across the viewport
+  float aHalo = clamp(uHalo * (0.30 * exp(-outside / (0.025 * uPlateScale)) + 0.07 * exp(-outside / (0.12 * uPlateScale))), 0.0, 1.0) * step(0.0, sd) * (1.0 - smoothstep(0.22 * uPlateScale, 0.4 * uPlateScale, outside));
   float aSh = uShadow * 0.03 * exp(-shadowFall * shadowFall) * step(0.0, sd);
   bg = mix(bg, haloCol, aHalo);
   vec3 glassC = vec3(0.0); float covC = 0.0;
@@ -440,7 +443,11 @@ void main() {
     over(vec3(1.0), aRip);
     over(lg.rgb, lg.a * uBare * (1.0 - uPlateAlpha));
     over(glassC, covC * uPlateAlpha);
-    outColor = vec4(ov.rgb / max(ov.a, 1e-4) + (hash(gl_FragCoord.xy) - 0.5) / 255.0, ov.a);
+    // premultiplied output (the canvas is premultiplied): where nothing is drawn the pixel is exactly (0,0,0,0). The old straight-alpha write
+    // (rgb / a) left full-strength halo and ripple colour in pixels whose alpha had rounded to ~0, which any compositor that treats the canvas as
+    // premultiplied (several GPU / driver paths do) adds as light: a ghost outline and a milky haze far outside the tile
+    if (ov.a < 0.006) ov = vec4(0.0);
+    outColor = vec4(ov.rgb + (hash(gl_FragCoord.xy) - 0.5) / 255.0 * ov.a, ov.a);
     return;
   }
   vec3 outc = mix(plain, col, uPlateAlpha);
@@ -449,7 +456,7 @@ void main() {
 }`;
 
   function createRenderer(canvas) {
-    var gl = canvas.getContext('webgl2', { antialias: false, premultipliedAlpha: false });
+    var gl = canvas.getContext('webgl2', { antialias: false, premultipliedAlpha: true });
     if (!gl) return null;
     function compile(type, src) {
       var sh = gl.createShader(type); gl.shaderSource(sh, src); gl.compileShader(sh);

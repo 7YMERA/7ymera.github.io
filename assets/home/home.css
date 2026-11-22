@@ -200,3 +200,6 @@ html.orbit-live .reveal .hc { color: #9fd0ff; }
 html.orbit-live .rv-name { text-shadow: 0 2px 28px rgba(2, 6, 20, .85), 0 0 2px rgba(2, 6, 20, .6); }
 html.orbit-live .rv-tag { text-shadow: 0 1px 14px rgba(2, 6, 20, .9); color: #c4d4ee; }
 html.orbit-live .ds-stage { background: transparent; }
+
+/* the header sits on the Earth: whatever is drawn behind it, its type keeps a dark halo so it stays readable (light theme included) */
+html.orbit-live .top:not(.solid) .nav a, html.orbit-live .top:not(.solid) .mark { text-shadow: 0 1px 12px rgba(2, 6, 20, .9), 0 0 2px rgba(2, 6, 20, .55); }

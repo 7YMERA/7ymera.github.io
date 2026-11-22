@@ -252,7 +252,7 @@
     }
     function type(p, text, done) {
       var i = 0; p.textContent = '';
-      (function step() { if (dead) return; i++; p.textContent = text.slice(0, i); if (i < text.length) later(step, 22); else if (done) done(); })();
+      (function step() { if (dead) return; if (state !== 'boot') { p.textContent = text; return; } i++; p.textContent = text.slice(0, i); if (i < text.length) later(step, 22); else if (done) done(); })();
     }
     function startBoot() {
       status.textContent = 'ACQUIRING';
@@ -262,8 +262,17 @@
     }
     function ready() {
       if (state !== 'boot') return;
-      state = 'ready'; rootEl.classList.add('ready'); status.textContent = 'READY';
+      state = 'ready'; status.textContent = 'READY';
+      lines.forEach(function (p, i) { p.textContent = BOOT[i]; });   // typing can lag behind the counter on a slow machine: the log is complete when it docks
+      kl.classList.add('lock');
+      var fl = reduce ? [] : [lines[0].parentNode, $('.gate-count'), $('.gate-bar')].map(function (n) { return { n: n, a: n.getBoundingClientRect() }; });
+      rootEl.classList.add('ready');
       cta.hidden = false; rect = null;
+      fl.forEach(function (f) {   // the loading sequence stays: it glides from the centre to its dock (FLIP, transform only)
+        var b = f.n.getBoundingClientRect(); if (!f.a.width || !b.width || !f.n.animate) return;
+        f.n.style.transformOrigin = '0 0';
+        f.n.animate([{ transform: 'translate3d(' + (f.a.left - b.left) + 'px,' + (f.a.top - b.top) + 'px,0) scale(' + (f.a.width / b.width) + ',' + (f.a.height / b.height) + ')' }, { transform: 'none' }], { duration: 900, easing: 'cubic-bezier(.76,0,.24,1)' });
+      });
       try { btn.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
     }
 
@@ -327,10 +336,19 @@
       ss('gate-seen', '1');
       try { d.dispatchEvent(new CustomEvent('sfx-cue', { detail: { name: 'gate' } })); } catch (e) { /* no sound */ }
       rootEl.classList.add('leaving'); btn.disabled = true; if (nos) nos.disabled = true; status.textContent = silent ? 'SILENT' : 'GO';
-      if (reduce) { rootEl.classList.add('fade'); later(function () { opened(); finish(); }, 420); return; }
+      if (reduce) { sweep(); return; }
       ringPulse(); tWarp = 1; kick();
       later(glitchWord, 120);
-      later(split, 640);
+      later(sweep, 560);
+    }
+    /* the chess grid covers the gate (navy and gold blocks slide in from the right), the page is set underneath (gate dismissed, the Earth handed to
+       the reveal), then the blocks sweep out to the left onto the \7 glass on the Earth. No grid script (or it throws): the old split seam. */
+    function sweep() {
+      if (!w.ChessGrid) { if (reduce) { rootEl.classList.add('fade'); later(function () { opened(); finish(); }, 420); } else split(); return; }
+      var m = innerWidth < 640;
+      try {
+        w.ChessGrid.play({ cols: m ? 6 : 8, color: '#040b1f', color2: '#0f2a5e', edge: 'rgba(255,210,122,.38)', duration: m ? .62 : .72, onCovered: function () { try { drawEarth(0); } catch (e) { /* ignore */ } opened(); finish(); } });
+      } catch (e) { if (w.console) console.warn(e); opened(); finish(); }
     }
     function snapshot(cy) {   // freeze the current frame into two halves
       var src = cv;
