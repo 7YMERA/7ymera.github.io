@@ -17,6 +17,8 @@
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:400 14px/1.45 "Albert Sans",system-ui,sans-serif}
 .wrap{display:grid;grid-template-columns:minmax(0,1fr) 310px;height:100%}
 .stage{position:relative;min-height:360px;overflow:hidden;cursor:pointer}
+.stage .gr-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.stage .gr-mask{position:absolute;left:50%;top:50%;width:min(40vw,420px);aspect-ratio:156/112;transform:translate(-50%,-50%);background:var(--ink,#0b2a6b)}
 .stage-hud{position:absolute;left:16px;bottom:16px;right:16px;display:flex;justify-content:space-between;align-items:center;pointer-events:none;font:500 11px/1 "JetBrains Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .panel{padding:18px 16px;background:var(--surface);border-left:1px solid var(--line);overflow:auto;display:grid;gap:14px;align-content:start}
 h1{margin:0;font:700 18px/1.2 "Bricolage Grotesque",sans-serif}
