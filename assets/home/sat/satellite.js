@@ -205,13 +205,21 @@
       me.gltf.load(BASE + MODELS[key].file, function (g) { me.cache[key] = me.parts(g.scene, key); res(me.cache[key]); }, undefined, function () { rej(new Error('model ' + key)); });
     });
   };
+  // Draco hands back quantised (normalised integer) attributes; transforms need real floats
+  function floaty(g, T) {
+    ['position', 'normal'].forEach(function (n) {
+      var a = g.attributes[n]; if (!a || a.array instanceof Float32Array) return;
+      var f = new Float32Array(a.count * 3), i; for (i = 0; i < a.count; i++) { f[i * 3] = a.getX(i); f[i * 3 + 1] = a.getY(i); f[i * 3 + 2] = a.getZ(i); }
+      g.setAttribute(n, new T.BufferAttribute(f, 3));
+    });
+  }
   // turn a loaded scene into parts in one normalised space (radius 1, centred), each with its own box and explode offset
   Sat.prototype.parts = function (scene, key) {
     var T = this.THREE; scene.updateMatrixWorld(true);
     var items = [], box = new T.Box3(), i;
     scene.traverse(function (o) {
       if (!o.isMesh || !o.geometry) return;
-      var g = o.geometry.clone(); if (!g.attributes.normal) g.computeVertexNormals(); g.applyMatrix4(o.matrixWorld); g.computeBoundingBox(); box.union(g.boundingBox);
+      var g = o.geometry.clone(); floaty(g, T); if (!g.attributes.normal) g.computeVertexNormals(); g.applyMatrix4(o.matrixWorld); g.computeBoundingBox(); box.union(g.boundingBox);
       items.push({ geo: g, mat: o.material, mesh: o.name || '', matName: (o.material && o.material.name) || '' });
     });
     var c = box.getCenter(new T.Vector3()), s = 1 / (box.getSize(new T.Vector3()).length() / 2);
