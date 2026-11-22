@@ -81,6 +81,7 @@
     stage.hidden = false; stage.classList.add('is-open'); setInert(true); root.classList.add('play-lock');
     stageTitle.textContent = c.title; stageSub.textContent = c.sub; d.title = c.title + ' · ' + PAGE_NAME + ' · Alif Najmi';
     views.forEach(function (v) { v.hidden = v.dataset.view !== c.view; });
+    stage.setAttribute('data-v', c.view);
     $('#stage-body').scrollTop = 0;
     previewsOn = false;
     if (c.pick && c.view === 'arcade' && window.__arcade) window.__arcade.pick(c.pick);
