@@ -63,7 +63,7 @@
     egg: { view: 'egg', title: 'Back room', sub: 'Out of order' }
   };
   // which page each cabinet lives on: the rest are dropped, so a stray #id from the other page opens nothing
-  var LAB_IDS = { orbit: 1, lab: 1, glass: 1, anatomy: 1, lglass: 1 };
+  var LAB_IDS = { orbit: 1, lab: 1, glass: 1, anatomy: 1, lglass: 1, 'sql-company': 1, 'sql-jom': 1, atlas: 1 };
   Object.keys(CAB).forEach(function (id) { if ((LAB_IDS[id] ? 'lab' : 'play') !== PAGE) delete CAB[id]; });
   var cur = null, curId = '', opener = null, pushed = false, views = $$('.view', stage);
   var previewsOn = true;

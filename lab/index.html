@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lab · Alif Najmi</title>
 <link rel="canonical" href="https://7ymera.github.io/lab/">
-<meta name="description" content="The lab: a NASA satellite you can x-ray and pull apart, a dotted globe, particles that become the KL skyline, exploded landmarks and glass shaders.">
+<meta name="description" content="The lab: a NASA satellite you can x-ray and pull apart, a dotted globe, particles that become the KL skyline, exploded landmarks and glass shaders and real SQL databases.">
 <meta property="og:title" content="Lab · Alif Najmi">
 <meta property="og:description" content="The lab: x-ray a NASA satellite, spin a globe, explode the Kuala Lumpur skyline and bend light through glass, all in your browser.">
 <meta property="og:image" content="https://7ymera.github.io/assets/og-skyline-3.jpg">
@@ -34,6 +34,7 @@
 <link rel="stylesheet" href="/assets/cursor.css?v=20261122t">
 <link rel="stylesheet" href="/assets/arcade.css?v=20261122t">
 <link rel="stylesheet" href="/assets/halcyon.css?v=20261122t">
+<link rel="stylesheet" href="/assets/join-atlas.css?v=20261122t">
 <link rel="stylesheet" href="/assets/play/play.css?v=20261122t">
 <link rel="stylesheet" href="/assets/play/anatomy.css?v=20261122t">
 <link rel="stylesheet" href="/assets/play/sat.css?v=20261122t">
@@ -100,10 +101,31 @@
       </div>
     </section>
 
+    <section class="bay lab-more" aria-labelledby="bay-2">
+      <header class="bay-head"><span class="bay-no" aria-hidden="true">02</span><h2 id="bay-2">Data toys</h2><p>Real SQLite databases running in your browser. Nothing leaves the page.</p></header>
+      <div class="cabs">
+        <a class="cab" id="sql-company" href="#sql-company" data-open="sql-company" data-tone="teal">
+          <span class="cab-sign"><b>Company SQL</b><i class="tag">49 tables</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="sql" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">A whole company from CEO down. Run the original joins or write your own.</span><span class="cab-keys"><kbd>Ctrl</kbd><kbd>Enter</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" id="sql-jom" href="#sql-jom" data-open="sql-jom" data-tone="blue">
+          <span class="cab-sign"><b>Jom Al-Quran SQL</b><i class="tag">26 tables</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="sql2" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">A tuition-centre database with scrubbed data, plus ready questions to try.</span><span class="cab-keys"><kbd>Ctrl</kbd><kbd>Enter</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" id="atlas" href="#atlas" data-open="atlas" data-tone="gold">
+          <span class="cab-sign"><b>Join Atlas</b><i class="tag">Map</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="atlas" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">Pick tables on a map; it finds the shortest route and writes the JOINs for you.</span><span class="cab-keys"><kbd>Tap</kbd><kbd>Drag</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+      </div>
+    </section>
+
     <a class="lab-door lab-door-games" href="/play/">
       <span class="lab-door-eye">Next door</span>
       <b class="lab-door-t">The games</b>
-      <span class="lab-door-d">Stack the Kuala Lumpur skyline, ride the last train, triage the backlog and run real SQL in your browser.</span>
+      <span class="lab-door-d">Stack the Kuala Lumpur skyline, ride the last train and triage the backlog.</span>
       <span class="lab-door-go">Play<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>
     </a>
   </div>
@@ -156,6 +178,11 @@
           <p class="hx-credit">The landmarks are my own KL models, turned into points. Heights are to scale: Merdeka 118 is the tallest.</p>
         </div>
       </div>
+    </section>
+
+    <section class="view view-pad" data-view="sql" hidden>
+      <div class="sql-head"><p id="sql-lede"></p><a id="sql-note" class="ghost-btn" href="/notes/">Read the story</a></div>
+      <div id="sql-host" class="sql-host"><p class="sql-wait">Loading the playground…</p></div>
     </section>
 
     <section class="view view-glass" data-view="glass" hidden>
