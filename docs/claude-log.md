@@ -30,7 +30,7 @@ where the last chat stopped without re-reading everything.
 
 ---
 
-## 2026-11-22 · 4.0 Solstice (`feat/v4-solstice`)
+## 2026-11-22 · 3.1 Solstice (Gemini, merged from `feat/v4-solstice`); Liquid Glass Lab canvas sized by Claude
 - Built directly on the zero-build plain HTML/CSS/JS stack (no framework migration), respecting all scene colour & performance rules in `CLAUDE.md`. Key `20261122a`.
 - `/` front page: pointer-tracked prismatic rim light + scroll-driven circular aperture morph (`glass-reveal.js`, `home.js`); Halcyon-style city hover probe & pulsing great-circle arcs from KL (`descent.js`, `home.css`); chromatic accent-synced Project Deck stage glow, specular rim, and counter (`project-deck.js`, `.css`).
 - Flight & time of day: added **Live KL (MYT)** 4th mode synced to UTC+8 (`timeofday.js`, `.css`) and **`Take control · Free fly`** momentum-damped 3D orbit at the flight finale (`scene.js`, `.css`).
