@@ -492,8 +492,10 @@ void main() {
     }
     return t;
   }
-  function frameAt(T, P, outro) {
+  function frameAt(T, P, outro, extra) {
     outro = outro || 0;
+    extra = extra || {};
+    var ptrX = extra.ptrX || 0, ptrY = extra.ptrY || 0, ap = extra.aperture || 0, hover = extra.hover || 0;
     var tx = P.present, keep = P.keepPlate ? 1 : 0, damping = 1 - P.bounce;
     var grow = spring(T + 0.01, P.response, damping);
     var tl = timeToReach(0.85, P.response, damping) - 0.01, tm = timeToReach(0.92, P.response, damping) - 0.01;
@@ -502,29 +504,39 @@ void main() {
     var zoomIn = 0.25 * spring(T, 0.7, 1) + 0.75 * smoother(0, P.glide, T);
     var settle = spring(T - 0.5, 2.4, 1), exit = spring(T - tx, 0.95, 1), release = spring(T - tx - 0.05, 0.65, 1);
     var dome = 0.15 * P.bulge * (1 - smooth(0.4, 0.95, grow));
-    var view = (1 + (P.startZoom - 1) * (1 - zoomIn)) * (1 - 0.045 * settle) * mix(1, P.finalScale, exit) * (1 - 0.06 * outro);
+    var view = (1 + (P.startZoom - 1) * (1 - zoomIn)) * (1 - 0.045 * settle) * mix(1, P.finalScale, exit) * (1 - 0.06 * outro) * (1 + ap * 0.55);
     var bandW = mix(P.bevelWidth, Math.max(P.bevelWidth, 0.4), drop);
-    var plateScale = mix(P.startSize, 1, grow) * (1 + drift) * (1 + 0.14 * release * (1 - keep)) * (1 - keep * (0.03 * release + 0.06 * outro));
+    var plateScale = mix(P.startSize, 1, grow) * (1 + drift) * (1 + 0.14 * release * (1 - keep)) * (1 - keep * (0.03 * release + 0.06 * outro)) * (1 + ap * 1.35);
     var bg = hexToRgb(P.background);
+    // Interactive optical airlock: pointer movement keeps a subtle prismatic rim alive even after release,
+    // and scrolling down morphs the squircle back into a circular orbital aperture that opens into space.
+    var apGlass = Math.sin(clamp01(ap) * Math.PI) * 0.85;
+    var liveGlass = Math.max(hover * 0.28, apGlass);
+    var effRelease = clamp01(release * (1 - liveGlass * 0.72));
+    var baseShape = mix(2, P.corner, morph);
+    var shapeN = mix(baseShape, 2.0, clamp01(ap * 1.4));
+    var plateAlphaBase = keep ? appear * (1 - outro) : appear * (1 - smooth(0.45, 1, effRelease));
+    var plateAlpha = clamp01(Math.max(plateAlphaBase, apGlass * 0.92)) * (1 - smooth(0.72, 1.0, ap));
+    var bareFade = (1 - keep) * smooth(tx - 0.25, tx, T) * (1 - outro) * (1 - smooth(0.35, 0.92, ap));
     return {
-      uPlateScale: plateScale, uShapeN: mix(2, P.corner, morph), uCornerN: P.corner, uOptics: 1 - smooth(0.55, 1, release),
-      uPlateAlpha: keep ? appear * (1 - outro) : appear * (1 - smooth(0.45, 1, release)),
-      uLogoHalf: P.logoScale * view, uLogoOff: [P.logoOffset[0] * view, P.logoOffset[1] * view],
-      uKeep: keep, uSheen: P.sheen, uSweep: mix(-1.6, 1.6, smoother(0.9, tx - 0.1, T)), uLightAng: P.lightTurn * smoother(0.4, tx + 0.4, T),
+      uPlateScale: plateScale, uShapeN: shapeN, uCornerN: P.corner, uOptics: Math.max(1 - smooth(0.55, 1, effRelease), liveGlass * 0.85),
+      uPlateAlpha: plateAlpha,
+      uLogoHalf: P.logoScale * view, uLogoOff: [(P.logoOffset[0] + ptrX * 0.035) * view, (P.logoOffset[1] - ptrY * 0.035) * view],
+      uKeep: keep, uSheen: P.sheen, uSweep: mix(-1.6, 1.6, smoother(0.9, tx - 0.1, T)) + ptrX * 1.15, uLightAng: P.lightTurn * smoother(0.4, tx + 0.4, T) + ptrX * 1.45 + ptrY * 0.65,
       uBold: P.swell * 0.03 * (1 - zoomIn),
-      uBlur: P.focus * 0.05 * (1 - smooth(0.3, 0.95, grow)) + 0.03 * outro,
+      uBlur: P.focus * 0.05 * (1 - smooth(0.3, 0.95, grow)) + 0.03 * outro + ap * 0.045,
       uFrost: P.focus * (1 - smooth(0.5, 0.95, grow)),
       uPinch: 0.38 * P.stretch * smooth(0.1, 0.9, morph) * smooth(0.75, 0.97, zoomIn),
-      uTilt: P.tilt, uDome: dome, uDrop: drop, uRim: 1 + 0.8 * drop,
-      uHalo: P.halo * (0.5 + 0.5 * drop) * (1 - keep * release),
-      uShadow: Math.max(P.shadow * smooth(0.45, 0.8, grow) * (1 - smooth(0, 0.6, morph)), 0.8 * P.shadow * keep * release),
+      uTilt: P.tilt, uDome: dome + ap * 0.14, uDrop: drop, uRim: 1 + 0.8 * drop + liveGlass * 0.5,
+      uHalo: (P.halo + apGlass * 0.65) * (0.5 + 0.5 * drop) * (1 - keep * release),
+      uShadow: Math.max(P.shadow * smooth(0.45, 0.8, grow) * (1 - smooth(0, 0.6, morph)), 0.8 * P.shadow * keep * release) * (1 - ap),
       uGhost: smooth(0, 0.03, T) * (1 - smooth(0.04, 0.08, T)),
       uRipR: 1 + 0.9 * Math.max(0, T - tl), uRipA: P.ripple * smooth(tl, tl + 0.06, T) * Math.exp(-Math.max(0, T - tl) / 0.6),
-      uBare: (1 - keep) * smooth(tx - 0.25, tx, T) * (1 - outro),
+      uBare: bareFade,
       uReach: bandW * plateScale, uCornerPull: P.cornerPull, uStreak: P.edgeSmear, uWiden: P.cornerWidth, uSlab: 0.3 * P.opticalDepth,
       uEtaSpread: 0.06, uFocus: P.cornerFocus, uFocusK: 1.0, uFocusSplit: 0.056 * P.colorBleed, uRimLine: 0.09,
-      uCornerOn: smooth(0.35, 1, morph), uGlow: 0.012 * P.colorBleed, uFaceDisp: 0.012 * P.dispersion, uVivid: 0.85,
-      uDissolve: release, uDisp: P.dispersion, uDouble: P.doubleBevel, uBevelW: bandW * (1 - release), uSpec: P.specular,
+      uCornerOn: smooth(0.35, 1, morph) * (1 - clamp01(ap * 1.2)), uGlow: 0.012 * P.colorBleed, uFaceDisp: 0.012 * P.dispersion, uVivid: 0.85,
+      uDissolve: effRelease, uDisp: P.dispersion, uDouble: P.doubleBevel, uBevelW: bandW * (1 - effRelease * 0.85), uSpec: P.specular,
       uIconPlate: P.iconPlate ? 1 : 0, uUseColor: P.originalColors ? 1 : 0,
       uLightScene: luminance(bg) > 0.5 ? 1 : 0, uLightGlass: luminance(P.iconPlate ? hexToRgb(P.plateColor) : bg) > 0.5 ? 1 : 0,
       uBg: bg, uPlateCol: hexToRgb(P.plateColor), uLogoCol: hexToRgb(P.logoColor)
@@ -542,6 +554,9 @@ void main() {
     this.disposed = false; this.visible = true; this.raf = 0; this.last = 0; this.time = 0; this.dirty = true; this.lost = false;
     this.logo = null; this.renderer = null; this.released = false; this.finished = false;
     this.bgOverride = opts.background || null;
+    this.ptrX = 0; this.ptrY = 0; this.tPtrX = 0; this.tPtrY = 0;
+    this.hover = 0; this.tHover = 0; this.aperture = 0; this.tAperture = 0;
+    this.fixedTime = opts.time == null ? null : opts.time;
     el.classList.add('gr');
     this.mount();
   }
@@ -594,6 +609,38 @@ void main() {
   GlassReveal.prototype.setLook = function (look, background) {
     this.look = look === 'dark' ? 'dark' : 'light'; this.bgOverride = background || null; this.dirty = true; this.kick();
   };
+  GlassReveal.prototype.setPointer = function (nx, ny, active) {
+    if (this.reduce) return;
+    this.tPtrX = Math.max(-1, Math.min(1, nx || 0));
+    this.tPtrY = Math.max(-1, Math.min(1, ny || 0));
+    this.tHover = active === false ? 0 : 1;
+    this.dirty = true; this.kick();
+  };
+  GlassReveal.prototype.setAperture = function (p) {
+    if (this.reduce) return;
+    this.tAperture = clamp01(p || 0);
+    this.dirty = true; this.kick();
+  };
+  GlassReveal.prototype.setTuning = function (patch) {
+    this.opts.tuning = extend(this.opts.tuning || {}, patch || {});
+    this.dirty = true; this.kick();
+  };
+  GlassReveal.prototype.setTime = function (sec) {
+    this.fixedTime = sec == null ? null : +sec;
+    if (this.fixedTime != null) { this.playing = false; this.time = this.fixedTime; }
+    this.dirty = true; this.kick();
+  };
+  GlassReveal.prototype.setLogo = function (svg) {
+    var me = this;
+    this.opts.logo = svg;
+    try {
+      loadLogo(svg).then(function (logo) {
+        if (me.disposed) return;
+        me.logo = logo; if (me.renderer) me.renderer.setLogo(logo);
+        me.dirty = true; me.kick();
+      }, function () { /* keep previous logo on invalid svg */ });
+    } catch (e) { /* ignore invalid svg */ }
+  };
   GlassReveal.prototype.kick = function () {
     if (this.raf || !this.visible || this.lost || this.disposed || !this.logo) return;
     this.last = performance.now(); this.raf = requestAnimationFrame(this._tick || (this._tick = this.tick.bind(this)));
@@ -603,10 +650,24 @@ void main() {
     if (this.disposed || this.lost) return;
     var dt = Math.min(0.1, (now - this.last) / 1000); this.last = now;
     var P = this.settings(), end = endOf(P);
-    if (this.playing) {
+    if (this.fixedTime != null) {
+      this.time = this.fixedTime;
+      this.playing = false;
+    } else if (this.playing) {
       this.time += dt; this.dirty = true;
       if (!this.released && this.time >= P.present) { this.released = true; if (this.onRelease) { try { this.onRelease(this); } catch (e) { /* the page must not stop the loop */ } } }
       if (this.time >= end) { this.time = end; this.playing = false; this.finished = true; if (this.onDone) { try { this.onDone(this); } catch (e2) { /* ignore */ } } }
+    }
+    var k = 1 - Math.exp(-dt * 9);
+    var moving = false;
+    if (Math.abs(this.tPtrX - this.ptrX) > 0.001 || Math.abs(this.tPtrY - this.ptrY) > 0.001) {
+      this.ptrX += (this.tPtrX - this.ptrX) * k; this.ptrY += (this.tPtrY - this.ptrY) * k; this.dirty = true; moving = true;
+    }
+    if (Math.abs(this.tHover - this.hover) > 0.002) {
+      this.hover += (this.tHover - this.hover) * k; this.dirty = true; moving = true;
+    }
+    if (Math.abs(this.tAperture - this.aperture) > 0.001) {
+      this.aperture += (this.tAperture - this.aperture) * Math.min(1, dt * 14); this.dirty = true; moving = true;
     }
     if (this.dirty && this.renderer) {
       var cv = this.cv, dpr = Math.min(window.devicePixelRatio || 1, 2), cw = cv.clientWidth, ch = cv.clientHeight;
@@ -614,10 +675,10 @@ void main() {
       if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
       var tile = Math.min(P.tileSize, Math.min(cw, ch) / 1.75);
       var cyFrac = this.opts.centerY == null ? .5 : this.opts.centerY;
-      this.renderer.render(frameAt(Math.min(this.time, end), P, 0), w, h, tile * dpr, h * (1 - cyFrac));
+      this.renderer.render(frameAt(Math.min(this.time, end), P, 0, { ptrX: this.ptrX, ptrY: this.ptrY, hover: this.hover, aperture: this.aperture }), w, h, tile * dpr, h * (1 - cyFrac));
       this.dirty = false;
     }
-    if (this.visible && this.playing) this.raf = requestAnimationFrame(this._tick);
+    if (this.visible && (this.playing || moving)) this.raf = requestAnimationFrame(this._tick);
   };
 
   /* no WebGL2: the same mark, flat, through a CSS mask */

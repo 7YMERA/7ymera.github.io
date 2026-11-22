@@ -30,6 +30,13 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · 4.0 Solstice (`feat/v4-solstice`)
+- Built directly on the zero-build plain HTML/CSS/JS stack (no framework migration), respecting all scene colour & performance rules in `CLAUDE.md`. Key `20261122a`.
+- `/` front page: pointer-tracked prismatic rim light + scroll-driven circular aperture morph (`glass-reveal.js`, `home.js`); Halcyon-style city hover probe & pulsing great-circle arcs from KL (`descent.js`, `home.css`); chromatic accent-synced Project Deck stage glow, specular rim, and counter (`project-deck.js`, `.css`).
+- Flight & time of day: added **Live KL (MYT)** 4th mode synced to UTC+8 (`timeofday.js`, `.css`) and **`Take control · Free fly`** momentum-damped 3D orbit at the flight finale (`scene.js`, `.css`).
+- `/portfolio/`: fixed the logged `t = 1.5` grey-on-grey contrast dip by separating ink vs surface crossover curves, and added a clickable **Pin daylight** lock + simulated MYT solar clock on the dial (`daycycle.js`, `.css`).
+- Audio & `/play/`: layered scroll-velocity band-pass wind rush during Descent & Flight into `sfx.js`; added two new `/play/` cabinets (13 total): **Skyline Anatomy** (`assets/play/anatomy.js`, `.css` — real KL landmark meshes sliced into 5 explodable architectural strata) and **Liquid Glass Lab** (`lab/liquid-glass.html` — live WebGL2 shader controls + custom SVG input).
+
 ## 2026-11-21 · 3.0: front page, portfolio, play, time of day
 - Owner asked for: the 21st.dev liquid glass logo reveal on the front page, the scroll-stacking project deck, a proper soundtrack and a cooler cursor, a portfolio for recruiters on its own page, games on another, scroll turning the portfolio from day to golden hour to night, and a Plain / Golden / Night choice for the drone view. Built by five parallel agents with disjoint files, integrated here. Key `20261121b`.
 - `/` new front page (`assets/home/`). `/portfolio/` is the old home page reworked for recruiters (CV/Email/LinkedIn/GitHub up top, At a glance, Highlights switch); notes, resume and 404 links now point at `/portfolio/#...`. `/play/` arcade hall with 11 cabinets and the new Skyline Stack, gamepad support. `SceneTime` + `timeofday.js` + `daycycle.js`; golden hour rebuilt as a uniform blend. `sfx.js` rewritten as a 72-bar composed piece; `cursor.js` replaces the fx.js ring. Flight progress on `/` now ends at the bottom of `#enter`.

@@ -60,6 +60,14 @@
     gl.addEventListener('click', replay);
     var rb = $('#rv-replay'); if (rb) rb.addEventListener('click', replay);
     gl.style.cursor = 'pointer';
+    if (rv && !reduce) {
+      rv.addEventListener('pointermove', function (e) {
+        if (!gr) return;
+        var r = rv.getBoundingClientRect();
+        gr.setPointer(((e.clientX - r.left) / Math.max(1, r.width)) * 2 - 1, ((e.clientY - r.top) / Math.max(1, r.height)) * 2 - 1, true);
+      }, { passive: true });
+      rv.addEventListener('pointerleave', function () { if (gr) gr.setPointer(0, 0, false); });
+    }
     var go = function () { makeGlass(reduce); };
     if (window.GlassReveal) go(); else addEventListener('load', go);
     // free the GPU once we have scrolled well past; come back to the finished state if the reader returns
@@ -87,6 +95,11 @@
   function tick() {
     ticking = false;
     var y = scrollY, vh = innerHeight, i;
+    // optical airlock: as the reader scrolls out of #reveal into #descent, relax the glass tile into a circular orbital lens
+    if (gr && rv && !reduce) {
+      var ap = clamp((y - vh * .05) / (vh * .78), 0, 1);
+      gr.setAperture(ap);
+    }
     // the 3D city only shows from the end of the descent to the end of the flight (the CSS fades it); outside that it stays hidden
     var city = false;
     if (enter && enter.offsetHeight) { var top = enter.offsetTop, bot = top + enter.offsetHeight; city = y > top - vh * 1.18 && y < bot + vh * .2; }

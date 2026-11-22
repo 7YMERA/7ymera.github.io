@@ -29,13 +29,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@500;600&display=swap">
-<link rel="stylesheet" href="/assets/site.css?v=20261121b">
-<link rel="stylesheet" href="/assets/fx.css?v=20261121b">
-<link rel="stylesheet" href="/assets/cursor.css?v=20261121b">
-<link rel="stylesheet" href="/assets/arcade.css?v=20261121b">
-<link rel="stylesheet" href="/assets/halcyon.css?v=20261121b">
-<link rel="stylesheet" href="/assets/join-atlas.css?v=20261121b">
-<link rel="stylesheet" href="/assets/play/play.css?v=20261121b">
+<link rel="stylesheet" href="/assets/site.css?v=20261122a">
+<link rel="stylesheet" href="/assets/fx.css?v=20261122a">
+<link rel="stylesheet" href="/assets/cursor.css?v=20261122a">
+<link rel="stylesheet" href="/assets/arcade.css?v=20261122a">
+<link rel="stylesheet" href="/assets/halcyon.css?v=20261122a">
+<link rel="stylesheet" href="/assets/join-atlas.css?v=20261122a">
+<link rel="stylesheet" href="/assets/play/play.css?v=20261122a">
+<link rel="stylesheet" href="/assets/play/anatomy.css?v=20261122a">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Play","url":"https://7ymera.github.io/play/","description":"Games and toys by Alif Najmi.","isPartOf":{"@type":"WebSite","name":"Alif Najmi","url":"https://7ymera.github.io/"}}</script>
 </head>
 <body class="play">
@@ -62,7 +63,7 @@
   <section class="hero-play" aria-labelledby="play-h1">
     <canvas id="attract" aria-hidden="true"></canvas>
     <div class="wrap hero-in">
-      <p class="eyebrow hero-eye"><span class="led" aria-hidden="true"></span>Arcade hall · 11 cabinets · no coins needed</p>
+      <p class="eyebrow hero-eye"><span class="led" aria-hidden="true"></span>Arcade hall · 13 cabinets · no coins needed</p>
       <h1 id="play-h1"><span class="l1">Play</span><span class="l2">the skyline.</span></h1>
       <p class="lede">An arcade, a lab and a toy box in one room. Stack Kuala Lumpur higher than Merdeka 118, ride the last train, spin the Earth, or run a real database in your browser.</p>
       <div class="hero-cta">
@@ -81,7 +82,7 @@
     </div>
   </section>
 
-  <div class="ticker" aria-hidden="true"><div class="ticker-in"><span>Insert coin</span><span>Press start</span><span>11 cabinets</span><span>Best scores stay on this device</span><span>Gamepad ready</span><span>Insert coin</span><span>Press start</span><span>11 cabinets</span><span>Best scores stay on this device</span><span>Gamepad ready</span></div></div>
+  <div class="ticker" aria-hidden="true"><div class="ticker-in"><span>Insert coin</span><span>Press start</span><span>13 cabinets</span><span>Best scores stay on this device</span><span>Gamepad ready</span><span>Insert coin</span><span>Press start</span><span>13 cabinets</span><span>Best scores stay on this device</span><span>Gamepad ready</span></div></div>
 
   <div class="wrap bays" id="cabinets">
 
@@ -128,6 +129,16 @@
           <span class="cab-sign"><b>Glass lab</b><i class="tag">WebGL</i></span>
           <span class="cab-screen"><canvas class="pv" data-pv="glass" width="640" height="400" aria-hidden="true"></canvas></span>
           <span class="cab-deck"><span class="cab-desc">A reeded-glass panel in one shader. Slide the light across it, then bend, frost and re-rib it.</span><span class="cab-keys"><kbd>Move</kbd><kbd>Drag</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" id="anatomy-cab" href="#anatomy-cab" data-open="anatomy" data-tone="gold">
+          <span class="cab-sign"><b>Skyline anatomy</b><i class="tag">New</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="anatomy" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">Explode Petronas, Merdeka 118, Menara KL and Exchange 106 into 5 architectural strata like a watch movement.</span><span class="cab-keys"><kbd>Drag</kbd><kbd>Scrub</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" id="lglass" href="#lglass" data-open="lglass" data-tone="blue">
+          <span class="cab-sign"><b>Liquid glass lab</b><i class="tag">New</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="lglass" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">Tune the front page’s WebGL2 optical shader live: dispersion, corner shape, rim light, or paste any custom SVG.</span><span class="cab-keys"><kbd>Move</kbd><kbd>Sliders</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
         </a>
       </div>
     </section>
@@ -291,6 +302,27 @@
       <iframe id="glass-frame" title="Glass lab" loading="lazy" allow="fullscreen"></iframe>
     </section>
 
+    <section class="view view-pad" data-view="anatomy" hidden>
+      <div class="an-wrap" id="anatomy">
+        <div class="arc-tabs" id="an-tabs" role="tablist" aria-label="Choose a Kuala Lumpur landmark"></div>
+        <div class="an-grid">
+          <div class="an-stage">
+            <canvas id="an-canvas" data-cursor="Drag" width="840" height="520" role="img" aria-label="Exploded 3D architectural diagram of a Kuala Lumpur landmark sliced into five vertical strata."></canvas>
+            <div class="an-controls">
+              <label class="an-slider"><span>Explode</span><input id="an-explode" type="range" min="0" max="100" value="55"><b id="an-pct">55%</b></label>
+              <button class="arc-sound" id="an-spin" type="button" aria-pressed="true">Auto-spin <b>On</b></button>
+            </div>
+          </div>
+          <aside class="an-side" aria-label="Landmark stratum details">
+            <h3 id="an-name">Petronas Twin Towers</h3>
+            <p class="an-meta" id="an-meta">452 m · 1998</p>
+            <p class="an-note" id="an-note"></p>
+            <div class="an-strata" id="an-strata" role="group" aria-label="Inspect architectural strata"></div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
     <section class="view view-pad" data-view="sql" hidden>
       <div class="sql-head"><p id="sql-lede"></p><a id="sql-note" class="ghost-btn" href="/notes/">Read the story</a></div>
       <div id="sql-host" class="sql-host"><p class="sql-wait">Loading the playground…</p></div>
@@ -327,13 +359,14 @@
   paint();
 })();
 </script>
-<script src="/assets/sfx.js?v=20261121b" defer></script>
-<script src="/assets/fx.js?v=20261121b" defer></script>
-<script src="/assets/cursor.js?v=20261121b" defer></script>
-<script src="/assets/arcade.js?v=20261121b" defer></script>
-<script src="/assets/halcyon.js?v=20261121b" defer></script>
-<script src="/assets/play/stack.js?v=20261121b" defer></script>
-<script src="/assets/play/pad.js?v=20261121b" defer></script>
-<script src="/assets/play/play.js?v=20261121b" defer></script>
+<script src="/assets/sfx.js?v=20261122a" defer></script>
+<script src="/assets/fx.js?v=20261122a" defer></script>
+<script src="/assets/cursor.js?v=20261122a" defer></script>
+<script src="/assets/arcade.js?v=20261122a" defer></script>
+<script src="/assets/halcyon.js?v=20261122a" defer></script>
+<script src="/assets/play/stack.js?v=20261122a" defer></script>
+<script src="/assets/play/anatomy.js?v=20261122a" defer></script>
+<script src="/assets/play/pad.js?v=20261122a" defer></script>
+<script src="/assets/play/play.js?v=20261122a" defer></script>
 </body>
 </html>

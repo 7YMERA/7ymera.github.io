@@ -72,18 +72,34 @@
   function progress() { var h = Math.max(1, root.scrollHeight - innerHeight); return Math.max(0, Math.min(1, (window.pageYOffset || root.scrollTop || 0) / h)); }
 
   // ---------- the dial and the glow ----------
-  var dial, wins = {}, glow, ringC, lab, labTxt = '', gl = root.classList.contains('gl');
+  var dial, wins = {}, glow, ringC, lab, pinBtn, labTxt = '', gl = root.classList.contains('gl'), pinned = false;
+  try { pinned = sessionStorage.getItem('dc-pin') === '1'; } catch (e) {}
   function build() {
     var b = document.body; if (!b || document.querySelector('.dc-dial')) return;
     glow = document.createElement('div'); glow.className = 'dc-glow'; glow.setAttribute('aria-hidden', 'true'); b.appendChild(glow);
-    dial = document.createElement('div'); dial.className = 'dc-dial'; dial.setAttribute('aria-hidden', 'true');
-    dial.innerHTML = '<div class="dc-win"><i class="dc-sky dc-d"></i><i class="dc-sky dc-g"></i><i class="dc-sky dc-n"></i><span class="dc-stars"><i class="dc-st a"></i><i class="dc-st b"></i><i class="dc-st c"></i></span><i class="dc-sun"></i><i class="dc-moon"></i>' +
+    dial = document.createElement('div'); dial.className = 'dc-dial';
+    dial.innerHTML = '<div class="dc-win" aria-hidden="true"><i class="dc-sky dc-d"></i><i class="dc-sky dc-g"></i><i class="dc-sky dc-n"></i><span class="dc-stars"><i class="dc-st a"></i><i class="dc-st b"></i><i class="dc-st c"></i></span><i class="dc-sun"></i><i class="dc-moon"></i>' +
       '<svg class="dc-sk" viewBox="0 0 120 40" preserveAspectRatio="none" focusable="false"><path d="M0 40V30h9v-6h7v6h6V20h5v10h8V27h6v13h4V12l2-8 2 8v28h5V12l2-8 2 8v28h4V25h7v-9h6v9h5v15z"/></svg></div>' +
-      '<svg class="dc-ring" viewBox="0 0 76 76" focusable="false"><circle cx="38" cy="38" r="35" class="dc-ring-bg"/><circle cx="38" cy="38" r="35" class="dc-ring-p" transform="rotate(-90 38 38)"/></svg><span class="dc-lab">Day</span>';
+      '<svg class="dc-ring" viewBox="0 0 76 76" aria-hidden="true" focusable="false"><circle cx="38" cy="38" r="35" class="dc-ring-bg"/><circle cx="38" cy="38" r="35" class="dc-ring-p" transform="rotate(-90 38 38)"/></svg>' +
+      '<button type="button" class="dc-pin" aria-pressed="' + (pinned ? 'true' : 'false') + '" aria-label="Pin daylight theme for reading" title="Pin daylight"></button>' +
+      '<span class="dc-lab" aria-hidden="true">Day · 10:00</span>';
     b.appendChild(dial);
     ['d', 'g', 'n'].forEach(function (x) { wins[x] = dial.querySelector('.dc-' + x); });
-    wins.sun = dial.querySelector('.dc-sun'); wins.stars = dial.querySelector('.dc-stars'); wins.moon = dial.querySelector('.dc-moon'); wins.sk = dial.querySelector('.dc-sk'); ringC = dial.querySelector('.dc-ring-p'); lab = dial.querySelector('.dc-lab');
+    wins.sun = dial.querySelector('.dc-sun'); wins.stars = dial.querySelector('.dc-stars'); wins.moon = dial.querySelector('.dc-moon'); wins.sk = dial.querySelector('.dc-sk'); ringC = dial.querySelector('.dc-ring-p'); lab = dial.querySelector('.dc-lab'); pinBtn = dial.querySelector('.dc-pin');
+    pinBtn.addEventListener('click', function () {
+      pinned = !pinned;
+      pinBtn.setAttribute('aria-pressed', pinned ? 'true' : 'false');
+      dial.classList.toggle('is-pinned', pinned);
+      try { sessionStorage.setItem('dc-pin', pinned ? '1' : '0'); } catch (e) {}
+      kick();
+    });
+    dial.classList.toggle('is-pinned', pinned);
     if (reduce) dial.classList.add('dc-still');
+  }
+  function clockFor(p) {
+    var mins = Math.round(10 * 60 + p * (13.5 * 60));
+    var hh = String(Math.floor(mins / 60) % 24).padStart(2, '0'), mm = String(mins % 60).padStart(2, '0');
+    return hh + ':' + mm + ' MYT';
   }
   function paintDial(t, p) {
     if (!dial) return;
@@ -98,21 +114,24 @@
     var fs = t <= 1 ? mix(SKL[0], SKL[1], t) : mix(SKL[1], SKL[2], t - 1), fl = str(fs); if (fl !== lastFill) { lastFill = fl; wins.sk.style.fill = fl; }
     wins.stars.style.opacity = Math.max(0, Math.min(1, (t - 1.3) / 0.7)).toFixed(3);
     ringC.style.strokeDashoffset = (220 * (1 - p)).toFixed(1);
-    var l = t < 0.5 ? 'Day' : t < 1.5 ? 'Golden hour' : 'Night'; if (l !== labTxt) { labTxt = l; lab.textContent = l; }
+    var l = pinned ? 'Daylight pinned' : ((t < 0.5 ? 'Day' : t < 1.5 ? 'Golden hour' : 'Night') + ' · ' + clockFor(p));
+    if (l !== labTxt) { labTxt = l; lab.textContent = l; }
     if (glow) { var g = 1 - Math.abs(t - 1); g = g < 0 ? 0 : g; glow.style.opacity = ((gl ? 0.5 : 0.9) * g * g * (3 - 2 * g)).toFixed(3); }
   }
 
   // ---------- applying ----------
   var SKL = ['#5c92dc', '#6a5a98', '#16224d'].map(parse), lastFill = '';
   var gap = 80, t = 0, target = 0, prog = 0, written = -1, lastW = 0, wTimer = 0, raf = 0, lastF = 0, theme = '';
+  var INK_TOKS = { '--ink': 1, '--muted': 1, '--accent-ink': 1, '--fx-ink': 1 };
   function write() {
     wTimer = 0; lastW = performance.now(); written = t;
-    var seg = t <= 1 ? 0 : 1, F = t <= 1 ? t : t - 1, FU = seg ? sstep(0.3, 0.7, F) : F, st = root.style, j, c, s;
+    // Contrast-locked crossover: ink tokens flip rapidly across t 1.46..1.54 so text never reads grey-on-grey near t 1.5.
+    var seg = t <= 1 ? 0 : 1, F = t <= 1 ? t : t - 1, FU = seg ? sstep(0.36, 0.64, F) : F, FInk = seg ? sstep(0.46, 0.54, F) : F, st = root.style, j, c, s;
     for (j = 0; j < tok.length; j++) {
       c = tok[j];
       if (c.shadow) { var a = SH[seg], b = SH[seg + 1], col = [0, 1, 2].map(function (q) { return Math.round(a[0][q] + (b[0][q] - a[0][q]) * FU); }), o1 = a[1] + (b[1] - a[1]) * FU, o2 = a[2] + (b[2] - a[2]) * FU;
         s = '0 1px 2px rgba(' + col + ',' + o1.toFixed(3) + '),0 10px 30px rgba(' + col + ',' + o2.toFixed(3) + ')'; }
-      else s = str(mix(c.set[seg], c.set[seg + 1], FU));
+      else s = str(mix(c.set[seg], c.set[seg + 1], INK_TOKS[c.name] ? FInk : FU));
       if (s !== c.last) { c.last = s; st.setProperty(c.name, s); }
     }
     if (root.classList.contains('gl')) { // the sky behind the canvas, mirrored by the city's shader (the same three colours and stop, mixed the same way)
@@ -131,7 +150,7 @@
     else try { document.dispatchEvent(new CustomEvent('scenetime', { detail: { t: t } })); } catch (e) {}
   }
   function tick(now) {
-    raf = 0; prog = progress(); target = curve(prog);
+    raf = 0; prog = progress(); target = pinned ? 0 : curve(prog);
     var d = target - t;
     if (reduce || Math.abs(d) < 0.0015) t = target; else t += d * (1 - Math.exp(-Math.max(0.004, Math.min(0.1, (now - lastF) / 1000 || 0.016)) / 0.12));
     lastF = now;

@@ -351,7 +351,7 @@
 
   /* ================= realtime wrapper ================= */
   var env = { T: root.getAttribute('data-theme') === 'light' ? 0 : (root.getAttribute('data-theme') ? 2 : 0), energy: .55, flight: 0, ctx: .78 };
-  var on = false, armed = false, ac = null, eng = null, fadeG = null, uiG = null, an = null, timer = 0, vol = .75, lastGlyph = 0, lastTick = 0, started = 0, sawScene = false;
+  var on = false, armed = false, ac = null, eng = null, fadeG = null, uiG = null, windG = null, windF = null, an = null, timer = 0, vol = .75, lastGlyph = 0, lastTick = 0, started = 0, sawScene = false;
   var LOOK = .5;
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -375,6 +375,13 @@
       ac = new Ctx(); env.T = sceneT(); readPage();
       eng = Engine(ac, env);
       fadeG = ac.createGain(); fadeG.gain.value = 0; uiG = ac.createGain(); uiG.gain.value = .9;
+      // Subtle scroll-velocity wind layer (active during orbital descent & KL drone flight)
+      var wLen = ac.sampleRate * 2, wBuf = ac.createBuffer(1, wLen, ac.sampleRate), wData = wBuf.getChannelData(0), b0 = 0, b1 = 0, b2 = 0;
+      for (var wi = 0; wi < wLen; wi++) { var wh = Math.random() * 2 - 1; b0 = .997 * b0 + wh * .029; b1 = .985 * b1 + wh * .032; b2 = .95 * b2 + wh * .048; wData[wi] = (b0 + b1 + b2 + wh * .018) * .3; }
+      var wSrc = ac.createBufferSource(); wSrc.buffer = wBuf; wSrc.loop = true;
+      windF = ac.createBiquadFilter(); windF.type = 'bandpass'; windF.frequency.value = 320; windF.Q.value = 1.5;
+      windG = ac.createGain(); windG.gain.value = .0001;
+      wSrc.connect(windF); windF.connect(windG); windG.connect(fadeG); wSrc.start();
       var clip = ac.createWaveShaper(); clip.curve = new Float32Array([-.97, .97]);
       eng.out.connect(fadeG); uiG.connect(fadeG); fadeG.connect(clip); clip.connect(ac.destination);
       an = ac.createAnalyser(); an.fftSize = 256; an.smoothingTimeConstant = .78; clip.connect(an);
@@ -394,7 +401,7 @@
     }
     timer = setTimeout(loop, 40);
   }
-  function closeAc() { if (on || !ac) return; clearTimeout(timer); try { ac.close(); } catch (e) {} ac = null; eng = null; fadeG = null; uiG = null; an = null; }
+  function closeAc() { if (on || !ac) return; clearTimeout(timer); try { ac.close(); } catch (e) {} ac = null; eng = null; fadeG = null; uiG = null; windG = null; windF = null; an = null; }
   function set(v, quiet) {
     v = !!v;
     if (v) {
@@ -510,7 +517,26 @@
   var tPend = 0;
   d.addEventListener('scenetime', function (e) { sawScene = true; env.T = clamp(+(e.detail && e.detail.t) || 0, 0, 2); if (!tPend) tPend = setTimeout(function () { tPend = 0; if (eng && ac) eng.ctrl(ac.currentTime); }, 250); });
   new MutationObserver(function () { if (!sawScene) { env.T = themeT(); if (eng && ac) eng.ctrl(ac.currentTime); } }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
-  var pend = 0; function onScroll() { if (pend) return; pend = requestAnimationFrame(function () { pend = 0; readPage(); }); }
+  var pend = 0, lastSy = scrollY, lastSt = performance.now(), windCalm = 0;
+  function onScroll() {
+    if (pend) return;
+    pend = requestAnimationFrame(function () {
+      pend = 0; readPage();
+      var now = performance.now(), dt = Math.max(16, now - lastSt), vel = Math.abs(scrollY - lastSy) / dt;
+      lastSy = scrollY; lastSt = now;
+      if (on && ac && windG && windF) {
+        var ds = d.getElementById('descent'), inDs = false;
+        if (ds) { var dr = ds.getBoundingClientRect(); inDs = dr.top < innerHeight && dr.bottom > 0; }
+        var activeZone = env.flight > .5 || inDs;
+        var v = activeZone ? clamp(vel * .42, 0, 1) : 0;
+        var t = ac.currentTime;
+        windG.gain.setTargetAtTime(v > .02 ? .004 + v * .11 : .0001, t, .08);
+        windF.frequency.setTargetAtTime(240 + v * 920 + (inDs ? 180 : 0), t, .1);
+        clearTimeout(windCalm);
+        windCalm = setTimeout(function () { if (ac && windG) windG.gain.setTargetAtTime(.0001, ac.currentTime, .22); }, 180);
+      }
+    });
+  }
   addEventListener('scroll', onScroll, { passive: true }); addEventListener('resize', onScroll);
   d.addEventListener('visibilitychange', function () { if (!ac || !on) return; if (d.hidden) ac.suspend(); else { ac.resume(); meterKick(); } });
   var armGate = 0;

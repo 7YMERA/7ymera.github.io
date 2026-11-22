@@ -51,7 +51,9 @@
     match: { view: 'arcade', title: 'Spec Match', sub: 'Arcade floor · cabinet 04', score: 'match', pick: 'match' },
     orbit: { view: 'halcyon', title: 'Orbit', sub: 'The lab · Halcyon', pick: 'orbit' },
     lab: { view: 'halcyon', title: 'Particle lab', sub: 'The lab · Halcyon', pick: 'lab' },
-    glass: { view: 'glass', title: 'Glass lab', sub: 'The lab · one WebGL shader' },
+    glass: { view: 'glass', title: 'Glass lab', sub: 'The lab · one WebGL shader', src: '/lab/glass.html' },
+    anatomy: { view: 'anatomy', title: 'Skyline anatomy', sub: 'The lab · exploded KL meshes' },
+    lglass: { view: 'glass', title: 'Liquid glass lab', sub: 'The lab · WebGL2 optical shader', src: '/lab/liquid-glass.html' },
     'sql-company': { view: 'sql', title: 'Company SQL', sub: 'Data toys · SQLite in your browser', sql: 'company' },
     'sql-jom': { view: 'sql', title: 'Jom Al-Quran SQL', sub: 'Data toys · SQLite in your browser', sql: 'jom' },
     atlas: { view: 'sql', title: 'Join Atlas', sub: 'Data toys · a map of the schema', sql: 'atlas' },
@@ -77,7 +79,7 @@
     previewsOn = false;
     if (c.pick && c.view === 'arcade' && window.__arcade) window.__arcade.pick(c.pick);
     if (c.pick && c.view === 'halcyon' && window.__halcyon) window.__halcyon.pick(c.pick);
-    if (c.view === 'glass') { var f = $('#glass-frame'); var th = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; f.src = '/lab/glass.html?embed=1&theme=' + th; }
+    if (c.view === 'glass') { var f = $('#glass-frame'); var th = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; f.title = c.title; f.src = (c.src || '/lab/glass.html') + '?embed=1&theme=' + th; }
     if (c.view === 'sql') mountSql(c.sql);
     if (c.view === 'egg') eggPaint();
     d.dispatchEvent(new CustomEvent('play-view', { detail: { id: c.view === 'stack' ? 'stack' : c.view, cab: id } }));
@@ -347,6 +349,45 @@
       for (var i = 0; i < ribs; i++) { var sh = Math.sin(t * .8 + i * .42) * 10 + (i - 8) * 1.6, sx = clamp(i * rw + sh + 20, 0, 360 - rw); g.drawImage(off, sx, 0, rw, 200, i * rw, 0, rw + .5, PH); var lg = g.createLinearGradient(i * rw, 0, (i + 1) * rw, 0); lg.addColorStop(0, 'rgba(255,255,255,.22)'); lg.addColorStop(.5, 'rgba(255,255,255,0)'); lg.addColorStop(1, 'rgba(0,0,0,.28)'); g.fillStyle = lg; g.fillRect(i * rw, 0, rw, PH); }
       var lx = ((t * 50) % 440) - 60; var sg = g.createLinearGradient(lx - 40, 0, lx + 40, 0); sg.addColorStop(0, 'rgba(255,255,255,0)'); sg.addColorStop(.5, 'rgba(255,255,255,.28)'); sg.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = sg; g.fillRect(lx - 40, 0, 80, PH);
       px(g, 14); g.textAlign = 'left'; g.fillStyle = C.ink; g.fillText('Seen through glass', 14, 188);
+    },
+    anatomy: function (g, t) {
+      backdrop(g);
+      var ex = (Math.sin(t * 1.1) * .5 + .5) * 14;
+      var cx = 160, base = 172;
+      g.strokeStyle = 'rgba(255,210,122,.28)'; g.setLineDash([3, 4]); g.beginPath(); g.moveTo(cx, 18); g.lineTo(cx, base + 6); g.stroke(); g.setLineDash([]);
+      var widths = [74, 52, 46, 34, 14], heights = [18, 22, 16, 20, 26];
+      var y = base;
+      for (var i = 0; i < 5; i++) {
+        var h = heights[i], w = widths[i], lift = i * ex, yy = y - h - lift;
+        var hi = Math.floor(t * .9) % 5 === i;
+        g.fillStyle = hi ? C.gold : (i % 2 ? '#164166' : '#0f2d49');
+        g.strokeStyle = hi ? '#fff0c2' : C.blue; g.lineWidth = 1.4;
+        g.fillRect(cx - w / 2, yy, w, h); g.strokeRect(cx - w / 2, yy, w, h);
+        g.fillStyle = hi ? C.gold : C.mute; mono(g, 8); g.textAlign = 'left';
+        g.fillText('0' + (i + 1), cx + w / 2 + 12, yy + h / 2 + 3);
+        y -= h + 2;
+      }
+      px(g, 11); g.textAlign = 'left'; g.fillStyle = C.mute; g.fillText('EXPLODED STRATA · 4 LANDMARKS', 12, 190);
+    },
+    lglass: function (g, t) {
+      backdrop(g);
+      var cx = 160, cy = 94, sz = 104, ang = t * 1.1;
+      var r = 24 + Math.sin(t * .8) * 18;
+      g.save();
+      rr(g, cx - sz / 2, cy - sz / 2, sz, sz, r);
+      var grd = g.createLinearGradient(cx - 50, cy - 50, cx + 50, cy + 50);
+      grd.addColorStop(0, 'rgba(120,190,255,.22)'); grd.addColorStop(.5, 'rgba(255,255,255,.06)'); grd.addColorStop(1, 'rgba(255,210,122,.22)');
+      g.fillStyle = grd; g.fill();
+      g.strokeStyle = C.blue; g.lineWidth = 2; g.stroke();
+      // orbiting specular rim
+      var sx = cx + Math.cos(ang) * (sz * .46), sy = cy + Math.sin(ang) * (sz * .46);
+      var sp = g.createRadialGradient(sx, sy, 2, sx, sy, 32);
+      sp.addColorStop(0, 'rgba(255,255,255,.9)'); sp.addColorStop(.45, 'rgba(106,168,255,.4)'); sp.addColorStop(1, 'rgba(255,210,122,0)');
+      g.fillStyle = sp; g.fill();
+      // \7 mark inside
+      g.fillStyle = C.ink; px(g, 42); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('\\7', cx, cy + 2);
+      g.restore(); g.textBaseline = 'alphabetic';
+      mono(g, 9); g.textAlign = 'left'; g.fillStyle = C.mute; g.fillText('WEBGL2 · DISPERSION · CUSTOM SVG', 12, 190);
     },
     sql: function (g, t) { sqlPv(g, t, ['SELECT E_department,', '       count(*) AS people', 'FROM Employee', 'GROUP BY 1', 'ORDER BY 2 DESC;'], [['Sales', '41'], ['Finance', '33'], ['IT', '27'], ['Legal', '12']], ['department', 'people']); },
     sql2: function (g, t) { sqlPv(g, t, ['SELECT who, count(*)', 'FROM (SELECT \'Students\' who', '      FROM Student) t', 'GROUP BY who;'], [['Students', '120'], ['Teachers', '14'], ['Clients', '86']], ['who', 'how_many']); },

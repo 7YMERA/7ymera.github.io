@@ -1,0 +1,21 @@
+/* anatomy.css: Exploded Skyline Anatomy stage inside /play/ */
+.an-wrap{max-width:1060px;margin:0 auto;display:grid;gap:18px}
+.an-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(260px,.75fr);gap:18px;align-items:start}
+.an-stage{position:relative;border-radius:14px;overflow:hidden;border:2px solid var(--fx,var(--line));background:#040915;box-shadow:5px 5px 0 var(--hard,rgba(0,0,0,.25))}
+.an-stage canvas{display:block;width:100%;height:clamp(340px,54vh,540px);cursor:grab;touch-action:none}
+.an-stage canvas:active{cursor:grabbing}
+.an-controls{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:12px 16px;background:var(--surface);border-top:2px solid var(--fx,var(--line))}
+.an-slider{display:flex;align-items:center;gap:10px;flex:1 1 200px;font:600 .78rem var(--f-mono,monospace);text-transform:uppercase;letter-spacing:.08em}
+.an-slider input{flex:1;accent-color:var(--accent)}
+.an-side{display:grid;gap:12px;padding:16px;border-radius:14px;background:var(--surface);border:2px solid var(--fx,var(--line));box-shadow:5px 5px 0 var(--hard,rgba(0,0,0,.2))}
+.an-side h3{margin:0;font:700 1.25rem/1.15 var(--f-display,sans-serif)}
+.an-meta{margin:0;font:500 .74rem/1.4 var(--f-mono,monospace);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.an-note{margin:0;font-size:.9rem;line-height:1.5;color:var(--muted)}
+.an-strata{display:grid;gap:8px}
+.an-sbtn{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:9px 11px;text-align:left;border:1.5px solid var(--line);border-radius:9px;background:transparent;color:var(--ink);cursor:pointer;font:500 .84rem var(--f-body,sans-serif);transition:border-color .15s,background-color .15s}
+.an-sbtn b{font:600 .72rem var(--f-mono,monospace);color:var(--accent)}
+.an-sbtn small{font:500 .68rem var(--f-mono,monospace);color:var(--muted)}
+.an-sbtn:hover{border-color:var(--accent);background:var(--accent-soft)}
+.an-sbtn.on{background:var(--accent);color:var(--accent-ink,#fff);border-color:var(--fx,var(--accent))}
+.an-sbtn.on b,.an-sbtn.on small{color:inherit;opacity:.9}
+@media (max-width:860px){.an-grid{grid-template-columns:1fr}}

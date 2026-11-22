@@ -23,9 +23,19 @@
     this.small = matchMedia('(max-width: 640px)').matches;
     this.target = 0; this.x = 0; this.v = 0; this.visible = false; this.raf = 0; this.last = 0;
     sec.style.setProperty('--pd-n', this.count);
+    this.accents = [];
+    this.lastTop = -1;
+    // ambient glow + card counter HUD on the sticky stage
+    if (this.stage && !this.stage.querySelector('.pd-glow')) {
+      this.stage.insertAdjacentHTML('afterbegin', '<i class="pd-glow" aria-hidden="true"></i>');
+      this.stage.insertAdjacentHTML('beforeend', '<div class="pd-count" aria-hidden="true"><b class="pd-now">01</b><span>/ ' + String(this.count).padStart(2, '0') + '</span><i class="pd-bar"></i></div>');
+    }
+    this.nowEl = this.stage ? this.stage.querySelector('.pd-now') : null;
+    this.barEl = this.stage ? this.stage.querySelector('.pd-bar') : null;
     this.cards.forEach(function (c, i) {
       c.style.zIndex = i + 1;
       c.dim = c.querySelector('.pd-dim');
+      me.accents.push((c.style.getPropertyValue('--pd-accent') || '').trim() || '#1559c9');
       var vis = c.querySelector('.pd-visit');
       if (vis && !vis.querySelector('.pd-corner')) {
         var R = 18, svg = '<svg class="pd-corner" aria-hidden="true" width="' + R + '" height="' + R + '" viewBox="0 0 ' + R + ' ' + R + '"><path d="M' + R + ' 0V' + R + 'H0A' + R + ' ' + R + ' 0 0 0 ' + R + ' 0Z" fill="currentColor"/></svg>';
@@ -60,15 +70,17 @@
     return easeOut(clamp01((v * span - (j - 1)) / ENTER));
   };
   Deck.prototype.apply = function (v) {
-    var n = this.count, i, j, c;
+    var n = this.count, i, j, c, topIdx = 0;
     for (i = 0; i < n; i++) {
       c = this.cards[i];
       var arr = this.arrived(i, v), above = 0;
       for (j = i + 1; j < n; j++) above += this.arrived(j, v);
+      if (arr >= .5) topIdx = i;
       above = Math.min(3, above);
       if (this.reduce) {
         c.style.transform = 'translate3d(0,' + (arr >= .5 ? 0 : 110) + 'svh,0)'; c.style.filter = 'none';
         if (c.dim) c.dim.style.opacity = 0;
+        c.classList.toggle('pd-top', arr >= .5 && above < .5);
         continue;
       }
       var y = (1 - arr) * 108 - above * 5, rx = -(1 - arr) * 30 + above * 5, sc = .9 + .1 * arr - above * .05;
@@ -78,6 +90,13 @@
       if (c.dim) c.dim.style.opacity = (above * .15).toFixed(3);
       c.classList.toggle('pd-top', arr > .98 && above < .02);
     }
+    if (topIdx !== this.lastTop) {
+      this.lastTop = topIdx;
+      var col = this.accents[topIdx] || '#1559c9';
+      if (this.stage) this.stage.style.setProperty('--pd-active', col);
+      if (this.nowEl) this.nowEl.textContent = String(topIdx + 1).padStart(2, '0');
+    }
+    if (this.barEl) this.barEl.style.transform = 'scaleX(' + ((topIdx + 1) / Math.max(1, n)).toFixed(4) + ')';
   };
   window.ProjectDeck = Deck;
   document.addEventListener('DOMContentLoaded', function () { [].forEach.call(document.querySelectorAll('[data-deck]'), function (s) { if (!s.__deck) s.__deck = new Deck(s); }); });

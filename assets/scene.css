@@ -266,7 +266,21 @@ html.gl.gl-on #fx-grain{opacity:.5}
 .fly-again:hover{transform:translate3d(-50%,-2px,0)}
 .fly-again:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
 @media (max-width:700px){.fly-again{bottom:250px;min-height:54px;padding:0 20px;font-size:1rem}}
-@media (prefers-reduced-motion:reduce){.fly-again{transition:none}}
+@media (prefers-reduced-motion:reduce){.fly-again,.fly-free{transition:none}}
+/* "Take control · Free fly": sits right below Fly it again over the finale */
+.fly-free{position:absolute;left:50%;bottom:clamp(30px,8svh,76px);transform:translate3d(-50%,14px,0);display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:0 22px;font:600 .9375rem var(--f-mono,ui-monospace,monospace);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:color-mix(in srgb,var(--surface) 92%,transparent);border:2px solid var(--fx);border-radius:999px;box-shadow:4px 4px 0 var(--hard);cursor:pointer;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .4s,transform .4s,visibility 0s .4s;white-space:nowrap;z-index:6}
+.fly-free svg{width:18px;height:18px}
+.fly-free.on{opacity:1;visibility:visible;pointer-events:auto;transform:translate3d(-50%,0,0);transition:opacity .4s,transform .4s}
+.fly-free:hover{transform:translate3d(-50%,-2px,0)}
+.fly-free[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink,#fff)}
+.fly-free:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+.fly-free-hint{position:absolute;left:50%;bottom:clamp(8px,2.2svh,22px);transform:translateX(-50%);margin:0;padding:4px 12px;border-radius:999px;background:rgba(5,10,24,.72);color:#dfeaff;font:500 .68rem/1.3 var(--f-mono,ui-monospace,monospace);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .3s;z-index:6}
+.fly-free-hint.on{opacity:1}
+html.free-fly,html.free-fly body{overflow:hidden!important}
+html.free-fly .ride-caps,html.free-fly .ride-hint,html.free-fly .fly-again{opacity:0!important;pointer-events:none!important}
+html.free-fly .enter-sticky{cursor:grab}
+html.free-fly .enter-sticky:active{cursor:grabbing}
+@media (max-width:700px){.fly-free{bottom:184px;min-height:44px;padding:0 16px;font-size:.82rem}.fly-free-hint{bottom:146px;font-size:.6rem}}
 
 /* ---- the opening card, redesigned to match the rest of the site: a HUD panel with corner ticks, a status bar, a segmented pixel rule, readout cells ---- */
 .k-label{display:none}

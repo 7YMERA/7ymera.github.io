@@ -10,6 +10,16 @@
 (function () {
   'use strict';
   var KL = [3.139, 101.687], D2R = Math.PI / 180;
+  var CITIES = [
+    { name: 'Kuala Lumpur', tag: 'HOME · HQ', lat: 3.139, lon: 101.687, km: 0 },
+    { name: 'UTP · Seri Iskandar', tag: 'ALMA MATER', lat: 4.382, lon: 100.979, km: 158 },
+    { name: 'Singapore', tag: 'HUB · SEA', lat: 1.352, lon: 103.820, km: 315 },
+    { name: 'Bangkok', tag: 'SEA', lat: 13.756, lon: 100.502, km: 1185 },
+    { name: 'Jakarta', tag: 'SEA', lat: -6.209, lon: 106.846, km: 1179 },
+    { name: 'Tokyo', tag: 'EAST ASIA', lat: 35.676, lon: 139.650, km: 5330 },
+    { name: 'Dubai', tag: 'MENA', lat: 25.205, lon: 55.271, km: 5545 },
+    { name: 'Sydney', tag: 'OCEANIA', lat: -33.869, lon: 151.209, km: 6604 }
+  ];
   var PEN = [[6.50, 100.19], [6.10, 100.35], [5.60, 100.38], [5.10, 100.45], [4.60, 100.62], [4.20, 100.70], [3.80, 100.80], [3.40, 101.10], [3.00, 101.35], [2.60, 101.75], [2.25, 102.10], [1.90, 102.60], [1.50, 103.25], [1.30, 103.55], [1.28, 103.85], [1.35, 104.15], [1.65, 104.25], [2.20, 103.95], [2.70, 103.80], [3.20, 103.45], [3.80, 103.35], [4.40, 103.45], [5.00, 103.45], [5.50, 103.05], [6.00, 102.45], [6.25, 102.10], [6.10, 101.85], [5.90, 101.25], [6.10, 100.95], [6.30, 100.60], [6.50, 100.19]];
   var BORC = [[4.50, 117.40], [3.60, 115.60], [2.30, 113.40], [1.50, 111.00], [1.80, 109.65]];
   var BOR = [[1.80, 109.65], [1.70, 110.30], [2.20, 111.10], [2.90, 112.00], [3.30, 113.05], [4.00, 113.90], [4.60, 114.20], [4.95, 115.15], [5.30, 115.20], [5.95, 115.60], [6.40, 116.35], [6.90, 116.80], [7.35, 117.00], [6.60, 117.70], [5.95, 118.10], [5.00, 118.35], [4.40, 118.60], [4.20, 117.90], [4.50, 117.40]];
@@ -24,7 +34,12 @@
     this.stage = section.querySelector('.ds-stage');
     this.reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.p = 0; this.ps = 0; this.v = 0; this.visible = false; this.raf = 0; this.last = 0; this.cache = {}; this.t = 0;
-    this.land = null; this.mx = 0; this.my = 0; this.tmx = 0; this.tmy = 0;
+    this.land = null; this.mx = 0; this.my = 0; this.tmx = 0; this.tmy = 0; this.px = -999; this.py = -999;
+    this.probe = document.createElement('div');
+    this.probe.className = 'ds-probe';
+    this.probe.setAttribute('aria-hidden', 'true');
+    this.stage.appendChild(this.probe);
+    this.probeCity = '';
     this.onProgress = opts.onProgress || null;
     this.off = document.createElement('canvas'); this.offCtx = this.off.getContext('2d');
     this.stars = []; this.mkStars(); this.mkClouds();
@@ -42,7 +57,12 @@
     if ('ResizeObserver' in window) new ResizeObserver(function () { self.size(); self.cache = {}; self.kick(); }).observe(this.stage);
     new IntersectionObserver(function (en) { self.visible = en[0].isIntersecting; if (self.visible) self.kick(); }, { rootMargin: '10% 0px' }).observe(section);
     addEventListener('scroll', function () { self.readScroll(); self.kick(); }, { passive: true });
-    addEventListener('pointermove', function (e) { self.tmx = e.clientX / innerWidth - .5; self.tmy = e.clientY / innerHeight - .5; if (self.visible) self.kick(); }, { passive: true });
+    addEventListener('pointermove', function (e) {
+      self.tmx = e.clientX / innerWidth - .5; self.tmy = e.clientY / innerHeight - .5;
+      var r = self.stage.getBoundingClientRect();
+      self.px = e.clientX - r.left; self.py = e.clientY - r.top;
+      if (self.visible) self.kick();
+    }, { passive: true });
     new MutationObserver(function () { self.readSky(); self.cache = {}; self.kick(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     this.readScroll(); this.ps = this.p; this.kick();
   }
@@ -146,7 +166,8 @@
     }
     this.drawStars(ctx, p, z);
     var v = this.setView(z);
-    if (p < .92) { this.drawEarth(ctx, v, z, p); this.drawAtmosphere(ctx, v, z); this.drawGraticule(ctx, v, z); this.drawCoast(ctx, v, z, p); this.drawReticle(ctx, v, z, p); }
+    if (p < .92) { this.drawEarth(ctx, v, z, p); this.drawAtmosphere(ctx, v, z); this.drawGraticule(ctx, v, z); this.drawCoast(ctx, v, z, p); this.drawCities(ctx, v, z, p); this.drawReticle(ctx, v, z, p); }
+    else if (this.probe) this.probe.classList.remove('on');
     if (cloudK > 0) this.drawClouds(ctx, cloudK, p);
     if (wash > 0) { ctx.globalAlpha = wash; var s = ctx.createLinearGradient(0, 0, 0, H); s.addColorStop(0, this.sky[1]); s.addColorStop(1, this.sky[0]); ctx.fillStyle = s; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
     this.readouts(p, z);
@@ -255,6 +276,55 @@
     ctx.globalAlpha = fade * .35; ctx.strokeStyle = '#ffb938'; ctx.lineWidth = 7; trace(PEN, k); trace(BOR, k);
     ctx.globalAlpha = fade; ctx.strokeStyle = '#ffd27a'; ctx.lineWidth = 1.8; trace(PEN, k); trace(BOR, k);
     ctx.globalAlpha = 1;
+  };
+
+  Descent.prototype.drawCities = function (ctx, v, z, p) {
+    var visA = sstep(.04, .18, p) * (1 - sstep(.68, .82, p));
+    if (visA <= 0) { if (this.probe) this.probe.classList.remove('on'); return; }
+    var kl = this.proj(KL[0], KL[1], v), kx = v.cx + kl[0], ky = v.cy - kl[1];
+    var best = null, bestD = 34, i, c, q, x, y;
+    ctx.save();
+    for (i = 0; i < CITIES.length; i++) {
+      c = CITIES[i];
+      q = this.proj(c.lat, c.lon, v);
+      if (!q[2]) continue;
+      x = v.cx + q[0]; y = v.cy - q[1];
+      if (x < -40 || x > this.W + 40 || y < -40 || y > this.H + 40) continue;
+      // great-circle-like curved beacon arc from KL
+      if (i > 0 && kl[2]) {
+        var mx = (kx + x) * .5, my = (ky + y) * .5 - Math.min(90, Math.hypot(x - kx, y - ky) * .28);
+        ctx.strokeStyle = 'rgba(255,210,122,' + (visA * .26).toFixed(3) + ')';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(kx, ky); ctx.quadraticCurveTo(mx, my, x, y); ctx.stroke();
+        if (!this.reduce) {
+          var ph = (this.t * .26 + i * .19) % 1, inv = 1 - ph;
+          var bx = inv * inv * kx + 2 * inv * ph * mx + ph * ph * x;
+          var by = inv * inv * ky + 2 * inv * ph * my + ph * ph * y;
+          ctx.fillStyle = 'rgba(255,232,168,' + (visA * .85).toFixed(3) + ')';
+          ctx.beginPath(); ctx.arc(bx, by, 1.8, 0, 6.2832); ctx.fill();
+        }
+      }
+      var d = Math.hypot(this.px - x, this.py - y);
+      if (d < bestD) { bestD = d; best = { c: c, x: x, y: y }; }
+      ctx.fillStyle = i === 0 ? '#ffd27a' : '#bfe0ff';
+      ctx.globalAlpha = visA * (i === 0 ? .95 : .78);
+      ctx.beginPath(); ctx.arc(x, y, i === 0 ? 3.2 : 2.2, 0, 6.2832); ctx.fill();
+    }
+    if (best && this.probe) {
+      ctx.globalAlpha = visA;
+      ctx.strokeStyle = '#ffd27a'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(best.x, best.y, 8.5, 0, 6.2832); ctx.stroke();
+      if (this.probeCity !== best.c.name) {
+        this.probeCity = best.c.name;
+        this.probe.innerHTML = '<b>' + best.c.name + '</b><span>' + best.c.tag + ' · ' + (best.c.km ? best.c.km.toLocaleString() + ' KM' : '3.139° N 101.687° E') + '</span>';
+      }
+      var lx = Math.min(this.W - 210, Math.max(16, best.x + 14)), ly = Math.max(82, best.y - 44);
+      this.probe.style.transform = 'translate3d(' + lx.toFixed(1) + 'px,' + ly.toFixed(1) + 'px,0)';
+      this.probe.classList.add('on');
+    } else if (this.probe) {
+      this.probe.classList.remove('on');
+    }
+    ctx.restore();
   };
 
   Descent.prototype.drawReticle = function (ctx, v, z, p) {

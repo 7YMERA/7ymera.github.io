@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Liquid Glass Lab · 7YMERA</title>
+<meta name="description" content="Interactive WebGL2 liquid glass optical lab: bend chromatic dispersion, bevel optics, corner superellipse and custom SVG marks in real time.">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="32x32">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{--bg:#e7eef7;--surface:#f7faff;--ink:#0b2a6b;--muted:#3f5b94;--line:rgba(11,42,107,.18);--accent:#1559c9;--accent-ink:#fff;--hard:rgba(11,42,107,.24)}
+:root[data-theme="dark"]{--bg:#050912;--surface:#0c1428;--ink:#e6efff;--muted:#8fb2d8;--line:rgba(180,210,255,.18);--accent:#6aa8ff;--accent-ink:#050912;--hard:rgba(0,0,0,.5)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:400 14px/1.45 "Albert Sans",system-ui,sans-serif}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 310px;height:100%}
+.stage{position:relative;min-height:360px;overflow:hidden;cursor:pointer}
+.stage-hud{position:absolute;left:16px;bottom:16px;right:16px;display:flex;justify-content:space-between;align-items:center;pointer-events:none;font:500 11px/1 "JetBrains Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.panel{padding:18px 16px;background:var(--surface);border-left:1px solid var(--line);overflow:auto;display:grid;gap:14px;align-content:start}
+h1{margin:0;font:700 18px/1.2 "Bricolage Grotesque",sans-serif}
+.sub{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.row{display:grid;gap:5px}
+.row label{display:flex;justify-content:space-between;font:500 11px "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.row label b{color:var(--ink)}
+.row input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer}
+.btns{display:flex;flex-wrap:wrap;gap:6px}
+.btn{appearance:none;border:1px solid var(--line);background:transparent;color:var(--ink);padding:7px 10px;border-radius:8px;font:500 11px "JetBrains Mono",monospace;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+textarea{width:100%;min-height:70px;resize:vertical;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:400 11px/1.4 "JetBrains Mono",monospace}
+@media (max-width:780px){.wrap{grid-template-columns:1fr;grid-template-rows:52vh auto;height:auto;min-height:100%}.panel{border-left:0;border-top:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="stage" id="stage" role="img" aria-label="Interactive WebGL2 liquid glass optical stage. Move pointer to steer rim light, click to replay.">
+    <div class="stage-hud"><span>Move pointer to bend rim light</span><span>Click stage to replay</span></div>
+  </div>
+  <aside class="panel" aria-label="Optical controls">
+    <div>
+      <h1>Liquid Glass Lab</h1>
+      <p class="sub">Real-time WebGL2 signed-distance refraction &amp; 20-tap chromatic dispersion.</p>
+    </div>
+    <div class="btns" id="marks" role="group" aria-label="Preset marks"></div>
+    <div class="btns">
+      <button class="btn on" id="btn-replay" type="button">Replay</button>
+      <button class="btn" id="btn-freeze" type="button" aria-pressed="false">Freeze lens</button>
+      <button class="btn" id="btn-theme" type="button">Dark glass</button>
+    </div>
+    <div class="row"><label><span>Timeline scrub</span><b id="v-time">Auto</b></label><input id="s-time" type="range" min="0" max="350" value="140"></div>
+    <div class="row"><label><span>Optical depth</span><b id="v-depth">1.10</b></label><input id="s-depth" type="range" min="20" max="260" value="110"></div>
+    <div class="row"><label><span>Dispersion</span><b id="v-disp">1.70</b></label><input id="s-disp" type="range" min="0" max="350" value="170"></div>
+    <div class="row"><label><span>Color bleed</span><b id="v-bleed">1.25</b></label><input id="s-bleed" type="range" min="0" max="280" value="125"></div>
+    <div class="row"><label><span>Corner shape</span><b id="v-corner">4.8</b></label><input id="s-corner" type="range" min="20" max="75" value="48"></div>
+    <div class="row"><label><span>Edge smear</span><b id="v-smear">2.85</b></label><input id="s-smear" type="range" min="0" max="500" value="285"></div>
+    <div class="row"><label><span>Bevel width</span><b id="v-bevel">0.14</b></label><input id="s-bevel" type="range" min="4" max="38" value="14"></div>
+    <div class="row">
+      <label for="svg-in"><span>Custom SVG mark</span></label>
+      <textarea id="svg-in" placeholder="Paste any &lt;svg ...&gt;...&lt;/svg&gt; markup here"></textarea>
+      <button class="btn" id="btn-svg" type="button">Apply custom SVG</button>
+    </div>
+  </aside>
+</div>
+<script src="/assets/home/glass-reveal.js?v=20261122a"></script>
+<script>
+(function () {
+  'use strict';
+  var q = new URLSearchParams(location.search);
+  var root = document.documentElement;
+  if (q.get('theme') === 'dark') root.setAttribute('data-theme', 'dark');
+
+  var MARKS = [
+    { name: '\\7 Mark', svg: '<svg xmlns="http://www.w3.org/2000/svg" width="312" height="224" viewBox="0 0 156 112"><path d="M12 8H40L81 108H53Z M94 8H154V29L122 108H96L127 31H94Z" fill="#000"/></svg>' },
+    { name: 'Petronas', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path fill="#000" d="M36 108V38l4-8h2V14h4v16h2l4 8v70H36zm32 0V38l4-8h2V14h4v16h2l4 8v70H68zM50 56h20v8H50z"/></svg>' },
+    { name: 'Merdeka', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path fill="#000" d="M58 8h4v34l18 14-8 56H44L38 48l20-16V8z"/></svg>' },
+    { name: 'Solstice', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path fill="#000" d="M60 10l12 38 38 12-38 12-12 38-12-38-38-12 38-12z"/></svg>' }
+  ];
+
+  var stage = document.getElementById('stage');
+  var isDark = function () { return root.getAttribute('data-theme') === 'dark'; };
+  var bgOf = function () { return isDark() ? '#050912' : '#e7eef7'; };
+  var frozen = false;
+
+  var gr = new GlassReveal(stage, {
+    logo: MARKS[0].svg, look: isDark() ? 'dark' : 'light', background: bgOf(),
+    tileSize: 360, centerY: 0.5, tuning: { finalScale: 0.95 }, replayOnClick: false
+  });
+
+  stage.addEventListener('pointermove', function (e) {
+    var r = stage.getBoundingClientRect();
+    gr.setPointer(((e.clientX - r.left) / Math.max(1, r.width)) * 2 - 1, ((e.clientY - r.top) / Math.max(1, r.height)) * 2 - 1, true);
+  }, { passive: true });
+  stage.addEventListener('pointerleave', function () { gr.setPointer(0, 0, false); });
+  stage.addEventListener('click', function () {
+    frozen = false; syncFreeze(); gr.setTime(null); gr.replay();
+  });
+
+  var marksEl = document.getElementById('marks');
+  MARKS.forEach(function (m, i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn' + (i === 0 ? ' on' : ''); b.textContent = m.name;
+    b.addEventListener('click', function () {
+      marksEl.querySelectorAll('.btn').forEach(function (x) { x.classList.remove('on'); });
+      b.classList.add('on'); gr.setLogo(m.svg);
+    });
+    marksEl.appendChild(b);
+  });
+
+  var btnFreeze = document.getElementById('btn-freeze'), sTime = document.getElementById('s-time'), vTime = document.getElementById('v-time');
+  function syncFreeze() {
+    btnFreeze.classList.toggle('on', frozen);
+    btnFreeze.setAttribute('aria-pressed', frozen ? 'true' : 'false');
+    vTime.textContent = frozen ? (+sTime.value / 100).toFixed(2) + 's' : 'Auto';
+  }
+  btnFreeze.addEventListener('click', function () {
+    frozen = !frozen; syncFreeze();
+    gr.setTime(frozen ? +sTime.value / 100 : null);
+    if (!frozen) gr.replay();
+  });
+  sTime.addEventListener('input', function () {
+    frozen = true; syncFreeze(); gr.setTime(+sTime.value / 100);
+  });
+  document.getElementById('btn-replay').addEventListener('click', function () {
+    frozen = false; syncFreeze(); gr.setTime(null); gr.replay();
+  });
+  var btnTheme = document.getElementById('btn-theme');
+  function syncThemeBtn() { btnTheme.textContent = isDark() ? 'Light glass' : 'Dark glass'; }
+  btnTheme.addEventListener('click', function () {
+    root.setAttribute('data-theme', isDark() ? 'light' : 'dark');
+    syncThemeBtn(); gr.setLook(isDark() ? 'dark' : 'light', bgOf());
+  });
+  syncThemeBtn();
+
+  function bind(id, outId, key, div, dec) {
+    var inp = document.getElementById(id), out = document.getElementById(outId);
+    inp.addEventListener('input', function () {
+      var v = +inp.value / div; out.textContent = v.toFixed(dec);
+      var patch = {}; patch[key] = v; gr.setTuning(patch);
+    });
+  }
+  bind('s-depth', 'v-depth', 'opticalDepth', 100, 2);
+  bind('s-disp', 'v-disp', 'dispersion', 100, 2);
+  bind('s-bleed', 'v-bleed', 'colorBleed', 100, 2);
+  bind('s-corner', 'v-corner', 'corner', 10, 1);
+  bind('s-smear', 'v-smear', 'edgeSmear', 100, 2);
+  bind('s-bevel', 'v-bevel', 'bevelWidth', 100, 2);
+
+  document.getElementById('btn-svg').addEventListener('click', function () {
+    var v = (document.getElementById('svg-in').value || '').trim();
+    if (v.indexOf('<svg') === 0) gr.setLogo(v);
+  });
+})();
+</script>
+</body>
+</html>

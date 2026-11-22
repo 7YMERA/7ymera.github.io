@@ -2,7 +2,7 @@
 .tod{display:flex;gap:10px;pointer-events:auto;z-index:6;padding:10px;background:var(--surface);color:var(--ink);border:2px solid var(--fx);border-radius:14px;box-shadow:5px 5px 0 var(--hard)}
 .tod--hud{position:absolute;left:50%;top:76px;transform:translateX(-50%)}
 .tod--hud.tod--nohead{top:18px}
-.tod .tod-b{appearance:none;font:inherit;color:inherit;display:grid;gap:7px;justify-items:center;align-content:start;width:132px;padding:7px 7px 9px;background:transparent;border:2px solid transparent;border-radius:10px;cursor:pointer;text-align:center;touch-action:manipulation;transition:transform .15s,background-color .15s}
+.tod .tod-b{appearance:none;font:inherit;color:inherit;display:grid;gap:7px;justify-items:center;align-content:start;width:112px;padding:7px 7px 9px;background:transparent;border:2px solid transparent;border-radius:10px;cursor:pointer;text-align:center;touch-action:manipulation;transition:transform .15s,background-color .15s}
 .tod .tod-b:hover{transform:translateY(-2px);background:var(--accent-soft)}
 .tod .tod-b:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .tod .tod-b[aria-checked="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--fx);box-shadow:3px 3px 0 var(--hard);transform:translate(-1px,-1px)}
@@ -27,6 +27,11 @@
 .tod-sw--night .tod-st.a{left:14%;top:18%}
 .tod-sw--night .tod-st.b{left:38%;top:36%;animation-delay:-.9s}
 .tod-sw--night .tod-st.c{left:52%;top:12%;animation-delay:-1.7s}
+.tod-sw--live{background:linear-gradient(125deg,#1d4e9e,#3a60a2 52%,#0c1a3c)}
+.tod-sw--live svg{fill:#0a1530}
+.tod-sw--live .tod-orb{left:42%;top:18%;width:18%;background:#ffd27a;box-shadow:0 0 0 3px rgba(255,210,122,.38);animation:tod-pulse 2.2s ease-in-out infinite}
+.tod-sw--live .tod-st{width:3px;height:3px;border-radius:50%;background:#ffd27a;opacity:.85;animation:tod-tw 1.8s ease-in-out infinite}
+.tod-sw--live .tod-st.a{left:18%;top:22%}.tod-sw--live .tod-st.b{left:74%;top:28%;animation-delay:-.7s}
 @keyframes tod-bob{50%{transform:translateY(-12%)}}
 @keyframes tod-set{50%{transform:translateY(14%)}}
 @keyframes tod-pulse{50%{opacity:.65}}

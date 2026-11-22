@@ -516,12 +516,45 @@
   // spaced so a shot holds while its section is read and the move to the next one happens in the gap between them.
   // "Fly it again ...": shown over the finale. It cycles the view (plain, golden hour, night) and goes back to the start of the flight. The big picker in the flight HUD (assets/timeofday.js) does the same by choice.
   var again=document.getElementById('fly-again'),DBGCR=/[?&]dbg/.test(location.search);
+  var freeBtn=null,freeHint=null,freeOn=false,freeDrag=false,freeLx=0,freeLy=0;
+  var freeState={a:48*Math.PI/180,ta:48*Math.PI/180,y:112,ty:112,r:280,tr:280,cx:0,cz:-40,cy:72};
+  function setFree(v){
+    v=!!v;if(v===freeOn)return;freeOn=v;root.classList.toggle('free-fly',v);
+    if(freeBtn){freeBtn.setAttribute('aria-pressed',v?'true':'false');var b=freeBtn.querySelector('b');if(b)b.textContent=v?'Resume scroll':'Take control · Free fly'}
+    if(freeHint)freeHint.classList.toggle('on',v);
+    if(v){
+      // seed free-fly orbit from the current camera so there is zero jump
+      var dx=cam.position.x-GC[0],dz=cam.position.z-GC[1];
+      freeState.cx=GC[0];freeState.cz=GC[1];freeState.cy=72;
+      freeState.a=freeState.ta=Math.atan2(dz,dx);
+      freeState.r=freeState.tr=clamp(Math.hypot(dx,dz),110,480);
+      freeState.y=freeState.ty=clamp(cam.position.y,18,260);
+      need=true;
+    } else { freeDrag=false; fInit=true; need=true; }
+  }
   if(again){(function(){var lab=again.querySelector('b'),NX={day:'golden',golden:'night',night:'day'},TXT={golden:'Fly it again at golden hour',night:'Fly it again at night',day:'Fly it again by day'};
     function next(){return NX[ST.nearest()]}
     function label(){if(lab)lab.textContent=TXT[next()]}
     label();document.addEventListener('scenetime',label);
-    again.addEventListener('click',function(){ST.mode(next());
-      var en=document.getElementById('enter');if(en)scrollTo({top:en.getBoundingClientRect().top+scrollY+innerHeight*.15,behavior:'instant'})})})()}
+    again.addEventListener('click',function(){setFree(false);ST.mode(next());
+      var en=document.getElementById('enter');if(en)scrollTo({top:en.getBoundingClientRect().top+scrollY+innerHeight*.15,behavior:'instant'})});
+    // Mount "Take control · Free fly" beside Fly it again (works on both / and /flight/)
+    var parent=again.parentNode;
+    if(parent&&!parent.querySelector('.fly-free')){
+      freeBtn=document.createElement('button');freeBtn.type='button';freeBtn.className='fly-free';freeBtn.setAttribute('aria-pressed','false');
+      freeBtn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="2"/></svg><b>Take control · Free fly</b>';
+      freeBtn.addEventListener('click',function(){setFree(!freeOn)});
+      parent.insertBefore(freeBtn,again.nextSibling);
+      freeHint=document.createElement('p');freeHint.className='fly-free-hint';freeHint.setAttribute('aria-hidden','true');
+      freeHint.textContent='Drag to orbit · Scroll to zoom · Esc to resume';
+      parent.insertBefore(freeHint,freeBtn.nextSibling);
+      window.addEventListener('pointerdown',function(e){if(!freeOn)return;if(e.target&&e.target.closest&&e.target.closest('button,a,.tod'))return;freeDrag=true;freeLx=e.clientX;freeLy=e.clientY});
+      window.addEventListener('pointermove',function(e){if(!freeOn||!freeDrag)return;var dx=e.clientX-freeLx,dy=e.clientY-freeLy;freeLx=e.clientX;freeLy=e.clientY;freeState.ta-=dx*.0055;freeState.ty=clamp(freeState.ty+dy*.45,18,280);need=true},{passive:true});
+      window.addEventListener('pointerup',function(){freeDrag=false});
+      window.addEventListener('wheel',function(e){if(!freeOn)return;e.preventDefault();freeState.tr=clamp(freeState.tr+e.deltaY*.22,95,520);need=true},{passive:false});
+      window.addEventListener('keydown',function(e){if(freeOn&&e.key==='Escape'){e.preventDefault();setFree(false)}});
+    }
+  })()}
   var spin=document.getElementById('spin'),SP0=.06,SPW=.28,sTop=0,sH=0; // sTop/sH: the buffer's place (read on layout, not per frame)
   function P(cx,cz,a,r,y,ty,sx,sy,mr){return [cx,cz,a,r,y,ty,sx||0,sy||0,mr||0]} // mr: the radius to use on a phone for a wide shot of the group (0 = the usual 12 % back)
   var MER=[LAY.mer[0],LAY.mer[1]],EXC=[LAY.ex[0],LAY.ex[1]],KLT=[LAY.kl[0],LAY.kl[1]];  // Merdeka 118, The Exchange 106, Menara KL (scene units, Petronas is 0,0), all from LAY
@@ -845,7 +878,17 @@
   function place(time){
     if(enter){var pin=scrollY>=enter.offsetTop-40&&scrollY<=enter.offsetTop+enter.offsetHeight-innerHeight+40;if(pin!==flying){flying=pin;root.classList.toggle('flying',pin)}} // hides the dock while the captions are on screen
     var inRide=cr>.0004&&!!rideP;
-    if(inRide){
+    if(freeOn){
+      var fk=reduce?1:1-Math.exp(-dtF*7);
+      freeState.a+=(freeState.ta-freeState.a)*fk;
+      freeState.y+=(freeState.ty-freeState.y)*fk;
+      freeState.r+=(freeState.tr-freeState.r)*fk;
+      cam.position.set(freeState.cx+Math.cos(freeState.a)*freeState.r,freeState.y,freeState.cz+Math.sin(freeState.a)*freeState.r);
+      cam.lookAt(freeState.cx,freeState.cy,freeState.cz);
+      cam.setViewOffset(W,Hh,0,0,W,Hh);
+      if(scene.fog){scene.fog.near=fogN0+260;scene.fog.far=fogF0+560}
+      hudUpdate(true,1,1);
+    } else if(inRide){
       var u=rideU(cr);
       rideP.getPoint(u,cam.position);
       if(cr>HOLD0){ // the hold: the scene drifts slowly sideways as you scroll, so the whole map is shown while the page moves on
@@ -879,7 +922,7 @@
     }
     followCam(dtF);
     for(var ci=0;ci<caps.length;ci++){var c=caps[ci],on=cr>=+c.dataset.from&&cr<+c.dataset.to;if(on!==c.classList.contains('on'))c.classList.toggle('on',on)}
-    if(again){if(DBGCR)again.dataset.cr=cr.toFixed(3);var aOn=inRide&&cr>.93;if(aOn!==again.classList.contains('on'))again.classList.toggle('on',aOn)}
+    if(again){if(DBGCR)again.dataset.cr=cr.toFixed(3);var aOn=(inRide&&cr>.93)||freeOn;if(aOn!==again.classList.contains('on'))again.classList.toggle('on',aOn);if(freeBtn&&aOn!==freeBtn.classList.contains('on'))freeBtn.classList.toggle('on',aOn)}
     if(spin&&sH){var sy=scrollY-(sTop-innerHeight),sf=sy/Math.max(1,sH),sOn=sf>.18&&sf<.95;if(sOn!==spin.classList.contains('on'))spin.classList.toggle('on',sOn)} // the coordinates tag
     ringUpdate(time,inRide);
     orb.rotation.y=time*.0004;ring.rotation.z=time*.0006;orb.position.y=230+Math.sin(time*.0009)*3;
@@ -891,7 +934,7 @@
     var dt=clamp((time-last)/1000,.001,.05);last=time;dtF=dt;tick++;
     if(reduce)snap();else{for(var j=0;j<8;j++)curPose[j]=damp(curPose[j],tgtPose[j],vPose[j],.55,dt);var cr0=cr;cr=clamp(damp(cr,tr,vr,.75,dt),0,1);if(flying){var cap=.085*dt;if(cr-cr0>cap){cr=cr0+cap;vr.v=Math.min(vr.v,cap/dt)}else if(cr0-cr>cap){cr=cr0-cap;vr.v=Math.max(vr.v,-cap/dt)}} /* speed limit: a fast flick can't whip the camera */px=damp(px,tx,vx,.6,dt)}
     // Idle drift: in the drone flight, when the reader has stopped scrolling, the page creeps forward by itself so slow scrolling never shows as a stutter.
-    if(flying&&enter&&!reduce&&!document.hidden&&time-lastUser>900&&scrollY<enter.offsetTop+enter.offsetHeight-innerHeight-6){
+    if(flying&&!freeOn&&enter&&!reduce&&!document.hidden&&time-lastUser>900&&scrollY<enter.offsetTop+enter.offsetHeight-innerHeight-6){
       driftAcc+=(mobile?20:28)*clamp((time-lastUser-900)/1500,0,1)*dt;
       if(driftAcc>=1){var dy=Math.floor(driftAcc);driftAcc-=dy;scrollBy({top:dy,behavior:'instant'})}}
     // Background drift: when the reader is idle outside the flight, the camera slowly swings and breathes (the page itself never moves),
@@ -902,7 +945,7 @@
     if(idleK<.002)idleK=0;
     var arcOn=root.classList.contains('arc-on'),iv=arcOn?125:idleK>0?33:66; // arc-on: a game in the arcade is running, so the city steps back to ~8 fps and leaves the frame budget to the game
     if(tDirty){tDirty=false;applyTime(ST.get())} // the time of day changed (SceneTime): blend the three parameter sets, once per frame at most
-    var moving=Math.abs(tr-cr)>(flying?.00002:.0003);for(var j2=0;j2<8;j2++)if(Math.abs(tgtPose[j2]-curPose[j2])>.02){moving=true;break}
+    var moving=freeOn||Math.abs(tr-cr)>(flying?.00002:.0003);for(var j2=0;j2<8;j2++)if(Math.abs(tgtPose[j2]-curPose[j2])>.02){moving=true;break}
     // While the reader is only reading, redraw at about 15 fps (the beams and pulses still drift); while scrolling, every frame.
     if(moving||need||(!reduce&&time-lastR>iv)){if(idleK>0&&!moving&&lastR>0&&!arcOn){dIv+=time-lastR;if(++dN>=90){if(dIv/dN>48)driftOff=true;dIv=0;dN=0}}place(reduce?0:time);renderer.render(scene,cam);need=false;lastR=time;if(!shown){shown=true;root.classList.add('gl-on')}}
     raf=run?requestAnimationFrame(frame):0}

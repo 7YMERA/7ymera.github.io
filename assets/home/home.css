@@ -99,6 +99,15 @@ html.gr-flat .rv-replay { display: none; }
 .ds-mark { position: absolute; right: -5px; top: 0; width: 11px; height: 11px; margin-top: -5px; border: 1.5px solid #ffd27a; background: #02040c; transform: rotate(45deg); will-change: transform; }
 .ds-ruler { overflow: visible; }
 .ds-mark { transition: none; }
+.ds-probe {
+  position: absolute; left: 0; top: 0; z-index: 4; pointer-events: none; padding: 7px 11px;
+  border: 1px solid rgba(255, 210, 122, .55); background: rgba(4, 10, 26, .84); color: #eef5ff;
+  font: 500 .65rem/1.35 var(--f-mono); letter-spacing: .14em; text-transform: uppercase;
+  opacity: 0; transition: opacity .18s ease; will-change: transform, opacity; white-space: nowrap;
+}
+.ds-probe.on { opacity: 1; }
+.ds-probe b { display: block; color: #ffd27a; font-weight: 600; }
+.ds-probe span { display: block; color: #9fb8dc; font-size: .6rem; margin-top: 2px; }
 @media (max-width: 700px) {
   .ds-chap { left: 18px; top: 84px; } .ds-ph { left: 20px; right: 20px; bottom: 150px; }
   .ds-tele { right: 18px; left: 18px; bottom: 20px; grid-template-columns: 1fr 1fr; text-align: left; gap: 8px 18px; font-size: .625rem; }

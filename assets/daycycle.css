@@ -3,7 +3,11 @@ html[data-daycycle] #theme-btn{display:none!important} /* the scroll is the time
 /* the horizon glow: a warm wash from the bottom edge at golden hour; only its opacity changes */
 .dc-glow{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0;background:radial-gradient(130% 62% at 50% 104%,rgba(255,178,84,.85),rgba(255,150,64,.34) 46%,rgba(255,150,64,0) 72%)}
 /* the sun and moon window: a round view of the sky that shows the time of day, with a ring that fills as you scroll */
-.dc-dial{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:40;width:76px;height:76px;pointer-events:none;color:var(--ink)}
+.dc-dial{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:40;width:76px;height:76px;pointer-events:auto;color:var(--ink)}
+.dc-pin{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;border-radius:50%;background:transparent;cursor:pointer;z-index:4}
+.dc-pin:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.dc-dial.is-pinned .dc-ring-p{stroke:var(--gold,#a86d12)}
+.dc-dial.is-pinned .dc-lab{border-color:var(--gold,#a86d12)}
 .dc-win{position:absolute;inset:6px;border-radius:50%;overflow:hidden;isolation:isolate;background:#fcfeff;box-shadow:0 0 0 2px var(--fx),3px 3px 0 var(--hard)}
 .dc-sky,.dc-st,.dc-sun,.dc-moon,.dc-stars{position:absolute;display:block}
 .dc-sky{inset:0}
