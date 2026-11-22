@@ -77,11 +77,11 @@ body.pf .top .wrap { max-width: var(--pf-w); }
 /* ---------- Sections stand straight on the city, as on the old home page: no sheet behind them; side-l / side-r leave the other half of the screen to the landmark the camera is showing (camera keys in scene.js, by section id) ---------- */
 html body.pf main > section.pf-s.block { margin-bottom: var(--pf-gap); }
 /* full-width sections (At a glance, Work, Credentials, Activity, Why) read across the whole city, so they keep a calm sheet; the side sections and the split skill tree stand on the city */
-html body.pf main > section.pf-s.block:not(.side-l):not(.side-r):not(.tree-split) {
+html body.pf main > section.pf-s.block:not(.side-l):not(.side-r):not(.tree-split):not(#notes) {
   width: min(calc(100% - 32px), var(--pf-w)); margin: 0 auto var(--pf-gap); padding: var(--pf-pad);
   background: color-mix(in srgb, var(--bg) 96%, transparent); border: 1px solid var(--line); border-radius: 28px; box-shadow: var(--pf-shadow);
 }
-html body.pf main > section.pf-s.block:not(.side-l):not(.side-r):not(.tree-split) > .wrap { max-width: none; padding-inline: 0; }
+html body.pf main > section.pf-s.block:not(.side-l):not(.side-r):not(.tree-split):not(#notes) > .wrap { max-width: none; padding-inline: 0; }
 .pf-s .sec-head { margin-bottom: clamp(28px, 4vw, 52px); align-items: end; gap: 24px; }
 .pf-s .sec-head > div:first-child { gap: 14px; max-width: 46em; }
 .pf-s .sec-head h2, .nb-head h2 { font: 400 clamp(2.4rem, 4.8vw, 4.1rem)/1.02 var(--f-serif); letter-spacing: -.022em; color: var(--ink); }
@@ -229,3 +229,28 @@ html.pf-js .pf-portrait { animation-delay: .2s; }
 
 html body.pf .contact .eyebrow::before { color: inherit; border-right-color: color-mix(in srgb, var(--bg) 30%, transparent); }
 html body.pf .contact h2 em { padding-right: 0; }
+
+/* ---------- Notes: one centred row that scrolls sideways, ending on a "See all" card ---------- */
+html body.pf #notes { width: auto; }
+#notes .nb-head { justify-content: center; text-align: center; }
+#notes .nb-head > div { justify-items: center; margin-inline: auto; max-width: 40rem; }
+.nb-rail { display: flex; align-items: flex-end; gap: 40px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: none; margin-inline: calc(50% - 50vw); padding: 110px max(24px, calc(50vw - 720px)) 28px; justify-content: safe center; }
+.nb-rail::-webkit-scrollbar { display: none; }
+.nb-rail:focus-visible { outline: 3px solid var(--accent); outline-offset: -6px; }
+.nb-rail > .fd-grid { display: contents; }
+.nb-rail .fd, .nb-end { flex: none; scroll-snap-align: center; }
+.nb-end { display: grid; align-content: end; gap: 6px; width: 260px; height: 272px; padding: 26px; box-sizing: border-box; border-radius: 22px; background: var(--ink); color: var(--bg); text-decoration: none; box-shadow: 6px 6px 0 var(--accent); position: relative; transition: transform .25s; }
+.nb-end:hover { transform: translateY(-4px); }
+.nb-end:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+.nb-end-n { position: absolute; top: 18px; left: 24px; font: 400 4.6rem/1 var(--f-serif, serif); letter-spacing: -.04em; opacity: .9; }
+.nb-end-t { font: 700 1.5rem/1.1 var(--f-display); }
+.nb-end-s { font-size: .9375rem; opacity: .75; }
+.nb-end-go { position: absolute; right: 22px; top: 22px; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: var(--accent-ink, #fff); font-size: 1.5rem; transition: transform .25s; }
+.nb-end:hover .nb-end-go { transform: rotate(-45deg); }
+.nb-rail-ctrl { display: flex; justify-content: center; gap: 14px; margin-top: 4px; }
+.nb-rail-ctrl .hs-btn { display: grid; place-items: center; width: 52px; height: 52px; border: 2.5px solid var(--ink); border-radius: 14px; background: var(--surface); color: var(--ink); cursor: pointer; box-shadow: 3px 3px 0 var(--ink); }
+.nb-rail-ctrl .hs-btn svg { width: 24px; height: 24px; }
+.nb-rail-ctrl .hs-btn:hover { background: var(--accent); color: var(--accent-ink, #fff); }
+@media (min-width: 1500px) { .nb-rail-ctrl { display: none; } }
+.nb-rail .fd { width: 330px; }
+#notes .nb-head { display: grid; justify-items: center; padding: 22px 28px; margin: 0 auto; max-width: 44rem; background: color-mix(in srgb, var(--bg) 92%, transparent); border: 2px solid var(--fx); border-radius: 16px; box-shadow: 5px 5px 0 var(--hard); }

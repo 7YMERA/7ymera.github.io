@@ -30,6 +30,9 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · Portfolio notes: one centred row ending on "See all"
+- Owner: the 2 + 1 folder layout looked lopsided. `#notes` is no longer `side-l`: a centred heading, then one full-width row (`.nb-rail`, scrolls sideways with snap, arrows under 1500 px) of the three pinned folders ending on a dark "See all 12 notes" card. Key `20261122h`.
+
 ## 2026-11-22 · Notes: folders everywhere, three pinned, a note about this site
 - New note `notes/portfolio-site.html` ("Building this site", 22 Nov), images in `assets/notes/site/`; added to `notes/index.html`, `sitemap.xml` and `feed.xml`.
 - Portfolio `#notes`: three pinned folders, TaskMatch (studies), This site and Graduation (owner swapped the random third for the convocation); "See all 12 notes".
