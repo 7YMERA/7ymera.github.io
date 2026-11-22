@@ -47,3 +47,7 @@
   .tod--hud .tod-t b{font-size:.82rem}.tod--hud .tod-t small{display:none}
 }
 @media (prefers-reduced-motion:reduce){.tod .tod-b,.tod-orb,.tod-glow,.tod-st{transition:none;animation:none!important}}
+
+/* mid-flight the picker steps aside (scene.js sets html.ride-mid between 5 % and 90 % of the flight), so the landmark labels it covered can be read; it is back at the start and at the finale */
+.tod--hud{transition:opacity .35s,transform .35s}
+html.ride-mid .tod--hud{opacity:0;transform:translate(-50%,-14px);pointer-events:none;visibility:hidden;transition:opacity .35s,transform .35s,visibility 0s .35s}

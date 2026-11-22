@@ -30,6 +30,12 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · Descent from above, picker steps aside, glitching letters
+- Owner: the descent should end looking down on the skyline from above and ease into the drone angle. `scene.js`: on the front page (`#descent` present, `HOMEDS`) three director keys hold a straight-down view (radius 4 to 6, 1250 to 980 high) as the clouds clear, then tilt into the flight's first shot (`END`); the flight now starts at the top of `#enter` instead of one screen earlier, so the director reaches `END` exactly where the flight takes over.
+- Owner: Menara KL's label was hidden behind the view picker. `scene.js` sets `html.ride-mid` between 5 % and 90 % of the flight; `timeofday.css` fades the picker out then. It is there at the start and at the finale.
+- Owner: letters should glitch now and then. `fx.js`: every 2.6 to 6.8 s one visible heading, label or nav link (plain text only) swaps a few letters for glyphs for about 0.2 s with a colour split, then restores. Off with reduced motion; opt out with `data-noglitch`. Key `20261122b`.
+- README rewritten for the three pages (eras in the version history, page tables, new screenshots in `docs/screens/v3-*`).
+
 ## 2026-11-22 · 3.1 Solstice (Gemini, merged from `feat/v4-solstice`); Liquid Glass Lab canvas sized by Claude
 - Built directly on the zero-build plain HTML/CSS/JS stack (no framework migration), respecting all scene colour & performance rules in `CLAUDE.md`. Key `20261122a`.
 - `/` front page: pointer-tracked prismatic rim light + scroll-driven circular aperture morph (`glass-reveal.js`, `home.js`); Halcyon-style city hover probe & pulsing great-circle arcs from KL (`descent.js`, `home.css`); chromatic accent-synced Project Deck stage glow, specular rim, and counter (`project-deck.js`, `.css`).

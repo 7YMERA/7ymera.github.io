@@ -51,4 +51,36 @@
 
   /* ---- rules ---- */
   var g = d.createElement('div'); g.className = 'fx-grid'; g.setAttribute('aria-hidden', 'true'); g.innerHTML = '<i></i><i></i><i></i>'; d.body.appendChild(g);
+
+  /* ---- glitch: now and then one visible heading, label or nav link flickers for a fifth of a second (a few letters swap for glyphs, a colour split and a jolt), then comes back exactly as it was ---- */
+  if (!reduce) {
+    var GL = '!<>-_\\/[]{}=+*^?#01', SEL = 'h1, h2, h3, .eyebrow, .cap, nav a, .mark, .k-label, .rv-name, .rv-tag, .sec-head span, [data-glitch]';
+    var glitchOne = function () {
+      if (d.hidden) return;
+      var list = d.querySelectorAll(SEL), pool = [];
+      for (var i = 0; i < list.length; i++) {
+        var e = list[i];
+        if (e.classList.contains('fx-gl') || e.closest('[data-noglitch], .tod, input, textarea')) continue;
+        var r = e.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > innerHeight || r.width < 8) continue;
+        if (e.childNodes.length !== 1 || e.firstChild.nodeType !== 3 || e.textContent.trim().length < 2) continue; /* only plain text, so markup is never touched */
+        pool.push(e);
+      }
+      if (!pool.length) return;
+      var el = pool[Math.floor(Math.random() * pool.length)], orig = el.textContent, n = Math.max(1, Math.round(orig.length * .18)), steps = 0;
+      el.setAttribute('aria-label', el.getAttribute('aria-label') || orig);
+      var w = el.getBoundingClientRect().width; el.style.minWidth = w + 'px'; /* glyphs never reflow the line */
+      el.classList.add('fx-gl');
+      var tick = function () {
+        if (steps++ >= 4) { el.textContent = orig; el.classList.remove('fx-gl'); el.style.minWidth = ''; return; }
+        var c = orig.split('');
+        for (var k = 0; k < n; k++) { var j = Math.floor(Math.random() * c.length); if (c[j] !== ' ') c[j] = GL[Math.floor(Math.random() * GL.length)]; }
+        el.textContent = c.join('');
+        setTimeout(tick, 45 + Math.random() * 30);
+      };
+      tick();
+    };
+    var glLoop = function () { glitchOne(); setTimeout(glLoop, 2600 + Math.random() * 4200); };
+    setTimeout(glLoop, 3500);
+  }
 })();

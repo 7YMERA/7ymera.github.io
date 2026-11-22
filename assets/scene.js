@@ -26,7 +26,7 @@
   // Where this script lives (assets/), so the models load from any page, whatever its folder.
   var BASE=(((CS||document.querySelector('script[src*="scene.js"]')||{}).src)||'').replace(/scene\.js.*$/,'');
   // data-flight-only on <html> (the /flight/ page): no orbit phase and no page around it, just the flight, driven by scroll.
-  var ONLY=root.hasAttribute('data-flight-only');
+  var ONLY=root.hasAttribute('data-flight-only'),HOMEDS=!!document.getElementById('descent'); // HOMEDS: the front page, where the flight follows the descent
   // ?bg=district: the compact one-mesh KLCC district (assets/city/klcc_district.json, tools/convert-klcc-dae.js) replaces the OSM city and the four landmark models.
   var DIST=!/[?&]bg=osm/.test(location.search); // the district is the map; ?bg=osm swaps in the OpenStreetMap city. In the district, the landmarks are the hand-made models, not the district's own blocky ones.
   // ===== LAYOUT: the one table every position in this file derives from =====
@@ -608,7 +608,11 @@
     ['journey',.62,0,P(-25,9,60,360,190,70,0,0,900)],
     ['halcyon',.5,-.5,P(-25,9,60,360,190,70,0,0,900)],
     ['arcade',.5,-.5,P(-25,9,60,360,190,70,0,0,900)],                 // hold the pulled-back view while the arcade is on screen                 // pull right back (zoom out) ...
-    ['enter',0,-1,END]                                         // ... then in to where the flight starts (zoom in)                                     // the flight starts here
+    // Front page (#descent): as the clouds clear, the city is seen from straight above the skyline, then the camera drops and tilts into the flight's first shot (END), so the descent runs on into the drone with no cut
+    ['descent',.6,0,P(-15,-11,65,4,1250,0,0,0,4)],
+    ['descent',.88,0,P(-15,-11,65,6,980,0,0,0,6)],
+    ['descent',.96,0,P(-15,-11,40,60,640,20,0,0,70)],
+    ['enter',0,HOMEDS?0:-1,END]                                         // ... then in to where the flight starts (zoom in)                                     // the flight starts here
   ];
   var KEYS=[],lastLay=-1;
   function mob(p){if(!mobile)return p;var q=p.slice(0,8);q[6]=0;if(p[8]){q[3]=p[8]}else{q[3]*=1.12;q[4]*=1.08}return q} // a portrait screen is only 0.49 of its height wide: a wide shot of the group stands much farther back there (p[8])
@@ -630,7 +634,7 @@
       if(y<=KEYS[i].y){var a=poseOf(KEYS[i-1]),b=poseOf(KEYS[i]),t=(y-KEYS[i-1].y)/Math.max(1,KEYS[i].y-KEYS[i-1].y);t=t*t*(3-2*t);
         var o=[];for(var j=0;j<8;j++)o.push(a[j]+(b[j]-a[j])*t);return o}}
     return poseOf(KEYS[KEYS.length-1])}
-  function rideProg(){if(!enter)return 0;var m=ONLY?document.documentElement.scrollHeight-innerHeight:enter.offsetTop+enter.offsetHeight-innerHeight,st=ONLY?0:enter.offsetTop-innerHeight;return m>st?Math.min(1,Math.max(0,(scrollY-st)/(m-st))):0}
+  function rideProg(){if(!enter)return 0;var m=ONLY?document.documentElement.scrollHeight-innerHeight:enter.offsetTop+enter.offsetHeight-innerHeight,st=ONLY?0:enter.offsetTop-(HOMEDS?0:innerHeight);return m>st?Math.min(1,Math.max(0,(scrollY-st)/(m-st))):0}
   function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
   // Critically damped follow (no overshoot, no jump when a wheel notch lands): the camera glides to where the scroll bar is.
   function damp(c,t,v,st,dt){var o=2/st,x=o*dt,e=1/(1+x+.48*x*x+.235*x*x*x),ch=c-t,tmp=(v.v+o*ch)*dt;v.v=(v.v-o*tmp)*e;return t+(ch+tmp)*e}
@@ -878,6 +882,7 @@
   function place(time){
     if(enter){var pin=scrollY>=enter.offsetTop-40&&scrollY<=enter.offsetTop+enter.offsetHeight-innerHeight+40;if(pin!==flying){flying=pin;root.classList.toggle('flying',pin)}} // hides the dock while the captions are on screen
     var inRide=cr>.0004&&!!rideP;
+    var rMid=inRide&&!freeOn&&cr>.05&&cr<.9;if(rMid!==root.classList.contains('ride-mid'))root.classList.toggle('ride-mid',rMid); // the view picker steps aside mid-flight so the landmark labels at the top of the HUD stay readable (timeofday.css)
     if(freeOn){
       var fk=reduce?1:1-Math.exp(-dtF*7);
       freeState.a+=(freeState.ta-freeState.a)*fk;

@@ -53,3 +53,8 @@ html.brief .fx-grid { display: none; }
 .hx-name::after, .sc-why.live::after { content: "_"; margin-left: 2px; animation: fx-caret 1s steps(1) infinite; }
 @keyframes fx-caret { 50% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .hx-name::after { animation: none; } .fx-rp { display: none; } .sec-head h2.cg::before, .sec-head h2.cg::after { display: none; } }
+
+/* glitch (fx.js): a brief colour split and a jolt; only transform moves, the shadow is on for a fifth of a second */
+.fx-gl{animation:fxGl .22s steps(2) both;text-shadow:2px 0 rgba(255,60,60,.55),-2px 0 rgba(40,200,255,.55)}
+@keyframes fxGl{0%{transform:translate(0)}25%{transform:translate(-2px,1px) skewX(-6deg)}50%{transform:translate(2px,-1px)}75%{transform:translate(-1px,0) skewX(4deg)}100%{transform:translate(0)}}
+@media (prefers-reduced-motion:reduce){.fx-gl{animation:none;text-shadow:none}}
