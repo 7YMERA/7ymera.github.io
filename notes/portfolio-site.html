@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Building this site · Alif Najmi</title>
+<meta name="description" content="How this portfolio grew from one static page into a 3D Kuala Lumpur you can fly through, in plain HTML, CSS and JavaScript with no build step.">
+<meta property="og:title" content="Building this site">
+<meta property="og:description" content="From one static page to a 3D Kuala Lumpur, with no framework.">
+<meta property="og:image" content="https://7ymera.github.io/assets/og-skyline-3.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Alif Najmi">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://7ymera.github.io/notes/portfolio-site.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://7ymera.github.io/notes/portfolio-site.html">
+<link rel="alternate" type="application/rss+xml" title="Alif Najmi · Notes" href="/feed.xml">
+<meta name="theme-color" content="#0b2a6b">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/favicon-192.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/site.css?v=20261122g">
+<link rel="stylesheet" href="../assets/scene.css?v=20261122g">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BlogPosting",
+ "headline": "Building this site",
+ "description": "How this portfolio grew from one static page into a 3D Kuala Lumpur you can fly through, in plain HTML, CSS and JavaScript with no build step.",
+ "datePublished": "2026-11-22",
+ "author": {
+  "@type": "Person",
+  "name": "Alif Najmi",
+  "url": "https://7ymera.github.io/"
+ },
+ "image": "https://7ymera.github.io/assets/og-skyline-3.jpg",
+ "mainEntityOfPage": "https://7ymera.github.io/notes/portfolio-site.html"
+}
+</script>
+</head>
+<body>
+<div class="sky" aria-hidden="true"></div>
+
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge av"><img src="/assets/icons/favicon-192.png" alt="" width="32" height="32" decoding="async"></span>Alif Najmi</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="../portfolio/#me">Me</a>
+      <a href="../portfolio/#work">Work</a>
+      <a href="../portfolio/#journey">Journey</a>
+      <a href="../portfolio/#contact">Contact</a>
+    </nav>
+    <button class="icon-btn k-btn" id="theme-btn" type="button" aria-label="Switch light or dark theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="post">
+    <div class="post-head">
+      <span><a class="back" href="../portfolio/#me">← Back to Alif</a> · <a class="back" href="index.html">All notes</a></span>
+      <span class="eyebrow">Notes · Side project · Pinned</span>
+      <h1>Building this site</h1>
+      <p class="meta">22 November 2026 · 5 min read</p>
+    </div>
+
+    <div class="post-body">
+      <p>This site is the project I have touched most. It started on 25 October 2026 as one static page, and four weeks and a few hundred commits later it is a 3D Kuala Lumpur you fall into from orbit, a portfolio for recruiters, a room of games, and these notes. It is still plain HTML, CSS and JavaScript on GitHub Pages: no framework, no build step, nothing to install. You edit a file, push, and it is live in a minute.</p>
+
+      <h2>Version 1: one page</h2>
+      <p>The first version was a manifesto, a "REQ-001 · Hire Alif" user-story card, three case studies and a timeline, in teal and gold. Over the next two weeks it grew a curtain opening, an aurora behind everything, glass folders for each project, a coverflow of my UTP subjects and live SQL playgrounds you can run in the browser.</p>
+      <figure class="shot">
+        <img src="../assets/notes/site/2026-10-first-version.webp" alt="The first version of the site: a manifesto and a user-story card" width="1200" height="750" loading="lazy" decoding="async">
+        <figcaption>25 October 2026, the first version.</figcaption>
+      </figure>
+
+      <h2>Version 2: the city becomes the site</h2>
+      <p>On 10 November the experiment I had been running on the side, a low-poly KL skyline, took over the home page. The Petronas Towers, Merdeka 118, Menara KL and The Exchange 106 are real models; the rest of the city comes from OpenStreetMap. Every section of the page got its own camera shot, and the end of the page became a drone flight through the skyline. Night is lit from photos of the real city: scattered warm and cool windows, a warm haze on the horizon.</p>
+      <div class="pair">
+        <figure class="shot"><img src="../assets/notes/site/city-hero-dark.webp" alt="The 3D home page at night" width="1300" height="800" loading="lazy" decoding="async"><figcaption>The 3D home page at night.</figcaption></figure>
+        <figure class="shot"><img src="../assets/notes/site/city-flight-wide.webp" alt="The drone flight over the skyline" width="1300" height="800" loading="lazy" decoding="async"><figcaption>The drone flight.</figcaption></figure>
+      </div>
+
+      <h2>Version 3: three pages and a time of day</h2>
+      <p>By 20 November the one long page did too much. So it split: a front page that is a short film (a liquid glass logo, a fall from 408 km up into the city, the flight, a deck of projects), a portfolio that gets a recruiter to the point in thirty seconds, and a play page with the games and labs. The city got a real time of day. You can fly it by day, at golden hour or at night, and scrolling the portfolio turns the day into dusk. A composed soundtrack plays underneath if you switch it on.</p>
+      <figure class="shot">
+        <img src="../assets/notes/site/v3-flight-golden.webp" alt="The skyline at golden hour" width="1300" height="800" loading="lazy" decoding="async">
+        <figcaption>Golden hour over KLCC.</figcaption>
+      </figure>
+      <div class="pair">
+        <figure class="shot"><img src="../assets/notes/site/v3-home-descent.webp" alt="The descent from orbit" width="1300" height="800" loading="lazy" decoding="async"><figcaption>The descent, from 408 km.</figcaption></figure>
+        <figure class="shot"><img src="../assets/notes/site/v3-play.webp" alt="The play page" width="1300" height="800" loading="lazy" decoding="async"><figcaption>The play page.</figcaption></figure>
+      </div>
+
+      <h2>What I learned</h2>
+      <ul>
+        <li><b>Frame rate is a feature.</b> Animate only transform and opacity, pause anything off screen, and measure with the CPU slowed down four times. Golden hour was taken out once because it stuttered on phones, and only came back when it could be done with a handful of shader values instead of repainting every material.</li>
+        <li><b>Port, don't install.</b> The components I liked on 21st.dev are React. Each one here is rewritten in plain JavaScript, so the site never needs a build.</li>
+        <li><b>Write the handoff as you go.</b> Most of this was built with AI agents. A short CLAUDE.md, a work log with what changed and what is still open, and a smoke test that checks every page at desktop and phone width are what kept it coherent.</li>
+        <li><b>Privacy is a rule, not a step.</b> No client names, nobody else's name or ID in a screenshot, and any database published here is scrubbed first.</li>
+      </ul>
+
+      <p>The code is on <a href="https://github.com/7YMERA/7ymera.github.io" target="_blank" rel="noopener">GitHub</a>, and the README has the full version history.</p>
+    </div>
+
+    <div class="post-foot">
+      <a class="back" href="index.html">← All notes</a>
+      <a class="back" href="slb-screens.html">Try the IT Asset Disposal app →</a>
+    </div>
+  </article>
+</main>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  try { var saved = localStorage.getItem('theme'); if (saved) root.setAttribute('data-theme', saved); } catch (e) {}
+  document.getElementById('theme-btn').addEventListener('click', function () {
+    var cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+  });
+})();
+</script>
+<script src="../assets/reader.js?v=20261122g" defer></script>
+</body>
+</html>

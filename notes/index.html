@@ -24,39 +24,60 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=20261122f">
-<link rel="stylesheet" href="../assets/scene.css?v=20261122f">
+<link rel="stylesheet" href="../assets/site.css?v=20261122g">
+<link rel="stylesheet" href="../assets/scene.css?v=20261122g">
+<link rel="stylesheet" href="/assets/fx.css?v=20261122g">
+<link rel="stylesheet" href="/assets/cursor.css?v=20261122g">
+<link rel="stylesheet" href="/assets/notes-index.css?v=20261122g">
 </head>
 <body>
 <div class="sky" aria-hidden="true"></div>
 
 <header class="top">
   <div class="wrap">
-    <a class="mark" href="../" aria-label="Alif Najmi, home"><span class="badge av"><img src="/assets/icons/favicon-192.png" alt="" width="32" height="32" decoding="async"></span>Alif Najmi</a>
-    <nav class="nav" aria-label="Sections">
-      <a href="../portfolio/#me">Me</a>
-      <a href="../portfolio/#work">Work</a>
-      <a href="../portfolio/#journey">Journey</a>
-      <a href="../portfolio/#contact">Contact</a>
+    <a class="mark" href="/" aria-label="7YMERA, home"><span class="badge av"><img src="/assets/icons/favicon-192.png" alt="" width="32" height="32" decoding="async"></span>7YMERA</a>
+    <nav class="nav" aria-label="Site">
+      <a href="/">Home</a>
+      <a href="/portfolio/">Portfolio</a>
+      <a href="/play/">Play</a>
+      <a href="/notes/" aria-current="page">Notes</a>
     </nav>
+    <button class="icon-btn sfx-btn" id="sfx-btn" type="button" aria-pressed="false" aria-label="Sound off. Turn sound on"><span class="sfx-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
     <button class="icon-btn k-btn" id="theme-btn" type="button" aria-label="Switch light or dark theme">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
     </button>
   </div>
 </header>
 
-<main class="wrap">
-  <section class="post">
-    <div class="stream-hero">
-      <div class="post-head">
-        <a class="back" href="../portfolio/#me">← Back to Alif</a>
-        <span class="eyebrow">Notes</span>
-        <h1>Notes</h1>
-        <p class="meta">How my projects work, the diagrams behind them, and what I learned.</p>
-      </div>
-      <div class="stream" data-stream='["../assets/notes/slb/charts/erd-normalised.webp", "../assets/smk.webp", "../assets/mle-home-v2.webp", "../assets/kaki.webp", "../assets/jumaat.webp", "../assets/tm-dashboard-v2.webp", "../assets/notes/db/jom-cover.webp", "../assets/notes/db/cover.webp", "../assets/notes/aws/cover-2.webp", "../assets/slb-track-v2.webp", "../assets/notes/slb/charts/final-flow.webp", "../assets/notes/mle/design-system.webp", "../assets/notes/kaki/ta-dark.webp"]'></div>
+<main id="main" class="ni">
+  <section class="ni-hero" aria-labelledby="ni-h1">
+    <div class="ni-head">
+      <a class="back" href="/portfolio/#notes">← Back to the portfolio</a>
+      <span class="eyebrow">Notes · 10 projects · 12 notes</span>
+      <h1 id="ni-h1">Notes</h1>
+      <p class="meta">How my projects work, the diagrams behind them, and what I learned. Open a folder for the stories, demos and code.</p>
+      <a class="ni-jump" href="#pinned">See the folders <span aria-hidden="true">↓</span></a>
     </div>
-    <div class="notes-index">
+    <div class="stream ni-stream" data-speed="34" data-stream='["../assets/notes/site/v3-flight-golden.webp", "../assets/notes/slb/charts/erd-normalised.webp", "../assets/smk.webp", "../assets/mle-home-v2.webp", "../assets/kaki.webp", "../assets/jumaat.webp", "../assets/tm-dashboard-v2.webp", "../assets/notes/db/jom-cover.webp", "../assets/notes/db/cover.webp", "../assets/notes/aws/cover-2.webp", "../assets/slb-track-v2.webp", "../assets/notes/slb/charts/final-flow.webp", "../assets/notes/mle/design-system.webp", "../assets/notes/kaki/ta-dark.webp"]'></div>
+  </section>
+
+  <section class="ni-sec" id="pinned" aria-labelledby="ni-pin">
+    <div class="ni-sec-head"><span class="ni-pin" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15 3l6 6-3 1-4 4 1 5-2 2-4-4-5 5-1-1 5-5-4-4 2-2 5 1 4-4z"/></svg></span><h2 id="ni-pin">Pinned</h2><p>The three I would show first: my final year project, rebuilt properly, this site, and the day I graduated.</p></div>
+    <div class="fd-grid ni-grid ni-grid--pinned" data-folders='[{"label": "This site", "kicker": "Pinned · Side project", "cover": "/assets/notes/site/v3-flight-golden.webp", "files": [{"name": "Source on GitHub", "meta": "Repo", "href": "https://github.com/7YMERA/7ymera.github.io"}, {"name": "Fly the drone view", "meta": "Live", "href": "/#enter"}, {"name": "The play room", "meta": "Live", "href": "/play/"}, {"name": "Building this site", "meta": "Note", "href": "/notes/portfolio-site.html"}]}, {"label": "TaskMatch", "kicker": "Pinned · FYP, rebuilt", "cover": "/assets/tm-dashboard-v2.webp", "files": [{"name": "FYP version", "meta": "Repo", "href": "https://github.com/7YMERA/taskmatch-v1-utp"}, {"name": "v2 source", "meta": "Repo", "href": "https://github.com/7YMERA/taskmatch-v2"}, {"name": "Live demo", "meta": "No login", "href": "https://taskmatch-umber.vercel.app", "img": "/assets/tm-landing-v2.webp"}, {"name": "Rebuilding my FYP properly", "meta": "Note", "href": "/notes/taskmatch-v2.html", "img": "/assets/tm-dashboard-v2.webp"}]}, {"label": "Graduation", "kicker": "Pinned · UTP · Nov 2026", "cover": "/assets/notes/convocation-cover-2.webp", "files": [{"name": "Four years, one walk", "meta": "Note", "href": "/notes/convocation-2026.html", "img": "/assets/notes/convocation-cover-2.webp"}]}]'></div>
+  </section>
+
+  <section class="ni-sec" aria-labelledby="ni-all">
+    <div class="ni-sec-head"><h2 id="ni-all">Every project</h2><p>Newest first.</p></div>
+    <div class="fd-grid ni-grid" data-folders='[{"label": "IT Asset Disposal", "kicker": "SLB internship", "cover": "/assets/slb-track-v2.webp", "files": [{"name": "Source on GitHub", "meta": "Repo", "href": "https://github.com/7YMERA/it-asset-disposal-app-v1"}, {"name": "Click through the app", "meta": "26 screens", "href": "/notes/slb-screens.html", "img": "/assets/slb-screens/022-000.webp"}, {"name": "Charts & data model", "meta": "Note", "href": "/notes/slb-design.html", "img": "/assets/notes/slb/charts/mvp-flow.webp"}, {"name": "From reply-all to Power Apps", "meta": "Note", "href": "/notes/slb-power-apps.html", "img": "/assets/slb-track-v2.webp"}]}, {"label": "Databases", "kicker": "UTP · SQL playgrounds", "cover": "/assets/notes/db/cover.webp", "files": [{"name": "Jom Al-Quran, 56 tables", "meta": "Playground", "href": "/notes/jom-al-quran.html", "img": "/assets/notes/db/jom-cover.webp"}, {"name": "A company in 49 tables", "meta": "Playground", "href": "/notes/database.html", "img": "/assets/notes/db/cover.webp"}]}, {"label": "SMK Subang dashboard", "kicker": "In real use", "cover": "/assets/smk.webp", "files": [{"name": "Source on GitHub", "meta": "Repo", "href": "https://github.com/7YMERA/dashboard-smksubang-portfolio"}, {"name": "150 teachers actually open it", "meta": "Note", "href": "/notes/smk-dashboard.html", "img": "/assets/smk.webp"}]}, {"label": "MyLokalEvent", "kicker": "Coursework, rebuilt", "cover": "/assets/mle-home-v2.webp", "files": [{"name": "Coursework version", "meta": "Repo", "href": "https://github.com/7YMERA/mylokalevent-v1-utp"}, {"name": "v2 source", "meta": "Repo", "href": "https://github.com/7YMERA/mylokalevent-v2"}, {"name": "Live site", "meta": "BM / EN", "href": "https://mylokalevent.vercel.app", "img": "/assets/mle-events-v2.webp"}, {"name": "From coursework to trust", "meta": "Note", "href": "/notes/mylokalevent-v2.html", "img": "/assets/mle-home-v2.webp"}]}, {"label": "KakiLima", "kicker": "Side project", "cover": "/assets/kaki.webp", "files": [{"name": "Source on GitHub", "meta": "Repo", "href": "https://github.com/7YMERA/kakilima"}, {"name": "Live site", "meta": "4 languages", "href": "https://kakilima-iota.vercel.app", "img": "/assets/notes/kaki/ta-dark.webp"}, {"name": "Accessible first", "meta": "Note", "href": "/notes/kakilima.html", "img": "/assets/kaki.webp"}]}, {"label": "JumaatFinder", "kicker": "Side project", "cover": "/assets/notes/jumaat-cover.webp", "files": [{"name": "Source on GitHub", "meta": "Repo", "href": "https://github.com/7YMERA/jumaat-finder-app"}, {"name": "Where can I solat Jumaat?", "meta": "Note", "href": "/notes/jumaatfinder.html", "img": "/assets/notes/jumaat-cover.webp"}]}, {"label": "AWS", "kicker": "UTP · Cloud", "cover": "/assets/notes/aws/cover-2.webp", "files": [{"name": "Cloud Foundations badge", "meta": "AWS", "href": "https://skillsprofile.skillbuilder.aws/user/najmi/certification-badges"}, {"name": "One VPC, two departments", "meta": "Note", "href": "/notes/aws-two-departments.html", "img": "/assets/notes/aws/cover-2.webp"}]}]'></div>
+  </section>
+
+  <section class="ni-sec ni-list" aria-labelledby="ni-every">
+    <div class="ni-sec-head"><h2 id="ni-every">Every note</h2><p>All twelve, newest first.</p></div>
+<div class="notes-index">
+        <a class="note-card" href="portfolio-site.html">
+          <img src="../assets/notes/site/v3-flight-golden.webp" alt="" width="96" height="96" loading="lazy">
+          <div><span>22 Nov 2026 · Side project</span><b>Building this site</b><span class="note-sub">From one static page to a 3D Kuala Lumpur, with no framework and no build step.</span></div>
+        </a>
         <a class="note-card" href="slb-screens.html">
           <img src="../assets/slb-screens/022-000.webp" alt="" width="96" height="96" loading="lazy">
           <div><span>10 Nov 2026 · Internship</span><b>Try the IT Asset Disposal app</b><span class="note-sub">Click through all 26 screens of the Power App, in the order a case moves through it.</span></div>
@@ -121,7 +142,11 @@
   });
 })();
 </script>
-<script src="../assets/image-stream.js?v=20261122f" defer></script>
-<script src="../assets/reader.js?v=20261122f" defer></script>
+<script src="../assets/image-stream.js?v=20261122g" defer></script>
+<script src="/assets/folders.js?v=20261122g" defer></script>
+<script src="/assets/sfx.js?v=20261122g" defer></script>
+<script src="/assets/fx.js?v=20261122g" defer></script>
+<script src="/assets/cursor.js?v=20261122g" defer></script>
+<script src="../assets/reader.js?v=20261122g" defer></script>
 </body>
 </html>

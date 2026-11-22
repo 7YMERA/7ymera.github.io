@@ -7,6 +7,13 @@
     <language>en</language>
     <atom:link href="https://7ymera.github.io/feed.xml" rel="self" type="application/rss+xml"/>
     <item>
+      <title>Building this site</title>
+      <link>https://7ymera.github.io/notes/portfolio-site.html</link>
+      <guid isPermaLink="true">https://7ymera.github.io/notes/portfolio-site.html</guid>
+      <pubDate>Sun, 22 Nov 2026 00:00:00 +0800</pubDate>
+      <description>How this portfolio grew from one static page into a 3D Kuala Lumpur you can fly through, with no framework and no build step.</description>
+    </item>
+    <item>
       <title>Jom Al-Quran: 56 tables, back from Oracle</title>
       <link>https://7ymera.github.io/notes/jom-al-quran.html</link>
       <guid isPermaLink="true">https://7ymera.github.io/notes/jom-al-quran.html</guid>

@@ -30,6 +30,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · Notes: folders everywhere, three pinned, a note about this site
+- New note `notes/portfolio-site.html` ("Building this site", 22 Nov), images in `assets/notes/site/`; added to `notes/index.html`, `sitemap.xml` and `feed.xml`.
+- Portfolio `#notes`: three folders, TaskMatch (studies) and This site pinned, the third picked at random each visit from the rest (`data-folder-pool`, an inline script before deferred `folders.js`); "See all 12 notes".
+- `/notes/` rebuilt (`assets/notes-index.css`): shared top bar, a full-width image stream at a softer angle (34 degrees, not 78), Pinned (This site, TaskMatch, Graduation, centred), Every project newest first, then the list of every note. Key `20261122g`.
+
 ## 2026-11-22 · Free fly with WASD, a foldable picker, Play's background slideshow, readable At a glance
 - Free fly (`scene.js`): WASD moves along the ground relative to the view, Q/E down/up, Shift faster, arrows turn and zoom; a key sheet on the left and Day / Golden hour / Night / Live KL buttons on the right (`.fly-free-hint`, `.fly-free-time`). Fixed Gemini's bug: `overflow:hidden` on html and body made body the scroller and threw the sticky flight overlay off screen, so the free-fly buttons were invisible; the page is now held still by catching wheel, keys and touch.
 - `timeofday.js`: the HUD picker folds (a big View tab) instead of disappearing; it folds itself mid-flight and in free fly, and you can open it any time.
