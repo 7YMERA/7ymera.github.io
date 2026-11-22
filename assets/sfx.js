@@ -125,7 +125,7 @@
     E.out = lim;
 
     /* routing */
-    var ctxG = g(env.ctx); ctxG.connect(mix);
+    var ctxG = g(env.ctx), cityLP = flt('lowpass', 20000, .5), cityZ = g(0); ctxG.connect(cityLP); cityLP.connect(cityZ); cityZ.connect(mix);
     var duck = g(1); duck.connect(ctxG);
     var conv = ac.createConvolver(); conv.buffer = ir; var revRet = g(.55); conv.connect(revRet); revRet.connect(ctxG);
     var dIn = g(1), dL = ac.createDelay(2), dR = ac.createDelay(2), fbL = g(.4), fbR = g(.4), lpL = flt('lowpass', 2600), lpR = flt('lowpass', 2600), pL = pan(-.8), pR = pan(.8), dRet = g(.6);
@@ -222,6 +222,141 @@
       s.connect(bp); bp.connect(e); e.connect(p); p.connect(bAir.in); s.start(t); s.stop(t + dur + .1);
       for (var k = 0; k * .17 < dur; k++) { var en = Math.sin(Math.PI * k * .17 / dur), cf = flt('bandpass', 1500, 3); noiseHit(t + k * .17, .04, bAir.in, cf, .05 * en * en + .001); }
     }
+
+
+    /* ================= ZONES: glass (airy bed), cosmos (orbit), city (the score) + one-shot cues ================= */
+    var zlog = [], zconn = { g: true, c: true, y: true };
+    function act(z, t) { var cur = false, off = -1; for (var k = 0; k < zlog.length; k++) { var ev = zlog[k]; if (ev.t > t + .001) break; if (ev.z === z) cur = true; else if (cur) { cur = false; off = ev.t + ev.tc * 5 + .5; } } return cur || t < off; }
+    // a shared, brighter reverb for the airy zones and the cues
+    var irEN = Math.floor(rate * 5), irE = ac.createBuffer(2, irEN, rate);
+    for (var ce = 0; ce < 2; ce++) { var che = irE.getChannelData(ce), lpe = 0; for (i = 0; i < irEN; i++) { var te = i / irEN, ke = lerp(.9, .15, Math.pow(te, .5)); lpe += ((Math.random() * 2 - 1) - lpe) * ke; che[i] = lpe * Math.pow(1 - te, 2.2) * Math.exp(-te * 1.1) * 1.8; } }
+    var convE = ac.createConvolver(); convE.buffer = irE; var eRet = g(.7); convE.connect(eRet); eRet.connect(mix);
+    function zbus(rev) { var z = { src: g(1), zin: g(0) }; z.src.connect(z.zin); z.zin.connect(mix); z.rs = g(rev); z.zin.connect(z.rs); z.rs.connect(convE); return z; }
+    var Zc = zbus(.8), Zg = zbus(1);
+    var zNode = { g: Zg.zin, c: Zc.zin, y: cityZ }, zLevel = { g: 1.25, c: .45, y: 1 };
+    var Cue = g(1.5), cueRev = g(.45); Cue.connect(mix); Cue.connect(cueRev); cueRev.connect(convE);
+    function crystal(t, m, vel, pn, dur, dest, ratio) {
+      if (live > MAXLIVE) return; live++; var f = hz(m), cr = osc('sine', f), md = osc('sine', f * (ratio || 3.5)), mg = g(0), h2 = osc('sine', f * 2), hg = g(.18), e = g(0), p = pan(pn);
+      mg.gain.setValueAtTime(f * 1.1 * vel, t); mg.gain.exponentialRampToValueAtTime(f * .01 + 1, t + dur * .35);
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .13, t + .004); e.gain.exponentialRampToValueAtTime(.0002, t + dur);
+      md.connect(mg); mg.connect(cr.frequency); cr.connect(e); h2.connect(hg); hg.connect(e); e.connect(p); p.connect(dest);
+      cr.onended = function () { live--; }; cr.start(t); md.start(t); h2.start(t); cr.stop(t + dur + .05); md.stop(t + dur + .05); h2.stop(t + dur + .05);
+    }
+    /* cosmos: sub drone, orbit pad with a slow sweep, choir formants, crystalline arps into a long ping-pong, star twinkles, thin atmosphere */
+    var cArp = g(1), cdIn = g(.7), cdL = ac.createDelay(4), cdR = ac.createDelay(4), cfL = g(.58), cfR = g(.58), clL = flt('lowpass', 3600), clR = flt('lowpass', 3600), cpL = pan(-.85), cpR = pan(.85);
+    cdL.delayTime.value = .94; cdR.delayTime.value = .94; cArp.connect(Zc.src); cArp.connect(cdIn); cdIn.connect(cdL); cdL.connect(cpL); cdR.connect(cpR); cdL.connect(clL); clL.connect(cfL); cfL.connect(cdR); cdR.connect(clR); clR.connect(cfR); cfR.connect(cdL); cpL.connect(Zc.src); cpR.connect(Zc.src);
+    var cSub = osc('sine', 36.7), cSubG = g(.2); cSub.connect(cSubG); cSubG.connect(Zc.src); cSub.start();
+    var cDrF = flt('lowpass', 170, .7), cDrG = g(.06), cDr = [osc('sawtooth', 73.4), osc('sawtooth', 73.4)]; cDr[0].detune.value = -7; cDr[1].detune.value = 7; cDr.forEach(function (o) { o.connect(cDrF); o.start(); }); cDrF.connect(cDrG); cDrG.connect(Zc.src);
+    var cdl = osc('sine', .021), cdlg = g(70); cdl.connect(cdlg); cdlg.connect(cDrF.frequency); cdl.start();
+    var cPadF = flt('lowpass', 1300, .9), cPadG = g(.075), cPad = []; cPadF.connect(cPadG); cPadG.connect(Zc.src);
+    var orb1 = osc('sine', .037), orb1g = g(900), orb2 = osc('sine', .0113), orb2g = g(520); orb1.connect(orb1g); orb1g.connect(cPadF.frequency); orb2.connect(orb2g); orb2g.connect(cPadF.frequency); orb1.start(); orb2.start();
+    [-.6, -.2, .2, .6].forEach(function (pv) { var a = osc('sawtooth', 220), b = osc('sawtooth', 220), va = g(.22), vb = g(.22), pa = pan(clamp(pv - .35, -1, 1)), pb = pan(clamp(pv + .35, -1, 1)); a.detune.value = -9; b.detune.value = 9; a.connect(va); va.connect(pa); pa.connect(cPadF); b.connect(vb); vb.connect(pb); pb.connect(cPadF); a.start(); b.start(); cPad.push([a, b]); });
+    var cChIn = g(1), cChSw = g(.55), cChOut = g(.9), cForm = [[800, 10, 1], [1150, 12, .55], [2900, 14, .22]].map(function (fq) { var f = flt('bandpass', fq[0], fq[1]), fg = g(fq[2]); cChIn.connect(f); f.connect(fg); fg.connect(cChSw); return f; });
+    cChSw.connect(cChOut); cChOut.connect(Zc.src); cChOut.connect(Zc.rs);
+    var chSwL = osc('sine', .055), chSwG = g(.4); chSwL.connect(chSwG); chSwG.connect(cChSw.gain); chSwL.start();
+    var chVib = osc('sine', 5.2), chVibG = g(11); chVib.connect(chVibG); chVib.start(); var cCh = [];
+    [0, 1, 2].forEach(function (v) { var a = osc('sawtooth', 220), b = osc('sawtooth', 220), vg = g(.085); a.detune.value = -6; b.detune.value = 6; chVibG.connect(a.detune); chVibG.connect(b.detune); a.connect(vg); b.connect(vg); vg.connect(cChIn); a.start(); b.start(); cCh.push([a, b]); });
+    var cAtm = ac.createBufferSource(); cAtm.buffer = brown; cAtm.loop = true; var cAtmF = flt('bandpass', 520, .6), cAtmG = g(.05), cAtmP = pan(0); cAtm.connect(cAtmF); cAtmF.connect(cAtmG); cAtmG.connect(cAtmP); cAtmP.connect(Zc.src); cAtm.start();
+    var atL = osc('sine', .03), atG = g(280); atL.connect(atG); atG.connect(cAtmF.frequency); atL.start(); if (cAtmP.pan) { var apL = osc('sine', .045), apG = g(.7); apL.connect(apG); apG.connect(cAtmP.pan); apL.start(); }
+    var cGl = ac.createBufferSource(); cGl.buffer = white; cGl.loop = true; var cGlF = flt('bandpass', 6200, 1), cGlG = g(.006); cGl.connect(cGlF); cGlF.connect(cGlG); cGlG.connect(Zc.src); cGl.start();
+    // D lydian-ish orbit chords, 16 seconds each: [root, pad voices, choir voices, vowel]
+    var VOW = [[800, 1150, 2900], [450, 800, 2830], [325, 700, 2530], [530, 1840, 2480]];
+    var COS = [[38, [57, 61, 64, 69], [62, 69, 73], 0], [35, [54, 62, 66, 69], [62, 66, 73], 1], [43, [55, 62, 66, 71], [67, 71, 74], 2], [45, [57, 64, 69, 71], [64, 69, 76], 3]];
+    function applyCos(t, c) {
+      var gl = 3; cSub.frequency.setTargetAtTime(hz(c[0]), t, gl); cDr[0].frequency.setTargetAtTime(hz(c[0] + 12), t, gl); cDr[1].frequency.setTargetAtTime(hz(c[0] + 12), t, gl);
+      for (var v = 0; v < 4; v++) { cPad[v][0].frequency.setTargetAtTime(hz(c[1][v]), t, gl); cPad[v][1].frequency.setTargetAtTime(hz(c[1][v]), t, gl); }
+      for (v = 0; v < 3; v++) { cCh[v][0].frequency.setTargetAtTime(hz(c[2][v]), t, gl); cCh[v][1].frequency.setTargetAtTime(hz(c[2][v]), t, gl); }
+      for (v = 0; v < 3; v++) cForm[v].frequency.setTargetAtTime(VOW[c[3]][v], t, 2.2);
+    }
+    /* glass: a quiet high shimmer pad and very sparse glassy bells */
+    var gHP = flt('highpass', 1100, .5), gTr = g(.65), gSh = g(.024), gOs = []; gHP.connect(gTr); gTr.connect(gSh); gSh.connect(Zg.src);
+    var gtl = osc('sine', .13), gtg = g(.35); gtl.connect(gtg); gtg.connect(gTr.gain); gtl.start();
+    [0, 1, 2, 3].forEach(function (k) { var a = osc('sine', 2000), b = osc('sine', 2000); a.detune.value = -1.4; b.detune.value = 1.4; var vg = g(.25); a.connect(vg); b.connect(vg); vg.connect(gHP); a.start(); b.start(); gOs.push([a, b]); });
+    var gAir = ac.createBufferSource(); gAir.buffer = white; gAir.loop = true; var gAirF = flt('bandpass', 7000, .9), gAirG = g(.004); gAir.connect(gAirF); gAirF.connect(gAirG); gAirG.connect(Zg.src); gAir.start();
+    var GS = [[88, 95, 92, 99], [86, 93, 90, 97], [84, 91, 88, 95], [90, 97, 93, 100]];
+    function applyGlass(t, c) { for (var k = 0; k < 4; k++) { var f = hz(c[k]); gOs[k][0].frequency.setTargetAtTime(f, t, 3); gOs[k][1].frequency.setTargetAtTime(f, t, 3); } }
+    /* the ambient clock: one "bar" is four seconds; the chord changes every four bars */
+    var AMB = 4, amb = { nextT: 0, bar: 0, cosC: -1, glC: -1 };
+    function ambBar(t0, bar) {
+      var rnd = rngFor(bar * 31 + 5), ci = Math.floor(bar / 4) % COS.length, k, c = COS[ci], gi = Math.floor(bar / 3) % GS.length;
+      if (act('c', t0)) {
+        if (amb.cosC !== ci) { amb.cosC = ci; applyCos(t0, c); }
+        var pool = [], oct; for (oct = 24; oct <= 36; oct += 12) c[1].forEach(function (m) { if (m + oct >= 76 && m + oct <= 100) pool.push(m + oct); }); pool.sort(function (a, b) { return a - b; });
+        var ix = amb.ix == null ? 2 : amb.ix;
+        for (k = 0; k < 8; k++) if (rnd() < .3 && pool.length) { ix = clamp(ix + Math.round(rnd() * 4 - 2), 0, pool.length - 1); crystal(t0 + k * .5 + rnd() * .04, pool[ix], .5 + rnd() * .4, rnd() * 1.2 - .6, 3.2, cArp); }
+        amb.ix = ix;
+        var tw = 2 + (rnd() * 3 | 0), TW = [2349, 2637, 3136, 3520, 4698, 5274, 6272];
+        for (k = 0; k < tw; k++) { var tt = t0 + rnd() * AMB, f = TW[(rnd() * TW.length) | 0], o = osc('sine', f), e = g(0), p = pan(rnd() * 1.8 - .9); e.gain.setValueAtTime(0, tt); e.gain.linearRampToValueAtTime(.012 + rnd() * .02, tt + .004); e.gain.exponentialRampToValueAtTime(.0002, tt + .25 + rnd() * .5); o.connect(e); e.connect(p); p.connect(cArp); o.start(tt); o.stop(tt + .8); }
+      }
+      if (act('g', t0)) {
+        if (amb.glC !== gi) { amb.glC = gi; applyGlass(t0, GS[gi]); }
+        if (rnd() < .55) { var gm = GS[gi][(rnd() * 4) | 0]; crystal(t0 + rnd() * 3, gm + (rnd() < .4 ? 12 : 0) > 104 ? gm : gm + (rnd() < .4 ? 12 : 0), .35 + rnd() * .25, rnd() * 1.6 - .8, 5, Zg.src, 2.76); }
+      }
+    }
+    /* cues */
+    function cueEnv(t, a, pk, hold, rel) { var e = g(0); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(pk, t + a); if (hold > 0) e.gain.setValueAtTime(pk, t + a + hold); e.gain.exponentialRampToValueAtTime(.0002, t + a + hold + rel); return e; }
+    function sweepNoise(t, dur, f0, f1, q, vol, att, pn) {
+      var s = ac.createBufferSource(); s.buffer = white; s.loop = true; var bp = flt('bandpass', f0, q), e = g(.0002), p = pan(pn || 0);
+      bp.frequency.setValueAtTime(f0, t); bp.frequency.exponentialRampToValueAtTime(f1, t + dur);
+      e.gain.setValueAtTime(.0002, t); e.gain.exponentialRampToValueAtTime(vol, t + dur * att); e.gain.exponentialRampToValueAtTime(.0002, t + dur);
+      s.connect(bp); bp.connect(e); e.connect(p); p.connect(Cue); s.start(t, Math.random()); s.stop(t + dur + .05);
+    }
+    function chirp(t, f0, f1, len, vol, type) { var o = osc(type || 'sine', f0), e = cueEnv(t, .006, vol, 0, len); o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + len); o.connect(e); e.connect(Cue); o.start(t); o.stop(t + len + .05); }
+    function click(t, vol, f) { var cf = flt('bandpass', f || 3200, 3.5); noiseHit(t, .02, Cue, cf, vol, .001); var o = osc('triangle', 1400), e = cueEnv(t, .001, vol * .3, 0, .03); o.frequency.setValueAtTime(1400, t); o.frequency.exponentialRampToValueAtTime(500, t + .03); o.connect(e); e.connect(Cue); o.start(t); o.stop(t + .06); }
+    function thunk(t, vol, f) { var o = osc('sine', f || 120), e = cueEnv(t, .004, vol, 0, .35); o.frequency.setValueAtTime(f || 120, t); o.frequency.exponentialRampToValueAtTime(42, t + .3); o.connect(e); e.connect(Cue); o.start(t); o.stop(t + .4); }
+    E.cue = function (name, t) {
+      var k, o, e, p, lp;
+      if (name === 'glass') {
+        [[1318.5, 0, -.5], [1975.5, .07, .35], [1661.2, .15, -.2], [2489, .24, .55], [2960, .36, -.6], [3951, .5, .3], [659.3, .02, 0]].forEach(function (n) {
+          var f = n[0], tt = t + n[1], cr = osc('sine', f), md = osc('sine', f * 3.5), mg = g(0), h = osc('sine', f * 2.76), hg = g(.1), en = cueEnv(tt, .004, .085, 0, 2.2), pn = pan(n[2]);
+          mg.gain.setValueAtTime(f * 1.8, tt); mg.gain.exponentialRampToValueAtTime(f * .02, tt + .9); md.connect(mg); mg.connect(cr.frequency); cr.connect(en); h.connect(hg); hg.connect(en); en.connect(pn); pn.connect(Cue);
+          cr.start(tt); md.start(tt); h.start(tt); cr.stop(tt + 2.4); md.stop(tt + 2.4); h.stop(tt + 2.4);
+        });
+        sweepNoise(t, 2.2, 300, 4800, 1.2, .1, .5, 0);
+        [64, 68, 71, 75, 78].forEach(function (m, j) {
+          var a = osc('triangle', hz(m)), b = osc('sine', hz(m + 12)), en = g(0), pn = pan(j / 2 - 1), l = flt('lowpass', 500, .5), bg = g(.4);
+          l.frequency.setValueAtTime(500, t + .1); l.frequency.linearRampToValueAtTime(5200, t + 1.3); en.gain.setValueAtTime(0, t + .1); en.gain.linearRampToValueAtTime(.035, t + 1.1); en.gain.linearRampToValueAtTime(0, t + 2.9);
+          a.connect(l); b.connect(bg); bg.connect(l); l.connect(en); en.connect(pn); pn.connect(Cue); a.start(t + .1); b.start(t + .1); a.stop(t + 3); b.stop(t + 3);
+        });
+      } else if (name === 'sat-on') { chirp(t, 740, 1480, .09, .07); chirp(t + .08, 1318, 1976, .12, .05); }
+      else if (name === 'sat-off') { chirp(t, 1480, 740, .1, .06); chirp(t + .08, 988, 494, .14, .05); }
+      else if (name === 'sat-xray') {
+        o = osc('sawtooth', 130); var o2 = osc('square', 65.4), bp = flt('bandpass', 400, 6), am = g(.5), lf = osc('sine', 30), lg = g(.5); e = cueEnv(t, .08, .1, .5, .35);
+        bp.frequency.setValueAtTime(400, t); bp.frequency.exponentialRampToValueAtTime(3000, t + .55); bp.frequency.exponentialRampToValueAtTime(800, t + 1);
+        lf.connect(lg); lg.connect(am.gain); o.connect(bp); o2.connect(bp); bp.connect(am); am.connect(e); e.connect(Cue); o.start(t); o2.start(t); lf.start(t); o.stop(t + 1.1); o2.stop(t + 1.1); lf.stop(t + 1.1);
+        chirp(t + .02, 2400, 3600, .1, .03);
+      }
+      else if (name === 'sat-explode') {
+        thunk(t, .22, 130); [0, .05, .1, .17, .27].forEach(function (d0, j) { click(t + d0, .16 - j * .015, 2600 + j * 500); });
+        sweepNoise(t + .02, 1, 1400, 6500, .7, .11, .15, 0); thunk(t + .3, .1, 90);
+      }
+      else if (name === 'sat-assemble') {
+        sweepNoise(t, .9, 6500, 900, .8, .1, .93, 0); [.52, .64, .75, .85].forEach(function (d0, j) { click(t + d0, .08 + j * .04, 2000 + j * 700); }); thunk(t + .9, .2, 110); chirp(t + .92, 1760, 2349, .2, .04);
+      }
+      else if (name === 'flight-start') {
+        o = osc('sawtooth', 38); lp = flt('lowpass', 200, .8); e = g(0); o.frequency.setValueAtTime(38, t); o.frequency.exponentialRampToValueAtTime(150, t + 2.2); o.frequency.exponentialRampToValueAtTime(95, t + 3.4);
+        lp.frequency.setValueAtTime(200, t); lp.frequency.exponentialRampToValueAtTime(1800, t + 2.2); lp.frequency.exponentialRampToValueAtTime(700, t + 3.4);
+        e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(.16, t + 1.9); e.gain.linearRampToValueAtTime(.07, t + 3.2); e.gain.linearRampToValueAtTime(0, t + 3.6);
+        var o3 = osc('square', 76), g3 = g(.35); o3.frequency.setValueAtTime(76, t); o3.frequency.exponentialRampToValueAtTime(300, t + 2.2); o3.frequency.exponentialRampToValueAtTime(190, t + 3.4); o.connect(lp); o3.connect(g3); g3.connect(lp); lp.connect(e); e.connect(Cue);
+        o.start(t); o3.start(t); o.stop(t + 3.7); o3.stop(t + 3.7); sweepNoise(t + .1, 3, 200, 2800, 1, .12, .62, 0);
+      }
+    };
+    // cosmos to city: a riser, wind, the low pass opening and a soft landing under the city
+    E.descend = function (t) {
+      cityLP.frequency.cancelScheduledValues(t); cityLP.frequency.setValueAtTime(380, t); cityLP.frequency.exponentialRampToValueAtTime(20000, t + 3.6);
+      sweepNoise(t, 2.8, 200, 7000, 1.1, .16, .9, 0); sweepNoise(t + 1.2, 3.2, 5200, 600, .8, .1, .35, -.3); thunk(t + 2.7, .24, 70);
+      [0, 7, 12, 19].forEach(function (iv, j) { var o = osc('sine', hz(50 + iv)), en = cueEnv(t + 1.4, 1.2, .03, 0, 1.8); o.frequency.setValueAtTime(hz(50 + iv) * .8, t + 1.4); o.frequency.exponentialRampToValueAtTime(hz(50 + iv), t + 2.6); o.connect(en); en.connect(Cue); o.start(t + 1.4); o.stop(t + 4.5); });
+    };
+    E.setZone = function (name, t, tc) {
+      var z = name === 'glass' ? 'g' : name === 'cosmos' ? 'c' : 'y'; zlog.push({ t: t, z: z, tc: tc || 0 }); if (zlog.length > 12) zlog.shift();
+      ['g', 'c', 'y'].forEach(function (k) { var v = k === z ? zLevel[k] : 0, pr = zNode[k].gain; if (tc > 0) pr.setTargetAtTime(v, t, tc); else pr.setValueAtTime(v, t); });
+      if (z === 'y') cityLP.frequency.setTargetAtTime(20000, t, .3);
+      if (amb.nextT > t + .2) amb.nextT = t + .1;
+      if (opts.power) E.power(t);
+    };
+    function wire(k, on) { if (zconn[k] === on) return; zconn[k] = on; try { if (k === 'y') { if (on) cityLP.connect(cityZ); else cityLP.disconnect(cityZ); } else { var Z = k === 'c' ? Zc : Zg; if (on) Z.src.connect(Z.zin); else Z.src.disconnect(Z.zin); } } catch (x) {} }
+    E.power = function (t) { wire('y', act('y', t)); wire('c', act('c', t)); wire('g', act('g', t)); };
+    E.zones = function (t) { return { glass: act('g', t), cosmos: act('c', t), city: act('y', t) }; };
 
     /* sequencer state */
     var st = { bar: 0, nextT: 0, bpm: 80, sd: .1875, mood: null, ch: null, vl: null, root: 45, cPrev: 82, spare: 0 };
@@ -340,8 +475,12 @@
       return beat * 4;
     }
     /* schedule every bar that starts before `until` */
-    E.start = function (t, bar0) { st.nextT = t; st.bar = bar0 || 0; st.mood = null; st.ch = null; st.vl = null; st.bpm = tempoFor(env.T); ctrl(t); };
-    E.pump = function (until) { var n = 0; while (st.nextT < until && n++ < 4) { var len = buildBar(st.bar, st.nextT); st.nextT += len; st.bar++; } };
+    E.start = function (t, bar0) { amb.nextT = t; amb.bar = 0; st.nextT = t; st.bar = bar0 || 0; st.mood = null; st.ch = null; st.vl = null; st.bpm = tempoFor(env.T); ctrl(t); };
+    E.pump = function (until) {
+      var n = 0; if (opts.power) E.power(until);
+      if (act('y', until)) { while (st.nextT < until && n++ < 4) { var len = buildBar(st.bar, st.nextT); st.nextT += len; st.bar++; } } else if (st.nextT < until) st.nextT = until;
+      n = 0; while (amb.nextT < until && n++ < 3) { ambBar(amb.nextT, amb.bar); amb.nextT += AMB; amb.bar++; }
+    };
     E.state = function () { var L = locate(st.bar - 1 < 0 ? 0 : st.bar - 1); return { bar: st.bar, total: TOTAL, section: L.seg.n, bo: L.bo, bpm: Math.round(st.bpm), chord: st.ch ? st.ch.name : '', mood: st.mood, nextT: st.nextT, live: live }; };
     E.train = function (t) { train(t, 8, Math.random() < .5 ? -1 : 1); };
     E.bell = bell; E.bBell = bKeys;
@@ -365,7 +504,23 @@
       var r = en.getBoundingClientRect(), inE = r.top < vh * .55 && r.bottom > vh * .45, hero = !inE && r.top > vh * .3;
       env.flight = inE ? 1 : 0; env.ctx = inE ? 1.08 : hero ? .8 : .62; env.energy = inE ? 1 : hero ? .55 : .3;
     } else { env.flight = 0; env.ctx = .78; env.energy = .55; }
+    if (root.classList.contains('flying') || root.classList.contains('free-fly')) { env.flight = 1; env.ctx = 1.18; env.energy = 1; }
+    pickZone();
     if (eng && ac) eng.ctrl(ac.currentTime);
+  }
+  // the zone that fills most of the viewport (sections marked data-sfx-zone); pages without any keep the plain score
+  var zone = null;
+  function pickZone() {
+    var els = d.querySelectorAll('[data-sfx-zone]'); if (!els.length) return;
+    var vh = innerHeight, sum = {}, best = null, bo = 0, i;
+    for (i = 0; i < els.length; i++) { var r = els[i].getBoundingClientRect(), ov = Math.min(r.bottom, vh) - Math.max(r.top, 0); if (ov > 0) { var z = els[i].getAttribute('data-sfx-zone'); sum[z] = (sum[z] || 0) + ov; } }
+    for (var k in sum) { var v = sum[k] * (k === zone ? 1.12 : 1); if (v > bo) { bo = v; best = k; } }
+    if (best && best !== zone) setZone(best);
+  }
+  function setZone(z) {
+    var prev = zone; zone = z; root.setAttribute('data-sfx-zone-active', z);
+    if (eng && ac && on) { var t = ac.currentTime + .02; eng.setZone(z, t, z === 'city' && prev === 'cosmos' ? 1.1 : 2.5 / 3); if (z === 'city' && prev === 'cosmos') eng.descend(t); }
+    d.dispatchEvent(new CustomEvent('sfx-zone', { detail: { zone: z, prev: prev } }));
   }
 
   function ensure() {
@@ -373,7 +528,7 @@
     if (!Ctx) return false;
     try {
       ac = new Ctx(); env.T = sceneT(); readPage();
-      eng = Engine(ac, env);
+      eng = Engine(ac, env, { power: true });
       fadeG = ac.createGain(); fadeG.gain.value = 0; uiG = ac.createGain(); uiG.gain.value = .9;
       // Subtle scroll-velocity wind layer (active during orbital descent & KL drone flight)
       var wLen = ac.sampleRate * 2, wBuf = ac.createBuffer(1, wLen, ac.sampleRate), wData = wBuf.getChannelData(0), b0 = 0, b1 = 0, b2 = 0;
@@ -387,10 +542,20 @@
       an = ac.createAnalyser(); an.fftSize = 256; an.smoothingTimeConstant = .78; clip.connect(an);
       var pos = null; try { pos = JSON.parse(sessionStorage.getItem('sfx-pos') || 'null'); } catch (e) {}
       var bar0 = 0; if (pos && Date.now() - pos.ts < 30000) bar0 = pos.bar % 72;
-      eng.start(ac.currentTime + .12, bar0);
+      eng.start(ac.currentTime + .12, bar0); eng.setZone(zone || 'city', ac.currentTime + .1, .6);
+      ac.onstatechange = onState;
       if (DEBUG) { window.__sfxAn = an; window.__sfxEng = eng; window.__sfxEnv = env; }
       return true;
     } catch (e) { ac = null; eng = null; return false; }
+  }
+  var chimed = false;
+  function onState() {
+    if (!ac || !on) return;
+    if (ac.state === 'running') {
+      armed = false; hideHint(); disarm(); if (eng) { var t = ac.currentTime + .02; eng.setZone(zone || 'city', t, .6); }
+      if (!chimed) { chimed = true; setTimeout(function () { if (on && ac) { tone(523.25, .04, .4, 'sine'); tone(783.99, .03, .5, 'sine', .08); } }, 250); }
+      sync();
+    }
   }
   function fadeTo(v, secs) { if (!fadeG) return; var g = fadeG.gain, t = ac.currentTime; g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(v, t + secs); }
   function loop() {
@@ -401,17 +566,17 @@
     }
     timer = setTimeout(loop, 40);
   }
-  function closeAc() { if (on || !ac) return; clearTimeout(timer); try { ac.close(); } catch (e) {} ac = null; eng = null; fadeG = null; uiG = null; windG = null; windF = null; an = null; }
+  function closeAc() { if (on || !ac) return; chimed = false; clearTimeout(timer); try { ac.close(); } catch (e) {} ac = null; eng = null; fadeG = null; uiG = null; windG = null; windF = null; an = null; }
   function set(v, quiet) {
     v = !!v;
     if (v) {
       if (!ensure()) { on = false; sync(); return; }
-      on = true; armed = false; started = performance.now(); ac.resume(); fadeTo(vgain(), 1.5); loop(); setTimeout(function () { if (on && ac) { tone(523.25, .04, .4, 'sine'); tone(783.99, .03, .5, 'sine', .08); } }, 200);
+      on = true; started = performance.now(); armed = ac.state !== 'running'; var pr = ac.resume(); if (pr && pr.then) pr.then(onState, function () {}); fadeTo(vgain(), 1.5); loop(); if (!armed) onState();
     } else {
-      on = false; armed = false; if (ac) { fadeTo(0, 1.5); setTimeout(closeAc, 1700); }
+      on = false; armed = false; disarm(); if (ac) { fadeTo(0, 1.5); setTimeout(closeAc, 1700); }
     }
     if (!quiet) lsSet('sfx-on', v ? '1' : '0');
-    sync(); if (v) popShow(3500);
+    sync(); if (v && !quiet) popShow(3500);
   }
   function tone(f, vol2, len, type, delay, slide) {
     if (!on || !ac || ac.state !== 'running' || !uiG) return;
@@ -429,6 +594,8 @@
     set: function (v) { set(v); },
     volume: function (v) { if (v == null) return vol; vol = clamp(+v, 0, 1); lsSet('sfx-vol', String(vol)); if (ac && on && fadeG) { var g = fadeG.gain, t = ac.currentTime; g.cancelScheduledValues(t); g.setTargetAtTime(vgain(), t, .05); } paintPop(); },
     state: function () { return eng ? eng.state() : null; },
+    zone: function () { return zone; },
+    cue: function (n) { d.dispatchEvent(new CustomEvent('sfx-cue', { detail: { name: n } })); },
     beep: function (f, len, type, v, slide) { tone(f, v || .04, len || .1, type || 'square', 0, slide); },
     tick: function () { var n = performance.now(); if (n - lastTick < 60) return; lastTick = n; tone(1320, .018, .035, 'square'); },
     glyph: function () { var n = performance.now(); if (n - lastGlyph < 38) return; lastGlyph = n; tone(SCAN[(Math.random() * SCAN.length) | 0] * (.92 + Math.random() * .16), .02, .022, 'square'); },
@@ -441,8 +608,10 @@
   window.__sfx = api; window.SFX = api;
   if (DEBUG) api.render = function (sec, o) {
     o = o || {}; var oc = new OCtx(2, Math.floor(44100 * sec), 44100), e2 = { T: o.T == null ? 2 : o.T, energy: o.energy == null ? .7 : o.energy, flight: o.flight || 0, ctx: o.ctx || .8 };
-    var en = Engine(oc, e2); en.out.connect(oc.destination); en.start(.1, o.bar || 0); en.ctrl(0);
-    var t = 0; while (en.nextBarTime() < sec + 1) { en.pump(en.nextBarTime() + .01); } return oc.startRendering();
+    var en = Engine(oc, e2); en.out.connect(oc.destination); en.start(.1, o.bar || 0); en.ctrl(0); en.setZone(o.zone || 'city', 0, 0);
+    (o.script || []).forEach(function (s) { if (s[1] === 'zone') { en.setZone(s[2], s[0], s[3] == null ? .8 : s[3]); if (s[2] === 'city' && s[4]) en.descend(s[0]); } else if (s[1] === 'cue') en.cue(s[2], s[0]); });
+    if (o.cue) en.cue(o.cue, o.cueAt || .2);
+    for (var u = .5; u < sec + 1; u += .5) en.pump(u); return oc.startRendering();
   };
 
   /* ================= UI: button, meter, popover ================= */
@@ -513,6 +682,7 @@
   }
   d.addEventListener('click', function (e) { if (on && e.target.closest && e.target.closest('a, button, [role=tab], summary')) api.tick(); }, true);
   d.addEventListener('click', function (e) { if (popOpen && pop && !pop.contains(e.target) && e.target !== btn && !(btn && btn.contains(e.target))) { popOpen = false; pop.classList.remove('open'); } });
+  d.addEventListener('sfx-cue', function (e) { var n = e.detail && e.detail.name; if (!n || !on || !ac || !eng || ac.state !== 'running' || d.hidden) return; eng.cue(n, ac.currentTime + .03); if (n === 'flight-start') { env.flight = 1; eng.ctrl(ac.currentTime); } });
   d.addEventListener('sec-change', function (e) { if (on) api.chime(e.detail && e.detail.index); });
   var tPend = 0;
   d.addEventListener('scenetime', function (e) { sawScene = true; env.T = clamp(+(e.detail && e.detail.t) || 0, 0, 2); if (!tPend) tPend = setTimeout(function () { tPend = 0; if (eng && ac) eng.ctrl(ac.currentTime); }, 250); });
@@ -539,12 +709,36 @@
   }
   addEventListener('scroll', onScroll, { passive: true }); addEventListener('resize', onScroll);
   d.addEventListener('visibilitychange', function () { if (!ac || !on) return; if (d.hidden) ac.suspend(); else { ac.resume(); meterKick(); } });
-  var armGate = 0;
-  if (lsGet('sfx-on') === '1' && Ctx) {
-    armed = true;   // allowed to play, but browsers need a tap or key first
-    var go = function () { if (!armed) return; ['pointerdown', 'keydown', 'touchend'].forEach(function (n) { removeEventListener(n, go, true); }); armGate = performance.now(); set(true, true); };
-    ['pointerdown', 'keydown', 'touchend'].forEach(function (n) { addEventListener(n, go, true); });
+  var armGate = 0, hint = null, armEvs = ['pointerdown', 'pointerup', 'touchstart', 'touchend', 'keydown', 'click'];
+  function showHint() {
+    if (hint || !d.body) return;
+    var st = d.createElement('style');
+    st.textContent = '.sfxhint{position:fixed;z-index:95;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 24px);padding:13px 20px;border-radius:999px;background:var(--accent,#0a6c74);color:var(--accent-ink,#fff);box-shadow:0 12px 36px rgba(0,0,0,.3);font:700 .92rem/1.2 var(--f-mono,ui-monospace,monospace);letter-spacing:.03em;pointer-events:none;opacity:0;transition:opacity .5s;animation:sfxhp 1.8s ease-in-out infinite}.sfxhint.on{opacity:1}.sfxhint i{width:9px;height:9px;border-radius:50%;background:currentColor}@keyframes sfxhp{50%{transform:translateY(3px)}}@media (prefers-reduced-motion:reduce){.sfxhint{animation:none}}';
+    d.head.appendChild(st); hint = d.createElement('div'); hint.className = 'sfxhint'; hint.setAttribute('role', 'status'); hint.innerHTML = '<i></i>Sound on · tap anywhere'; d.body.appendChild(hint); placeHint();
+    requestAnimationFrame(function () { if (hint) hint.classList.add('on'); });
   }
+  function placeHint() {
+    if (!hint) return; var r = btn && btn.getBoundingClientRect();
+    if (r && r.width) { hint.style.top = Math.round(r.bottom + 10) + 'px'; hint.style.right = Math.max(12, Math.round(innerWidth - r.right)) + 'px'; hint.style.left = 'auto'; hint.style.bottom = 'auto'; }
+    else { hint.style.bottom = '24px'; hint.style.left = '50%'; hint.style.right = 'auto'; hint.style.top = 'auto'; hint.style.marginLeft = '-' + Math.round(hint.offsetWidth / 2) + 'px'; }
+  }
+  function hideHint() { if (!hint) return; var h = hint; hint = null; h.classList.remove('on'); setTimeout(function () { if (h.parentNode) h.parentNode.removeChild(h); }, 800); }
+  function go(e) {
+    if (e && e.type === 'keydown' && (e.key === 'Escape' || e.key === 'Shift' || e.key === 'Control' || e.key === 'Alt' || e.key === 'Meta')) return;   // those do not count as a user activation
+    armGate = performance.now();
+    if (!on) { if (lsGet('sfx-on') === '0') { disarm(); return; } set(true, true); }
+    else if (ac && ac.state !== 'running') { var pr = ac.resume(); if (pr && pr.then) pr.then(onState, function () {}); }
+  }
+  function disarm() { armEvs.forEach(function (n) { removeEventListener(n, go, true); }); if (!on && !armed) hideHint(); }
+  // On by default on the front page (sections carry data-sfx-zone) and wherever sound was left on; a stored "0" always means off.
+  var stored = lsGet('sfx-on'), frontPage = !!d.querySelector('[data-sfx-zone]') || /^\/(index\.html)?$/.test(location.pathname);
+  if (Ctx && (stored === '1' || (stored == null && frontPage))) {
+    armed = true;   // allowed to play; browsers need a real tap or key first (wheel and scroll do not count as user activation)
+    armEvs.forEach(function (n) { addEventListener(n, go, { capture: true, passive: true }); });
+    if (d.body) showHint(); else d.addEventListener('DOMContentLoaded', showHint);
+    addEventListener('resize', placeHint);
+  }
+  setInterval(function () { if (!d.hidden) readPage(); }, 700);
   if (!Ctx && btn) btn.hidden = true;
   readPage(); sync();
 })();
