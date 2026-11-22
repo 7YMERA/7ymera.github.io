@@ -30,6 +30,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · Finale buttons clear of the horizon gauge
+
+- The cockpit horizon gauge (`.cp-adi`, bottom centre) sat under "Fly it again" and "Take control · Free fly". `scene.js` now sets `html.fly-end` while the finale buttons show, and `scene.css` hides the gauge then. Not screenshot-verified (software GL never reaches the finale). Key 20261122r.
+
 ## 2026-11-22 · Chase train removed
 
 - `scene.js`: the hero train (driven by the scroll for the drone chase) is gone, and the spacing rule from the last entry is reverted. The chase camera still follows `heroS` along the sky rail; the timed trains run as before. Key 20261122q.

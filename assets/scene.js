@@ -972,7 +972,7 @@
     }
     followCam(dtF);
     for(var ci=0;ci<caps.length;ci++){var c=caps[ci],on=cr>=+c.dataset.from&&cr<+c.dataset.to;if(on!==c.classList.contains('on'))c.classList.toggle('on',on)}
-    if(again){if(DBGCR)again.dataset.cr=cr.toFixed(3);var aOn=(inRide&&fc>.93)||freeOn;if(aOn!==again.classList.contains('on'))again.classList.toggle('on',aOn);if(freeBtn&&aOn!==freeBtn.classList.contains('on'))freeBtn.classList.toggle('on',aOn)}
+    if(again){if(DBGCR)again.dataset.cr=cr.toFixed(3);var aOn=(inRide&&fc>.93)||freeOn;if(aOn!==again.classList.contains('on')){again.classList.toggle('on',aOn);document.documentElement.classList.toggle('fly-end',aOn)}if(freeBtn&&aOn!==freeBtn.classList.contains('on'))freeBtn.classList.toggle('on',aOn)}
     if(spin&&sH){var sy=scrollY-(sTop-innerHeight),sf=sy/Math.max(1,sH),sOn=sf>.18&&sf<.95;if(sOn!==spin.classList.contains('on'))spin.classList.toggle('on',sOn)} // the coordinates tag
     ringUpdate(time,inRide);
     orb.rotation.y=time*.0004;ring.rotation.z=time*.0006;orb.position.y=230+Math.sin(time*.0009)*3;

@@ -359,3 +359,7 @@ html.home-ds.drone-ready .ride-hint{--d:.55s}
   .cp-adi{top:132px}
   .cp-rec{top:132px}
 }
+
+/* the finale: the big buttons take the bottom centre, so the horizon gauge steps aside */
+.cp-adi{transition:opacity .4s}
+html.fly-end .hud .cp-adi{opacity:0!important;visibility:hidden!important}
