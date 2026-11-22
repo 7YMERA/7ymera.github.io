@@ -30,6 +30,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · No more doubled trains
+
+- `scene.js` railUpdate: the parked/chased hero train shared platforms with the timed sky-line trains, so two could sit in one place (owner's screenshot). A timed sky train now keeps a train's length plus a car clear of the hero, holding behind it or staying ahead. Key 20261122p.
+
 ## 2026-11-22 · Live KL by default
 
 - `timeofday.js`: with no stored choice and no `?time=`, the flight starts on Live KL (the real MYT time). A picked mode is still remembered. Key 20261122o.

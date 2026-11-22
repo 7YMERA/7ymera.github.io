@@ -388,6 +388,9 @@
         var uf=Math.min(1,Math.max(0,cc+dd*(tr.cars-1)/2*st2));tr.c.getPointAt(uf,trP);tr.c.getTangentAt(uf,trT);if(dd<0)trT.negate();headGlows[k].visible=true;headGlows[k].position.copy(trP).addScaledVector(trT,CARL*.55).add(trUp);
         var ub=Math.min(1,Math.max(0,cc-dd*(tr.cars-1)/2*st2));tr.c.getPointAt(ub,trP);tr.c.getTangentAt(ub,trT);if(dd<0)trT.negate();tailGlows[k].visible=true;tailGlows[k].position.copy(trP).addScaledVector(trT,-CARL*.55).add(trUp);continue}
       var x=tr.hero?heroS:trainX(tr,t),dir=tr.dir,step=(CARL+CARGAP)/tr.len;
+      /* never two trains in one place: a timed train on the sky line keeps a train's length (plus a car) clear of the hero train,
+         holding back behind it, or kept ahead if it was already ahead */
+      if(!tr.hero&&tr.c===skyCurve&&dir>0){var span=(tr.cars+1)*step,dh=((x-heroS)%1+1)%1;if(dh<span)x=(heroS+span)%1;else if(dh>1-span)x=((heroS-span)%1+1)%1}
       for(var c=0;c<tr.cars;c++){var xc=(((x-c*step)%1)+1)%1,u=dir>0?xc:(1-xc)%1;tr.c.getPointAt(u,trP);tr.c.getTangentAt(u,trT);if(dir<0)trT.negate();setCar(tr,c,trP,trT,c===tr.cars-1)}
       var uh=dir>0?x%1:(1-x)%1;tr.c.getPointAt(uh,trP);tr.c.getTangentAt(uh,trT);if(dir<0)trT.negate();headGlows[k].visible=true;headGlows[k].position.copy(trP).addScaledVector(trT,CARL*.55).add(trUp);
       var xt=(((x-(tr.cars-1)*step)%1)+1)%1,ut=dir>0?xt:(1-xt)%1;tr.c.getPointAt(ut,trP);tr.c.getTangentAt(ut,trT);if(dir<0)trT.negate();tailGlows[k].visible=true;tailGlows[k].position.copy(trP).addScaledVector(trT,-CARL*.55).add(trUp)}
