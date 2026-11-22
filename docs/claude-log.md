@@ -7,6 +7,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 22 Nov 2026 (data toys to the lab)
+
+- Company SQL, Jom Al-Quran SQL and Join Atlas moved from /play/ to /lab/ (own bay 02 "Data toys" below the experiments). `LAB_IDS` in `play.js` updated; /play/'s head redirect also maps `#sql-company`, `#sql-jom`, `#atlas`; /play/ lost `join-atlas.css` and the SQL view; cabinet counts on /play/ now 5. Scripts stay lazy (`mountSql`). README Play and Lab sections updated.
+
 ## 16 Nov 2026 (logo)
 
 - Home page header logo text is now `\7ymera` (backslash, as the owner asked), and so is the landing sign (`.op-id`). Other pages, titles, share previews, manifest and feed keep Alif Najmi.
@@ -29,6 +33,10 @@ where the last chat stopped without re-reading everything.
 
 
 ---
+
+## 2026-11-22 · Cosmos back on the portfolio
+
+- Owner asked to apply cosmos: `cosmos.css`/`cosmos.js` (key 20261122t) now load on `/portfolio/` only: stars, an orbit arc with AIM/GPM over the 3D sky, corner brackets, and at 1320 px+ the left telemetry readout and right descent rail. No page errors, no sideways scroll at 1440 and 390. Note: its clock is the real MYT time, while the portfolio dial shows the scroll's time of day.
 
 ## 2026-11-22 · 3.4: Get started gate, /lab/ split, performance and audio pass
 
