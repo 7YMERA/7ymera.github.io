@@ -9,7 +9,14 @@
 // ADDING A STATIC RULE: add one entry to PAGE_RULES (per page) or SITE_RULES (whole site).
 // A rule is { name, run } where run returns an array of problems; each problem is a string,
 // or [message, needle] where needle is source text used to find the line number.
-const { chromium } = require('playwright');
+let chromium;
+try { ({ chromium } = require('playwright')); } catch (e) {
+  console.error('playwright is not installed. Install it outside the repo (no package.json here), e.g.\n' +
+    '  npm i --prefix /tmp/pw playwright && npx --prefix /tmp/pw playwright install chromium\n' +
+    'then run: NODE_PATH=/tmp/pw/node_modules node tools/check.js   (Windows: set NODE_PATH=%TEMP%\\pw\\node_modules)\n' +
+    'Claude Code cloud sessions already have it.');
+  process.exit(2);
+}
 const fs = require('fs'), path = require('path');
 const args = process.argv.slice(2);
 const staticOnly = args.includes('--static');
