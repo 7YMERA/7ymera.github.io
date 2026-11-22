@@ -34,6 +34,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · Hide HUD in the drone view; a hold before free fly
+
+- `scene.js` + `scene.css`: a big "Hide HUD" toggle (top right of the flight, front page only; /flight/ has its own UI switch) hides the cockpit, captions, picker, skip, hints and finale buttons; remembered in localStorage `hud-off`.
+- Take control bug (owner's screenshots: the finale buttons stayed up while the stage slid away under the next section, so free fly opened half off screen): the ride now ends BUFV = 0.7 screens before #enter's pinned end (#enter 1250vh → 1320vh, so the flight's pacing is unchanged), the finale buttons hide once the stage starts to leave, and Take control scrolls back onto the pinned stage before the page locks. Checked: from past the end, free fly opens with the stage at top 0. Key 20261122x.
+
 ## 2026-11-22 · Chess grid entry, boot HUD kept, glass halo guard
 
 - `assets/home/chess-grid.js`: plain-JS port of the 21st.dev Chess Grid Transition (Hyperiux Vault), Web Animations, transform only. Get started now covers the gate with navy blocks (gold hairline), hands the Earth over, and the blocks sweep away onto the glass; the split seam is the fallback.

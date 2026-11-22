@@ -52,7 +52,7 @@ html.flying .dock{opacity:0;pointer-events:none;transform:translate(-50%,20px)}
 
 /* ---- The flight: a tall scroll section, sticky captions, HUD ---- */
 .enter{display:none}
-html.gl .enter{display:block;height:1250vh;position:relative}
+html.gl .enter{display:block;height:1320vh;position:relative} /* 1250vh of flight + a 70vh hold at the end (BUFV in scene.js) */
 .enter-sticky{position:sticky;top:0;height:100vh;height:100svh;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;padding:0 20px 40px;pointer-events:none}
 .ride-caps{position:relative;width:min(440px,100%);min-height:140px;counter-reset:cap}
 .ride-cap{counter-increment:cap;position:absolute;left:0;bottom:0;margin:0;padding:14px 16px;background:var(--surface);color:var(--ink);border:2px solid var(--fx);box-shadow:5px 5px 0 var(--hard);opacity:0;transform:translateY(14px);transition:opacity .35s,transform .35s}
@@ -367,3 +367,14 @@ html.home-ds.drone-ready .ride-hint{--d:.55s}
 /* the finale: the big buttons take the bottom centre, so the horizon gauge steps aside */
 .cp-adi{transition:opacity .4s}
 html.fly-end .hud .cp-adi{opacity:0!important;visibility:hidden!important}
+
+/* Hide HUD: a big toggle in the flight (scene.js); with it on, only the city and the toggle remain */
+.hud-tog{position:absolute;right:20px;top:78px;z-index:6;pointer-events:auto;display:inline-flex;align-items:center;gap:10px;min-height:46px;padding:0 18px;font:600 15px var(--f-pix);color:var(--ink);background:var(--bg);border:2px solid var(--fx);border-radius:10px;box-shadow:3px 3px 0 var(--hard);cursor:pointer}
+.hud-tog svg{width:20px;height:20px}.hud-tog:hover{transform:translateY(-1px)}.hud-tog:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.hud-tog[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink,#fff);border-color:var(--accent)}
+.cp-id{top:140px}
+html.hud-off .hud,html.hud-off .ride-caps,html.hud-off .ride-hint,html.hud-off .fly-skip,html.hud-off .tod--hud,html.hud-off .fly-again,html.hud-off .fly-free,html.hud-off .fly-free-hint,html.hud-off .fly-free-time{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity .3s,visibility 0s .3s!important}
+html.home-ds .hud-tog{opacity:0;visibility:hidden;transition:opacity .35s,visibility 0s .35s}
+html.home-ds.drone-ready .hud-tog{opacity:1;visibility:visible;transition:opacity .6s ease .1s,visibility 0s .1s}
+@media (max-width:700px){.hud-tog{right:14px;top:76px;min-height:44px;padding:0 14px;font-size:14px}}
+@media (prefers-reduced-motion:reduce){.hud-tog{transition:none}}

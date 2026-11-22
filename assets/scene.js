@@ -523,6 +523,16 @@
   // The keys below are placed on the page by section: [section id, fraction down it, viewport offset, pose]. Keys are
   // spaced so a shot holds while its section is read and the move to the next one happens in the gap between them.
   // "Fly it again ...": shown over the finale. It cycles the view (plain, golden hour, night) and goes back to the start of the flight. The big picker in the flight HUD (assets/timeofday.js) does the same by choice.
+  // "Hide HUD": one big toggle in the flight that clears every overlay (cockpit, captions, picker, skip, hints) for a clean view of the city.
+  // Remembered per browser; the toggle itself always stays.
+  (function(){if(root.hasAttribute('data-flight-only'))return; // /flight/ has its own UI switch
+    var host=document.getElementById('fly-again');host=host&&host.parentNode;if(!host)return;
+    var b=document.createElement('button');b.type='button';b.className='hud-tog';var rt=document.documentElement,K='hud-off';
+    function set(v,save){rt.classList.toggle('hud-off',v);b.setAttribute('aria-pressed',v?'true':'false');
+      b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(v?'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>':'<path d="M3 3l18 18M10.6 5.1A10.5 10.5 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6C3.9 8.4 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 4.4-1"/>')+'</svg><b>'+(v?'Show HUD':'Hide HUD')+'</b>';
+      if(save)try{localStorage.setItem(K,v?'1':'0')}catch(e){}}
+    var st=null;try{st=localStorage.getItem(K)}catch(e){}
+    set(st==='1',false);b.addEventListener('click',function(){set(!rt.classList.contains('hud-off'),true)});host.appendChild(b)})();
   var again=document.getElementById('fly-again'),DBGCR=/[?&]dbg/.test(location.search);
   var freeBtn=null,freeHint=null,freeTime=null,freeOn=false,freeDrag=false,freeLx=0,freeLy=0,fKeys={}; // fKeys: the movement keys held down in free fly (WASD, Q/E, arrows, Shift)
   var freeState={a:48*Math.PI/180,ta:48*Math.PI/180,y:112,ty:112,r:280,tr:280,cx:0,cz:-40,cy:72};
@@ -530,6 +540,7 @@
     v=!!v;if(v===freeOn)return;freeOn=v;root.classList.toggle('free-fly',v);
     if(freeBtn){freeBtn.setAttribute('aria-pressed',v?'true':'false');var b=freeBtn.querySelector('b');if(b)b.textContent=v?'Resume scroll':'Take control · Free fly'}
     if(freeHint)freeHint.classList.toggle('on',v);if(freeTime)freeTime.classList.toggle('on',v);if(!v)fKeys={};
+    if(v&&!ONLY&&scrollY>pinEnd()-2){var se=document.documentElement.style,sb=se.scrollBehavior;se.scrollBehavior='auto';scrollTo(0,pinEnd()-Math.round(.35*BUFV*innerHeight));se.scrollBehavior=sb} // back onto the pinned stage before the page locks
     if(v){
       // seed free-fly orbit from the current camera so there is zero jump
       var dx=cam.position.x-GC[0],dz=cam.position.z-GC[1];
@@ -635,7 +646,7 @@
     ['descent',function(el){return RIDE_FROM*(el.offsetHeight-innerHeight)/el.offsetHeight},0,OVER],
     HOMEDS?null:['enter',0,-1,END]                                      // ... then in to where the flight starts (zoom in)                                     // the flight starts here
   ].filter(Boolean);
-  var KEYS=[],eTop=0,eH=0;
+  var KEYS=[],eTop=0,eH=0,BUFV=.7; // BUFV: screens of hold at the end of #enter (see pinEnd)
   function mob(p){if(!mobile)return p;var q=p.slice(0,8);q[6]=0;if(p[8]){q[3]=p[8]}else{q[3]*=1.12;q[4]*=1.08}return q} // a portrait screen is only 0.49 of its height wide: a wide shot of the group stands much farther back there (p[8])
   function layoutKeys(){
     var vh=innerHeight,k=[];
@@ -658,9 +669,12 @@
     return poseOf(KEYS[KEYS.length-1])}
   // The front page's drone flight starts inside the descent. homeGeo: st = where the ride starts (88 % through the descent), rv = where the sky stage has scrolled off and the city shows, s0 = top of #enter (the camera is level there, the drone proper), m = end of the ride.
   var USEPRE=HOMEDS&&DIST&&!!enter,GEO=null,CS0=0; // CS0: the ride's progress at the drone-level knot ('start'); 0 where the flight begins the ride (/flight/, /portfolio/)
-  function homeGeo(){var d=USEPRE&&document.getElementById('descent');if(!d||!enter||!d.offsetHeight)return null;var vh=innerHeight,sp=Math.max(0,d.offsetHeight-vh),g={st:d.offsetTop+RIDE_FROM*sp,rv:d.offsetTop+sp,s0:enter.offsetTop,m:enter.offsetTop+enter.offsetHeight-vh};return g.m>g.s0&&g.s0>g.rv-2&&g.rv>=g.st?g:null}
+  // the finale holds pinned for the last BUFV screens of #enter (a buffer before the next section slides in), so the end buttons
+  // and free fly always get the whole stage
+  function pinEnd(){return eTop+eH-innerHeight}
+  function homeGeo(){var d=USEPRE&&document.getElementById('descent');if(!d||!enter||!d.offsetHeight)return null;var vh=innerHeight,sp=Math.max(0,d.offsetHeight-vh),g={st:d.offsetTop+RIDE_FROM*sp,rv:d.offsetTop+sp,s0:enter.offsetTop,m:enter.offsetTop+enter.offsetHeight-vh-BUFV*vh};return g.m>g.s0&&g.s0>g.rv-2&&g.rv>=g.st?g:null}
   function fr(c){return clamp((c-CS0)/Math.max(1e-6,1-CS0),0,1)} // the flight's own progress (0 at the drone-level knot, 1 at the end), what cr was before the descent was folded in
-  function rideProg(){if(!enter)return 0;var m=ONLY?document.documentElement.scrollHeight-innerHeight:eTop+eH-innerHeight,st=ONLY?0:eTop-(HOMEDS?0:innerHeight);if(GEO&&!ONLY){m=GEO.m;st=GEO.st}return m>st?Math.min(1,Math.max(0,(scrollY-st)/(m-st))):0}
+  function rideProg(){if(!enter)return 0;var m=ONLY?document.documentElement.scrollHeight-innerHeight:eTop+eH-innerHeight-BUFV*innerHeight,st=ONLY?0:eTop-(HOMEDS?0:innerHeight);if(GEO&&!ONLY){m=GEO.m;st=GEO.st}return m>st?Math.min(1,Math.max(0,(scrollY-st)/(m-st))):0}
   function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
   // Critically damped follow (no overshoot, no jump when a wheel notch lands): the camera glides to where the scroll bar is.
   function damp(c,t,v,st,dt){var o=2/st,x=o*dt,e=1/(1+x+.48*x*x+.235*x*x*x),ch=c-t,tmp=(v.v+o*ch)*dt;v.v=(v.v-o*tmp)*e;return t+(ch+tmp)*e}
@@ -982,7 +996,7 @@
     }
     followCam(dtF);
     for(var ci=0;ci<caps.length;ci++){var c=caps[ci],on=cr>=+c.dataset.from&&cr<+c.dataset.to;if(on!==c.classList.contains('on'))c.classList.toggle('on',on)}
-    if(again){if(DBGCR)again.dataset.cr=cr.toFixed(3);var aOn=(inRide&&fc>.93)||freeOn;if(aOn!==again.classList.contains('on')){again.classList.toggle('on',aOn);document.documentElement.classList.toggle('fly-end',aOn)}if(freeBtn&&aOn!==freeBtn.classList.contains('on'))freeBtn.classList.toggle('on',aOn)}
+    if(again){if(DBGCR)again.dataset.cr=cr.toFixed(3);var aOn=(inRide&&fc>.93&&(ONLY||scrollY<=pinEnd()-2))||freeOn;if(aOn!==again.classList.contains('on')){again.classList.toggle('on',aOn);document.documentElement.classList.toggle('fly-end',aOn)}if(freeBtn&&aOn!==freeBtn.classList.contains('on'))freeBtn.classList.toggle('on',aOn)}
     if(spin&&sH){var sy=scrollY-(sTop-innerHeight),sf=sy/Math.max(1,sH),sOn=sf>.18&&sf<.95;if(sOn!==spin.classList.contains('on'))spin.classList.toggle('on',sOn)} // the coordinates tag
     ringUpdate(time,inRide);
     orb.rotation.y=time*.0004;ring.rotation.z=time*.0006;orb.position.y=230+Math.sin(time*.0009)*3;
