@@ -32,7 +32,7 @@ where the last chat stopped without re-reading everything.
 
 ## 2026-11-22 · Notes: folders everywhere, three pinned, a note about this site
 - New note `notes/portfolio-site.html` ("Building this site", 22 Nov), images in `assets/notes/site/`; added to `notes/index.html`, `sitemap.xml` and `feed.xml`.
-- Portfolio `#notes`: three folders, TaskMatch (studies) and This site pinned, the third picked at random each visit from the rest (`data-folder-pool`, an inline script before deferred `folders.js`); "See all 12 notes".
+- Portfolio `#notes`: three pinned folders, TaskMatch (studies), This site and Graduation (owner swapped the random third for the convocation); "See all 12 notes".
 - `/notes/` rebuilt (`assets/notes-index.css`): shared top bar, a full-width image stream at a softer angle (34 degrees, not 78), Pinned (This site, TaskMatch, Graduation, centred), Every project newest first, then the list of every note. Key `20261122g`.
 
 ## 2026-11-22 · Free fly with WASD, a foldable picker, Play's background slideshow, readable At a glance
