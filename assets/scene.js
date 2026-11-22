@@ -347,8 +347,7 @@
     var pl=new T.Mesh(stPlatG,stPlatM);pl.position.y=-1.9;var cn=new T.Mesh(stCanG,stCanM);cn.position.y=3;g2.add(pl,cn);
     [[-3,-9],[3,-9],[-3,9],[3,9]].forEach(function(o){var po=new T.Mesh(stPostG,stPostM);po.position.set(o[0],.9,o[1]);g2.add(po)});
     var lp=new T.Mesh(stLampG,stLampM);lp.position.y=3.3;g2.add(lp);scene.add(g2)}); // a lit strip along the canopy: no name signs, just the design
-  var trains=[{c:skyCurve,len:skyLen,cars:5,sp:34,off:0,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:34,off:.34,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:34,off:.67,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:0,off:0,hero:true},
-    {c:ringCurve,len:ringLen,cars:4,sp:-15,off:0,hero:false},{c:ringCurve,len:ringLen,cars:4,sp:15,off:.5,hero:false},{c:helixCurve,len:helixLen,cars:3,sp:22,off:.15,hero:false,pp:true}];
+  var trains=[{c:skyCurve,len:skyLen,cars:5,sp:34,off:0,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:34,off:.34,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:34,off:.67,hero:false},{c:ringCurve,len:ringLen,cars:4,sp:-15,off:0,hero:false},{c:ringCurve,len:ringLen,cars:4,sp:15,off:.5,hero:false},{c:helixCurve,len:helixLen,cars:3,sp:22,off:.15,hero:false,pp:true}];
   if(innerWidth<=820)trains.splice(1,2);
   var nCars=0,nMid=0;trains.forEach(function(t,ti){t.i0=nCars;nCars+=t.cars;t.m0=nMid;nMid+=t.cars-2;t.k0=ti*2;t.dir=t.sp<0?-1:1;
     if(t.pp){t.hh=t.cars*(CARL+CARGAP)/2/t.len;t.D=1-2*t.hh;t.tl=t.D*t.len/t.sp/.85;t.cyc=2*(t.tl+DWELL);t.xs=[];t.seg=[];return}
@@ -380,7 +379,7 @@
   function railUpdate(time,still){
     var t=still?0:time*.001;
     for(var k=0;k<trains.length;k++){var tr=trains[k];
-      /* the hero train is always on the rail (parked at its first stop before the chase, at its last after it), so it never pops in */
+      /* no hero train any more (owner, 22 Nov): the chase camera still follows heroS along the empty sky rail */
       if(tr.pp){ // the shuttle: up the helix, wait, back down, wait (centre of the train at c, front car first)
         var tt=(((t+tr.off*tr.cyc)%tr.cyc)+tr.cyc)%tr.cyc,cc,dd=1,ez=function(f){return f*f*f*(f*(f*6-15)+10)},st2=(CARL+CARGAP)/tr.len;
         if(tt<DWELL)cc=tr.hh;else{tt-=DWELL;if(tt<tr.tl)cc=tr.hh+tr.D*ez(tt/tr.tl);else{tt-=tr.tl;dd=-1;if(tt<DWELL)cc=1-tr.hh;else{tt-=DWELL;cc=1-tr.hh-tr.D*ez(Math.min(1,tt/tr.tl))}}}
@@ -388,9 +387,6 @@
         var uf=Math.min(1,Math.max(0,cc+dd*(tr.cars-1)/2*st2));tr.c.getPointAt(uf,trP);tr.c.getTangentAt(uf,trT);if(dd<0)trT.negate();headGlows[k].visible=true;headGlows[k].position.copy(trP).addScaledVector(trT,CARL*.55).add(trUp);
         var ub=Math.min(1,Math.max(0,cc-dd*(tr.cars-1)/2*st2));tr.c.getPointAt(ub,trP);tr.c.getTangentAt(ub,trT);if(dd<0)trT.negate();tailGlows[k].visible=true;tailGlows[k].position.copy(trP).addScaledVector(trT,-CARL*.55).add(trUp);continue}
       var x=tr.hero?heroS:trainX(tr,t),dir=tr.dir,step=(CARL+CARGAP)/tr.len;
-      /* never two trains in one place: a timed train on the sky line keeps a train's length (plus a car) clear of the hero train,
-         holding back behind it, or kept ahead if it was already ahead */
-      if(!tr.hero&&tr.c===skyCurve&&dir>0){var span=(tr.cars+1)*step,dh=((x-heroS)%1+1)%1;if(dh<span)x=(heroS+span)%1;else if(dh>1-span)x=((heroS-span)%1+1)%1}
       for(var c=0;c<tr.cars;c++){var xc=(((x-c*step)%1)+1)%1,u=dir>0?xc:(1-xc)%1;tr.c.getPointAt(u,trP);tr.c.getTangentAt(u,trT);if(dir<0)trT.negate();setCar(tr,c,trP,trT,c===tr.cars-1)}
       var uh=dir>0?x%1:(1-x)%1;tr.c.getPointAt(uh,trP);tr.c.getTangentAt(uh,trT);if(dir<0)trT.negate();headGlows[k].visible=true;headGlows[k].position.copy(trP).addScaledVector(trT,CARL*.55).add(trUp);
       var xt=(((x-(tr.cars-1)*step)%1)+1)%1,ut=dir>0?xt:(1-xt)%1;tr.c.getPointAt(ut,trP);tr.c.getTangentAt(ut,trT);if(dir<0)trT.negate();tailGlows[k].visible=true;tailGlows[k].position.copy(trP).addScaledVector(trT,-CARL*.55).add(trUp)}
