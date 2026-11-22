@@ -30,6 +30,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · No sound pill
+
+- `sfx.js`: the "Sound on · tap anywhere" pill is gone. Sound tries to start at page load (plays at once where the browser allows autoplay); otherwise the first click, tap or key starts it silently. Browsers cannot be forced past that. Key 20261122m.
+
 ## 2026-11-22 · Hero satellite with the mirage x-ray (3.3)
 
 - Orbit chapter opens on a big hero satellite (`assets/home/sat/satellite.js` rewritten): PBR look per material, PMREM space env, ACES; plexus, lens flare, follow label. DataScan x-ray re-made from the mirage study: a cursor-targeted, speed-grown, noise-edged reveal with a comet trail over the whole model, closing ~1 s after the cursor stops. GPM/TRMM/AIM as big tabs; Explode with part labels; X-ray sweep button (key x). The Inspect overlay is gone.

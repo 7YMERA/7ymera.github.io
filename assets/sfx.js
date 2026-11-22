@@ -737,8 +737,9 @@
   if (Ctx && (stored === '1' || (stored == null && frontPage))) {
     armed = true;   // allowed to play; browsers need a real tap or key first (wheel and scroll do not count as user activation)
     armEvs.forEach(function (n) { addEventListener(n, go, { capture: true, passive: true }); });
-    if (d.body) showHint(); else d.addEventListener('DOMContentLoaded', showHint);
-    addEventListener('resize', placeHint);
+    // no hint pill: try to start right away (browsers that allow autoplay, e.g. Chrome for returning visitors, play at once);
+    // where the browser blocks it, the first click, tap or key starts it silently
+    try { go(); } catch (e) {}
   }
   setInterval(function () { if (!d.hidden) readPage(); }, 700);
   if (!Ctx && btn) btn.hidden = true;
