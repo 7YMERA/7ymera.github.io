@@ -7,8 +7,9 @@
  * Ported as is: the fragment shader (superellipse plate, bevel refraction, 20-tap spectral dispersion, corner focus, rim and
  * sheen), the exact distance transform and signed-distance builder (fitToTexture / buildSdf / edt), the closed-form spring
  * timeline (frameAt) and the LIGHT / dark looks. Changed for the web page: a small class instead of hooks, the plate may sit
- * above the middle of the canvas (centerY), a CSS mask fallback, and the hold-then-fade loop is replaced by play once and rest
- * on the finished mark.
+ * above the middle of the canvas (centerY), a CSS mask fallback, and the hold-then-fade loop is replaced by: play once, then rest on the
+ * glass at T = REST (1.7 s: tile still glossy, mark inside, corners fringing) and stay alive (sheen sweep every ~6 s, breath, pointer rim light, ~30 fps).
+ * No click-to-replay. Dispatches 'sfx-cue' {name:'glass'} when the reveal starts.
  *
  *   var g = new GlassReveal(el, { logo: svgString, look: 'light'|'dark', background: '#e7eef7', tileSize: 420, centerY: .42,
  *                                 onRelease: fn, onDone: fn });
@@ -462,8 +463,8 @@ void main() {
   }
 
   /* ---------- the timeline: closed-form springs, one frame for any time T ---------- */
-  var TAIL = 1.1;
-  function endOf(P) { return P.present + TAIL; }
+  var REST = 1.7; /* the timeline stops here: the tile is still glass, the mark sits inside it, the corners still fringe */
+  function endOf(P) { return P.rest != null ? P.rest : REST; }
   function clamp01(x) { return x < 0 ? 0 : x > 1 ? 1 : x; }
   function mix(a, b, t) { return a + (b - a) * t; }
   function smooth(a, b, x) { var t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); }
@@ -495,7 +496,7 @@ void main() {
   function frameAt(T, P, outro, extra) {
     outro = outro || 0;
     extra = extra || {};
-    var ptrX = extra.ptrX || 0, ptrY = extra.ptrY || 0, ap = extra.aperture || 0, hover = extra.hover || 0;
+    var ptrX = extra.ptrX || 0, ptrY = extra.ptrY || 0, ap = extra.aperture || 0, hover = extra.hover || 0, live = extra.live || 0, breath = extra.breath || 0, sweepLive = extra.sweep;
     var tx = P.present, keep = P.keepPlate ? 1 : 0, damping = 1 - P.bounce;
     var grow = spring(T + 0.01, P.response, damping);
     var tl = timeToReach(0.85, P.response, damping) - 0.01, tm = timeToReach(0.92, P.response, damping) - 0.01;
@@ -519,15 +520,15 @@ void main() {
     var plateAlpha = clamp01(Math.max(plateAlphaBase, apGlass * 0.92)) * (1 - smooth(0.72, 1.0, ap));
     var bareFade = (1 - keep) * smooth(tx - 0.25, tx, T) * (1 - outro) * (1 - smooth(0.35, 0.92, ap));
     return {
-      uPlateScale: plateScale, uShapeN: shapeN, uCornerN: P.corner, uOptics: Math.max(1 - smooth(0.55, 1, effRelease), liveGlass * 0.85),
+      uPlateScale: plateScale * (1 + 0.011 * breath * live), uShapeN: shapeN, uCornerN: P.corner, uOptics: Math.max(1 - smooth(0.55, 1, effRelease), liveGlass * 0.85),
       uPlateAlpha: plateAlpha,
       uLogoHalf: P.logoScale * view, uLogoOff: [(P.logoOffset[0] + ptrX * 0.035) * view, (P.logoOffset[1] - ptrY * 0.035) * view],
-      uKeep: keep, uSheen: P.sheen, uSweep: mix(-1.6, 1.6, smoother(0.9, tx - 0.1, T)) + ptrX * 1.15, uLightAng: P.lightTurn * smoother(0.4, tx + 0.4, T) + ptrX * 1.45 + ptrY * 0.65,
+      uKeep: keep, uSheen: P.sheen, uSweep: (sweepLive != null ? mix(-1.6, 1.6, sweepLive) : mix(-1.6, 1.6, smoother(0.9, tx - 0.1, T))) + ptrX * 0.6 * (sweepLive != null ? 1 : 1.9), uLightAng: P.lightTurn * smoother(0.4, tx + 0.4, T) + ptrX * 1.45 + ptrY * 0.65 + 0.07 * breath * live,
       uBold: P.swell * 0.03 * (1 - zoomIn),
       uBlur: P.focus * 0.05 * (1 - smooth(0.3, 0.95, grow)) + 0.03 * outro + ap * 0.045,
       uFrost: P.focus * (1 - smooth(0.5, 0.95, grow)),
       uPinch: 0.38 * P.stretch * smooth(0.1, 0.9, morph) * smooth(0.75, 0.97, zoomIn),
-      uTilt: P.tilt, uDome: dome + ap * 0.14, uDrop: drop, uRim: 1 + 0.8 * drop + liveGlass * 0.5,
+      uTilt: P.tilt, uDome: dome + ap * 0.14, uDrop: drop, uRim: 1 + 0.8 * drop + liveGlass * 0.5 + hover * 0.35,
       uHalo: (P.halo + apGlass * 0.65) * (0.5 + 0.5 * drop) * (1 - keep * release),
       uShadow: Math.max(P.shadow * smooth(0.45, 0.8, grow) * (1 - smooth(0, 0.6, morph)), 0.8 * P.shadow * keep * release) * (1 - ap),
       uGhost: smooth(0, 0.03, T) * (1 - smooth(0.04, 0.08, T)),
@@ -590,13 +591,13 @@ void main() {
     this.io.observe(this.el);
     this.ro = new ResizeObserver(function () { me.dirty = true; me.kick(); });
     this.ro.observe(this.el);
-    this._ck = function () { if (me.opts.replayOnClick !== false) me.replay(); };
-    this.el.addEventListener('click', this._ck);
   };
   GlassReveal.prototype.start = function () {
     var P = this.settings(), end = endOf(P);
     this.time = this.instant ? end : 0; this.playing = !this.instant;
     this.released = this.instant; this.finished = false; this.dirty = true;
+    this.t0 = performance.now();
+    if (!this.instant) { try { document.dispatchEvent(new CustomEvent('sfx-cue', { detail: { name: 'glass' } })); } catch (e) { /* no sound */ } }
     if (this.instant) { this.released = true; this.finished = true; var me = this; setTimeout(function () { if (me.onDone && !me.disposed) me.onDone(me); }, 0); }
     this.kick();
   };
@@ -654,9 +655,11 @@ void main() {
       this.time = this.fixedTime;
       this.playing = false;
     } else if (this.playing) {
-      this.time += dt; this.dirty = true;
-      if (!this.released && this.time >= P.present) { this.released = true; if (this.onRelease) { try { this.onRelease(this); } catch (e) { /* the page must not stop the loop */ } } }
-      if (this.time >= end) { this.time = end; this.playing = false; this.finished = true; if (this.onDone) { try { this.onDone(this); } catch (e2) { /* ignore */ } } }
+      /* real time up to just before the rest frame, then the clock eases to a stop on it (no hard halt) */
+      if (this.time < end - 0.55) this.time += dt; else this.time += (end - this.time) * (1 - Math.exp(-dt * 3.4)) + 0.0005;
+      this.dirty = true;
+      if (!this.released && this.time >= end - 0.5) { this.released = true; if (this.onRelease) { try { this.onRelease(this); } catch (e) { /* the page must not stop the loop */ } } }
+      if (this.time >= end - 0.004) { this.time = end; this.playing = false; this.finished = true; if (this.onDone) { try { this.onDone(this); } catch (e2) { /* ignore */ } } }
     }
     var k = 1 - Math.exp(-dt * 9);
     var moving = false;
@@ -669,16 +672,24 @@ void main() {
     if (Math.abs(this.tAperture - this.aperture) > 0.001) {
       this.aperture += (this.tAperture - this.aperture) * Math.min(1, dt * 14); this.dirty = true; moving = true;
     }
+    /* alive at rest: a slow sheen sweep every ~6 s, a breath, the rim light on the pointer. Capped near 30 fps. */
+    var live = 0, sweep, breath = 0, restOn = !this.reduce && this.fixedTime == null && (this.finished || (this.released && !this.playing));
+    if (restOn) {
+      var ts = (now - (this.t0 || now)) / 1000; live = 1; breath = Math.sin(ts * 0.9);
+      var cyc = (ts % 6.2) / 1.7; sweep = cyc < 1 ? cyc * cyc * (3 - 2 * cyc) : 1.2;
+      if (now - (this.lastDraw || 0) > 30) this.dirty = true;
+    }
     if (this.dirty && this.renderer) {
+      this.lastDraw = now;
       var cv = this.cv, dpr = Math.min(window.devicePixelRatio || 1, 2), cw = cv.clientWidth, ch = cv.clientHeight;
       var w = Math.max(1, Math.round(cw * dpr)), h = Math.max(1, Math.round(ch * dpr));
       if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
       var tile = Math.min(P.tileSize, Math.min(cw, ch) / 1.75);
       var cyFrac = this.opts.centerY == null ? .5 : this.opts.centerY;
-      this.renderer.render(frameAt(Math.min(this.time, end), P, 0, { ptrX: this.ptrX, ptrY: this.ptrY, hover: this.hover, aperture: this.aperture }), w, h, tile * dpr, h * (1 - cyFrac));
+      this.renderer.render(frameAt(Math.min(this.time, end), P, 0, { ptrX: this.ptrX, ptrY: this.ptrY, hover: this.hover, aperture: this.aperture, live: live, breath: breath, sweep: restOn ? sweep : undefined }), w, h, tile * dpr, h * (1 - cyFrac));
       this.dirty = false;
     }
-    if (this.visible && (this.playing || moving)) this.raf = requestAnimationFrame(this._tick);
+    if (this.visible && (this.playing || moving || restOn)) this.raf = requestAnimationFrame(this._tick);
   };
 
   /* no WebGL2: the same mark, flat, through a CSS mask */
@@ -690,8 +701,6 @@ void main() {
     if (typeof url === 'string') { var m = 'url("' + url + '") center / contain no-repeat'; d.style.webkitMask = m; d.style.mask = m; }
     el.appendChild(d); this.maskEl = d;
     setTimeout(function () { if (me.disposed) return; if (me.onRelease) me.onRelease(me); if (me.onDone) me.onDone(me); if (me.onReady) me.onReady(me); }, this.instant ? 0 : 900);
-    this._ck = function () { if (me.opts.replayOnClick !== false) me.replay(); };
-    el.addEventListener('click', this._ck);
   };
   GlassReveal.prototype.replayFallback = function () {
     var d = this.maskEl; if (!d || this.reduce) return;
@@ -701,7 +710,6 @@ void main() {
     if (this.disposed) return; this.disposed = true;
     if (this.raf) cancelAnimationFrame(this.raf); this.raf = 0;
     if (this.ro) this.ro.disconnect(); if (this.io) this.io.disconnect();
-    this.el.removeEventListener('click', this._ck);
     if (this.renderer) this.renderer.dispose();
     if (this.cv && this.cv.parentNode) this.cv.parentNode.removeChild(this.cv);
     if (this.maskEl && this.maskEl.parentNode) this.maskEl.parentNode.removeChild(this.maskEl);

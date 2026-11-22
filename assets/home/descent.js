@@ -5,6 +5,7 @@
  *   0.80 - 1.00  THE CLOUDS a deck of cloud streams past, the screen turns to sky; the stage then dissolves onto the 3D city
  * The Earth is an orthographic globe sampled per pixel from assets/halcyon/land.json (360 x 180, 2 bits a cell, 2 = Malaysia)
  * at a low resolution and scaled up; the gold coast is hand-placed lat/lon points through the same projection.
+ * The Malaysia chapter also draws the rail network (RAIL, hand-drawn waypoints, Catmull-Rom smoothed; schematic).
  * Scroll progress is smoothed with a critically damped spring. Off-screen it does nothing. Reduced motion: no smoothing, no twinkle.
  */
 (function () {
@@ -24,6 +25,35 @@
   var BORC = [[4.50, 117.40], [3.60, 115.60], [2.30, 113.40], [1.50, 111.00], [1.80, 109.65]];
   var BOR = [[1.80, 109.65], [1.70, 110.30], [2.20, 111.10], [2.90, 112.00], [3.30, 113.05], [4.00, 113.90], [4.60, 114.20], [4.95, 115.15], [5.30, 115.20], [5.95, 115.60], [6.40, 116.35], [6.90, 116.80], [7.35, 117.00], [6.60, 117.70], [5.95, 118.10], [5.00, 118.35], [4.40, 118.60], [4.20, 117.90], [4.50, 117.40]];
 
+  /* ---- the rail network (hand-drawn waypoints from public knowledge; schematic, not to scale). [lat, lon, station, label side] ---- */
+  var RAIL = [
+    { id: 'west', name: 'KTM West Coast Line', short: 'West Coast', col: '#58c4ff', st: 'op', pts: [[6.66, 100.32, 'Padang Besar', 'l'], [6.12, 100.37, 'Alor Setar', 'l'], [5.39, 100.37, 'Butterworth', 'l'], [4.85, 100.74], [4.60, 101.07, 'Ipoh', 'l'], [3.68, 101.52], [3.134, 101.686, 'KL Sentral', 'l'], [2.72, 101.94, 'Seremban', 'r'], [2.58, 102.61, 'Gemas', 'l'], [2.50, 102.82], [2.03, 103.32], [1.46, 103.76, 'JB Sentral', 'l']] },
+    { id: 'east', name: 'KTM East Coast Line, the Jungle Railway', short: 'East Coast (Jungle Railway)', col: '#ffa24a', st: 'op', pts: [[2.58, 102.61], [3.48, 102.35, 'Mentakab', 'l'], [4.18, 102.05, 'Kuala Lipis', 'l'], [4.88, 101.97, 'Gua Musang', 'l'], [5.53, 102.20], [6.20, 102.17, 'Tumpat', 'l']] },
+    { id: 'ecrl', name: 'ECRL East Coast Rail Link', short: 'ECRL', col: '#ff6a5c', st: 'uc', tag: ['ECRL · opening 2026–27', 4.76, 103.42, 'r'], pts: [[6.12, 102.24, 'Kota Bharu', 'r'], [5.74, 102.49], [5.33, 103.14, 'Kuala Terengganu', 'r'], [4.76, 103.42], [4.23, 103.42], [3.82, 103.33, 'Kuantan', 'r'], [3.59, 102.77], [3.48, 102.35], [3.52, 101.91], [3.23, 101.72, 'Gombak', 'r'], [3.21, 101.43], [3.00, 101.39]] },
+    { id: 'klang', name: 'KTM Port Klang line and Batu Caves spur', short: 'Port Klang + Batu Caves', col: '#b49bff', st: 'op', pts: [[3.134, 101.686], [3.04, 101.45], [3.00, 101.39, 'Port Klang', 'l']], pts2: [[3.134, 101.686], [3.24, 101.68, 'Batu Caves', 'r']] },
+    { id: 'klia', name: 'KLIA Ekspres and Transit', short: 'KLIA Ekspres', col: '#3fe0a0', st: 'op', pts: [[3.134, 101.686], [2.93, 101.69], [2.75, 101.71, 'KLIA', 'r']] },
+    { id: 'rts', name: 'RTS Link, Johor Bahru to Singapore', short: 'RTS Link JB–Woodlands', col: '#ffe14d', st: 'soon', tag: ['RTS Link · JB–Woodlands', 1.46, 103.77, 'r'], pts: [[1.46, 103.76], [1.45, 103.79]] },
+    { id: 'pen', name: 'Penang LRT Mutiara Line', short: 'Penang LRT Mutiara', col: '#59f0d4', st: 'uc', tag: ['Penang LRT', 5.41, 100.33, 'l'], pts: [[5.41, 100.33], [5.30, 100.28]] },
+    { id: 'sbh', name: 'Sabah State Railway', short: 'Sabah State Railway', col: '#cfd8ff', st: 'op', pts: [[5.95, 116.05, 'Tanjung Aru', 'r'], [5.35, 115.75, 'Beaufort', 'r'], [5.12, 115.95, 'Tenom', 'r']] }
+  ];
+  var KV = [[3.134, 101.686], ['#ff7a7a', '#7ad0ff', '#9be58b', '#ffd27a', '#c9a8ff']];
+  // Catmull-Rom through the waypoints, in lat/lon, each station keeping the index of its dense point
+  function smooth(pts) {
+    var out = [], idx = [], n = pts.length, i, k, SUB = n > 2 ? 7 : 1;
+    for (i = 0; i < n - 1; i++) {
+      var p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(n - 1, i + 2)];
+      idx.push(out.length);
+      for (k = 0; k < SUB; k++) {
+        var t = k / SUB, t2 = t * t, t3 = t2 * t;
+        out.push([.5 * ((2 * p1[0]) + (-p0[0] + p2[0]) * t + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3),
+          .5 * ((2 * p1[1]) + (-p0[1] + p2[1]) * t + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3)]);
+      }
+    }
+    idx.push(out.length); out.push([pts[n - 1][0], pts[n - 1][1]]);
+    return { d: out, idx: idx };
+  }
+  RAIL.forEach(function (L) { L.segs = [smooth(L.pts)]; L.srcs = [L.pts]; if (L.pts2) { L.segs.push(smooth(L.pts2)); L.srcs.push(L.pts2); } });
+
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
   function sstep(a, b, x) { x = clamp((x - a) / (b - a), 0, 1); return x * x * (3 - 2 * x); }
   function b64(s) { var bin = atob(s), u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
@@ -40,6 +70,9 @@
     this.probe.setAttribute('aria-hidden', 'true');
     this.stage.appendChild(this.probe);
     this.probeCity = '';
+    this.railOn = true; this.railA = 1; this.leg = section.querySelector('.ds-rail');
+    var tg = section.querySelector('#rl-tog'), me0 = this;
+    if (tg) tg.addEventListener('click', function () { me0.railOn = !me0.railOn; tg.setAttribute('aria-pressed', me0.railOn ? 'true' : 'false'); tg.querySelector('b').textContent = me0.railOn ? 'On' : 'Off'; if (me0.leg) me0.leg.classList.toggle('off', !me0.railOn); me0.kick(); });
     this.onProgress = opts.onProgress || null;
     this.off = document.createElement('canvas'); this.offCtx = this.off.getContext('2d');
     this.stars = []; this.mkStars(); this.mkClouds();
@@ -166,7 +199,7 @@
     }
     this.drawStars(ctx, p, z);
     var v = this.setView(z);
-    if (p < .92) { this.drawEarth(ctx, v, z, p); this.drawAtmosphere(ctx, v, z); this.drawGraticule(ctx, v, z); this.drawCoast(ctx, v, z, p); this.drawCities(ctx, v, z, p); this.drawReticle(ctx, v, z, p); }
+    if (p < .92) { this.drawEarth(ctx, v, z, p); this.drawAtmosphere(ctx, v, z); this.drawGraticule(ctx, v, z); this.drawCoast(ctx, v, z, p); this.drawRail(ctx, v, z, p); this.drawCities(ctx, v, z, p); this.drawReticle(ctx, v, z, p); }
     else if (this.probe) this.probe.classList.remove('on');
     if (cloudK > 0) this.drawClouds(ctx, cloudK, p);
     if (wash > 0) { ctx.globalAlpha = wash; var s = ctx.createLinearGradient(0, 0, 0, H); s.addColorStop(0, this.sky[1]); s.addColorStop(1, this.sky[0]); ctx.fillStyle = s; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
@@ -276,6 +309,80 @@
     ctx.globalAlpha = fade * .35; ctx.strokeStyle = '#ffb938'; ctx.lineWidth = 7; trace(PEN, k); trace(BOR, k);
     ctx.globalAlpha = fade; ctx.strokeStyle = '#ffd27a'; ctx.lineWidth = 1.8; trace(PEN, k); trace(BOR, k);
     ctx.globalAlpha = 1;
+  };
+
+  /* ---- the rail layer: drawn on as the chapter scrolls in, one colour a line, a train pulse on the operating ones ---- */
+  Descent.prototype.drawRail = function (ctx, v, z, p) {
+    var me = this, on = this.railOn ? 1 : 0;
+    this.railA += (on - this.railA) * (this.reduce ? 1 : .14); if (Math.abs(on - this.railA) < .003) this.railA = on;
+    var vis = (1 - sstep(.58, .7, p)) * this.railA, legA = sstep(.2, .27, p) * (1 - sstep(.6, .68, p));
+    if (this.leg) { var q = legA.toFixed(2); if (this.leg.__q !== q) { this.leg.__q = q; this.leg.style.opacity = q; this.leg.style.visibility = legA < .02 ? 'hidden' : 'visible'; } }
+    if (vis <= .01 || sstep(.08, .2, p) <= 0) return;
+    var t = this.t, W = this.W, H = this.H, placed = [], tags = [];
+    ctx.save(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.font = '500 10.5px "JetBrains Mono", ui-monospace, monospace';
+    function sp(lat, lon) { var q = me.proj(lat, lon, v); return q[2] ? [v.cx + q[0], v.cy - q[1]] : null; }
+    RAIL.forEach(function (L, li) {
+      var frac = sstep(.1 + .012 * li, .25 + .012 * li, p); if (frac <= 0) return;
+      L.segs.forEach(function (sg, si) {
+        var P = [], i, tot = 0, cum = [0], d = sg.d;
+        for (i = 0; i < d.length; i++) { var s = sp(d[i][0], d[i][1]); P.push(s); if (i && s && P[i - 1]) { tot += Math.hypot(s[0] - P[i - 1][0], s[1] - P[i - 1][1]); } cum.push(tot); }
+        cum.shift(); var lim = tot * frac;
+        function path() {
+          ctx.beginPath(); var pen = false;
+          for (i = 0; i < P.length; i++) {
+            if (!P[i]) { pen = false; continue; }
+            if (cum[i] > lim) { if (i && pen) { var tt = (lim - cum[i - 1]) / Math.max(1e-6, cum[i] - cum[i - 1]); ctx.lineTo(P[i - 1][0] + (P[i][0] - P[i - 1][0]) * tt, P[i - 1][1] + (P[i][1] - P[i - 1][1]) * tt); } break; }
+            if (pen) ctx.lineTo(P[i][0], P[i][1]); else ctx.moveTo(P[i][0], P[i][1]); pen = true;
+          }
+        }
+        ctx.strokeStyle = L.col;
+        ctx.setLineDash([]); ctx.globalAlpha = .2 * vis; ctx.lineWidth = 8; path(); ctx.stroke();
+        ctx.globalAlpha = .95 * vis; ctx.lineWidth = L.st === 'op' ? 2.6 : 2.2; ctx.setLineDash(L.st === 'uc' ? [9, 7] : L.st === 'soon' ? [2, 6] : []); path(); ctx.stroke(); ctx.setLineDash([]);
+        // the train: a bright bead sliding along the revealed part of an operating line
+        if (L.st === 'op' && !me.reduce && frac > .98 && tot > 40) {
+          var target = ((t * .045 + li * .31 + si * .5) % 1) * tot, j = 1; while (j < cum.length - 1 && cum[j] < target) j++;
+          var a = P[j - 1], b = P[j];
+          if (a && b) { var u = (target - cum[j - 1]) / Math.max(1e-6, cum[j] - cum[j - 1]), x = a[0] + (b[0] - a[0]) * u, y = a[1] + (b[1] - a[1]) * u, g = ctx.createRadialGradient(x, y, 0, x, y, 12); g.addColorStop(0, 'rgba(255,255,255,.95)'); g.addColorStop(.25, L.col); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.globalAlpha = vis; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 12, 0, 6.2832); ctx.fill(); }
+        }
+        // stations
+        if (frac > .9) {
+          var src = L.srcs[si];
+          for (var k = 0; k < src.length; k++) {
+            var st = src[k]; if (!st[2]) continue;
+            var X = P[sg.idx[k]]; if (!X || X[0] < 8 || X[0] > W - 8 || X[1] < 70 || X[1] > H - 8) continue;
+            ctx.globalAlpha = vis; ctx.fillStyle = '#050912'; ctx.strokeStyle = L.col; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(X[0], X[1], 3.4, 0, 6.2832); ctx.fill(); ctx.stroke();
+            var txt = st[2].toUpperCase(), w = ctx.measureText(txt).width, tx = st[3] === 'l' ? X[0] - 9 - w : X[0] + 9, ty = X[1] + 3.5, ok = true;
+            for (var m = 0; m < placed.length; m++) { var o = placed[m]; if (tx < o[0] + o[2] + 4 && tx + w + 4 > o[0] && ty - 11 < o[1] + 4 && ty + 3 > o[1] - 12) { ok = false; break; } }
+            if (ok) { placed.push([tx, ty, w]); ctx.fillStyle = 'rgba(8,14,32,.55)'; ctx.fillRect(tx - 3, ty - 10, w + 6, 14); ctx.fillStyle = '#e6f0ff'; ctx.fillText(txt, tx, ty); }
+          }
+        }
+      });
+      if (L.tag && frac > .95) { var tg = L.tag, X2 = sp(tg[1], tg[2]); if (X2 && X2[0] > 8 && X2[0] < W - 8) tags.push({ txt: tg[0], x: X2[0], y: X2[1], side: tg[3], col: L.col, st: L.st }); }
+    });
+    // tags: status labels for the lines that are not open yet
+    tags.forEach(function (g) {
+      var w = ctx.measureText(g.txt.toUpperCase()).width, sd = g.side === 'r' && g.x + 28 + w > W ? 'l' : g.side, x = sd === 'l' ? g.x - 18 - w : g.x + 18, y = g.y - 14; ctx.globalAlpha = vis;
+      ctx.strokeStyle = g.col; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(g.x, g.y); ctx.lineTo(sd === 'l' ? x + w + 6 : x - 6, y); ctx.stroke();
+      ctx.fillStyle = 'rgba(8,14,32,.78)'; ctx.fillRect(x - 5, y - 11, w + 10, 17); ctx.strokeRect(x - 5.5, y - 11.5, w + 11, 18); ctx.fillStyle = g.col; ctx.fillText(g.txt.toUpperCase(), x, y + 2);
+    });
+    // the Klang Valley: too dense at this scale, so a glowing knot of urban lines
+    var kl = sp(KV[0][0], KV[0][1]);
+    if (kl && sstep(.26, .38, p) > 0) {
+      var k0 = sstep(.26, .4, p) * vis, r = clamp(v.R * .0042, 14, 60), pulse = this.reduce ? 0 : .12 * Math.sin(t * 2.2);
+      var gg = ctx.createRadialGradient(kl[0], kl[1], 0, kl[0], kl[1], r * (1.9 + pulse)); gg.addColorStop(0, 'rgba(255,255,255,.5)'); gg.addColorStop(.3, 'rgba(120,200,255,.28)'); gg.addColorStop(1, 'rgba(60,120,255,0)');
+      ctx.globalAlpha = k0; ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(kl[0], kl[1], r * 2, 0, 6.2832); ctx.fill();
+      ctx.lineWidth = 2.4;
+      for (var a = 0; a < 5; a++) { var ang = -1.1 + a * 1.25 + .3, rr = r * (.9 + .25 * (a % 2)); ctx.strokeStyle = KV[1][a]; ctx.globalAlpha = k0 * .95; ctx.beginPath(); ctx.moveTo(kl[0] - Math.cos(ang) * rr * .5, kl[1] - Math.sin(ang) * rr * .5); ctx.lineTo(kl[0] + Math.cos(ang) * rr, kl[1] + Math.sin(ang) * rr); ctx.stroke(); }
+      ctx.globalAlpha = k0; ctx.lineWidth = 1.2; ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(kl[0], kl[1], r * .5, 0, 6.2832); ctx.stroke();
+      if (sstep(.26, .34, p) > 0 && kl[0] > 300) {
+        var L1 = ['KLANG VALLEY · URBAN RAIL', 'LRT Kelana Jaya · Ampang · Sri Petaling', 'MRT Kajang · Putrajaya', 'KL Monorail · BRT Sunway', 'LRT3 Shah Alam (new)'], bx = kl[0] - r * 2.1 - 8, by = kl[1] - r * 3.6, bw = 0, ii;
+        ctx.font = '500 10px "JetBrains Mono", ui-monospace, monospace'; for (ii = 0; ii < L1.length; ii++) bw = Math.max(bw, ctx.measureText(L1[ii]).width);
+        ctx.globalAlpha = k0 * sstep(.26, .34, p); ctx.fillStyle = 'rgba(8,14,32,.8)'; ctx.fillRect(bx - bw - 12, by - 12, bw + 18, L1.length * 14 + 12); ctx.strokeStyle = 'rgba(159,208,255,.5)'; ctx.lineWidth = 1; ctx.strokeRect(bx - bw - 11.5, by - 11.5, bw + 17, L1.length * 14 + 11);
+        for (ii = 0; ii < L1.length; ii++) { ctx.fillStyle = ii ? '#b8cbe8' : '#ffd27a'; ctx.fillText(L1[ii], bx - bw - 6, by + 2 + ii * 14); }
+      }
+    }
+    ctx.restore();
   };
 
   Descent.prototype.drawCities = function (ctx, v, z, p) {

@@ -51,15 +51,10 @@
     gr = new GlassReveal(gl, {
       logo: LOGO, look: isDark() ? 'dark' : 'light', background: ground(), instant: instant, tileSize: 560, centerY: innerWidth < 720 ? .36 : .4, tuning: { finalScale: 1.1 },
       onRelease: function () { if (!instant) arrive(); },
-      onDone: function () { if (instant && !arrivedOnce) arrive(); },
-      replayOnClick: false
+      onDone: function () { if (instant && !arrivedOnce) arrive(); }
     });
   }
-  function replay() { if (!gr) { makeGlass(false); return; } hideText(); gr.replay(); }
   if (gl) {
-    gl.addEventListener('click', replay);
-    var rb = $('#rv-replay'); if (rb) rb.addEventListener('click', replay);
-    gl.style.cursor = 'pointer';
     if (rv && !reduce) {
       rv.addEventListener('pointermove', function (e) {
         if (!gr) return;
