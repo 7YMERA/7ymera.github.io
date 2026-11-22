@@ -1,4 +1,6 @@
-/* play.js: the arcade hall at /play/.
+/* play.js: the arcade hall at /play/ and the lab at /lab/ (one script, chosen by <body data-page="play|lab">: the games page keeps the hero, the
+   games and the data toys; the lab page keeps Orbit, Particle lab, Glass lab, Skyline anatomy and Liquid glass lab, and has no hero of its own,
+   its first screen is the satellite inspector, mounted by satellite.js on [data-sat-hero]).
    1. The hero's attract-mode loop (Last Train playing itself) and the high-score strip.
    2. The cabinet grid: every card has a live canvas preview. One shared loop draws only the ones on screen, at 30 fps,
       and stops while a game is open.
@@ -11,6 +13,7 @@
 (function () {
   'use strict';
   var d = document, root = d.documentElement, body = d.body;
+  var PAGE = body.getAttribute('data-page') === 'lab' ? 'lab' : 'play', PAGE_NAME = PAGE === 'lab' ? 'Lab' : 'Play', BASE_TITLE = d.title;
   var calmQ = matchMedia('(prefers-reduced-motion: reduce)');
   function calm() { return calmQ.matches; }
   function $(s, r) { return (r || d).querySelector(s); }
@@ -53,13 +56,15 @@
     lab: { view: 'halcyon', title: 'Particle lab', sub: 'The lab · Halcyon', pick: 'lab' },
     glass: { view: 'glass', title: 'Glass lab', sub: 'The lab · one WebGL shader', src: '/lab/glass.html' },
     anatomy: { view: 'anatomy', title: 'Skyline anatomy', sub: 'The lab · exploded KL meshes' },
-    sat: { view: 'sat', title: 'Satellite inspector', sub: 'The lab · NASA models' },
     lglass: { view: 'glass', title: 'Liquid glass lab', sub: 'The lab · WebGL2 optical shader', src: '/lab/liquid-glass.html' },
     'sql-company': { view: 'sql', title: 'Company SQL', sub: 'Data toys · SQLite in your browser', sql: 'company' },
     'sql-jom': { view: 'sql', title: 'Jom Al-Quran SQL', sub: 'Data toys · SQLite in your browser', sql: 'jom' },
     atlas: { view: 'sql', title: 'Join Atlas', sub: 'Data toys · a map of the schema', sql: 'atlas' },
     egg: { view: 'egg', title: 'Back room', sub: 'Out of order' }
   };
+  // which page each cabinet lives on: the rest are dropped, so a stray #id from the other page opens nothing
+  var LAB_IDS = { orbit: 1, lab: 1, glass: 1, anatomy: 1, lglass: 1 };
+  Object.keys(CAB).forEach(function (id) { if ((LAB_IDS[id] ? 'lab' : 'play') !== PAGE) delete CAB[id]; });
   var cur = null, curId = '', opener = null, pushed = false, views = $$('.view', stage);
   var previewsOn = true;
 
@@ -74,7 +79,7 @@
     if (cur) return false;
     cur = c; curId = id; opener = opts.opener || d.activeElement;
     stage.hidden = false; stage.classList.add('is-open'); setInert(true); root.classList.add('play-lock');
-    stageTitle.textContent = c.title; stageSub.textContent = c.sub; d.title = c.title + ' · Play · Alif Najmi';
+    stageTitle.textContent = c.title; stageSub.textContent = c.sub; d.title = c.title + ' · ' + PAGE_NAME + ' · Alif Najmi';
     views.forEach(function (v) { v.hidden = v.dataset.view !== c.view; });
     $('#stage-body').scrollTop = 0;
     previewsOn = false;
@@ -94,7 +99,7 @@
     if (!cur) return;
     var was = curId; cur = null; curId = '';
     stage.hidden = true; stage.classList.remove('is-open'); setInert(false); root.classList.remove('play-lock');
-    d.title = 'Play · Alif Najmi';
+    d.title = BASE_TITLE;
     d.dispatchEvent(new CustomEvent('play-view', { detail: { id: null } }));
     var f = $('#glass-frame'); if (f && f.getAttribute('src')) f.removeAttribute('src');
     if (d.fullscreenElement && d.exitFullscreen) { try { d.exitFullscreen(); } catch (e) { /* fine */ } }
@@ -210,10 +215,10 @@
      ===================================================================== */
   var eggN = 0; try { eggN = +localStorage.getItem('play-egg') || 0; } catch (e) { /* fine */ }
   function eggPaint() {
-    $('#egg-count').textContent = eggN ? 'Trains run from this room: ' + eggN : 'Trains run from this room: 0';
+    var ec = $('#egg-count'); if (ec) ec.textContent = eggN ? 'Trains run from this room: ' + eggN : 'Trains run from this room: 0';
     var t = $('[data-egg-tag]'); if (t) t.textContent = eggN ? 'Found' : '???';
   }
-  $('#egg-ring').addEventListener('click', function () {
+  if ($('#egg-ring')) $('#egg-ring').addEventListener('click', function () {
     var tr = $('#egg-train'); tr.classList.remove('run'); void tr.getBoundingClientRect(); tr.classList.add('run');
     eggN++; try { localStorage.setItem('play-egg', String(eggN)); } catch (e) { /* fine */ }
     $('#egg-count').textContent = 'Next stop: hiring. Trains run from this room: ' + eggN;
@@ -225,12 +230,13 @@
   /* =====================================================================
      insert coin
      ===================================================================== */
+  var heroCur = function () { return 'stack'; }; // the hero block below swaps in the slideshow's current cabinet
   function coin() {
-    var b = $('#coin'); if (b) { b.classList.remove('drop'); void b.offsetWidth; b.classList.add('drop'); }
+    var b = $('#coin'); if (!b) return; if (b) { b.classList.remove('drop'); void b.offsetWidth; b.classList.add('drop'); }
     beep(988, .07, 'square', .05); setTimeout(function () { beep(1319, .3, 'square', .05); }, 80);
-    var id = hsCur(); setTimeout(function () { open(id, { opener: $('.cab[data-open="' + id + '"]') }); }, calm() ? 0 : 320);
+    var id = heroCur(); setTimeout(function () { open(id, { opener: $('.cab[data-open="' + id + '"]') }); }, calm() ? 0 : 320);
   }
-  $('#coin').addEventListener('click', coin);
+  if ($('#coin')) $('#coin').addEventListener('click', coin);
 
   /* =====================================================================
      previews: tiny canvases on dark "screens", one shared loop
@@ -466,7 +472,9 @@
   /* =====================================================================
      the hero's attract loop: Last Train plays itself
      ===================================================================== */
-  var hero = $('.hero-play'), acv = $('#attract'), ag = acv.getContext('2d', { alpha: true }), aw = 0, ah = 0, adpr = 1, gY = 0, aOn = true, aVis = true, aRaf = 0, aLast = 0, AP = null, aTheme = '';
+  var hero = $('.hero-play');
+  if (hero) (function () {
+  var acv = $('#attract'), ag = acv.getContext('2d', { alpha: true }), aw = 0, ah = 0, adpr = 1, gY = 0, aOn = true, aVis = true, aRaf = 0, aLast = 0, AP = null, aTheme = '';
   function rgb(c) { var m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec((c || '').trim()); if (m) { var h = m[1]; if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2]; return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; } return [128, 128, 128]; }
   function mixc(a, b, t) { var A = rgb(a), B = rgb(b); return 'rgb(' + Math.round(A[0] + (B[0] - A[0]) * t) + ',' + Math.round(A[1] + (B[1] - A[1]) * t) + ',' + Math.round(A[2] + (B[2] - A[2]) * t) + ')'; }
   function aPal() {
@@ -543,16 +551,10 @@
      the hero's showcase: every cabinet in turn, a live screen on the right; the second line of the title, the lede and Insert coin follow it
      ===================================================================== */
   var HS = [
-    ['train', 'Game', 'Last Train', 'the skyline.', 'An arcade, a lab and a toy box in one room. Ride the KL line, jump the scope creep and grab every requirement before the last train home.'],
+    ['train', 'Game', 'Last Train', 'the skyline.', 'An arcade in one room. Ride the KL line, jump the scope creep and grab every requirement before the last train home.'],
     ['stack', 'Game', 'Skyline Stack', 'the tower.', 'One button, one tower. Stack Kuala Lumpur floor by floor, past Menara TM, KL Tower and Petronas, all the way up Merdeka 118.'],
     ['creep', 'Game', 'Scope Creep', 'the backlog.', 'Forty-five seconds of triage. Real requirement or creep? Build it or park it.'],
-    ['match', 'Game', 'Spec Match', 'the stack.', 'Pair each tool with the project it shipped in. Fewest moves wins.'],
-    ['orbit', 'Lab', 'Orbit', 'the planet.', 'Spin the Earth from 408 km up, with arcs flying out of Kuala Lumpur.'],
-    ['lab', 'Lab', 'Particle lab', 'with particles.', 'Thousands of points that morph between a Chladni plate, the Earth and the KL towers.'],
-    ['anatomy', 'Lab', 'Skyline anatomy', 'with buildings.', 'The real tower models sliced into floors. Pull the slider and they come apart like a watch.'],
-    ['sat', 'Lab', 'Satellite inspector', 'with satellites.', 'Three real NASA satellites. Sweep an x-ray across the shell, or pull one apart.'],
-    ['lglass', 'Lab', 'Liquid Glass Lab', 'with glass.', 'Bend light through a liquid glass lens, tune every slider, paste your own logo.'],
-    ['sql-company', 'Toy', 'Company SQL', 'with data.', 'A real database and a real SQL engine, running in your browser. Break nothing, query anything.']
+    ['match', 'Game', 'Spec Match', 'the stack.', 'Pair each tool with the project it shipped in. Fewest moves wins.']
   ];
   var hsI = 0, hsCv = $('#hero-show'), hsRaf = 0, hsLast = 0, hsHold = false, hsTimer = 0, hsVis = true, hsFade = 1;
   function hsCur() { return hsCv ? HS[hsI][0] : 'stack'; }
@@ -594,6 +596,9 @@
     d.addEventListener('visibilitychange', hsWake); d.addEventListener('play-view', function (e) { if (!e.detail.id) setTimeout(hsWake, 0); });
     hsSet(0); hsWake(); if (calm()) hsDraw(2.4);
   }
+
+  heroCur = hsCur;
+  })();
 
   /* =====================================================================
      start up

@@ -1,11 +1,13 @@
 /* Satellite inspector: a NASA satellite, big and centred, lit like a photograph, with an x-ray, an explode and three models.
  *
- * Where it lives: the /play/ lab, cabinet "Satellite inspector" (play/index.html, section[data-view="sat"], host #sat-stage). Mode
- * 'cabinet': no scroll listener, no readScroll (the stage is always fully in), it sizes from its own container (ResizeObserver), and it
- * only loads and renders while the cabinet is open: the 'play-view' event (id 'sat') starts it, any other id stops it. Nothing is fetched
- * (three.js, the loaders, the glb files) until the first open, and the glb are cached for the next open. Styles: assets/play/sat.css.
- * (It used to be the hero of the home page's orbit chapter. The 'scroll' mode below is that old path: #descent with data-hold; it
- * is no longer booted anywhere, the home page just links to /play/#sat.)
+ * Where it lives: the first screen of /lab/ (lab/index.html, host `<div class="sat-stage" data-sat-hero>`). Mode 'cabinet' with `hero: true`:
+ * no scroll listener, no readScroll (the stage is always fully in), it sizes from its own container (ResizeObserver), and it renders only
+ * while the stage is on screen (IntersectionObserver), the tab is visible, and no cabinet is open over it (play.js's 'play-view' event
+ * with any id covers it). Scrolled away or covered, the loop stops and the GL context is freed a few seconds later; the glb stay cached.
+ * Three.js, the loaders and the glb are fetched on /lab/ only. Without `hero` the same mode is a cabinet host (#sat-stage, opened by the
+ * 'play-view' event with id 'sat'); no page uses that now. `SatelliteStage.frames` counts renders. Styles: assets/play/sat.css.
+ * (It used to be the hero of the home page's orbit chapter, then a cabinet on /play/. The 'scroll' mode below is the old home path:
+ * #descent with data-hold; it is no longer booted anywhere, the home page links to /lab/.)
  *
  * Scroll mode (unused): #descent carries data-hold (a share of the section's scroll). While raw progress is inside the hold,
  * descent.js keeps its own map at 0 and this file owns the stage: arrival, hero (slow sway, mouse parallax), exit.
@@ -245,7 +247,7 @@
   /* ---------- the controller ---------- */
   function Sat(section, opts) {
     var me = this; opts = opts || {};
-    this.cab = opts.mode === 'cabinet';
+    this.cab = opts.mode === 'cabinet'; this.hero = !!opts.hero;
     this.sec = section; this.stage = this.cab ? opts.stage : section.querySelector('.ds-stage');
     this.hold = this.cab ? 0 : (parseFloat(section.getAttribute('data-hold')) || 0.2);
     this.frames = 0; // render count (a debug counter: it stops rising when the cabinet closes)
@@ -290,7 +292,7 @@
     this.exBtn = ui.querySelector('.sat-ex'); this.xrBtn = ui.querySelector('.sat-xr'); this.hint = ui.querySelector('.sat-hint');
     this.swBtns = [].slice.call(ui.querySelectorAll('.sat-sw button'));
     this.gap = this.cab ? null : st.querySelector('.ds-ph[data-a="-.05"]');
-    if (this.cab) { this.msg = el('p', 'sat-msg', 'The 3D models did not load. Check your connection and open this cabinet again.'); this.msg.setAttribute('role', 'status'); st.appendChild(this.msg); }
+    if (this.cab) { this.msg = el('p', 'sat-msg', 'The 3D models did not load. Check your connection and try again.'); this.msg.setAttribute('role', 'status'); st.appendChild(this.msg); }
     this.pathsL = []; this.setText();
     this.hint.textContent = touchy ? 'Drag a finger across the satellite to x-ray it' : 'Move your cursor over the satellite to x-ray it';
   };
@@ -334,6 +336,15 @@
     // when to run
     new ResizeObserver(function () { me.size(); me.kick(); }).observe(this.stage);
     d.addEventListener('visibilitychange', function () { if (d.hidden) me.stop(); else me.kick(); });
+    if (this.cab && this.hero) {
+      // hero: an always-open stage (the first screen of /lab/). It runs while it is on screen, the tab is visible and no cabinet is open over it
+      this.vis = false; this.covered = false;
+      var upd = function () { if (me.vis && !me.covered) me.open(); else me.close(); };
+      if ('IntersectionObserver' in window) new IntersectionObserver(function (en) { me.vis = en[en.length - 1].isIntersecting; upd(); }).observe(this.stage);
+      else { this.vis = true; upd(); }
+      d.addEventListener('play-view', function (e) { me.covered = !!(e.detail && e.detail.id); upd(); });
+      return;
+    }
     if (this.cab) {
       // cabinet: no scroll path. play.js announces the open view; we run only while ours is the one showing
       d.addEventListener('play-view', function (e) { if (e.detail && e.detail.id === 'sat') me.open(); else me.close(); });
@@ -700,6 +711,8 @@
   };
 
   function boot() {
+    var hero = d.querySelector('[data-sat-hero]');
+    if (hero) { window.SatelliteStage = new Sat(null, { mode: 'cabinet', stage: hero, hero: true }); return; }
     var host = d.getElementById('sat-stage');
     if (host) { window.SatelliteStage = new Sat(null, { mode: 'cabinet', stage: host }); return; }
     var sec = d.getElementById('descent'); if (!sec || !sec.querySelector('.ds-stage')) return;

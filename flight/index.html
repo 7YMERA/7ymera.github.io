@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="../assets/timeofday.css?v=20261122r">
 <style>
 /* Flight-only page: the scene is the page. Nothing but the debug panel (opt-in) sits on top of it. */
-html.gl body{margin:0;background:linear-gradient(var(--sky1),var(--sky-mid) var(--sky-stop),var(--sky3)) fixed}
+html.gl body{margin:0;background:var(--sky-mid)} /* the sky gradient is #skybg (scene.css), a fixed layer; a fixed body background repaints on every scroll */
 html.ui-off .enter-sticky>*{visibility:hidden!important}
 .fp{position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:50;width:min(340px,calc(100vw - 24px));display:none;gap:10px;padding:14px;
   background:var(--surface);color:var(--ink);border:2px solid var(--fx);box-shadow:5px 5px 0 var(--hard);border-radius:6px;font:500 14px/1.4 var(--f-body)}

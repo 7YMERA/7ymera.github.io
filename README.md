@@ -154,25 +154,31 @@ The old home page's content, reordered for someone with 30 seconds: Download CV,
 | **Selected work** | **Journey** |
 | ![Selected work](docs/screens/work.webp) | ![Journey](docs/screens/journey.webp) |
 
-### `/play/` · games and labs (`play/index.html`, `assets/play/`)
+### `/play/` · the games (`play/index.html`, `assets/play/`)
 
-An arcade hall. Last Train plays itself behind the title; every cabinet below has a live preview and opens full screen (Esc or Back closes it, `#stack` style links open one directly). Best scores are kept on the device; games take touch, keyboard and a gamepad (`pad.js`).
+An arcade hall, games only. Last Train plays itself behind the title, and the hero slideshow turns through the four games (`HS` in `play.js`). Every cabinet below has a live preview and opens full screen (Esc or Back closes it, `#stack` style links open one directly). Best scores are kept on the device; games take touch, keyboard and a gamepad (`pad.js`). The experiments moved to `/lab/`: a big **The lab** card (and a hero button) links there, and old links such as `/play/#sat` or `/play/#anatomy` redirect to `/lab/#...` with a small inline script in the page head. `play.js` serves both pages: `<body data-page="play|lab">` picks which cabinets (`LAB_IDS` in `play.js`) and whether the hero exists.
 
 | Cabinet | What it is | File |
 |---|---|---|
 | **Skyline Stack** | One-button stacker past Menara TM, KL Tower, The Exchange 106, Petronas and Merdeka 118 at their real heights. | `assets/play/stack.js` |
 | **Last Train**, **Scope Creep**, **Spec Match** | The three original arcade games. | `assets/arcade.js` |
-| **Orbit**, **Particle lab** | The Halcyon globe and the morphing particle cloud. | `assets/halcyon.js` |
-| **Skyline anatomy** | The real landmark meshes sliced into strata, with an Explode slider. | `assets/play/anatomy.js` |
-| **Satellite inspector** (`#sat`, bay 2, tag NASA) | The NASA satellite from the old home page: GPM, TRMM and AIM as big tabs, lit like the Mirage reference, with a plexus and lens flare. A **cursor-targeted x-ray** turns only the patch under the cursor see-through (it grows with cursor speed, trails, closes about a second after you stop; on touch the finger scans while it drags, or press X-ray for an automatic sweep). Explode pulls the parts apart with labelled leader lines; drag spins it; zoom buttons. Built with three.js r128 + GLTF/Draco from jsdelivr and the NASA 3D Resources models (`assets/home/sat/*.glb`, credited on screen). It runs in `mode: 'cabinet'`: nothing (three.js from cdnjs, loaders, glb) is fetched until the cabinet first opens, it renders only while the cabinet is open and the tab is visible (the GL context is freed a few seconds after closing, the models stay cached for the next open), and it sizes from its own stage with a ResizeObserver. `SatelliteStage.frames` counts renders (a debug counter). Sound cues `sat-on`, `sat-off`, `sat-xray`, `sat-explode`, `sat-assemble` go out as `sfx-cue` events as before. The preview painter is `PV.sat` in `play.js`. The front page links here from the orbit chapter. | `assets/home/sat/satellite.js`, `assets/play/sat.css` |
-| **Glass lab**, **Liquid Glass Lab** | The glass shader toys, with sliders. | `lab/glass.html`, `lab/liquid-glass.html` |
-| **Company SQL**, **Jom Al-Quran SQL**, **Join Atlas** | The playgrounds from the database notes, loaded from those notes at run time. | `db-playground.js`, `join-atlas.js` |
+| **Company SQL**, **Jom Al-Quran SQL**, **Join Atlas** | The data toys (bay 2): the playgrounds from the database notes, loaded from those notes at run time. | `db-playground.js`, `join-atlas.js` |
 | **Out of order** | The hidden train, found. | `assets/play/play.js` |
 
 | The hall | The cabinets |
 |---|---|
 | ![Play, the hall](docs/screens/v3-play.webp) | ![Play, the cabinets](docs/screens/v3-play-cabinets.webp) |
 
+### `/lab/` · the lab (`lab/index.html`, `assets/play/`)
+
+The experiments, split off `/play/`. It **starts with the satellite inspector**: the first screen is the live inspector, not a card you open. Below it, five cabinets (Orbit, Particle lab, Glass lab, Skyline anatomy, Liquid glass lab) open full screen exactly as on `/play/` (same `play.js`, `play.css`, stage dialog; `/lab/#anatomy` opens one directly), and a big **The games** card links back to `/play/`. `Lab` sits between Play and Notes in the nav.
+
+| Part | What it is | File |
+|---|---|---|
+| **Satellite inspector** (the hero, `#satellite`) | The NASA satellite from the old home page: GPM, TRMM and AIM as big tabs, lit like the Mirage reference, with a plexus and lens flare. A **cursor-targeted x-ray** turns only the patch under the cursor see-through (it grows with cursor speed, trails, closes about a second after you stop; on touch the finger scans while it drags, or press X-ray for an automatic sweep). Explode pulls the parts apart with labelled leader lines; drag spins it; zoom buttons. Built with three.js r128 + GLTF/Draco from jsdelivr and the NASA 3D Resources models (`assets/home/sat/*.glb`, credited on screen). It is mounted by `new Sat(null, { mode: 'cabinet', hero: true, stage })` on the `[data-sat-hero]` element: three.js (cdnjs r128 + SRI), the loaders and the glb load on `/lab/` only; it renders only while the hero is on screen (IntersectionObserver), the tab is visible and no cabinet is open over it (the GL context is freed a few seconds after it stops, the models stay cached), and it sizes from its own stage with a ResizeObserver. `SatelliteStage.frames` counts renders (a debug counter). Sound cues `sat-on`, `sat-off`, `sat-xray`, `sat-explode`, `sat-assemble` go out as `sfx-cue` events as before. The front page's orbit chapter links to `/play/#sat`, which redirects here. | `assets/home/sat/satellite.js`, `assets/play/sat.css` |
+| **Orbit**, **Particle lab** | The Halcyon globe and the morphing particle cloud. | `assets/halcyon.js` |
+| **Skyline anatomy** | The real landmark meshes sliced into strata, with an Explode slider. | `assets/play/anatomy.js` |
+| **Glass lab**, **Liquid Glass Lab** | The glass shader toys, with sliders. | `lab/glass.html`, `lab/liquid-glass.html` |
 ### On every page
 
 - **Time of day:** `window.SceneTime` in `scene.js` (t 0 day, 1 golden hour, 2 night), blended in the shader with a few uniforms. The flight's picker is `timeofday.js`; the portfolio's scroll is `daycycle.js`.
@@ -480,9 +486,10 @@ The note pages share one template. Their themed SVG diagrams (flowcharts, sequen
 ```
 index.html               the front page (chapters listed above), scripts in assets/home/
 portfolio/index.html     the recruiter page, scripts in assets/portfolio/
-play/index.html          the games and labs page, scripts in assets/play/
+play/index.html          the games page, scripts in assets/play/
+lab/index.html           the lab page (satellite hero + experiments), same scripts plus assets/home/sat/
 flight/index.html        the drone flight on its own (panel on H)
-lab/                     glass.html and liquid-glass.html (also opened from /play/)
+lab/                     index.html, plus glass.html and liquid-glass.html (opened inside the lab cabinets)
 resume.html              the on-site résumé, generated from tools/cv/cv.html (do not hand-edit)
 404.html                 the "Signal lost" page GitHub Pages serves for a missing URL (root-absolute URLs only)
 sitemap.xml, robots.txt, feed.xml, site.webmanifest   for search engines, feed readers and home-screen icons
