@@ -30,6 +30,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-22 · Live KL by default
+
+- `timeofday.js`: with no stored choice and no `?time=`, the flight starts on Live KL (the real MYT time). A picked mode is still remembered. Key 20261122o.
+
 ## 2026-11-22 · Rail lines as pure design; README caught up
 
 - Descent rail layer is now just coloured lines: no station dots or names, no tags, no train beads, no Klang Valley label box, and the toggle + legend card are removed from `index.html` (code paths in `descent.js` are switched off with `if (false)`; the `.ds-rail`/`.rl-*` CSS is unused). README: Mark, Descent, Music and Sound rows updated for 3.2/3.3. Key 20261122n.

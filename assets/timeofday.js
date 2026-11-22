@@ -1,6 +1,6 @@
 /* The view picker for the 3D city: Plain · Golden hour · Night. Three big buttons with a small animated sky on each.
    Self-mounting: it goes into `#enter .enter-sticky` (the drone-flight HUD) on any page that has one, and into any element marked `data-tod-mount` (the /flight/ panel).
-   It drives window.SceneTime (assets/scene.js): SceneTime.mode('day'|'golden'|'night'). The choice is remembered in localStorage; `?time=golden` in the address overrides it.
+   It drives window.SceneTime (assets/scene.js): SceneTime.mode('day'|'golden'|'night'). The first visit starts on Live KL (MYT now); a choice is remembered in localStorage; `?time=golden` in the address overrides it.
    Keyboard: a radio group (arrow keys move and choose, Home and End jump). Pages with <html data-daycycle> do not get it, the scroll is their time of day. */
 (function () {
   'use strict';
@@ -134,7 +134,8 @@
   }
   function start() {
     mountAll();
-    var q = /[?&]time=(day|golden|night|live)/.exec(location.search), want = q ? q[1] : get(), tries = 0;
+    var q = /[?&]time=(day|golden|night|live)/.exec(location.search), want = q ? q[1] : (get() || 'live'),   // first visit: Live KL, the real time in Malaysia now
+        tries = 0;
     var m = want && byId(want);
     (function apply() {
       if (window.SceneTime) {
