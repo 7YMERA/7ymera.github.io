@@ -156,6 +156,7 @@
             <canvas id="hx-globe" data-cursor="Drag" width="800" height="450" role="img" aria-label="A dotted globe from orbit with glowing arcs from Kuala Lumpur to cities around the world and three satellites"></canvas>
             <div class="hx-probe" id="hx-probe" hidden></div>
           </div>
+          <div class="hx-dock">
           <div class="hx-bar">
             <button class="arc-btn" id="hx-kl" type="button">Face Kuala Lumpur</button>
             <button class="arc-btn alt" id="hx-me" type="button">Where I guess you are</button>
@@ -163,6 +164,7 @@
           </div>
           <p class="hx-read" id="hx-read" role="status"></p>
           <p class="hx-credit">Outlines: Natural Earth (public domain). Satellites: the NASA models behind <a href="https://halcyon-xmr.vercel.app/" target="_blank" rel="noopener">Halcyon</a> (AIM, GPM, TRMM). Your place is guessed from your time zone in this browser only.</p>
+          </div>
         </div>
 
         <div class="arc-panel" role="tabpanel" data-hx="lab" id="hx-pan-lab" aria-labelledby="hx-tab-lab" hidden>
@@ -170,12 +172,14 @@
             <canvas id="hx-lab" data-cursor="Drag" width="800" height="450" role="img" aria-label="A cloud of glowing particles that morphs between shapes, including the Petronas Towers and other Kuala Lumpur landmarks"></canvas>
             <p class="hx-name" id="hx-form" role="status" aria-live="polite">Chladni plate</p>
           </div>
+          <div class="hx-dock">
           <div class="hx-chips" id="hx-chips" role="group" aria-label="Shapes"></div>
           <div class="hx-bar">
             <button class="arc-sound" id="hx-explode" type="button" aria-pressed="false">Explode <b>Off</b></button>
             <button class="arc-sound" id="hx-auto" type="button" aria-pressed="true">Auto-morph <b>On</b></button>
           </div>
           <p class="hx-credit">The landmarks are my own KL models, turned into points. Heights are to scale: Merdeka 118 is the tallest.</p>
+          </div>
         </div>
       </div>
     </section>

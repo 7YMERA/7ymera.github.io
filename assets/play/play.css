@@ -143,7 +143,7 @@ body.play .top { z-index: 20; }
 .play-foot a { color: inherit; }
 
 /* ---------- the stage ---------- */
-.stage { position: fixed; inset: 0; z-index: 200; display: grid; grid-template-rows: auto minmax(0, 1fr); background: var(--bg); color: var(--ink); overscroll-behavior: contain; }
+.stage { position: fixed; inset: 0; z-index: 200; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); background: var(--bg); color: var(--ink); overscroll-behavior: contain; }
 .stage[hidden] { display: none !important; }
 .stage.is-open { animation: stage-in .26s cubic-bezier(.2, .8, .2, 1); }
 @keyframes stage-in { from { opacity: 0; transform: scale(.985); } to { opacity: 1; transform: none; } }
@@ -291,3 +291,127 @@ body.play .top { z-index: 20; }
 .lab-scroll svg { width: 18px; height: 18px; }
 .lab-more { padding-top: clamp(40px, 6vw, 72px); }
 @media (max-width: 700px) { .lab-hero { height: max(700px, calc(100svh - 62px)); min-height: 700px; } .lab-scroll { top: auto; bottom: 12px; right: 16px; left: 16px; justify-content: center; min-height: 46px; } }
+
+/* ---------- immersive lab views (Orbit, Particle lab, Skyline anatomy, Glass lab, Liquid glass lab) ----------
+   The experiment is the background of the whole view: it fills everything under a dark header bar, and the controls float
+   over it as near-solid dark panels (no backdrop-filter). Same look in both themes. Keyed on .stage[data-v] (set in play.js). */
+.stage[data-v="halcyon"], .stage[data-v="anatomy"], .stage[data-v="glass"] { background: #040915; color: #eaf1ff; --dk: rgba(6, 12, 28, .84); --dk-line: rgba(160, 196, 255, .28); --dk-ink: #eaf1ff; --dk-mute: #9db6dc; }
+.stage[data-v="halcyon"] .stage-bar, .stage[data-v="anatomy"] .stage-bar, .stage[data-v="glass"] .stage-bar { background: #060c1c; border-bottom: 1px solid var(--dk-line); color: var(--dk-ink); }
+.stage[data-v="halcyon"] .stage-id h2, .stage[data-v="anatomy"] .stage-id h2, .stage[data-v="glass"] .stage-id h2 { color: var(--dk-ink); }
+.stage[data-v="halcyon"] .stage-id .eyebrow, .stage[data-v="anatomy"] .stage-id .eyebrow, .stage[data-v="glass"] .stage-id .eyebrow { color: #8fb8ff; }
+.stage[data-v="halcyon"] .sbtn, .stage[data-v="anatomy"] .sbtn, .stage[data-v="glass"] .sbtn { background: rgba(255, 255, 255, .08); color: var(--dk-ink); border-color: var(--dk-line); }
+.stage[data-v="halcyon"] .sbtn:hover, .stage[data-v="anatomy"] .sbtn:hover, .stage[data-v="glass"] .sbtn:hover { border-color: #8fb8ff; }
+.stage[data-v="halcyon"] .stage-body, .stage[data-v="anatomy"] .stage-body, .stage[data-v="glass"] .stage-body { overflow: hidden; padding-bottom: 0; background: #040915; }
+.stage[data-v="halcyon"] .view-pad, .stage[data-v="anatomy"] .view-pad { position: absolute; inset: 0; max-width: none; margin: 0; padding: 0; }
+.stage[data-v="glass"] .view-glass iframe { background: #040915; }
+
+/* floating tab strip, top left (the Orbit / Particle lab tabs and the landmark tabs) */
+.stage[data-v="halcyon"] .arc-tabs, .stage[data-v="anatomy"] .arc-tabs { position: absolute; z-index: 3; left: 12px; top: 12px; right: 12px; gap: 8px; pointer-events: none; }
+.stage[data-v="halcyon"] .arc-tab, .stage[data-v="anatomy"] .arc-tab { pointer-events: auto; background: var(--dk); border: 1px solid var(--dk-line); color: var(--dk-ink); min-height: 56px; padding: 8px 16px; box-shadow: none; }
+.stage[data-v="halcyon"] .arc-tab small, .stage[data-v="anatomy"] .arc-tab small { color: var(--dk-mute); }
+.stage[data-v="halcyon"] .arc-tab:hover, .stage[data-v="anatomy"] .arc-tab:hover { border-color: #8fb8ff; }
+.stage[data-v="halcyon"] .arc-tab[aria-selected="true"], .stage[data-v="anatomy"] .arc-tab[aria-selected="true"] { background: #2f6fe0; border-color: #8fb8ff; color: #fff; }
+.stage[data-v="halcyon"] .arc-tab[aria-selected="true"] small, .stage[data-v="anatomy"] .arc-tab[aria-selected="true"] small { color: #fff; }
+@media (max-width: 560px) { .stage[data-v="halcyon"] .arc-tab, .stage[data-v="anatomy"] .arc-tab { flex: 1 1 0; min-width: 0; min-height: 48px; padding: 6px 10px; font-size: .9rem; } .stage[data-v="halcyon"] .arc-tab small { display: none; } .stage[data-v="anatomy"] .arc-tabs { flex-wrap: nowrap; overflow-x: auto; pointer-events: auto; } .stage[data-v="anatomy"] .arc-tab { flex: 0 0 auto; } }
+
+/* Orbit and Particle lab: the canvas is the panel; the dock floats along the bottom */
+.stage[data-v="halcyon"] #halcyon { position: absolute; inset: 0; }
+.stage[data-v="halcyon"] .arc-panel { position: absolute; inset: 0; padding: 0; border: 0; border-radius: 0; background: transparent; display: block; box-shadow: none; }
+.stage[data-v="halcyon"] .hx-stage { position: absolute; inset: 0; border: 0; border-radius: 0; }
+.stage[data-v="halcyon"] .hx-stage canvas { width: 100%; height: 100%; aspect-ratio: auto; }
+.stage[data-v="halcyon"] .hx-name { left: 16px; bottom: auto; top: 84px; z-index: 2; }
+.stage[data-v="halcyon"] .hx-dock { position: absolute; z-index: 3; left: 12px; right: 12px; bottom: max(12px, env(safe-area-inset-bottom, 0px)); display: grid; gap: 8px; justify-items: start; pointer-events: none; }
+.stage[data-v="halcyon"] .hx-dock > * { pointer-events: auto; }
+.stage[data-v="halcyon"] .hx-bar { background: var(--dk); border: 1px solid var(--dk-line); border-radius: 16px; padding: 8px; }
+.stage[data-v="halcyon"] .hx-chips { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; background: var(--dk); border: 1px solid var(--dk-line); border-radius: 16px; padding: 8px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+.stage[data-v="halcyon"] .hx-chip { flex: none; background: rgba(255, 255, 255, .07); color: var(--dk-ink); border-color: var(--dk-line); }
+.stage[data-v="halcyon"] .hx-chip:hover { border-color: #8fb8ff; }
+.stage[data-v="halcyon"] .hx-chip[aria-pressed="true"] { background: #2f6fe0; color: #fff; border-color: #8fb8ff; }
+.stage[data-v="halcyon"] .arc-btn { background: #2f6fe0; color: #fff; min-height: 48px; padding: 0 20px; font-size: 1rem; }
+.stage[data-v="halcyon"] .arc-btn.alt { background: #b98a2c; }
+.stage[data-v="halcyon"] .arc-sound { background: rgba(255, 255, 255, .08); color: var(--dk-ink); border-color: var(--dk-line); }
+.stage[data-v="halcyon"] .arc-sound[aria-pressed="true"] { border-color: #8fb8ff; }
+.stage[data-v="halcyon"] .hx-read { color: var(--dk-ink); font-size: .875rem; min-height: 0; background: var(--dk); border: 1px solid var(--dk-line); border-radius: 12px; padding: 6px 12px; max-width: min(720px, 100%); }
+.stage[data-v="halcyon"] .hx-read:empty { display: none; }
+.stage[data-v="halcyon"] .hx-credit { color: var(--dk-mute); font-size: .6875rem; background: var(--dk); border-radius: 10px; padding: 5px 10px; max-width: min(760px, 100%); }
+.stage[data-v="halcyon"] .hx-credit a { color: #8fb8ff; }
+@media (max-width: 560px) { .stage[data-v="halcyon"] .hx-credit { display: none; } .stage[data-v="halcyon"] .hx-bar { width: 100%; } .stage[data-v="halcyon"] .hx-bar > * { flex: 1 1 auto; justify-content: center; } }
+
+/* Skyline anatomy: canvas fills the view, controls and the stratum panel float */
+.stage[data-v="anatomy"] .an-wrap { position: absolute; inset: 0; max-width: none; display: block; }
+.stage[data-v="anatomy"] .an-grid { display: block; }
+.stage[data-v="anatomy"] .an-stage { position: absolute; inset: 0; border: 0; border-radius: 0; box-shadow: none; }
+.stage[data-v="anatomy"] .an-stage canvas { height: 100%; }
+.stage[data-v="anatomy"] .an-controls { position: absolute; left: 12px; bottom: max(12px, env(safe-area-inset-bottom, 0px)); width: min(520px, calc(100% - 24px)); border: 1px solid var(--dk-line); border-radius: 16px; background: var(--dk); color: var(--dk-ink); padding: 8px 14px; z-index: 2; }
+.stage[data-v="anatomy"] .an-slider { color: var(--dk-ink); }
+.stage[data-v="anatomy"] .an-slider input { accent-color: #6aa8ff; }
+.stage[data-v="anatomy"] .an-controls .arc-sound { background: rgba(255, 255, 255, .08); color: var(--dk-ink); border-color: var(--dk-line); margin-inline-start: 0; }
+.stage[data-v="anatomy"] .an-side { position: absolute; z-index: 2; right: 12px; top: 84px; bottom: 12px; width: min(320px, calc(100% - 24px)); max-height: calc(100% - 96px); overflow: auto; align-content: start; background: var(--dk); border: 1px solid var(--dk-line); border-radius: 16px; box-shadow: none; color: var(--dk-ink); }
+.stage[data-v="anatomy"] .an-side h3 { color: var(--dk-ink); }
+.stage[data-v="anatomy"] .an-meta { color: #8fb8ff; }
+.stage[data-v="anatomy"] .an-note { color: var(--dk-mute); }
+.stage[data-v="anatomy"] .an-sbtn { color: var(--dk-ink); border-color: var(--dk-line); min-height: 44px; }
+.stage[data-v="anatomy"] .an-sbtn b { color: #8fb8ff; }
+.stage[data-v="anatomy"] .an-sbtn small { color: var(--dk-mute); }
+.stage[data-v="anatomy"] .an-sbtn:hover { background: rgba(106, 168, 255, .16); border-color: #8fb8ff; }
+.stage[data-v="anatomy"] .an-sbtn.on { background: #2f6fe0; border-color: #8fb8ff; color: #fff; }
+.stage[data-v="anatomy"] .an-sbtn.on b, .stage[data-v="anatomy"] .an-sbtn.on small { color: #fff; }
+@media (max-width: 860px) {
+  .stage[data-v="anatomy"] .an-side { top: auto; bottom: 148px; right: 12px; left: 12px; width: auto; max-height: 30%; padding: 10px 12px; gap: 8px; }
+  .stage[data-v="anatomy"] .an-meta { display: none; }
+  .stage[data-v="anatomy"] .an-note { display: none; }
+  .stage[data-v="anatomy"] .an-strata { grid-auto-flow: column; grid-auto-columns: minmax(150px, 1fr); overflow-x: auto; }
+  .stage[data-v="anatomy"] .an-controls { width: calc(100% - 24px); }
+}
+
+/* ---------- the games: header dark too, and the arcade view full bleed ----------
+   Last Train: the canvas fills the view (arcade.js fits the scene and extends the sky and ground, never white bars).
+   Scope Creep and Spec Match: a dark scene fills the view, the cards sit centred on it. Title, hint, stats and the Jump pad float on dark panels. */
+.stage[data-v="arcade"] .stage-bar, .stage[data-v="stack"] .stage-bar { background: #060c1c; border-bottom: 1px solid rgba(160, 196, 255, .28); color: #eaf1ff; }
+.stage[data-v="arcade"] .stage-id h2, .stage[data-v="stack"] .stage-id h2 { color: #eaf1ff; }
+.stage[data-v="arcade"] .stage-id .eyebrow, .stage[data-v="stack"] .stage-id .eyebrow { color: #8fb8ff; }
+.stage[data-v="arcade"] .stage-bar .sbtn, .stage[data-v="stack"] .stage-bar .sbtn { background: rgba(255, 255, 255, .08); color: #eaf1ff; border-color: rgba(160, 196, 255, .28); }
+.stage[data-v="arcade"] .stage-bar .sbtn:hover, .stage[data-v="stack"] .stage-bar .sbtn:hover { border-color: #8fb8ff; }
+.stage[data-v="arcade"] .stage-hi, .stage[data-v="stack"] .stage-hi { border-color: rgba(160, 196, 255, .28); color: #e3b14e; }
+.stage[data-v="arcade"] .stage-body { overflow: hidden; padding-bottom: 0; background: #040915; }
+.stage[data-v="arcade"] .view-pad { position: absolute; inset: 0; max-width: none; margin: 0; padding: 0; }
+.stage[data-v="arcade"] #arcade { position: absolute; inset: 0; --dk: rgba(6, 12, 28, .86); --dk-line: rgba(160, 196, 255, .28); --dk-ink: #eaf1ff; --dk-mute: #9db6dc; }
+.stage[data-v="arcade"] #arc-sound { display: none; }
+.stage[data-v="arcade"] .arc-tabs { position: absolute; z-index: 4; left: 12px; top: 12px; right: 12px; gap: 8px; pointer-events: none; }
+.stage[data-v="arcade"] .arc-tab { pointer-events: auto; background: var(--dk); border: 1px solid var(--dk-line); color: var(--dk-ink); min-height: 56px; padding: 8px 16px; }
+.stage[data-v="arcade"] .arc-tab small { color: var(--dk-mute); }
+.stage[data-v="arcade"] .arc-tab:hover { border-color: #8fb8ff; }
+.stage[data-v="arcade"] .arc-tab[aria-selected="true"] { background: #2f6fe0; border-color: #8fb8ff; color: #fff; }
+.stage[data-v="arcade"] .arc-tab[aria-selected="true"] small { color: #fff; }
+.stage[data-v="arcade"] .arc-panel { position: absolute; inset: 0; padding: 0; border: 0; border-radius: 0; box-shadow: none; display: block; background: transparent; }
+.stage[data-v="arcade"] .arc-panel[hidden] { display: none !important; }
+.stage[data-v="arcade"] .arc-top { position: absolute; z-index: 3; left: 12px; top: 84px; max-width: min(420px, calc(100% - 24px)); display: grid; gap: 4px; padding: 10px 14px; border-radius: 14px; background: var(--dk); border: 1px solid var(--dk-line); }
+.stage[data-v="arcade"] .arc-top h3 { color: var(--dk-ink); font-size: 1.1rem; }
+.stage[data-v="arcade"] .arc-top p, .stage[data-v="arcade"] .arc-hint { color: var(--dk-mute); font-size: .8125rem; }
+.stage[data-v="arcade"] .arc-stat { background: rgba(255, 255, 255, .07); border-color: var(--dk-line); }
+.stage[data-v="arcade"] .arc-stat small { color: var(--dk-mute); }
+.stage[data-v="arcade"] .arc-stat b { color: var(--dk-ink); }
+/* Last Train */
+.stage[data-v="arcade"] .arc-stage { position: absolute; inset: 0; border: 0; border-radius: 0; background: var(--bg); }
+.stage[data-v="arcade"] .arc-stage canvas { width: 100%; height: 100%; aspect-ratio: auto; }
+.stage[data-v="arcade"] .arc-over { inset: auto; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(440px, calc(100% - 24px)); border-radius: 18px; background: rgba(6, 12, 28, .92); border: 1px solid var(--dk-line); color: var(--dk-ink); z-index: 3; }
+.stage[data-v="arcade"] .arc-over p { color: var(--dk-mute); }
+.stage[data-v="arcade"] .arc-pad { position: absolute; z-index: 3; left: 50%; transform: translateX(-50%); bottom: max(14px, env(safe-area-inset-bottom, 0px)); width: min(460px, calc(100% - 24px)); }
+.stage[data-v="arcade"] .arc-jump { min-height: 72px; font-size: 1.25rem; border-radius: 18px; background: #2f6fe0; color: #fff; border: 2px solid #8fb8ff; }
+/* Scope Creep and Spec Match: a dark scene with the content centred */
+.stage[data-v="arcade"] .arc-panel[data-game="creep"], .stage[data-v="arcade"] .arc-panel[data-game="match"] { color: var(--ink); overflow: auto; padding: 150px 16px 32px; background: radial-gradient(ellipse at 50% 0%, #12284f 0%, #070f24 60%, #040915 100%); --bg: #0c1a38; --surface: #12234a; --ink: #eaf1ff; --muted: #9db6dc; --line: rgba(160, 196, 255, .3); --sunk: rgba(255, 255, 255, .07); --accent: #4f93ff; --accent-ink: #fff; --accent-soft: #17356b; --gold: #e3b14e; --gold-soft: #4a3a14; }
+.stage[data-v="arcade"] .arc-panel[data-game="creep"] > *, .stage[data-v="arcade"] .arc-panel[data-game="match"] > * { position: relative; max-width: 760px; margin-inline: auto; }
+.stage[data-v="arcade"] .arc-panel[data-game="creep"] .arc-top, .stage[data-v="arcade"] .arc-panel[data-game="match"] .arc-top { position: absolute; max-width: min(520px, calc(100% - 24px)); margin: 0; }
+.stage[data-v="arcade"] .arc-panel[data-game="creep"] > *:not(.arc-top):not(.sr-only), .stage[data-v="arcade"] .arc-panel[data-game="match"] > *:not(.arc-top) { display: grid; }
+.stage[data-v="arcade"] .arc-panel[data-game="creep"] > .sc-bar { display: block; margin-bottom: 14px; }
+.stage[data-v="arcade"] .sc-card { min-height: clamp(150px, 26vh, 260px); font-size: clamp(1.25rem, 3vw, 2rem); }
+.stage[data-v="arcade"] .arc-panel[data-game="match"] .mt-grid { max-width: min(640px, calc(100vh - 290px)); min-width: 260px; }
+.stage[data-v="arcade"] .mt-msg { text-align: center; color: var(--dk-mute); }
+.stage[data-v="arcade"] .arc-panel[data-game="match"] > div:last-child { justify-items: center; }
+@media (max-width: 560px) {
+  .stage[data-v="arcade"] .arc-tab { flex: 1 1 0; min-width: 0; min-height: 48px; padding: 6px 8px; font-size: .85rem; }
+  .stage[data-v="arcade"] .arc-tab small { display: none; }
+  .stage[data-v="arcade"] .arc-top { top: 72px; }
+  .stage[data-v="arcade"] .arc-hint { display: none; }
+  .stage[data-v="arcade"] .arc-panel[data-game="creep"], .stage[data-v="arcade"] .arc-panel[data-game="match"] { padding-top: 160px; }
+}
