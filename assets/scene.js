@@ -231,8 +231,10 @@
     {name:'Menara Kuala Lumpur',real:421,top:new T.Vector3(crown('kl')[0],DIST?127:130,crown('kl')[1]),cta:'Notes & Write-ups ↗',href:'/notes/'},
     {name:'The Exchange 106',real:445,top:new T.Vector3(crown('ex')[0],DIST?132:136,crown('ex')[1]),cta:'Open the Lab ↗',href:'/lab/'}]; // tops derived from LAY (crown axis, height as before)
   var fx=[],fxGroup=new T.Group();scene.add(fxGroup);
-  function fade(){var c=document.createElement('canvas');c.width=4;c.height=64;var x=c.getContext('2d'),gr=x.createLinearGradient(0,64,0,0);
-    gr.addColorStop(0,'#fff');gr.addColorStop(.35,'#9a9a9a');gr.addColorStop(1,'#000');x.fillStyle=gr;x.fillRect(0,0,4,64);return new T.CanvasTexture(c)}
+  function fade(){var w=4,h=64,d=new Uint8Array(w*h*4),y,x,p;
+    for(y=0;y<h;y++){var f=y/(h-1),v=Math.round(255*(f<.35?1-(1-.604)*(f/.35):.604*(1-(f-.35)/.65)));
+      for(x=0;x<w;x++){p=(y*w+x)*4;d[p]=d[p+1]=d[p+2]=v;d[p+3]=255}}
+    var t=new T.DataTexture(d,w,h,T.RGBAFormat);t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.needsUpdate=true;return t}
   var fadeTex=fade();
   function fxMat(opts){var m=new T.MeshBasicMaterial(Object.assign({transparent:true,depthWrite:false,side:T.DoubleSide},opts));fx.push(m);return m}
   var beamM=fxMat({alphaMap:fadeTex}),haloM=fxMat({}),radarM=fxMat({});
@@ -288,7 +290,12 @@
     for(var i=0;i<46;i++){var cx=Math.random()*256,cy=Math.random()*128,r=3+Math.random()*13;x.fillStyle='rgba(60,70,90,'+(.1+Math.random()*.2)+')';x.beginPath();x.arc(cx,cy,r,0,6.2832);x.fill();
       x.fillStyle='rgba(255,255,255,'+(.14+Math.random()*.12)+')';x.beginPath();x.arc(cx-r*.25,cy-r*.25,r*.7,0,6.2832);x.fill()}
     var t=new T.CanvasTexture(c);return t}
-  function glowTex(){var c=document.createElement('canvas');c.width=c.height=128;var x=c.getContext('2d'),g=x.createRadialGradient(64,64,10,64,64,64);g.addColorStop(0,'rgba(255,255,255,.95)');g.addColorStop(.35,'rgba(255,255,255,.28)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return new T.CanvasTexture(c)}
+  function radialTex(fn){var S=128,h=S*.5,d=new Uint8Array(S*S*4),y,x,p;
+    for(y=0;y<S;y++)for(x=0;x<S;x++){var r=Math.hypot((x+.5-h)/h,(y+.5-h)/h),a=r>=1?0:Math.max(0,Math.min(1,fn(r)));
+      p=(y*S+x)*4;d[p]=d[p+1]=d[p+2]=255;d[p+3]=Math.round(a*255)}
+    var t=new T.DataTexture(d,S,S,T.RGBAFormat);t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.needsUpdate=true;return t}
+  // Procedural DataTextures (not Canvas2D) so Safari's Canvas2D fingerprinting noise can never speckle the giant additive sun/moon glow sprites.
+  function glowTex(){return radialTex(function(r){var u=1-r;return u*u*(.28+.67*u*u)})}
   var mTex=moonTex(),gTex=glowTex();
   var moonM=new T.MeshBasicMaterial({map:mTex,fog:false}),moon=new T.Mesh(new T.SphereGeometry(70,32,20),moonM),moonG=new T.Group();
   moon.renderOrder=-15;moonG.add(moon);
@@ -299,7 +306,7 @@
   var moon2M=new T.MeshBasicMaterial({map:mTex,fog:false}),moon2=new T.Mesh(new T.SphereGeometry(15,20,14),moon2M);moon2.renderOrder=-14;moonG.add(moon2);
   sci.add(moonG);
   // -- the golden-hour sun: a low warm disc with a wide glow, locked in the sky like the moon (visible only from t 0 to 2 around golden hour, see SceneTime). SUND is also where the golden-hour light comes from.
-  function discTex(){var c=document.createElement('canvas');c.width=c.height=128;var x=c.getContext('2d'),g=x.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'#fff');g.addColorStop(.86,'#fff');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return new T.CanvasTexture(c)}
+  function discTex(){return radialTex(function(r){var u=Math.max(0,Math.min(1,(1-r)/.14));return u*u*(3-2*u)})}
   var SUND=new T.Vector3(-.8,.11,-.59).normalize(),sunG=new T.Group(),
     sunDisc=new T.Sprite(new T.SpriteMaterial({map:discTex(),transparent:true,depthWrite:false,fog:false})),
     sunGlow=new T.Sprite(new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,depthTest:false,fog:false,blending:T.AdditiveBlending})), // the glow is not depth-tested: it is the sun's glare over the whole picture, so the ground and the sky meet without a seam

@@ -27,6 +27,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-23 · Fix Golden-Hour Sun Confetti Noise on iOS Safari
+
+- **Procedural Sun/Glow DataTextures (`assets/scene.js`):** replaced `CanvasTexture` in `glowTex()`, `discTex()`, and `fade()` with pure `Uint8Array` `THREE.DataTexture`s (`radialTex()`), eliminating iOS Safari's Canvas2D fingerprinting noise speckles that were being magnified across the golden-hour sun disc and additive sun glare sprites (`sunGlow` / `sunGlow2`). Key `20261123h`.
+
 ## 2026-11-23 · Keep Liquid-Glass Logo Shape on Scroll
 
 - **Glass Reveal (`assets/home/glass-reveal.js`):** removed the scroll-driven `ap` scale expansion (`plateScale`, `view`), squircle-to-circle morph (`shapeN`), blur/dome distortion, and halo flare in `frameAt()` so the `\7` liquid-glass tile keeps its crisp rounded-square shape and size as you scroll down into `#descent`, fading out cleanly at the bottom of `#reveal`. Key `20261123g`.
