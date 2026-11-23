@@ -27,6 +27,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-23 · Eliminate iOS Safari Scroll-Resize Flicker
+
+- **Static `100lvh` Canvases + Toolbar Resize Guard (`assets/home/home.css`, `assets/scene.css`, `assets/scene.js`):** locked `.orbit`, `#gl`, and `#skybg` to static `height: 100lvh` (so they cover the full screen even when Safari's bottom bar collapses without ever changing height or triggering `ResizeObserver`), restored `.ds-stage` to static `100svh`, and guarded `scene.js`'s `resize` handler against mobile toolbar-only height changes (`W <= 820 && innerWidth === W && Math.abs(innerHeight - Hh) < 180`). Key `20261123k`.
+
 ## 2026-11-23 · Fix iOS Bottom Sky Bleed During Space Descent & Unique Music Per Tab
 
 - **iOS Viewport Bleed Fix (`assets/home/home.css`):** switched `.orbit` from `height: 100svh` to `position: fixed; inset: 0`, switched `.ds-stage` to `100dvh`, and gated `#skybg` behind `html.home.city-on` alongside `#gl` so the golden-hour sky can never peek out below the Earth stage when Safari's bottom bar collapses.

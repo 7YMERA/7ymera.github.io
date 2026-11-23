@@ -1392,7 +1392,7 @@
   document.addEventListener('cf-change',function(e){if(e.target&&e.target.closest&&e.target.closest('#studied')){utpIdx=Math.max(0,Math.min(UTP.length-1,e.detail.index|0));retarget()}});
   addEventListener('load',function(){layoutKeys();retarget()});
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){layoutKeys();retarget()});
-  addEventListener('resize',function(){size();buildRide();layoutKeys();retarget()});
+  addEventListener('resize',function(){if(W<=820&&innerWidth===W&&Math.abs(innerHeight-Hh)<180)return;size();buildRide();layoutKeys();retarget()});
   SB.move(function(e){tx=e.clientX/innerWidth-.5});
   document.addEventListener('visibilitychange',function(){run=!document.hidden;if(run&&!raf){last=performance.now();raf=requestAnimationFrame(frame)}});
   setTimeout(function(){(window.requestIdleCallback||setTimeout)(warmEdges)},12000); // light theme: build the night lines in idle time, so the first switch to dark has them ready
