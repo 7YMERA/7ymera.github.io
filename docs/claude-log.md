@@ -34,6 +34,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-23 · Calm drone HUD on phones
+
+- Phones (<=700 px) only: `scene.css` (PHONE HUD block at the end), `timeofday.css` (row pill + open sheet), `scene.js` (landmark tags), `index.html` (`Skip<span class="fs-l"> the flight</span> ↓`). Top strip is the compass plus one 48 px icon Hide HUD button; REC, ALT rail, drone ID, speed, horizon, corner brackets, heading box and the scroll hint are hidden. Bottom is one row (Skip, View pill) with the compact caption (number + title on one line, one line of text) above it. Finale: "Fly it again" and "Free fly" stack full width above the row and the caption hides; free-fly times are a 2x2 grid in the same slot. Only the landmark nearest the centre keeps a tag, flipped to hang left near the right edge, kept clear of the strips. Opening the View picker hides the stack. Desktop unchanged. Open: the "Keep scrolling" hint is gone on phones.
+
 ## 2026-11-23 · Lab and game views fill the screen
 
 - `assets/play/play.css` (immersive + arcade blocks at the end; `.stage` grid fix `minmax(0,1fr)` stops a 390 px overflow), `play.js` (sets `data-v` on the stage), `lab/index.html` (`.hx-dock`), `lab/glass.html` + `lab/liquid-glass.html` (embed styles; liquid-glass gained `?embed=1`), `arcade.js` (Last Train fits 640–1000 world units wide, 270 high unchanged, spawns just off the visible edge). Every lab view and game fills the view under a dark header; controls float on dark panels; big Jump button bottom-centre. SQL toys left as they were (readability). Checked at 1920/1300/390, light and dark, all 6 lab and 5 play cabinets: no errors, Esc works. Key 20261123b.

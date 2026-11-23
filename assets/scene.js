@@ -528,7 +528,7 @@
   (function(){if(root.hasAttribute('data-flight-only'))return; // /flight/ has its own UI switch
     var host=document.getElementById('fly-again');host=host&&host.parentNode;if(!host)return;
     var b=document.createElement('button');b.type='button';b.className='hud-tog';var rt=document.documentElement,K='hud-off';
-    function set(v,save){rt.classList.toggle('hud-off',v);b.setAttribute('aria-pressed',v?'true':'false');
+    function set(v,save){rt.classList.toggle('hud-off',v);b.setAttribute('aria-pressed',v?'true':'false');b.setAttribute('aria-label',v?'Show HUD':'Hide HUD');
       b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(v?'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>':'<path d="M3 3l18 18M10.6 5.1A10.5 10.5 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6C3.9 8.4 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 4.4-1"/>')+'</svg><b>'+(v?'Show HUD':'Hide HUD')+'</b>';
       if(save)try{localStorage.setItem(K,v?'1':'0')}catch(e){}}
     var st=null;try{st=localStorage.getItem(K)}catch(e){}
@@ -917,12 +917,19 @@
     var alt=Math.round(cam.position.y*KU/5)*5;if(alt!==hLast){hLast=alt;hAlt.textContent=alt}
     var sec=0;for(var i=0;i<caps.length;i++)if(c>=+caps[i].dataset.from)sec=i;
     if(sec!==hSecLast){hSecLast=sec;var b=caps[sec]&&caps[sec].querySelector('b');hSec.textContent=b?b.textContent:'';for(i=0;i<hTicks.length;i++)hTicks[i].classList.toggle('on',i<=sec)}
+    var ph=W<=700,best=-1,bd=9,vs=[],px_=[],py_=[],ds_=[]; // phones: only the landmark nearest the screen centre keeps its tag, and it stays clear of the compass strip, the Hide HUD button and the caption card
     for(var k=0;k<LM.length;k++){
       tv.copy(LM[k].top);var dist=tv.distanceTo(cam.position);tv.project(cam);
-      var vis=tv.z<1&&Math.abs(tv.x)<.94&&Math.abs(tv.y)<.9&&(.5-tv.y*.5)*Hh>(mobile?100:116)&&dist>24&&dist<760,e=hTags[k]; /* a label never rides up into the compass strip at the top */
-      if(vis!==e.classList.contains('show'))e.classList.toggle('show',vis);
-      if(vis){e.style.transform='translate3d('+((tv.x*.5+.5)*W).toFixed(1)+'px,'+((-tv.y*.5+.5)*Hh).toFixed(1)+'px,0)';
-        if(tick%8===0)e.lastChild.textContent=Math.round(LM[k].real)+' m · '+Math.round(dist*KU/10)*10+' m away'}}}
+      var yy=(.5-tv.y*.5)*Hh;
+      var vis=tv.z<1&&Math.abs(tv.x)<.94&&Math.abs(tv.y)<.9&&yy>(ph?156:mobile?100:116)&&(!ph||yy<Hh-170)&&dist>24&&dist<760; /* a label never rides up into the compass strip at the top */
+      vs[k]=vis;ds_[k]=dist;px_[k]=tv.x;py_[k]=tv.y;
+      if(ph&&vis){var dd=tv.x*tv.x+tv.y*tv.y;if(dd<bd){bd=dd;best=k}}}
+    for(k=0;k<LM.length;k++){
+      var e=hTags[k],sv=ph?k===best:vs[k];
+      if(sv!==e.classList.contains('show'))e.classList.toggle('show',sv);
+      if(sv){e.style.transform='translate3d('+((px_[k]*.5+.5)*W).toFixed(1)+'px,'+((-py_[k]*.5+.5)*Hh).toFixed(1)+'px,0)';
+        var fl=ph&&px_[k]>0;if(fl!==e.classList.contains('flip'))e.classList.toggle('flip',fl); // near the right edge the label hangs to the left of its pin
+        if(tick%8===0)e.lastChild.textContent=Math.round(LM[k].real)+' m · '+Math.round(ds_[k]*KU/10)*10+' m away'}}}
   var tick=0,droneReady=false;
   // the lead-in sections show their label while they are on screen
   if('IntersectionObserver' in window){var stObs=new IntersectionObserver(function(es){es.forEach(function(e){e.target.classList.toggle('on',e.isIntersecting&&e.intersectionRatio>.55)})},{threshold:[0,.55,1]});document.querySelectorAll('.stage').forEach(function(el){stObs.observe(el)})}

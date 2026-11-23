@@ -71,9 +71,9 @@
 .tod--row.tod--min .tod-t b{font-size:.9rem;white-space:nowrap}
 html:has(.tod--row:not(.tod--min)) .hud .cp-compass{opacity:0!important}
 @media (max-width:1000px){.tod--row:not(.tod--min) .tod-b{width:92px}}
-@media (max-width:600px){
-  .tod.tod--hud.tod--row{top:auto;bottom:196px;left:var(--row-x,170px);width:auto;max-width:none}
+@media (max-width:700px){
+  .tod.tod--hud.tod--row{top:auto;bottom:var(--rb,14px);left:var(--row-x,110px);width:auto;max-width:none}
   .tod.tod--hud.tod--row.tod--min{height:44px}
-  .tod.tod--hud.tod--row:not(.tod--min){left:12px;right:12px;width:auto;bottom:250px}
+  .tod.tod--hud.tod--row:not(.tod--min){left:14px;right:14px;width:auto;bottom:var(--s1,72px)}
   html:has(.tod--row:not(.tod--min)) .hud .cp-compass{opacity:1!important}
 }

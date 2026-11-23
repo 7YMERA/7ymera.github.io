@@ -378,3 +378,35 @@ html.home-ds .hud-tog{opacity:0;visibility:hidden;transition:opacity .35s,visibi
 html.home-ds.drone-ready .hud-tog{opacity:1;visibility:visible;transition:opacity .6s ease .1s,visibility 0s .1s}
 @media (max-width:700px){.hud-tog{right:14px;top:76px;min-height:44px;padding:0 14px;font-size:14px}}
 @media (prefers-reduced-motion:reduce){.hud-tog{transition:none}}
+
+/* ---- PHONE HUD (<=700px): a calm layout. Top strip = compass + one Hide HUD icon; bottom = ONE control row (Skip, View pill) with the captions and finale buttons stacked above it. Hidden here: REC, ALT rail, drone ID, speed, horizon gauge, corner brackets, heading box, the scroll hint; only the landmark tag nearest the centre shows (scene.js). Desktop is untouched. ---- */
+@media (max-width:700px){
+  .enter-sticky{--rb:calc(14px + env(safe-area-inset-bottom,0px));--s1:calc(var(--rb) + 58px);padding:0 14px var(--s1)}
+  .hud-c,.hud-side,.cp-rec,.cp-id,.cp-spd,.cp-adi,.cp-cross,.cp-hdg,.ride-hint{display:none!important}
+  .cp-compass{top:78px;width:min(230px,58vw)}
+  .hud-tog{right:12px;top:72px;width:48px;min-height:48px;padding:0;justify-content:center;gap:0;border-radius:12px}
+  .hud-tog b{display:none}
+  .hud-tog svg{width:24px;height:24px}
+  .lm-tag b{font-size:11px;padding:2px 6px;top:-40px}.lm-tag span{display:none}.lm-tag::before{height:40px;top:-40px}
+  .lm-tag.flip>*{left:auto;right:16px}
+  /* bottom control row */
+  .fly-skip{left:14px;top:auto;bottom:var(--rb);min-height:44px;padding:0 16px;font-size:14px}
+  .fly-skip .fs-l{display:none}
+  /* caption card: sector number and title share a line, one line of text */
+  .ride-caps{width:100%;min-height:64px}
+  .ride-cap{right:0;padding:9px 12px 10px;box-shadow:3px 3px 0 var(--hard)}
+  .ride-cap::before{content:counter(cap,decimal-leading-zero) " / 06";display:inline-block;margin:0 8px 0 0;font-size:10px;letter-spacing:.1em;vertical-align:1px}
+  .ride-cap b{display:inline;font-size:1rem;margin:0}
+  .ride-cap span{margin-top:3px;font-size:.8rem;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* finale: two full-width buttons stacked above the row; the caption steps aside */
+  .fly-again,.fly-free{left:14px;right:14px;width:auto;justify-content:center;transform:translate3d(0,14px,0)}
+  .fly-again.on,.fly-free.on{transform:none}
+  .fly-again:hover,.fly-free:hover{transform:translate3d(0,-2px,0)}
+  .fly-free{bottom:var(--s1);min-height:48px;font-size:.82rem}
+  .fly-again{bottom:calc(var(--s1) + 60px);min-height:54px;padding:0 16px;font-size:1rem}
+  html.fly-end .ride-caps{opacity:0!important;visibility:hidden!important}
+  /* free fly: time buttons in a 2x2 grid in the same slot */
+  .fly-free-time{left:14px;right:14px;bottom:calc(var(--s1) + 60px)}
+  /* the View picker opened: it takes the stack's place */
+  html:has(.tod--row:not(.tod--min)) .ride-caps,html:has(.tod--row:not(.tod--min)) .fly-again,html:has(.tod--row:not(.tod--min)) .fly-free,html:has(.tod--row:not(.tod--min)) .fly-free-time{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+}
