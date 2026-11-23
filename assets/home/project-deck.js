@@ -41,6 +41,16 @@
         var R = 18, svg = '<svg class="pd-corner" aria-hidden="true" width="' + R + '" height="' + R + '" viewBox="0 0 ' + R + ' ' + R + '"><path d="M' + R + ' 0V' + R + 'H0A' + R + ' ' + R + ' 0 0 0 ' + R + ' 0Z" fill="currentColor"/></svg>';
         vis.insertAdjacentHTML('afterbegin', '<span class="pd-c1">' + svg + '</span><span class="pd-c2">' + svg + '</span>');
       }
+      var sbtn = c.querySelector('.pd-spec-btn'), spnl = c.querySelector('.pd-spec');
+      if (sbtn && spnl) {
+        sbtn.addEventListener('click', function () {
+          var open = !c.classList.contains('spec-open');
+          c.classList.toggle('spec-open', open);
+          sbtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          spnl.setAttribute('aria-hidden', open ? 'false' : 'true');
+          if (window.SFX && window.SFX.tick) window.SFX.tick();
+        });
+      }
     });
     new IntersectionObserver(function (en) { me.visible = en[0].isIntersecting; if (me.visible) { me.read(); me.kick(); } }, { rootMargin: '30% 0px' }).observe(sec);
     if (window.ScrollBus) window.ScrollBus.read(function () { me.read(); return function () { me.kick(); }; });
@@ -79,17 +89,22 @@
       if (arr >= .5) topIdx = i;
       above = Math.min(3, above);
       if (this.reduce) {
-        c.style.transform = 'translate3d(0,' + (arr >= .5 ? 0 : 110) + 'svh,0)'; c.style.filter = 'none';
+        c.style.transform = 'translate3d(0,' + (arr >= .5 ? 0 : 110) + 'svh,0)';
         if (c.dim) c.dim.style.opacity = 0;
         c.classList.toggle('pd-top', arr >= .5 && above < .5);
         continue;
       }
       var y = (1 - arr) * 108 - above * 5, rx = -(1 - arr) * 30 + above * 5, sc = .9 + .1 * arr - above * .05;
       c.style.transform = 'translate3d(0,' + y.toFixed(3) + 'svh,0) rotateX(' + rx.toFixed(3) + 'deg) scale(' + sc.toFixed(4) + ')';
-      var blur = Math.pow(1 - arr, 2) * (this.small ? 4 : 12) + above * (this.small ? 0 : 1.1);
-      c.style.filter = blur > .05 ? 'blur(' + blur.toFixed(2) + 'px)' : 'none';
-      if (c.dim) c.dim.style.opacity = (above * .15).toFixed(3);
-      c.classList.toggle('pd-top', arr > .98 && above < .02);
+      if (c.dim) c.dim.style.opacity = Math.min(.62, (1 - arr) * .35 + above * .18).toFixed(3);
+      var isTop = arr > .98 && above < .02;
+      c.classList.toggle('pd-top', isTop);
+      if (!isTop && c.classList.contains('spec-open')) {
+        c.classList.remove('spec-open');
+        var sb = c.querySelector('.pd-spec-btn'), sp = c.querySelector('.pd-spec');
+        if (sb) sb.setAttribute('aria-expanded', 'false');
+        if (sp) sp.setAttribute('aria-hidden', 'true');
+      }
     }
     if (topIdx !== this.lastTop) {
       this.lastTop = topIdx;

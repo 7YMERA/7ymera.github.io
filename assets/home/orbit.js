@@ -107,7 +107,7 @@
   };
 
   function sync() { var g = descentP() >= .5; if (g !== gone) { gone = g; if (layer) layer.classList.toggle('gone', g); } }
-  function size() { st.W = layer.clientWidth || w.innerWidth; st.H = layer.clientHeight || w.innerHeight; }
+  function size() { st.W = (layer && layer.clientWidth) || w.innerWidth || 1; st.H = (layer && layer.clientHeight) || w.innerHeight || 1; }
 
   /* ---- own loop (the descent and the glass drive frames themselves while they run) ---- */
   function loop(now) {
@@ -147,9 +147,9 @@
     kick();
   }
   function mountOwn() {
-    if (loading || E || !st.intent || !w.OrbitEarth || !w.THREE) return;
+    if (loading || E || !st.intent || !layer || !w.OrbitEarth || !w.THREE) return;
     loading = true;
-    var W = layer.clientWidth || w.innerWidth, e = w.OrbitEarth.mount(layer, { autoStart: false, space: true, className: 'orbit-earth', v: VER, arc: W < 640 ? .24 : .33, spin: reduce ? 0 : 1 });
+    var W = (layer && layer.clientWidth) || w.innerWidth || 1, e = w.OrbitEarth.mount(layer, { autoStart: false, space: true, className: 'orbit-earth', v: VER, arc: W < 640 ? .24 : .33, spin: reduce ? 0 : 1 });
     if (!e) { loading = false; fail(); return; }
     e.canvas.style.opacity = '0';
     e.ready.then(function (ok) { loading = false; if (!ok) { e.dispose(); fail(); return; } adopt(e, false); });

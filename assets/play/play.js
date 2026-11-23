@@ -57,13 +57,14 @@
     glass: { view: 'glass', title: 'Glass lab', sub: 'The lab · one WebGL shader', src: '/lab/glass.html' },
     anatomy: { view: 'anatomy', title: 'Skyline anatomy', sub: 'The lab · exploded KL meshes' },
     lglass: { view: 'glass', title: 'Liquid glass lab', sub: 'The lab · WebGL2 optical shader', src: '/lab/liquid-glass.html' },
+    scorelab: { view: 'scorelab', title: 'Score lab', sub: 'The lab · Web Audio stem mixer & visualizer' },
     'sql-company': { view: 'sql', title: 'Company SQL', sub: 'Data toys · SQLite in your browser', sql: 'company' },
     'sql-jom': { view: 'sql', title: 'Jom Al-Quran SQL', sub: 'Data toys · SQLite in your browser', sql: 'jom' },
     atlas: { view: 'sql', title: 'Join Atlas', sub: 'Data toys · a map of the schema', sql: 'atlas' },
     egg: { view: 'egg', title: 'Back room', sub: 'Out of order' }
   };
   // which page each cabinet lives on: the rest are dropped, so a stray #id from the other page opens nothing
-  var LAB_IDS = { orbit: 1, lab: 1, glass: 1, anatomy: 1, lglass: 1, 'sql-company': 1, 'sql-jom': 1, atlas: 1 };
+  var LAB_IDS = { orbit: 1, lab: 1, glass: 1, anatomy: 1, lglass: 1, scorelab: 1, 'sql-company': 1, 'sql-jom': 1, atlas: 1 };
   Object.keys(CAB).forEach(function (id) { if ((LAB_IDS[id] ? 'lab' : 'play') !== PAGE) delete CAB[id]; });
   var cur = null, curId = '', opener = null, pushed = false, views = $$('.view', stage);
   var previewsOn = true;
@@ -418,6 +419,27 @@
       g.fillStyle = C.ink; px(g, 42); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('\\7', cx, cy + 2);
       g.restore(); g.textBaseline = 'alphabetic';
       mono(g, 9); g.textAlign = 'left'; g.fillStyle = C.mute; g.fillText('WEBGL2 · DISPERSION · CUSTOM SVG', 12, 190);
+    },
+    scorelab: function (g, t) {
+      backdrop(g);
+      var n = 22, pad = 16, bw = (PW - pad * 2 - (n - 1) * 4) / n;
+      for (var i = 0; i < n; i++) {
+        var h = 18 + (Math.sin(t * 2.6 + i * .45) * .5 + .5) * 76 * (1 - Math.abs(i - 9) / 14);
+        var x = pad + i * (bw + 4), y = 164 - h;
+        g.fillStyle = i % 3 === 0 ? 'rgba(255,210,122,.28)' : 'rgba(127,211,255,.22)';
+        g.fillRect(x, y, bw, h);
+        g.fillStyle = i % 3 === 0 ? C.gold : C.blue;
+        g.fillRect(x, y, bw, 3);
+      }
+      glowLine(g, C.gold, 1.8, function () {
+        g.beginPath();
+        for (var k = 0; k <= 48; k++) {
+          var fx = k / 48, wx = pad + fx * (PW - pad * 2);
+          var wy = 56 + Math.sin(fx * 14 + t * 3.2) * 14 * Math.sin(fx * Math.PI);
+          if (k === 0) g.moveTo(wx, wy); else g.lineTo(wx, wy);
+        }
+      });
+      mono(g, 9); g.textAlign = 'left'; g.fillStyle = C.mute; g.fillText('WEB AUDIO · 6 STEMS · 72 BARS', 12, 190);
     },
     sql: function (g, t) { sqlPv(g, t, ['SELECT E_department,', '       count(*) AS people', 'FROM Employee', 'GROUP BY 1', 'ORDER BY 2 DESC;'], [['Sales', '41'], ['Finance', '33'], ['IT', '27'], ['Legal', '12']], ['department', 'people']); },
     sql2: function (g, t) { sqlPv(g, t, ['SELECT who, count(*)', 'FROM (SELECT \'Students\' who', '      FROM Student) t', 'GROUP BY who;'], [['Students', '120'], ['Teachers', '14'], ['Clients', '86']], ['who', 'how_many']); },

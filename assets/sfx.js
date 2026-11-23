@@ -170,6 +170,9 @@
     }
     var bPad = bus(.5, .06), bBass = bus(.02, 0), bKeys = bus(.42, .34), bLead = bus(.55, .46), bAir = bus(.9, .1);
     var bDr = g(.72); bDr.connect(ctxG); var drRev = g(.3); bDr.connect(drRev); drRev.connect(conv);
+    var STEMS = { pad: { n: bPad.in, base: 1, on: true }, bass: { n: bBass.in, base: 1, on: true }, keys: { n: bKeys.in, base: 1, on: true }, lead: { n: bLead.in, base: 1, on: true }, air: { n: bAir.in, base: 1, on: true }, drums: { n: bDr, base: .72, on: true } };
+    E.stems = function () { var o = {}; for (var k in STEMS) o[k] = STEMS[k].on; return o; };
+    E.setStem = function (k, v, t) { var s = STEMS[k]; if (!s) return; s.on = !!v; var p = s.n.gain, now = t || ac.currentTime; p.cancelScheduledValues(now); p.setTargetAtTime(s.on ? s.base : .0001, now, .04); };
     function duckAt(t, depth) { var p = duck.gain; p.setValueAtTime(1, t); p.linearRampToValueAtTime(1 - depth, t + .012); p.setTargetAtTime(1, t + .012, .115); }
 
     /* pad: four voices, two detuned saws each, one slow filter, gliding between voicings; swell layer for the flight */
@@ -653,6 +656,10 @@
     set: function (v) { set(v); },
     volume: function (v) { if (v == null) return vol; vol = clamp(+v, 0, 1); lsSet('sfx-vol', String(vol)); if (ac && on && fadeG) { var g = fadeG.gain, t = ac.currentTime; g.cancelScheduledValues(t); g.setTargetAtTime(vgain(), t, .05); } paintPop(); },
     state: function () { return eng ? eng.state() : null; },
+    analyser: function () { return an; },
+    stems: function () { return eng ? eng.stems() : { pad: true, bass: true, keys: true, lead: true, air: true, drums: true }; },
+    setStem: function (k, v) { if (!on) set(true); if (eng && ac) eng.setStem(k, v, ac.currentTime); },
+    setMood: function (t) { env.T = clamp(+t, 0, 2); if (!on) set(true); if (eng && ac) eng.ctrl(ac.currentTime); },
     zone: function () { return zone; },
     cue: function (n) { d.dispatchEvent(new CustomEvent('sfx-cue', { detail: { name: n } })); },
     beep: function (f, len, type, v, slide) { tone(f, v || .04, len || .1, type || 'square', 0, slide); },

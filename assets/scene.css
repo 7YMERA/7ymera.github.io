@@ -373,11 +373,32 @@ html.fly-end .hud .cp-adi{opacity:0!important;visibility:hidden!important}
 .hud-tog svg{width:20px;height:20px}.hud-tog:hover{transform:translateY(-1px)}.hud-tog:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .hud-tog[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink,#fff);border-color:var(--accent)}
 .cp-id{top:140px}
-html.hud-off .hud,html.hud-off .ride-caps,html.hud-off .ride-hint,html.hud-off .fly-skip,html.hud-off .tod--hud,html.hud-off .fly-again,html.hud-off .fly-free,html.hud-off .fly-free-hint,html.hud-off .fly-free-time{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity .3s,visibility 0s .3s!important}
+html.hud-off .hud,html.hud-off .ride-caps,html.hud-off .ride-hint,html.hud-off .fly-skip,html.hud-off .tod--hud,html.hud-off .fly-again,html.hud-off .fly-free,html.hud-off .fly-free-hint,html.hud-off .fly-free-time,html.hud-off .fly-free-wp{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity .3s,visibility 0s .3s!important}
 html.home-ds .hud-tog{opacity:0;visibility:hidden;transition:opacity .35s,visibility 0s .35s}
 html.home-ds.drone-ready .hud-tog{opacity:1;visibility:visible;transition:opacity .6s ease .1s,visibility 0s .1s}
 @media (max-width:700px){.hud-tog{right:14px;top:76px;min-height:44px;padding:0 14px;font-size:14px}}
 @media (prefers-reduced-motion:reduce){.hud-tog{transition:none}}
+
+/* ---- FREE-FLY WAYPOINTS & POSTCARD BAR ---- */
+.fly-free-wp{position:absolute;left:50%;bottom:clamp(94px,15svh,142px);transform:translate3d(-50%,10px,0);z-index:6;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:8px;border-radius:16px;background:rgba(5,10,24,.82);border:1.5px solid rgba(223,234,255,.22);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s,transform .3s,visibility 0s .3s;max-width:min(680px,calc(100vw - 32px))}
+.fly-free-wp.on{opacity:1;visibility:visible;pointer-events:auto;transform:translate3d(-50%,0,0);transition:opacity .3s,transform .3s}
+.fly-free-wp button{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 13px;border:1.5px solid rgba(223,234,255,.24);border-radius:10px;background:rgba(255,255,255,.07);color:#eaf2ff;font:600 .8rem var(--f-mono,ui-monospace,monospace);letter-spacing:.03em;cursor:pointer;white-space:nowrap}
+.fly-free-wp button:hover{border-color:rgba(223,234,255,.7);background:rgba(255,255,255,.14)}
+.fly-free-wp button[aria-pressed="true"]{background:#eaf2ff;color:#0b1a3a;border-color:#eaf2ff}
+.fly-free-wp button.ff-snap{background:var(--accent);border-color:var(--accent);color:var(--accent-ink,#fff)}
+.fly-free-wp button.ff-snap svg{width:15px;height:15px}
+.fly-free-wp button:focus-visible{outline:3px solid #7fd3ff;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.fly-free-wp{transition:none}}
+
+/* ---- TABLET HUD (701px..960px): prevent picker/compass and horizon/caption overlaps ---- */
+@media (min-width:701px) and (max-width:960px){
+  .cp-compass{top:74px;width:min(240px,34vw)}
+  .cp-adi{display:none!important}
+  .hud-tog{right:14px;top:74px;padding:0 12px;font-size:13px}
+  .ride-caps{width:min(390px,54vw)}
+  .fly-free-hint{display:none}
+  .fly-free-wp{bottom:clamp(108px,16svh,152px);max-width:calc(100vw - 240px)}
+}
 
 /* ---- PHONE HUD (<=700px): a calm layout. Top strip = compass + one Hide HUD icon; bottom = ONE control row (Skip, View pill) with the captions and finale buttons stacked above it. Hidden here: REC, ALT rail, drone ID, speed, horizon gauge, corner brackets, heading box, the scroll hint; only the landmark tag nearest the centre shows (scene.js). Desktop is untouched. ---- */
 @media (max-width:700px){
@@ -405,8 +426,11 @@ html.home-ds.drone-ready .hud-tog{opacity:1;visibility:visible;transition:opacit
   .fly-free{bottom:var(--s1);min-height:48px;font-size:.82rem}
   .fly-again{bottom:calc(var(--s1) + 60px);min-height:54px;padding:0 16px;font-size:1rem}
   html.fly-end .ride-caps{opacity:0!important;visibility:hidden!important}
-  /* free fly: time buttons in a 2x2 grid in the same slot */
+  /* free fly: time buttons in a 2x2 grid in the same slot; waypoints compact strip above them */
   .fly-free-time{left:14px;right:14px;bottom:calc(var(--s1) + 60px)}
+  .fly-free-wp{left:14px;right:14px;bottom:calc(var(--s1) + 188px);transform:none;max-width:none;padding:6px;gap:5px;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .fly-free-wp.on{transform:none}
+  .fly-free-wp button{min-height:36px;padding:0 10px;font-size:.72rem;flex:none}
   /* the View picker opened: it takes the stack's place */
-  html:has(.tod--row:not(.tod--min)) .ride-caps,html:has(.tod--row:not(.tod--min)) .fly-again,html:has(.tod--row:not(.tod--min)) .fly-free,html:has(.tod--row:not(.tod--min)) .fly-free-time{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+  html:has(.tod--row:not(.tod--min)) .ride-caps,html:has(.tod--row:not(.tod--min)) .fly-again,html:has(.tod--row:not(.tod--min)) .fly-free,html:has(.tod--row:not(.tod--min)) .fly-free-time,html:has(.tod--row:not(.tod--min)) .fly-free-wp{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
 }

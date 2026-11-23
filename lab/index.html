@@ -29,15 +29,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@500;600&display=swap">
-<link rel="stylesheet" href="/assets/site.css?v=20261123c">
-<link rel="stylesheet" href="/assets/fx.css?v=20261123c">
-<link rel="stylesheet" href="/assets/cursor.css?v=20261123c">
-<link rel="stylesheet" href="/assets/arcade.css?v=20261123c">
-<link rel="stylesheet" href="/assets/halcyon.css?v=20261123c">
-<link rel="stylesheet" href="/assets/join-atlas.css?v=20261123c">
-<link rel="stylesheet" href="/assets/play/play.css?v=20261123c">
-<link rel="stylesheet" href="/assets/play/anatomy.css?v=20261123c">
-<link rel="stylesheet" href="/assets/play/sat.css?v=20261123c">
+<link rel="stylesheet" href="/assets/site.css?v=20261123d">
+<link rel="stylesheet" href="/assets/fx.css?v=20261123d">
+<link rel="stylesheet" href="/assets/cursor.css?v=20261123d">
+<link rel="stylesheet" href="/assets/arcade.css?v=20261123d">
+<link rel="stylesheet" href="/assets/halcyon.css?v=20261123d">
+<link rel="stylesheet" href="/assets/join-atlas.css?v=20261123d">
+<link rel="stylesheet" href="/assets/play/play.css?v=20261123d">
+<link rel="stylesheet" href="/assets/play/anatomy.css?v=20261123d">
+<link rel="stylesheet" href="/assets/play/sat.css?v=20261123d">
 <script>/* #sat is the hero itself */if(location.hash==="#sat")location.replace("#satellite");</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Lab","url":"https://7ymera.github.io/lab/","description":"Experiments by Alif Najmi: a NASA satellite inspector, a globe, particles, exploded landmarks and glass shaders.","isPartOf":{"@type":"WebSite","name":"Alif Najmi","url":"https://7ymera.github.io/"}}</script>
 </head>
@@ -94,9 +94,14 @@
           <span class="cab-deck"><span class="cab-desc">Explode Petronas, Merdeka 118, Menara KL and Exchange 106 into 5 architectural strata like a watch movement.</span><span class="cab-keys"><kbd>Drag</kbd><kbd>Scrub</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
         </a>
         <a class="cab" id="lglass" href="#lglass" data-open="lglass" data-tone="blue">
-          <span class="cab-sign"><b>Liquid glass lab</b><i class="tag">New</i></span>
+          <span class="cab-sign"><b>Liquid glass lab</b><i class="tag">WebGL2</i></span>
           <span class="cab-screen"><canvas class="pv" data-pv="lglass" width="640" height="400" aria-hidden="true"></canvas></span>
           <span class="cab-deck"><span class="cab-desc">Tune the front page’s WebGL2 optical shader live: dispersion, corner shape, rim light, or paste any custom SVG.</span><span class="cab-keys"><kbd>Move</kbd><kbd>Sliders</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" id="scorelab-cab" href="#scorelab" data-open="scorelab" data-tone="gold">
+          <span class="cab-sign"><b>Score lab</b><i class="tag">New</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="scorelab" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">Solo and mute the 6 live Web Audio stems behind this site’s 72-bar procedural score, and morph harmony across day, golden hour and night.</span><span class="cab-keys"><kbd>Tap</kbd><kbd>Mix</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
         </a>
       </div>
     </section>
@@ -214,6 +219,36 @@
       </div>
     </section>
 
+    <section class="view view-pad" data-view="scorelab" hidden>
+      <div class="sl-wrap" id="scorelab">
+        <div class="sl-head">
+          <div class="sl-read">
+            <span class="sl-chord" id="sl-chord">STANDBY</span>
+            <span class="sl-meta" id="sl-form">Press Play score to start the Web Audio engine</span>
+            <span class="sl-meta" id="sl-bpm">72 bars</span>
+          </div>
+          <button class="sl-play" id="sl-play" type="button" aria-pressed="false">Play score</button>
+        </div>
+        <div class="sl-stage">
+          <canvas id="sl-cv" width="840" height="300" role="img" aria-label="Live frequency spectrum and waveform of the procedural Web Audio score."></canvas>
+        </div>
+        <div class="sl-moods" role="group" aria-label="Harmonic mood">
+          <button class="sl-btn" type="button" data-sl-mood="0" aria-pressed="false">Day · Major 9th</button>
+          <button class="sl-btn" type="button" data-sl-mood="1" aria-pressed="false">Golden · Suspended</button>
+          <button class="sl-btn" type="button" data-sl-mood="2" aria-pressed="true">Night · Minor 9th</button>
+        </div>
+        <div class="sl-grid" role="group" aria-label="Toggle individual stems">
+          <button class="sl-btn" type="button" data-sl-stem="pad" aria-pressed="true"><span>Pad</span><i aria-hidden="true"></i></button>
+          <button class="sl-btn" type="button" data-sl-stem="bass" aria-pressed="true"><span>Bass &amp; Sub</span><i aria-hidden="true"></i></button>
+          <button class="sl-btn" type="button" data-sl-stem="keys" aria-pressed="true"><span>FM Keys</span><i aria-hidden="true"></i></button>
+          <button class="sl-btn" type="button" data-sl-stem="lead" aria-pressed="true"><span>Glass Lead</span><i aria-hidden="true"></i></button>
+          <button class="sl-btn" type="button" data-sl-stem="air" aria-pressed="true"><span>Swell / Air</span><i aria-hidden="true"></i></button>
+          <button class="sl-btn" type="button" data-sl-stem="drums" aria-pressed="true"><span>Drums</span><i aria-hidden="true"></i></button>
+        </div>
+        <p class="sl-note">100% synthesised in your browser via Web Audio API (`assets/sfx.js`): zero audio files, voice-led chord progressions, ping-pong delay, generated impulse reverb, and sidechain ducking.</p>
+      </div>
+    </section>
+
   </div>
 </div>
 
@@ -232,14 +267,15 @@
   paint();
 })();
 </script>
-<script src="/assets/sfx.js?v=20261123c" defer></script>
-<script src="/assets/fx.js?v=20261123c" defer></script>
-<script src="/assets/cursor.js?v=20261123c" defer></script>
-<script src="/assets/halcyon.js?v=20261123c" defer></script>
-<script src="/assets/play/anatomy.js?v=20261123c" defer></script>
+<script src="/assets/sfx.js?v=20261123d" defer></script>
+<script src="/assets/fx.js?v=20261123d" defer></script>
+<script src="/assets/cursor.js?v=20261123d" defer></script>
+<script src="/assets/halcyon.js?v=20261123d" defer></script>
+<script src="/assets/play/anatomy.js?v=20261123d" defer></script>
+<script src="/assets/play/scorelab.js?v=20261123d" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous" defer></script>
-<script src="/assets/home/sat/satellite.js?v=20261123c" defer></script>
-<script src="/assets/play/pad.js?v=20261123c" defer></script>
-<script src="/assets/play/play.js?v=20261123c" defer></script>
+<script src="/assets/home/sat/satellite.js?v=20261123d" defer></script>
+<script src="/assets/play/pad.js?v=20261123d" defer></script>
+<script src="/assets/play/play.js?v=20261123d" defer></script>
 </body>
 </html>

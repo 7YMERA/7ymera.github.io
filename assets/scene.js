@@ -315,53 +315,127 @@
     sci.add(g);return g}
   addGyro(new T.Vector3(crown('klcc')[0],128,crown('klcc')[1]),22,1);
   addGyro(LM[1].top.clone().add(new T.Vector3(0,-14,0)),12,1.4);
-  // ===== RAIL: a sky line through the landmarks and a ring round the Petronas Towers, with trains =====
-  // Both lines were checked with raycasts against the whole district: nothing within 4.5 units at these heights.
-  // The sky line runs Petronas > Menara KL > Merdeka 118 > The Exchange 106 > back. One "hero" train on it is driven by the scroll during the drone
-  // flight, so the camera can chase it from Menara KL to Merdeka (see place()); every other train runs on time.
-  // The sky line is a closed loop through (u,w,y) points in the gap frame (A0): over the street side of the skybridge, out round the left of the towers, then past each landmark
-  // on the side facing the towers (Menara KL at 38 units from its axis, Merdeka 118 at 72, The Exchange 106 at 55: clear of their footprints), and home round the other side.
-  // The landmark points come from LAY, so the line follows the layout. Checked against every district and model vertex: the loop stays more than 12 units clear (the old line kept 4.5).
+  // ===== RAIL: architectural twin-rail KL sky-viaduct, ring line, and helix riser with portal arches, ribbed stations & kinetic light-trail trains =====
+  // All paths are derived from LAY/A0 with generous clearance (>12 units) from Petronas, Menara KL, Merdeka 118, Exchange 106 and surrounding blocks.
   function UW0(x,z){return [.665*x+.747*z,-.747*x+.665*z]}
   function toward(c,d){var L=Math.hypot(c[0],c[1])||1;return [c[0]-c[0]/L*d,c[1]-c[1]/L*d]} // d units from c towards the towers
   var kU=UW0(LAY.kl[0],LAY.kl[1]),mU=UW0(LAY.mer[0],LAY.mer[1]),eU=UW0(LAY.ex[0],LAY.ex[1]),kP=toward(kU,38),mP=toward(mU,72),eP=toward(eU,55);
-  var skyCurve=new T.CatmullRomCurve3([[41,0,88],[10,95,78],[kP[0],kP[1],58],[mP[0],mP[1],58],[eP[0],eP[1],58],[-20,-105,66],[40,-70,76]].map(function(p){return A0(p[0],p[1],p[2])}),true,'catmullrom',.5);
-  var ringPts=[];for(var rgi=0;rgi<14;rgi++){var rga=rgi/14*6.2832;ringPts.push(A0(Math.cos(rga)*52,Math.sin(rga)*52,24))} /* the low ring round the towers: radius 52 (was 41), checked clear of every building */
+  // Sweeping multi-elevation sky-rail weaving dynamically past all four landmarks
+  var skyCurve=new T.CatmullRomCurve3([[41,0,88],[10,95,78],[kP[0],kP[1],62],[mP[0],mP[1],70],[eP[0],eP[1],54],[-20,-105,64],[40,-70,80]].map(function(p){return A0(p[0],p[1],p[2])}),true,'catmullrom',.5);
+  var ringPts=[];for(var rgi=0;rgi<16;rgi++){var rga=rgi/16*6.2832;ringPts.push(A0(Math.cos(rga)*52,Math.sin(rga)*52,24))}
   var ringCurve=new T.CatmullRomCurve3(ringPts,true,'catmullrom',.5);
-  // The riser: one turn of a helix round the towers from the ring up to where the sky line starts, so the two are one connected network.
-  var hxPts=[];for(var hxi=0;hxi<=28;hxi++){var hxk=hxi/28,hxa=hxk*6.2832,hxr=52-11*hxk;hxPts.push(A0(Math.cos(hxa)*hxr,Math.sin(hxa)*hxr,24+64*hxk))}
+  // Sweeping helical riser connecting the lower KLCC ring up to the sky-rail deck
+  var hxPts=[];for(var hxi=0;hxi<=32;hxi++){var hxk=hxi/32,hxa=hxk*6.2832,hxr=52-11*hxk;hxPts.push(A0(Math.cos(hxa)*hxr,Math.sin(hxa)*hxr,24+64*hxk))}
   var helixCurve=new T.CatmullRomCurve3(hxPts,false,'catmullrom',.5);
   var skyLen=skyCurve.getLength(),ringLen=ringCurve.getLength(),helixLen=helixCurve.getLength();
   var tgtV=new T.Vector3(),chH=new T.Vector3(),chT=new T.Vector3(),chS=new T.Vector3(),chP=new T.Vector3(),chL=new T.Vector3();
-  var railM=new T.MeshBasicMaterial({transparent:true,opacity:.9,fog:true}),railM2=new T.MeshBasicMaterial({transparent:true,opacity:.35,fog:true});
-  var skyTube=new T.Mesh(new T.TubeGeometry(skyCurve,260,.5,5,true),railM),ringTube=new T.Mesh(new T.TubeGeometry(ringCurve,140,.5,5,true),railM),helixTube=new T.Mesh(new T.TubeGeometry(helixCurve,160,.5,5,false),railM);
-  var skyGlow=new T.Mesh(new T.TubeGeometry(skyCurve,200,1.6,5,true),railM2);
-  var helixGlow=new T.Mesh(new T.TubeGeometry(helixCurve,120,1.6,5,false),railM2);scene.add(skyTube,ringTube,helixTube,skyGlow,helixGlow);
-  // short pillars under the ring line
-  var pillarM=new T.MeshBasicMaterial({transparent:true,opacity:.7}),pillars=new T.InstancedMesh(new T.CylinderGeometry(.35,.5,24,6),pillarM,24),pdm=new T.Object3D();
-  for(var pi=0;pi<24;pi++){var pp=ringCurve.getPointAt(pi/24);pdm.position.set(pp.x,12,pp.z);pdm.updateMatrix();pillars.setMatrixAt(pi,pdm.matrix)}
-  scene.add(pillars);
-  // STATIONS: named stops (real KL stations near each landmark) on the two rails. Trains ease in, wait with their doors open, and ease out.
-  // Trains: instanced meshes only (mid cars, two rounded-nose cabs per train, a window strip and a stripe on every car), so the cost stays flat.
+
+  // Helper: build a laterally/vertically offset CatmullRomCurve3 for true twin rails and deck soffits
+  function offsetCurve(curve,segs,lat,dy,closed){
+    var pts=[],p=new T.Vector3(),tg=new T.Vector3(),side=new T.Vector3(),up=new T.Vector3(0,1,0);
+    for(var i=0;i<(closed?segs:segs+1);i++){
+      var u=i/segs;curve.getPointAt(u%1,p);curve.getTangentAt(u%1,tg);
+      side.crossVectors(tg,up).normalize();
+      pts.push(new T.Vector3(p.x+side.x*lat,p.y+dy,p.z+side.z*lat));
+    }
+    return new T.CatmullRomCurve3(pts,closed,'catmullrom',.5);
+  }
+  var railM=new T.MeshBasicMaterial({transparent:true,opacity:.95,fog:true}),
+      railM2=new T.MeshBasicMaterial({transparent:true,opacity:.32,fog:true,depthWrite:false}),
+      deckM=new T.MeshBasicMaterial({fog:true}),
+      portalM=new T.MeshBasicMaterial({transparent:true,opacity:.85,fog:true}),
+      trailM=new T.MeshBasicMaterial({transparent:true,opacity:.55,depthWrite:false,fog:true});
+
+  // Structural box-girder spine + dual parallel glowing maglev rails + under-deck luminous strip
+  var skyDeck=new T.Mesh(new T.TubeGeometry(offsetCurve(skyCurve,90,0,-1.05,true),240,1.05,4,true),deckM),
+      ringDeck=new T.Mesh(new T.TubeGeometry(offsetCurve(ringCurve,56,0,-1.05,true),128,.95,4,true),deckM),
+      helixDeck=new T.Mesh(new T.TubeGeometry(offsetCurve(helixCurve,56,0,-1.05,false),128,.9,4,false),deckM);
+  var skyRailL=new T.Mesh(new T.TubeGeometry(offsetCurve(skyCurve,90,-1.25,-.25,true),240,.24,4,true),railM),
+      skyRailR=new T.Mesh(new T.TubeGeometry(offsetCurve(skyCurve,90,1.25,-.25,true),240,.24,4,true),railM),
+      ringRailL=new T.Mesh(new T.TubeGeometry(offsetCurve(ringCurve,56,-1.15,-.25,true),120,.22,4,true),railM),
+      ringRailR=new T.Mesh(new T.TubeGeometry(offsetCurve(ringCurve,56,1.15,-.25,true),120,.22,4,true),railM),
+      helixRailL=new T.Mesh(new T.TubeGeometry(offsetCurve(helixCurve,56,-1.1,-.25,false),120,.22,4,false),railM),
+      helixRailR=new T.Mesh(new T.TubeGeometry(offsetCurve(helixCurve,56,1.1,-.25,false),120,.22,4,false),railM);
+  var skyGlow=new T.Mesh(new T.TubeGeometry(offsetCurve(skyCurve,72,0,-1.65,true),180,1.35,4,true),railM2),
+      helixGlow=new T.Mesh(new T.TubeGeometry(offsetCurve(helixCurve,48,0,-1.55,false),100,1.25,4,false),railM2);
+  scene.add(skyDeck,ringDeck,helixDeck,skyRailL,skyRailR,ringRailL,ringRailR,helixRailL,helixRailR,skyGlow,helixGlow);
+
+  // Instanced deck sleepers / cross-ties + architectural overhead portal arches along sky-line & ring
+  var tiesSky=Math.min(110,Math.round(skyLen/14)),tiesRing=44,tiesTotal=tiesSky+tiesRing;
+  var tieInst=new T.InstancedMesh(new T.BoxGeometry(3.4,.35,.6),deckM,tiesTotal);
+  var archSky=Math.min(44,Math.round(skyLen/36)),archRing=16,archTotal=archSky+archRing;
+  // Sleek tapered portal gantry (left leg, right leg, top lintel + luminous inner crown)
+  var archLegG=new T.BoxGeometry(.36,4.8,.45),archTopG=new T.BoxGeometry(4.4,.38,.55),archLitG=new T.BoxGeometry(3.8,.16,.24);
+  var archLegL=new T.InstancedMesh(archLegG,portalM,archTotal),archLegR=new T.InstancedMesh(archLegG,portalM,archTotal),
+      archTop=new T.InstancedMesh(archTopG,portalM,archTotal),archLit=new T.InstancedMesh(archLitG,railM,archTotal);
+  var dm=new T.Object3D(),dp=new T.Vector3(),dtg=new T.Vector3(),dsd=new T.Vector3(),dup=new T.Vector3(0,1,0),dLook=new T.Vector3();
+  var ti0=0,ai0=0;
+  function populateTrack(curve,nTies,nArch){
+    for(var i=0;i<nTies;i++){
+      var u=i/nTies;curve.getPointAt(u,dp);curve.getTangentAt(u,dtg);
+      dm.position.set(dp.x,dp.y-.75,dp.z);dLook.copy(dm.position).add(dtg);dm.lookAt(dLook);dm.updateMatrix();
+      tieInst.setMatrixAt(ti0++,dm.matrix);
+    }
+    for(var j=0;j<nArch;j++){
+      var ua=(j+.5)/nArch;curve.getPointAt(ua,dp);curve.getTangentAt(ua,dtg);dsd.crossVectors(dtg,dup).normalize();
+      dm.position.set(dp.x-dsd.x*2.05,dp.y+1.45,dp.z-dsd.z*2.05);dLook.copy(dm.position).add(dtg);dm.lookAt(dLook);dm.updateMatrix();archLegL.setMatrixAt(ai0,dm.matrix);
+      dm.position.set(dp.x+dsd.x*2.05,dp.y+1.45,dp.z+dsd.z*2.05);dLook.copy(dm.position).add(dtg);dm.lookAt(dLook);dm.updateMatrix();archLegR.setMatrixAt(ai0,dm.matrix);
+      dm.position.set(dp.x,dp.y+3.85,dp.z);dLook.copy(dm.position).add(dtg);dm.lookAt(dLook);dm.updateMatrix();archTop.setMatrixAt(ai0,dm.matrix);
+      dm.position.set(dp.x,dp.y+3.6,dp.z);dLook.copy(dm.position).add(dtg);dm.lookAt(dLook);dm.updateMatrix();archLit.setMatrixAt(ai0,dm.matrix);
+      ai0++;
+    }
+  }
+  populateTrack(skyCurve,tiesSky,archSky);
+  populateTrack(ringCurve,tiesRing,archRing);
+  scene.add(tieInst,archLegL,archLegR,archTop,archLit);
+
+  // Sculpted tapered viaduct pylons grounding both the ring line (24) and the sky-line (18) to the city floor
+  var pillarM=new T.MeshBasicMaterial({transparent:true,opacity:.78,fog:true});
+  var nRingP=24,nSkyP=18,pillars=new T.InstancedMesh(new T.CylinderGeometry(.42,.95,1,6),pillarM,nRingP+nSkyP),
+      pillarCaps=new T.InstancedMesh(new T.BoxGeometry(3.8,.7,1.4),deckM,nRingP+nSkyP),pdm=new T.Object3D(),pIdx=0;
+  for(var pi=0;pi<nRingP;pi++){
+    var pp=ringCurve.getPointAt(pi/nRingP),ptg=ringCurve.getTangentAt(pi/nRingP),ph=Math.max(4,pp.y-1.4);
+    pdm.position.set(pp.x,ph/2,pp.z);pdm.rotation.set(0,0,0);pdm.scale.set(1,ph,1);pdm.updateMatrix();pillars.setMatrixAt(pIdx,pdm.matrix);
+    pdm.position.set(pp.x,pp.y-1.35,pp.z);pdm.scale.set(1,1,1);dLook.copy(pdm.position).add(ptg);pdm.lookAt(dLook);pdm.updateMatrix();pillarCaps.setMatrixAt(pIdx,pdm.matrix);pIdx++;
+  }
+  for(var si=0;si<nSkyP;si++){
+    var sp2=skyCurve.getPointAt((si+.5)/nSkyP),stg2=skyCurve.getTangentAt((si+.5)/nSkyP),sh=Math.max(8,sp2.y-1.5);
+    pdm.position.set(sp2.x,sh/2,sp2.z);pdm.rotation.set(0,0,0);pdm.scale.set(1.15,sh,1.15);pdm.updateMatrix();pillars.setMatrixAt(pIdx,pdm.matrix);
+    pdm.position.set(sp2.x,sp2.y-1.4,sp2.z);pdm.scale.set(1.15,1.15,1.15);dLook.copy(pdm.position).add(stg2);pdm.lookAt(dLook);pdm.updateMatrix();pillarCaps.setMatrixAt(pIdx,pdm.matrix);pIdx++;
+  }
+  scene.add(pillars,pillarCaps);
+
+  // STATIONS: architectural ribbed KL transit hubs (KLCC, Bukit Nanas, Merdeka, TRX, Suria KLCC, Ampang Park)
   var CARL=6.4,CARGAP=.7,DWELL=4.5;
   function paramNear(curve,x,z){var b=1e9,r=0,q=new T.Vector3();for(var i=0;i<600;i++){curve.getPointAt(i/600,q);var d=Math.hypot(q.x-x,q.z-z);if(d<b){b=d;r=i/600}}return r}
-  var kS=A0(kP[0],kP[1],58),mS=A0(mP[0],mP[1],58),eS=A0(eP[0],eP[1],58);
+  var kS=A0(kP[0],kP[1],62),mS=A0(mP[0],mP[1],70),eS=A0(eP[0],eP[1],54);
   var STAT=[{c:skyCurve,s:0,n:'KLCC'},{c:skyCurve,s:paramNear(skyCurve,kS.x,kS.z),n:'Bukit Nanas'},{c:skyCurve,s:paramNear(skyCurve,mS.x,mS.z),n:'Merdeka'},{c:skyCurve,s:paramNear(skyCurve,eS.x,eS.z),n:'TRX'},
     {c:ringCurve,s:0,n:'Suria KLCC'},{c:ringCurve,s:.5,n:'Ampang Park'}];
-  var stPlatM=new T.MeshBasicMaterial({fog:true}),stCanM=new T.MeshBasicMaterial({transparent:true,opacity:.6,depthWrite:false,fog:true}),stPostM=new T.MeshBasicMaterial({fog:true});
-  var stLampG=new T.BoxGeometry(6.4,.16,22.4),stLampM=new T.MeshBasicMaterial({fog:true}),stPlatG=new T.BoxGeometry(7.4,.6,26),stCanG=new T.BoxGeometry(6.2,.3,22),stPostG=new T.BoxGeometry(.35,4.2,.35);
-  STAT.forEach(function(st){var g2=new T.Group(),pp=st.c.getPointAt(st.s),tg=st.c.getTangentAt(st.s);g2.position.copy(pp);g2.lookAt(pp.clone().add(tg));
-    var pl=new T.Mesh(stPlatG,stPlatM);pl.position.y=-1.9;var cn=new T.Mesh(stCanG,stCanM);cn.position.y=3;g2.add(pl,cn);
-    [[-3,-9],[3,-9],[-3,9],[3,9]].forEach(function(o){var po=new T.Mesh(stPostG,stPostM);po.position.set(o[0],.9,o[1]);g2.add(po)});
-    var lp=new T.Mesh(stLampG,stLampM);lp.position.y=3.3;g2.add(lp);scene.add(g2)}); // a lit strip along the canopy: no name signs, just the design
-  var trains=[{c:skyCurve,len:skyLen,cars:5,sp:34,off:0,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:34,off:.34,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:34,off:.67,hero:false},{c:ringCurve,len:ringLen,cars:4,sp:-15,off:0,hero:false},{c:ringCurve,len:ringLen,cars:4,sp:15,off:.5,hero:false},{c:helixCurve,len:helixLen,cars:3,sp:22,off:.15,hero:false,pp:true}];
+  var stPlatM=new T.MeshBasicMaterial({fog:true}),stCanM=new T.MeshBasicMaterial({transparent:true,opacity:.55,depthWrite:false,fog:true}),stPostM=new T.MeshBasicMaterial({fog:true});
+  var stLampM=new T.MeshBasicMaterial({fog:true}),stPlatG=new T.BoxGeometry(8.6,.7,30),stEdgeG=new T.BoxGeometry(.22,.16,29.6),stCanG=new T.BoxGeometry(7.6,.24,26),stRibG=new T.BoxGeometry(8.2,.32,.48),stPostG=new T.BoxGeometry(.36,5.2,.44),stLampG=new T.BoxGeometry(7.2,.18,26.4);
+  STAT.forEach(function(st){
+    var g2=new T.Group(),pp=st.c.getPointAt(st.s),tg=st.c.getTangentAt(st.s);g2.position.copy(pp);g2.lookAt(pp.clone().add(tg));
+    var pl=new T.Mesh(stPlatG,stPlatM);pl.position.y=-1.95;g2.add(pl);
+    // Glowing platform safety edge strips
+    [-3.95,3.95].forEach(function(ex){var ed=new T.Mesh(stEdgeG,stLampM);ed.position.set(ex,-1.55,0);g2.add(ed)});
+    // Vaulted canopy + 5 architectural structural ribs
+    var cn=new T.Mesh(stCanG,stCanM);cn.position.y=3.55;g2.add(cn);
+    [-11,-5.5,0,5.5,11].forEach(function(rz){
+      var rb=new T.Mesh(stRibG,stPostM);rb.position.set(0,3.72,rz);g2.add(rb);
+      [-3.85,3.85].forEach(function(rx){var po=new T.Mesh(stPostG,stPostM);po.position.set(rx,1.1,rz);g2.add(po)});
+    });
+    var lp=new T.Mesh(stLampG,stLampM);lp.position.y=3.92;g2.add(lp);
+    scene.add(g2);
+  });
+
+  // TRAINS: sleek articulated KL maglev/LRT sets with luminous kinetic slipstream light trails
+  var trains=[{c:skyCurve,len:skyLen,cars:5,sp:36,off:0,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:36,off:.34,hero:false},{c:skyCurve,len:skyLen,cars:5,sp:36,off:.67,hero:false},{c:ringCurve,len:ringLen,cars:4,sp:-16,off:0,hero:false},{c:ringCurve,len:ringLen,cars:4,sp:16,off:.5,hero:false},{c:helixCurve,len:helixLen,cars:3,sp:24,off:.15,hero:false,pp:true}];
   if(innerWidth<=820)trains.splice(1,2);
-  var nCars=0,nMid=0;trains.forEach(function(t,ti){t.i0=nCars;nCars+=t.cars;t.m0=nMid;nMid+=t.cars-2;t.k0=ti*2;t.dir=t.sp<0?-1:1;
+  var nCars=0,nMid=0,TRAIL_N=7;trains.forEach(function(t,ti){t.i0=nCars;nCars+=t.cars;t.m0=nMid;nMid+=t.cars-2;t.k0=ti*2;t.t0=ti*TRAIL_N;t.dir=t.sp<0?-1:1;
     if(t.pp){t.hh=t.cars*(CARL+CARGAP)/2/t.len;t.D=1-2*t.hh;t.tl=t.D*t.len/t.sp/.85;t.cyc=2*(t.tl+DWELL);t.xs=[];t.seg=[];return}
-    // the stops, in this train's own travel coordinate (0..1 along its direction), head a half-train past each station so the middle of the train sits at the platform
     var half=t.cars*(CARL+CARGAP)/2/t.len,xs=[];STAT.forEach(function(st){if(st.c===t.c)xs.push((((t.dir>0?st.s:1-st.s)+half)%1+1)%1)});xs.sort(function(a,b){return a-b});t.xs=xs;
     t.seg=xs.map(function(x,i){var d=((xs[(i+1)%xs.length]-x)%1+1)%1||1;return {dx:d,tt:d*t.len/(Math.abs(t.sp)||1)/.85}});t.cyc=0;t.seg.forEach(function(g3){t.cyc+=DWELL+g3.tt})});
-  function trainX(tr,t){ // where the train's head is, in its travel coordinate, with stops
+  function trainX(tr,t){
     if(!tr.xs.length)return ((tr.off+t*Math.abs(tr.sp)/tr.len)%1+1)%1;
     var tt=(((t+tr.off*tr.cyc)%tr.cyc)+tr.cyc)%tr.cyc;
     for(var i=0;i<tr.xs.length;i++){var sg=tr.seg[i],tot=DWELL+sg.tt;
@@ -369,35 +443,43 @@
       tt-=tot}
     return tr.xs[0]}
   var carBodyM=new T.MeshBasicMaterial({fog:true}),carWinM=new T.MeshBasicMaterial({fog:true}),carStripeM=new T.MeshBasicMaterial({fog:true});
-  function cabGeo(){var g=new T.BoxGeometry(2.5,2.7,CARL,2,2,6),pa=g.attributes.position,Z0=CARL/2-1.5;
-    for(var i=0;i<pa.count;i++){var z=pa.getZ(i);if(z>Z0){var k=(z-Z0)/1.5;k*=k;pa.setX(i,pa.getX(i)*(1-.5*k));if(pa.getY(i)>0)pa.setY(i,pa.getY(i)-.95*k)}}return g}
-  var carMid=new T.InstancedMesh(new T.BoxGeometry(2.5,2.7,CARL),carBodyM,Math.max(1,nMid)),carCab=new T.InstancedMesh(cabGeo(),carBodyM,trains.length*2),
-      carWin=new T.InstancedMesh(new T.BoxGeometry(2.62,.85,CARL-2.4),carWinM,nCars),carStripe=new T.InstancedMesh(new T.BoxGeometry(2.58,.32,CARL-1.6),carStripeM,nCars);
-  carMid.frustumCulled=carCab.frustumCulled=carWin.frustumCulled=carStripe.frustumCulled=false;scene.add(carMid,carCab,carWin,carStripe);
-  var headGlowM=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xfff0c0,opacity:.9}),headGlows=trains.map(function(){var sp=new T.Sprite(headGlowM);sp.scale.set(15,15,1);scene.add(sp);return sp});
-  var tailGlowM=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xff3a2a,opacity:.8}),tailGlows=trains.map(function(){var sp=new T.Sprite(tailGlowM);sp.scale.set(5,5,1);scene.add(sp);return sp});
+  function cabGeo(){var g=new T.BoxGeometry(2.6,2.7,CARL,2,2,6),pa=g.attributes.position,Z0=CARL/2-1.8;
+    for(var i=0;i<pa.count;i++){var z=pa.getZ(i);if(z>Z0){var k=(z-Z0)/1.8;k*=k;pa.setX(i,pa.getX(i)*(1-.52*k));if(pa.getY(i)>0)pa.setY(i,pa.getY(i)-1.05*k)}}return g}
+  var carMid=new T.InstancedMesh(new T.BoxGeometry(2.6,2.7,CARL),carBodyM,Math.max(1,nMid)),carCab=new T.InstancedMesh(cabGeo(),carBodyM,trains.length*2),
+      carWin=new T.InstancedMesh(new T.BoxGeometry(2.72,.88,CARL-2.1),carWinM,nCars),carStripe=new T.InstancedMesh(new T.BoxGeometry(2.68,.34,CARL-1.2),carStripeM,nCars),
+      trailInst=new T.InstancedMesh(new T.BoxGeometry(1.6,.22,5.6),trailM,trains.length*TRAIL_N);
+  carMid.frustumCulled=carCab.frustumCulled=carWin.frustumCulled=carStripe.frustumCulled=trailInst.frustumCulled=false;
+  scene.add(carMid,carCab,carWin,carStripe,trailInst);
+  var headGlowM=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xfff0c0,opacity:.9}),headGlows=trains.map(function(){var sp=new T.Sprite(headGlowM);sp.scale.set(16,16,1);scene.add(sp);return sp});
+  var tailGlowM=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xff3a2a,opacity:.8}),tailGlows=trains.map(function(){var sp=new T.Sprite(tailGlowM);sp.scale.set(6,6,1);scene.add(sp);return sp});
   var trD=new T.Object3D(),trP=new T.Vector3(),trT=new T.Vector3(),trTarget=new T.Vector3(),trUp=new T.Vector3(0,.3,0),heroS=0,heroOn=false;
-  var tK=0,tM=0;(function(){var kp=A0(kU[0],kU[1],58),mp=A0(mU[0],mU[1],58),bk=1e9,bm=1e9,q=new T.Vector3();for(var i=0;i<400;i++){skyCurve.getPointAt(i/400,q);var dk=Math.hypot(q.x-kp.x,q.z-kp.z),dm=Math.hypot(q.x-mp.x,q.z-mp.z);if(dk<bk){bk=dk;tK=i/400}if(dm<bm){bm=dm;tM=i/400}}})();
-  function setCar(tr,c,p,tg,flip){ // one car: body (a mid car or a nose cab), window strip and stripe, all on the same pose
-    trD.position.copy(p);trTarget.copy(p);if(flip)trTarget.sub(tg);else trTarget.add(tg);trD.lookAt(trTarget);trD.updateMatrix();
+  var tK=0,tM=0;(function(){var kp=A0(kU[0],kU[1],62),mp=A0(mU[0],mU[1],70),bk=1e9,bm=1e9,q=new T.Vector3();for(var i=0;i<400;i++){skyCurve.getPointAt(i/400,q);var dk=Math.hypot(q.x-kp.x,q.z-kp.z),dm=Math.hypot(q.x-mp.x,q.z-mp.z);if(dk<bk){bk=dk;tK=i/400}if(dm<bm){bm=dm;tM=i/400}}})();
+  function setCar(tr,c,p,tg,flip){
+    trD.position.copy(p);trD.scale.set(1,1,1);trTarget.copy(p);if(flip)trTarget.sub(tg);else trTarget.add(tg);trD.lookAt(trTarget);trD.updateMatrix();
     if(c===0)carCab.setMatrixAt(tr.k0,trD.matrix);else if(c===tr.cars-1)carCab.setMatrixAt(tr.k0+1,trD.matrix);else carMid.setMatrixAt(tr.m0+c-1,trD.matrix);
-    trD.position.y+=.35;trD.updateMatrix();carWin.setMatrixAt(tr.i0+c,trD.matrix);
-    trD.position.y-=1.05;trD.updateMatrix();carStripe.setMatrixAt(tr.i0+c,trD.matrix)}
+    trD.position.y+=.36;trD.updateMatrix();carWin.setMatrixAt(tr.i0+c,trD.matrix);
+    trD.position.y-=1.08;trD.updateMatrix();carStripe.setMatrixAt(tr.i0+c,trD.matrix)}
+  function setTrail(idx,p,tg,scale){
+    trD.position.copy(p);trD.position.y-=.32;trD.scale.set(scale,scale,scale);trTarget.copy(trD.position).add(tg);trD.lookAt(trTarget);trD.updateMatrix();
+    trailInst.setMatrixAt(idx,trD.matrix)}
   function railUpdate(time,still){
     var t=still?0:time*.001;
     for(var k=0;k<trains.length;k++){var tr=trains[k];
-      /* no hero train any more (owner, 22 Nov): the chase camera still follows heroS along the empty sky rail */
-      if(tr.pp){ // the shuttle: up the helix, wait, back down, wait (centre of the train at c, front car first)
-        var tt=(((t+tr.off*tr.cyc)%tr.cyc)+tr.cyc)%tr.cyc,cc,dd=1,ez=function(f){return f*f*f*(f*(f*6-15)+10)},st2=(CARL+CARGAP)/tr.len;
-        if(tt<DWELL)cc=tr.hh;else{tt-=DWELL;if(tt<tr.tl)cc=tr.hh+tr.D*ez(tt/tr.tl);else{tt-=tr.tl;dd=-1;if(tt<DWELL)cc=1-tr.hh;else{tt-=DWELL;cc=1-tr.hh-tr.D*ez(Math.min(1,tt/tr.tl))}}}
+      if(tr.pp){
+        var tt=(((t+tr.off*tr.cyc)%tr.cyc)+tr.cyc)%tr.cyc,cc,dd=1,ez=function(f){return f*f*f*(f*(f*6-15)+10)},st2=(CARL+CARGAP)/tr.len,moving=false;
+        if(tt<DWELL)cc=tr.hh;else{tt-=DWELL;if(tt<tr.tl){cc=tr.hh+tr.D*ez(tt/tr.tl);moving=true}else{tt-=tr.tl;dd=-1;if(tt<DWELL)cc=1-tr.hh;else{tt-=DWELL;cc=1-tr.hh-tr.D*ez(Math.min(1,tt/tr.tl));moving=true}}}
         for(var c2=0;c2<tr.cars;c2++){var uu=Math.min(1,Math.max(0,cc+dd*((tr.cars-1)/2-c2)*st2));tr.c.getPointAt(uu,trP);tr.c.getTangentAt(uu,trT);if(dd<0)trT.negate();setCar(tr,c2,trP,trT,c2===tr.cars-1)}
         var uf=Math.min(1,Math.max(0,cc+dd*(tr.cars-1)/2*st2));tr.c.getPointAt(uf,trP);tr.c.getTangentAt(uf,trT);if(dd<0)trT.negate();headGlows[k].visible=true;headGlows[k].position.copy(trP).addScaledVector(trT,CARL*.55).add(trUp);
-        var ub=Math.min(1,Math.max(0,cc-dd*(tr.cars-1)/2*st2));tr.c.getPointAt(ub,trP);tr.c.getTangentAt(ub,trT);if(dd<0)trT.negate();tailGlows[k].visible=true;tailGlows[k].position.copy(trP).addScaledVector(trT,-CARL*.55).add(trUp);continue}
+        var ub=Math.min(1,Math.max(0,cc-dd*(tr.cars-1)/2*st2));tr.c.getPointAt(ub,trP);tr.c.getTangentAt(ub,trT);if(dd<0)trT.negate();tailGlows[k].visible=true;tailGlows[k].position.copy(trP).addScaledVector(trT,-CARL*.55).add(trUp);
+        for(var q2=0;q2<TRAIL_N;q2++){var tu2=Math.min(1,Math.max(0,ub-dd*(q2+1)*5.4/tr.len));tr.c.getPointAt(tu2,trP);tr.c.getTangentAt(tu2,trT);setTrail(tr.t0+q2,trP,trT,moving?Math.max(.08,1-q2/TRAIL_N):0)}
+        continue}
       var x=tr.hero?heroS:trainX(tr,t),dir=tr.dir,step=(CARL+CARGAP)/tr.len;
       for(var c=0;c<tr.cars;c++){var xc=(((x-c*step)%1)+1)%1,u=dir>0?xc:(1-xc)%1;tr.c.getPointAt(u,trP);tr.c.getTangentAt(u,trT);if(dir<0)trT.negate();setCar(tr,c,trP,trT,c===tr.cars-1)}
       var uh=dir>0?x%1:(1-x)%1;tr.c.getPointAt(uh,trP);tr.c.getTangentAt(uh,trT);if(dir<0)trT.negate();headGlows[k].visible=true;headGlows[k].position.copy(trP).addScaledVector(trT,CARL*.55).add(trUp);
-      var xt=(((x-(tr.cars-1)*step)%1)+1)%1,ut=dir>0?xt:(1-xt)%1;tr.c.getPointAt(ut,trP);tr.c.getTangentAt(ut,trT);if(dir<0)trT.negate();tailGlows[k].visible=true;tailGlows[k].position.copy(trP).addScaledVector(trT,-CARL*.55).add(trUp)}
-    carMid.instanceMatrix.needsUpdate=true;carCab.instanceMatrix.needsUpdate=true;carWin.instanceMatrix.needsUpdate=true;carStripe.instanceMatrix.needsUpdate=true}
+      var xt=(((x-(tr.cars-1)*step)%1)+1)%1,ut=dir>0?xt:(1-xt)%1;tr.c.getPointAt(ut,trP);tr.c.getTangentAt(ut,trT);if(dir<0)trT.negate();tailGlows[k].visible=true;tailGlows[k].position.copy(trP).addScaledVector(trT,-CARL*.55).add(trUp);
+      var tStep=5.8/tr.len;
+      for(var q=0;q<TRAIL_N;q++){var tx2=(((xt-(q+1)*tStep)%1)+1)%1,tu=dir>0?tx2:(1-tx2)%1;tr.c.getPointAt(tu,trP);tr.c.getTangentAt(tu,trT);if(dir<0)trT.negate();setTrail(tr.t0+q,trP,trT,Math.max(.12,1-q/TRAIL_N))}}
+    carMid.instanceMatrix.needsUpdate=true;carCab.instanceMatrix.needsUpdate=true;carWin.instanceMatrix.needsUpdate=true;carStripe.instanceMatrix.needsUpdate=true;trailInst.instanceMatrix.needsUpdate=true}
   // Aircraft warning lights: a red double flash on the tip of every landmark (and on both Petronas spires), instead of lit rooms up there.
   var BEAC=(function(){var a=lp('klcc',11,-10),b=lp('klcc',-11,10),m=crown('mer'),e=crown('ex'),k=crown('kl');return [[a[0],134,a[1]],[b[0],134,b[1]],[m[0],193,m[1]],[e[0],136,e[1]],[k[0],130,k[1]]]})(); // both Petronas spires, then the tips of Merdeka 118, The Exchange 106 and Menara KL
   var beacons=BEAC.map(function(b,i){var m=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xff3a2a,fog:false,opacity:0}),sp=new T.Sprite(m);sp.scale.set(i===2?22:14,i===2?22:14,1);sp.position.set(b[0],b[1],b[2]);sp.renderOrder=6;g.add(sp);return{m:m,ph:i*.37}});
@@ -446,14 +528,15 @@
     sky1:['#fcfeff','#3a60a2','#050a1a'],skyM:['#e4f0fa','#eea25f','#141f52'],sky3:['#e4f0fa','#ffd79a','#6a4030'],fog:['#e4f0fa','#f1b27c','#3f2f41'],
     sunC:['#ffffff','#ffd9a4','#b0b4ff'],litC:['#f8fcff','#fff1d2','#f8fcff'],sunGlow:['#ffe6b0','#ffae55','#ffae55'],sunDisc:['#fffdf2','#fffbe8','#fffbe8'],
     star:['#5c92dc','#ffffff','#ffffff'],moon:['#5c92dc','#eac9aa','#c4cfee'],moon2:['#8ab2e6','#e2c6ac','#cfd8f2'],halo:['#ffffff','#ffd6a0','#9dbbff'],moonRing:['#5c92dc','#e9c9a4','#bcd2ff'],
-    rail:['#2aa6e8','#ffcf8a','#7fd3ff'],pillar:['#5c92dc','#8f80b8','#10183a'],stPlat:['#5c92dc','#9a8cbd','#10183a'],stPost:['#5c92dc','#9a8cbd','#7fd3ff'],stCan:['#ffffff','#ffe9c8','#7fd3ff'],
+    rail:['#2aa6e8','#ffcf8a','#7fd3ff'],deck:['#73a0df','#7d6fa6','#142147'],portal:['#4c82d1','#c29f90','#3d79e0'],trail:['#2aa6e8','#ffbe6b','#ffd480'],
+    pillar:['#5c92dc','#8f80b8','#10183a'],stPlat:['#5c92dc','#9a8cbd','#10183a'],stPost:['#5c92dc','#9a8cbd','#7fd3ff'],stCan:['#ffffff','#ffe9c8','#7fd3ff'],
     carBody:['#f6fbff','#fff0da','#1b3d73'],carWin:['#0b2a6b','#5a4a88','#fff1b8'],carStripe:['#1559c9','#e0842a','#7fd3ff'],headGlow:['#ffffff','#ffe2a8','#fff0c0'],
     gyro:['#2aa6e8','#ffc27a','#7fd3ff'],pulse:['#2aa6e8','#ffcf8a','#7fd3ff'],
     stop:[1,.6,.58],fogN:[620,500,520],fogF:[1700,1650,1500],nightU:[0,.24,1],gold:[0,1,0],wrap:[0,.2,0],glint:[0,.5,0],
     light:[[-.42,.74,.52],[.95,.2,-.3],[-.42,.74,.52]],litMul:[[1,1,1],[1.08,1,.9],[3,3,1.9]],midMul:[[1,1,1],[1,.97,1.04],[.95,.95,.95]],litMix:[.42,.5,0],shadeMul:[[.46,.62,.95],[.62,.55,.78],[.45,.5,.7]],hazeK:[.5,.92,.55],sunAmt:[.5,1,1],
     towEm:[.28,.5,1],glassEm:[.15,.45,.9],gmEm:[.04,.2,0],amb:[.5,.5,.45],
     starO:[.38,0,1],moonO:[.85,.3,.38],ringO:[.55,.4,.5],gyroO:[.75,.8,.85],sunO:[0,1,0],lines:[0,0,1],beacon:[.45,.7,1],
-    railO2:[.3,.3,.25],stCanO:[.65,.5,.32],headO:[.5,.7,.95],tailO:[.35,.6,.9],beamO:[.6,.65,.7],haloO:[.8,.85,.9],polyO:[.7,.75,.8],linkO:[.6,.6,.5]};
+    railO2:[.3,.3,.25],trailO:[.22,.48,.78],stCanO:[.65,.5,.32],headO:[.5,.7,.95],tailO:[.35,.6,.9],beamO:[.6,.65,.7],haloO:[.8,.85,.9],polyO:[.7,.75,.8],linkO:[.6,.6,.5]};
   var SET=[{},{},{}],tk,ti,tv0;
   for(tk in TB)for(ti=0;ti<3;ti++){tv0=TB[tk][ti];SET[ti][tk]=typeof tv0==='string'?lab(tv0):tv0}
   var CC={},TA,TBb,TF=0;
@@ -466,7 +549,7 @@
   scene.fog=new T.Fog(0xe4f0fa,620,1700);
   var fogN0=620,fogF0=1700; // base fog (applyTime sets them); the finale pushes it back
   function setAdd(add){ // the additive glow materials: normal blending by day and golden hour, additive from t 1.5
-    if(add===addNow)return;addNow=add;var b=add?T.AdditiveBlending:T.NormalBlending,L=[railM,railM2,stCanM,gyroM,beamM,haloM,radarM,polyM];
+    if(add===addNow)return;addNow=add;var b=add?T.AdditiveBlending:T.NormalBlending,L=[railM,railM2,trailM,stCanM,gyroM,beamM,haloM,radarM,polyM];
     for(var i=0;i<L.length;i++)L[i].blending=b;beaconAdd=add}
   function hex3(c){return '#'+c.getHexString()}
   var skyDiv=null;function skyEl(){if(!skyDiv){skyDiv=document.getElementById('skybg');if(!skyDiv){skyDiv=document.createElement('div');skyDiv.id='skybg';skyDiv.setAttribute('aria-hidden','true');document.body.insertBefore(skyDiv,document.body.firstChild)}}return skyDiv} // the sky gradient lives on its own fixed layer (scene.css #skybg): a fixed body background repaints the whole page on every scroll
@@ -495,7 +578,7 @@
     beaconK=nn('beacon');
     // rail, stations, trains, the light layer
     setAdd(add);
-    railM.color.copy(cmix('rail'));railM2.color.copy(CC.rail);railM2.opacity=nn('railO2');pillarM.color.copy(cmix('pillar'));stLampM.color.copy(CC.rail);stPlatM.color.copy(cmix('stPlat'));stPostM.color.copy(cmix('stPost'));
+    railM.color.copy(cmix('rail'));railM2.color.copy(CC.rail);railM2.opacity=nn('railO2');deckM.color.copy(cmix('deck'));portalM.color.copy(cmix('portal'));trailM.color.copy(cmix('trail'));trailM.opacity=nn('trailO');pillarM.color.copy(cmix('pillar'));stLampM.color.copy(CC.rail);stPlatM.color.copy(cmix('stPlat'));stPostM.color.copy(cmix('stPost'));
     stCanM.color.copy(cmix('stCan'));stCanM.opacity=nn('stCanO');carBodyM.color.copy(cmix('carBody'));carWinM.color.copy(cmix('carWin'));carStripeM.color.copy(cmix('carStripe'));
     headGlowM.color.copy(cmix('headGlow'));headGlowM.opacity=nn('headO');tailGlowM.opacity=nn('tailO');
     gyroM.color.copy(cmix('gyro'));gyroM.opacity=nn('gyroO');
@@ -534,22 +617,47 @@
     var st=null;try{st=localStorage.getItem(K)}catch(e){}
     set(st==='1',false);b.addEventListener('click',function(){set(!rt.classList.contains('hud-off'),true)});host.appendChild(b)})();
   var again=document.getElementById('fly-again'),DBGCR=/[?&]dbg/.test(location.search);
-  var freeBtn=null,freeHint=null,freeTime=null,freeOn=false,freeDrag=false,freeLx=0,freeLy=0,fKeys={}; // fKeys: the movement keys held down in free fly (WASD, Q/E, arrows, Shift)
-  var freeState={a:48*Math.PI/180,ta:48*Math.PI/180,y:112,ty:112,r:280,tr:280,cx:0,cz:-40,cy:72};
+  var freeBtn=null,freeHint=null,freeTime=null,freeWp=null,freeOn=false,freeDrag=false,freeLx=0,freeLy=0,fKeys={}; // fKeys: the movement keys held down in free fly (WASD, Q/E, arrows, Shift)
+  var freeState={a:48*Math.PI/180,ta:48*Math.PI/180,y:112,ty:112,r:280,tr:280,cx:0,tcx:0,cz:-40,tcz:-40,cy:72,tcy:72};
   function setFree(v){
     v=!!v;if(v===freeOn)return;freeOn=v;root.classList.toggle('free-fly',v);
     if(freeBtn){freeBtn.setAttribute('aria-pressed',v?'true':'false');var b=freeBtn.querySelector('b');if(b)b.textContent=v?'Resume scroll':'Take control · Free fly'}
-    if(freeHint)freeHint.classList.toggle('on',v);if(freeTime)freeTime.classList.toggle('on',v);if(!v)fKeys={};
+    if(freeHint)freeHint.classList.toggle('on',v);if(freeTime)freeTime.classList.toggle('on',v);if(freeWp)freeWp.classList.toggle('on',v);if(!v)fKeys={};
     if(v&&!ONLY&&scrollY>pinEnd()-2){var se=document.documentElement.style,sb=se.scrollBehavior;se.scrollBehavior='auto';scrollTo(0,pinEnd()-Math.round(.35*BUFV*innerHeight));se.scrollBehavior=sb} // back onto the pinned stage before the page locks
     if(v){
       // seed free-fly orbit from the current camera so there is zero jump
       var dx=cam.position.x-GC[0],dz=cam.position.z-GC[1];
-      freeState.cx=GC[0];freeState.cz=GC[1];freeState.cy=72;
+      freeState.cx=freeState.tcx=GC[0];freeState.cz=freeState.tcz=GC[1];freeState.cy=freeState.tcy=72;
       freeState.a=freeState.ta=Math.atan2(dz,dx);
       freeState.r=freeState.tr=clamp(Math.hypot(dx,dz),110,480);
       freeState.y=freeState.ty=clamp(cam.position.y,18,260);
       need=true;
     } else { freeDrag=false; fInit=true; need=true; }
+  }
+  function capturePostcard(btn){
+    try{
+      renderer.render(scene,cam);
+      var src=renderer.domElement,cw=src.width,ch=src.height;
+      var out=document.createElement('canvas');out.width=cw;out.height=ch;
+      var ctx=out.getContext('2d');
+      // Paint sky gradient backdrop matching current SceneTime
+      var gr=ctx.createLinearGradient(0,0,0,ch);
+      gr.addColorStop(0,hex3(cc('sky1')));gr.addColorStop(TU.uStop.value,hex3(cc('skyM')));gr.addColorStop(1,hex3(cc('sky3')));
+      ctx.fillStyle=gr;ctx.fillRect(0,0,cw,ch);
+      ctx.drawImage(src,0,0,cw,ch);
+      // Subtle editorial postcard stamp bar at bottom
+      var pad=Math.round(Math.min(cw,ch)*.032),fh=Math.round(Math.max(36,ch*.055));
+      var g2=ctx.createLinearGradient(0,ch-fh*2.4,0,ch);g2.addColorStop(0,'rgba(5,9,20,0)');g2.addColorStop(1,'rgba(5,9,20,.65)');
+      ctx.fillStyle=g2;ctx.fillRect(0,ch-fh*2.4,cw,fh*2.4);
+      var alt=Math.max(0,Math.round(cam.position.y*3.4)),tmName={day:'DAY',golden:'GOLDEN HOUR',night:'NIGHT'}[ST.nearest()]||'LIVE KL';
+      ctx.fillStyle='#eaf2ff';ctx.font='700 '+Math.round(fh*.44)+'px "JetBrains Mono",ui-monospace,monospace';
+      ctx.textBaseline='bottom';ctx.textAlign='left';
+      ctx.fillText('\\7YMERA  ·  KUALA LUMPUR  ·  '+tmName,pad,ch-pad*.75);
+      ctx.textAlign='right';ctx.fillStyle='rgba(234,242,255,.82)';
+      ctx.fillText('ALT '+alt+' M  ·  3.1579° N 101.7116° E',cw-pad,ch-pad*.75);
+      var a=document.createElement('a');a.download='7ymera-kl-'+ST.nearest()+'.png';a.href=out.toDataURL('image/png');a.click();
+      if(btn){var sp=btn.querySelector('span'),old=sp?sp.textContent:'Postcard';if(sp)sp.textContent='Saved!';setTimeout(function(){if(sp)sp.textContent=old},1800)}
+    }catch(e){if(window.console)console.warn('Postcard capture failed',e)}
   }
   if(again){(function(){var lab=again.querySelector('b'),NX={day:'golden',golden:'night',night:'day'},TXT={golden:'Fly it again at golden hour',night:'Fly it again at night',day:'Fly it again by day'};
     function next(){return NX[ST.nearest()]}
@@ -573,6 +681,29 @@
       function ftSync(){var n=ST.nearest(),bs=freeTime.querySelectorAll('button');for(var q=0;q<bs.length;q++)bs[q].setAttribute('aria-pressed',bs[q].dataset.m===n?'true':'false')}
       document.addEventListener('scenetime',ftSync);ftSync();
       parent.insertBefore(freeTime,freeHint.nextSibling);
+      // Waypoints & Postcard capture bar: one-tap iconic KL vantage points + PNG export
+      freeWp=document.createElement('div');freeWp.className='fly-free-wp';freeWp.setAttribute('role','group');freeWp.setAttribute('aria-label','Camera waypoints and postcard');
+      var WPS=[
+        {id:'sky',n:'Skyline',cx:function(){return GC[0]},cz:function(){return GC[1]},cy:78,a:58,r:290,y:125},
+        {id:'klcc',n:'Skybridge',cx:function(){return 0},cz:function(){return 0},cy:58,a:48,r:108,y:66},
+        {id:'mer',n:'Merdeka 118',cx:function(){return LAY.mer[0]},cz:function(){return LAY.mer[1]},cy:125,a:185,r:165,y:148},
+        {id:'kl',n:'Menara KL',cx:function(){return LAY.kl[0]},cz:function(){return LAY.kl[1]},cy:92,a:210,r:128,y:102},
+        {id:'ex',n:'Exchange 106',cx:function(){return LAY.ex[0]},cz:function(){return LAY.ex[1]},cy:76,a:300,r:132,y:96}
+      ];
+      WPS.forEach(function(wp){
+        var b=document.createElement('button');b.type='button';b.textContent=wp.n;
+        b.addEventListener('click',function(){
+          freeState.tcx=wp.cx();freeState.tcz=wp.cz();freeState.tcy=wp.cy;
+          freeState.ta=wp.a*Math.PI/180;freeState.tr=wp.r;freeState.ty=wp.y;need=true;
+          [].forEach.call(freeWp.querySelectorAll('button[data-wp]'),function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});
+        });
+        b.dataset.wp=wp.id;freeWp.appendChild(b);
+      });
+      var snapBtn=document.createElement('button');snapBtn.type='button';snapBtn.className='ff-snap';
+      snapBtn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Postcard</span>';
+      snapBtn.addEventListener('click',function(){capturePostcard(snapBtn)});
+      freeWp.appendChild(snapBtn);
+      parent.insertBefore(freeWp,freeTime.nextSibling);
       window.addEventListener('pointerdown',function(e){if(!freeOn)return;if(e.target&&e.target.closest&&e.target.closest('button,a,.tod'))return;freeDrag=true;freeLx=e.clientX;freeLy=e.clientY});
       window.addEventListener('pointermove',function(e){if(!freeOn||!freeDrag)return;var dx=e.clientX-freeLx,dy=e.clientY-freeLy;freeLx=e.clientX;freeLy=e.clientY;freeState.ta-=dx*.0055;freeState.ty=clamp(freeState.ty+dy*.45,12,420);need=true},{passive:true});
       window.addEventListener('pointerup',function(){freeDrag=false});
@@ -956,11 +1087,14 @@
       // WASD: move the point the camera circles (and the camera with it) along the ground, relative to where it faces; Q/E down and up; arrows turn and tilt; Shift is faster
       var fsp=(fKeys.Shift?260:120)*Math.min(dtF,.05),fwx=freeState.cx-cam.position.x,fwz=freeState.cz-cam.position.z,fl=Math.hypot(fwx,fwz)||1;fwx/=fl;fwz/=fl;
       var mf=(fKeys.w?1:0)-(fKeys.s?1:0)+(fKeys.ArrowUp&&false?1:0),ms=(fKeys.d?1:0)-(fKeys.a?1:0);
-      if(mf||ms){var nx=freeState.cx+(fwx*mf-fwz*ms)*fsp,nz=freeState.cz+(fwz*mf+fwx*ms)*fsp,rr=Math.hypot(nx-GC[0],nz-GC[1]);if(rr>620){nx=GC[0]+(nx-GC[0])*620/rr;nz=GC[1]+(nz-GC[1])*620/rr}freeState.cx=nx;freeState.cz=nz}
-      if(fKeys.q||fKeys.e){var dv=((fKeys.e?1:0)-(fKeys.q?1:0))*(fKeys.Shift?160:80)*Math.min(dtF,.05);freeState.ty=clamp(freeState.ty+dv,12,420);freeState.cy=clamp(freeState.cy+dv*.6,0,300)}
+      if(mf||ms){var nx=freeState.tcx+(fwx*mf-fwz*ms)*fsp,nz=freeState.tcz+(fwz*mf+fwx*ms)*fsp,rr=Math.hypot(nx-GC[0],nz-GC[1]);if(rr>620){nx=GC[0]+(nx-GC[0])*620/rr;nz=GC[1]+(nz-GC[1])*620/rr}freeState.tcx=freeState.cx=nx;freeState.tcz=freeState.cz=nz}
+      if(fKeys.q||fKeys.e){var dv=((fKeys.e?1:0)-(fKeys.q?1:0))*(fKeys.Shift?160:80)*Math.min(dtF,.05);freeState.ty=clamp(freeState.ty+dv,12,420);freeState.tcy=freeState.cy=clamp(freeState.tcy+dv*.6,0,300)}
       if(fKeys.ArrowLeft||fKeys.ArrowRight)freeState.ta+=((fKeys.ArrowLeft?1:0)-(fKeys.ArrowRight?1:0))*1.4*Math.min(dtF,.05);
       if(fKeys.ArrowUp||fKeys.ArrowDown)freeState.tr=clamp(freeState.tr+((fKeys.ArrowDown?1:0)-(fKeys.ArrowUp?1:0))*220*Math.min(dtF,.05),60,520);
-      var fk=reduce?1:1-Math.exp(-dtF*7);
+      var fk=reduce?1:1-Math.exp(-dtF*6.5);
+      freeState.cx+=(freeState.tcx-freeState.cx)*fk;
+      freeState.cz+=(freeState.tcz-freeState.cz)*fk;
+      freeState.cy+=(freeState.tcy-freeState.cy)*fk;
       freeState.a+=(freeState.ta-freeState.a)*fk;
       freeState.y+=(freeState.ty-freeState.y)*fk;
       freeState.r+=(freeState.tr-freeState.r)*fk;

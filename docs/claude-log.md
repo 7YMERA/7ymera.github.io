@@ -13,9 +13,7 @@ where the last chat stopped without re-reading everything.
 
 ## Open items (keep this list current)
 
-- **Check on a real GPU / iPhone (owner):** the glass halo fix (premultiplied alpha; if a big ring still shows at rest, it's the scroll aperture from 3.1), smoothness of the gate → chess grid → glass → descent shot, the descent zoom curve, the reverb and gate sounds, touch drag on the satellite, dark mode of the phone HUD.
-- **Tablet (768 px) flight HUD** still has the old overlaps (picker vs compass, horizon gauge vs caption); the phone layout stops at 700 px.
-- **A "clientWidth of null" page error** shows in some Playwright runs, outside the HUD code; not traced.
+- **Check on a real GPU / iPhone (owner):** the glass halo fix (premultiplied alpha; if a big ring still shows at rest, it's the scroll aperture from 3.1), smoothness of the gate → chess grid → glass → descent shot, the descent zoom curve, the reverb and gate sounds, touch drag on the satellite, dark mode of the phone HUD, and the reworked twin-rail KL viaduct + portal arches + train light trails.
 - **Gold outline** sits ~15 px off the coast at the closest descent zoom; the gate's 2D stars swap for 3D stars as the halves slide away.
 - **Card hover shadow** (`.card`, site.css) still transitions box-shadow (overflow:hidden + both pseudo-elements in use).
 - **Unused ports kept on purpose** (owner, 22 Nov): `curved-reel.js`, `glance.js` (not loaded, no cost); `glass.js` is used by lab/glass.html.
@@ -28,6 +26,14 @@ where the last chat stopped without re-reading everything.
   Only the scrubbed `assets/db/jom-al-quran.sqlite` is published. Never commit the raw data.
 
 ---
+
+## 2026-11-23 · Epic KL viaduct railway, Free-Fly waypoints & postcard, Score Lab, Inspect Spec & 3 doors
+
+- **3D Railway rework (`assets/scene.js`):** replaced the thin 5-sided rail tubes and boxy stations with an architectural twin-rail KL viaduct (box-girder deck spine, dual parallel glowing maglev rails, under-deck soffit glow), sweeping multi-elevation `skyCurve`, instanced cross-ties, instanced overhead portal arches/gantries framing the drone chase, sculpted tapered viaduct pylons grounding both the ring and sky lines, ribbed vaulted stations with glowing platform safety edges, and kinetic slipstream light trails behind every train. Full Day / Golden / Night `SceneTime` harmony (no magenta/pink).
+- **Free-Fly waypoints & Postcard (`assets/scene.js`, `assets/scene.css`):** smooth `tcx/tcz/tcy` camera glide presets (`Skyline`, `Skybridge`, `Merdeka 118`, `Menara KL`, `Exchange 106`) plus a `Postcard` button exporting a stamped PNG (`\7YMERA · KUALA LUMPUR · [TIME] · ALT`).
+- **Score Lab (`/lab/#scorelab`, `assets/play/scorelab.js`, `assets/sfx.js`, `assets/play/play.js`, `play.css`):** exposed `SFX.analyser()`, `SFX.stems()`, `SFX.setStem()`, and `SFX.setMood()` to power a live Web Audio stem mixer (Pad, Bass, FM Keys, Glass Lead, Swell/Air, Drums), Day/Golden/Night harmony switcher, and Canvas2D spectrum + oscilloscope cabinet in `/lab/`.
+- **Front page (`index.html`, `project-deck.js/.css`, `home.css`, `orbit.js`):** added `Spec` BA case-file drawer (`Problem / BA Spec / Shipped Outcome` + write-up link) to all 6 project cards; removed per-frame `filter: blur()` from `project-deck.js` (transform/opacity only); upgraded `#doors` to 3 doors (`Portfolio`, `Lab`, `Play`); fixed `orbit.js` `"clientWidth of null"` race on early resize.
+- **Polish:** added 701–960 px tablet HUD rules in `scene.css` (fixes picker/compass and horizon/caption overlaps); fixed `12 notes` → `13 notes` in `notes/index.html` and `portfolio/index.html`; updated `404.html` branding to `7YMERA` with Lab & Play waypoints. Key `20261123d`.
 
 ## 2026-11-21 → 23 · Session summary: 3.0 to now (one long chat)
 
