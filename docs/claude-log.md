@@ -27,6 +27,12 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-23 · Underground MRT Tunnel Network, Clean Station-Cleared Viaducts & TRX Camera Jerk Fix
+
+- **Underground MRT Corridor (`assets/scene.js`):** removed the lazy encircling outer oval (`outerCurve`) and the tangled diagonal `helixCurve` stabbing through KLCC station. Replaced them with a cross-city **Underground MRT Line (`mrtCurve`)** that dives below ground (`y = -12`) under Merdeka & KLCC through **sculpted glowing Underground Tunnel Portals (`buildPortals`)**, leaves a glowing subterranean X-ray conduit line visible from overhead (`mrtXray`), and surfaces at KL Sentral, TRX Underground, and Ampang Portal.
+- **Clean Viaduct Geometry (`assets/scene.js`):** lowered `skyCurve` to a sleek realistic urban viaduct altitude (`y = 30..38`), replaced blocky 4-sided diamond deck tubes with flat segmented instanced box-girder deck plates (`deckInst`), and added `nearStation()` clearance so piers and portal arches never stab through station platforms.
+- **TRX Camera Reversal Fix (`assets/scene.js`):** fixed the Merdeka → TRX forward-then-jerk-back bug in `buildKF()` by computing `e0Pt` first (`fR0 = Math.min(96 * fr, dist(C, E) * 0.46)`) and interpolating `fl1..fl3` strictly forward from Merdeka to `e0Pt`. Key `20261123o`.
+
 ## 2026-11-23 · Rework Lab Soundtrack ("The Grid · 118 BPM")
 
 - **Lab Score Overhaul (`assets/sfx.js`, `assets/intro-gate.js`):** replaced the discordant 136 BPM acid/glitch experiment with **The Grid · Lab Pulse (118 BPM)** — dark D-minor TRON: Legacy × Blade Runner 2049 analog sci-fi synth featuring a fat detuned dual-saw Moog rolling 16th bass arp (`tronPulse`) with an 8-bar breathing filter sweep, heavy cyberpunk half-time kick/clap groove, and a soaring heroic D-minor synth lead. Key `20261123n`.

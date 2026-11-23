@@ -341,24 +341,23 @@
     };
   })();
 
-  // ===== RAIL: expanded city-wide KL viaduct network (Inner Sky-Line, KLCC Ring, Helix Riser & Wide Outer Metro Loop) =====
-  // All paths use LAY/A0 with generous clearance (>14 units) from landmarks and blocks.
+  // ===== RAIL: Elevated Sky-Line + KLCC Concourse Ring + Underground MRT Subterranean Corridor =====
+  // Clean architectural viaducts with station-clearance piers (no stilts stabbing stations) and an underground MRT line diving through glowing tunnel portals.
   function UW0(x,z){return [.665*x+.747*z,-.747*x+.665*z]}
   function toward(c,d){var L=Math.hypot(c[0],c[1])||1;return [c[0]-c[0]/L*d,c[1]-c[1]/L*d]}
-  var kU=UW0(LAY.kl[0],LAY.kl[1]),mU=UW0(LAY.mer[0],LAY.mer[1]),eU=UW0(LAY.ex[0],LAY.ex[1]),kP=toward(kU,38),mP=toward(mU,72),eP=toward(eU,55);
-  var skyCurve=new T.CatmullRomCurve3([[41,0,88],[10,95,78],[kP[0],kP[1],62],[mP[0],mP[1],70],[eP[0],eP[1],54],[-20,-105,64],[40,-70,80]].map(function(p){return A0(p[0],p[1],p[2])}),true,'catmullrom',.5);
-  var ringPts=[];for(var rgi=0;rgi<16;rgi++){var rga=rgi/16*6.2832;ringPts.push(A0(Math.cos(rga)*52,Math.sin(rga)*52,24))}
-  var ringCurve=new T.CatmullRomCurve3(ringPts,true,'catmullrom',.5);
-  var hxPts=[];for(var hxi=0;hxi<=32;hxi++){var hxk=hxi/32,hxa=hxk*6.2832,hxr=52-11*hxk;hxPts.push(A0(Math.cos(hxa)*hxr,Math.sin(hxa)*hxr,24+64*hxk))}
-  var helixCurve=new T.CatmullRomCurve3(hxPts,false,'catmullrom',.5);
-  // Expanded Wide Outer KL Metro Loop: sweeps across the wider Kuala Lumpur basin around all four landmarks
-  var outPts=[],ocx=(LAY.klcc[0]+LAY.kl[0]+LAY.mer[0]+LAY.ex[0])/4,ocz=(LAY.klcc[1]+LAY.kl[1]+LAY.mer[1]+LAY.ex[1])/4;
-  for(var oi=0;oi<12;oi++){
-    var oa=oi/12*6.2832,or2=255+Math.sin(oa*2)*42,oy=42+Math.sin(oa*3+1.1)*18;
-    outPts.push(new T.Vector3(ocx+Math.cos(oa)*or2,oy,ocz+Math.sin(oa)*or2));
-  }
-  var outerCurve=new T.CatmullRomCurve3(outPts,true,'catmullrom',.5);
-  var skyLen=skyCurve.getLength(),ringLen=ringCurve.getLength(),helixLen=helixCurve.getLength(),outerLen=outerCurve.getLength();
+  var kU=UW0(LAY.kl[0],LAY.kl[1]),mU=UW0(LAY.mer[0],LAY.mer[1]),eU=UW0(LAY.ex[0],LAY.ex[1]),kP=toward(kU,40),mP=toward(mU,70),eP=toward(eU,56);
+  // Elevated Sky-Line at realistic urban viaduct altitude (y = 26..42)
+  var skyCurve=new T.CatmullRomCurve3([[44,0,36],[14,88,34],[kP[0],kP[1],30],[mP[0],mP[1],38],[eP[0],eP[1],32],[-24,-96,34],[42,-66,38]].map(function(p){return A0(p[0],p[1],p[2])}),true,'centripetal');
+  var ringPts=[];for(var rgi=0;rgi<16;rgi++){var rga=rgi/16*6.2832;ringPts.push(A0(Math.cos(rga)*52,Math.sin(rga)*52,18))}
+  var ringCurve=new T.CatmullRomCurve3(ringPts,true,'centripetal');
+  // Underground MRT Corridor: cross-city SW -> NE line that dives below ground (y = -10) under Merdeka & KLCC and surfaces briefly at Sentral, TRX & Ampang
+  var mrtRaw=[
+    [-250,-180,14], [-175,-120,10], [-120,-80,-10], [mP[0]-10,mP[1]+10,-12],
+    [eP[0]-22,eP[1]-18,12], [eP[0]+18,eP[1]+16,12], [22,-28,-10], [18,22,-12],
+    [95,95,-10], [155,148,10], [235,205,14]
+  ];
+  var mrtCurve=new T.CatmullRomCurve3(mrtRaw.map(function(p){return A0(p[0],p[1],p[2])}),false,'centripetal');
+  var skyLen=skyCurve.getLength(),ringLen=ringCurve.getLength(),mrtLen=mrtCurve.getLength();
   var tgtV=new T.Vector3(),chH=new T.Vector3(),chT=new T.Vector3(),chS=new T.Vector3(),chP=new T.Vector3(),chL=new T.Vector3();
 
   function offsetCurve(curve,segs,lat,dy,closed){
@@ -368,7 +367,13 @@
       side.crossVectors(tg,up).normalize();
       pts.push(new T.Vector3(p.x+side.x*lat,p.y+dy,p.z+side.z*lat));
     }
-    return new T.CatmullRomCurve3(pts,closed,'catmullrom',.5);
+    return new T.CatmullRomCurve3(pts,closed,'centripetal');
+  }
+  // Surface X-ray projection of the underground MRT line so overhead views show the glowing subterranean conduit pulsing beneath KL
+  function mrtXrayCurve(){
+    var pts=[],p=new T.Vector3();
+    for(var i=0;i<=80;i++){mrtCurve.getPointAt(i/80,p);pts.push(new T.Vector3(p.x,p.y<2?.55:p.y-.8,p.z))}
+    return new T.CatmullRomCurve3(pts,false,'centripetal');
   }
   var railM=new T.MeshBasicMaterial({transparent:true,opacity:.95,fog:true}),
       railM2=new T.MeshBasicMaterial({transparent:true,opacity:.32,fog:true,depthWrite:false}),
@@ -377,102 +382,133 @@
       trailM=new T.MeshBasicMaterial({transparent:true,opacity:.55,depthWrite:false,fog:true});
 
   function ts(n){return Math.max(24,Math.round(n*PERF.tubeMul))}
-  var skyDeck=new T.Mesh(new T.TubeGeometry(offsetCurve(skyCurve,76,0,-1.05,true),ts(220),1.05,4,true),deckM),
-      ringDeck=new T.Mesh(new T.TubeGeometry(offsetCurve(ringCurve,48,0,-1.05,true),ts(112),.95,4,true),deckM),
-      helixDeck=new T.Mesh(new T.TubeGeometry(offsetCurve(helixCurve,48,0,-1.05,false),ts(112),.9,4,false),deckM),
-      outerDeck=new T.Mesh(new T.TubeGeometry(offsetCurve(outerCurve,84,0,-1.05,true),ts(220),1.05,4,true),deckM);
-  var skyRailL=new T.Mesh(new T.TubeGeometry(offsetCurve(skyCurve,76,-1.25,-.25,true),ts(220),.24,3,true),railM),
-      skyRailR=new T.Mesh(new T.TubeGeometry(offsetCurve(skyCurve,76,1.25,-.25,true),ts(220),.24,3,true),railM),
-      ringRailL=new T.Mesh(new T.TubeGeometry(offsetCurve(ringCurve,48,-1.15,-.25,true),ts(110),.22,3,true),railM),
-      ringRailR=new T.Mesh(new T.TubeGeometry(offsetCurve(ringCurve,48,1.15,-.25,true),ts(110),.22,3,true),railM),
-      helixRailL=new T.Mesh(new T.TubeGeometry(offsetCurve(helixCurve,48,-1.1,-.25,false),ts(110),.22,3,false),railM),
-      helixRailR=new T.Mesh(new T.TubeGeometry(offsetCurve(helixCurve,48,1.1,-.25,false),ts(110),.22,3,false),railM),
-      outerRailL=new T.Mesh(new T.TubeGeometry(offsetCurve(outerCurve,84,-1.25,-.25,true),ts(200),.24,3,true),railM),
-      outerRailR=new T.Mesh(new T.TubeGeometry(offsetCurve(outerCurve,84,1.25,-.25,true),ts(200),.24,3,true),railM);
-  var skyGlow=new T.Mesh(new T.TubeGeometry(offsetCurve(skyCurve,60,0,-1.65,true),ts(160),1.35,3,true),railM2),
-      helixGlow=new T.Mesh(new T.TubeGeometry(offsetCurve(helixCurve,40,0,-1.55,false),ts(90),1.25,3,false),railM2);
-  scene.add(skyDeck,ringDeck,helixDeck,outerDeck,skyRailL,skyRailR,ringRailL,ringRailR,helixRailL,helixRailR,outerRailL,outerRailR,skyGlow,helixGlow);
+  var skyRailL=new T.Mesh(new T.TubeGeometry(offsetCurve(skyCurve,76,-1.15,-.15,true),ts(220),.22,4,true),railM),
+      skyRailR=new T.Mesh(new T.TubeGeometry(offsetCurve(skyCurve,76,1.15,-.15,true),ts(220),.22,4,true),railM),
+      ringRailL=new T.Mesh(new T.TubeGeometry(offsetCurve(ringCurve,48,-1.05,-.15,true),ts(110),.2,4,true),railM),
+      ringRailR=new T.Mesh(new T.TubeGeometry(offsetCurve(ringCurve,48,1.05,-.15,true),ts(110),.2,4,true),railM),
+      mrtRailL=new T.Mesh(new T.TubeGeometry(offsetCurve(mrtCurve,80,-1.15,-.15,false),ts(190),.22,4,false),railM),
+      mrtRailR=new T.Mesh(new T.TubeGeometry(offsetCurve(mrtCurve,80,1.15,-.15,false),ts(190),.22,4,false),railM);
+  var skyGlow=new T.Mesh(new T.TubeGeometry(offsetCurve(skyCurve,60,0,-1.1,true),ts(160),.95,4,true),railM2),
+      mrtXray=new T.Mesh(new T.TubeGeometry(mrtXrayCurve(),ts(160),1.15,4,false),railM2);
+  scene.add(skyRailL,skyRailR,ringRailL,ringRailR,mrtRailL,mrtRailR,skyGlow,mrtXray);
 
-  // Instanced sleepers & overhead portal arches across inner sky-line, KLCC ring, and wide outer metro loop
-  var tiesSky=Math.round(Math.min(100,skyLen/16)*PERF.tubeMul),tiesRing=Math.round(40*PERF.tubeMul),tiesOut=Math.round(80*PERF.tubeMul),tiesTotal=tiesSky+tiesRing+tiesOut;
-  var tieInst=new T.InstancedMesh(new T.BoxGeometry(3.4,.35,.6),deckM,tiesTotal);
-  var archSky=Math.round(Math.min(40,skyLen/38)*PERF.tubeMul),archRing=Math.round(14*PERF.tubeMul),archOut=PERF.tier==='low'?12:Math.round(28*PERF.tubeMul),archTotal=archSky+archRing+archOut;
-  var archLegG=new T.BoxGeometry(.36,4.8,.45),archTopG=new T.BoxGeometry(4.4,.38,.55),archLitG=new T.BoxGeometry(3.8,.16,.24);
-  var archLegL=new T.InstancedMesh(archLegG,portalM,archTotal),archLegR=new T.InstancedMesh(archLegG,portalM,archTotal),
-      archTop=new T.InstancedMesh(archTopG,portalM,archTotal),archLit=new T.InstancedMesh(archLitG,railM,archTotal);
-  var dm=new T.Object3D(),dp=new T.Vector3(),dtg=new T.Vector3(),dsd=new T.Vector3(),dup=new T.Vector3(0,1,0),dLook=new T.Vector3();
-  var ti0=0,ai0=0;
-  function populateTrack(curve,nTies,nArch){
-    for(var i=0;i<nTies;i++){
-      var u=i/nTies;curve.getPointAt(u,dp);curve.getTangentAt(u,dtg);
-      dm.position.set(dp.x,dp.y-.75,dp.z);dLook.copy(dm.position).add(dtg);dm.lookAt(dLook);dm.updateMatrix();
-      tieInst.setMatrixAt(ti0++,dm.matrix);
-    }
-    for(var j=0;j<nArch;j++){
-      var ua=(j+.5)/nArch;curve.getPointAt(ua,dp);curve.getTangentAt(ua,dtg);dsd.crossVectors(dtg,dup).normalize();
-      dm.position.set(dp.x-dsd.x*2.05,dp.y+1.45,dp.z-dsd.z*2.05);dLook.copy(dm.position).add(dtg);dm.lookAt(dLook);dm.updateMatrix();archLegL.setMatrixAt(ai0,dm.matrix);
-      dm.position.set(dp.x+dsd.x*2.05,dp.y+1.45,dp.z+dsd.z*2.05);dLook.copy(dm.position).add(dtg);dm.lookAt(dLook);dm.updateMatrix();archLegR.setMatrixAt(ai0,dm.matrix);
-      dm.position.set(dp.x,dp.y+3.85,dp.z);dLook.copy(dm.position).add(dtg);dm.lookAt(dLook);dm.updateMatrix();archTop.setMatrixAt(ai0,dm.matrix);
-      dm.position.set(dp.x,dp.y+3.6,dp.z);dLook.copy(dm.position).add(dtg);dm.lookAt(dLook);dm.updateMatrix();archLit.setMatrixAt(ai0,dm.matrix);
-      ai0++;
-    }
-  }
-  populateTrack(skyCurve,tiesSky,archSky);
-  populateTrack(ringCurve,tiesRing,archRing);
-  populateTrack(outerCurve,tiesOut,archOut);
-  scene.add(tieInst,archLegL,archLegR,archTop,archLit);
-
-  // Tapered viaduct pylons grounding Ring (20), Sky-Line (16), and Wide Outer Metro (22)
-  var pillarM=new T.MeshBasicMaterial({transparent:true,opacity:.78,fog:true});
-  var nRingP=20,nSkyP=16,nOutP=PERF.tier==='low'?14:22,pTot=nRingP+nSkyP+nOutP;
-  var pillars=new T.InstancedMesh(new T.CylinderGeometry(.42,.95,1,5),pillarM,pTot),
-      pillarCaps=new T.InstancedMesh(new T.BoxGeometry(3.8,.7,1.4),deckM,pTot),pdm=new T.Object3D(),pIdx=0;
-  function addPylons(curve,cnt,sc){
-    for(var i=0;i<cnt;i++){
-      var pp=curve.getPointAt((i+.5)/cnt),ptg=curve.getTangentAt((i+.5)/cnt),ph=Math.max(6,pp.y-1.45);
-      pdm.position.set(pp.x,ph/2,pp.z);pdm.rotation.set(0,0,0);pdm.scale.set(sc,ph,sc);pdm.updateMatrix();pillars.setMatrixAt(pIdx,pdm.matrix);
-      pdm.position.set(pp.x,pp.y-1.35,pp.z);pdm.scale.set(sc,sc,sc);dLook.copy(pdm.position).add(ptg);pdm.lookAt(dLook);pdm.updateMatrix();pillarCaps.setMatrixAt(pIdx,pdm.matrix);pIdx++;
-    }
-  }
-  addPylons(ringCurve,nRingP,1);
-  addPylons(skyCurve,nSkyP,1.12);
-  addPylons(outerCurve,nOutP,1.18);
-  scene.add(pillars,pillarCaps);
-
-  // STATIONS: 8 KL architectural transit hubs (6 inner + 2 wide outer perimeter hubs: Sentral & Ampang)
+  // STATIONS: 6 clean KL transit hubs (defined before piers/arches so piers & arches never stab through a station)
   var CARL=6.4,CARGAP=.7,DWELL=4.5;
   function paramNear(curve,x,z){var b=1e9,r=0,q=new T.Vector3();for(var i=0;i<600;i++){curve.getPointAt(i/600,q);var d=Math.hypot(q.x-x,q.z-z);if(d<b){b=d;r=i/600}}return r}
-  var kS=A0(kP[0],kP[1],62),mS=A0(mP[0],mP[1],70),eS=A0(eP[0],eP[1],54);
+  var kS=A0(kP[0],kP[1],30),mS=A0(mP[0],mP[1],38),eS=A0(eP[0],eP[1],32);
   var STAT=[
     {c:skyCurve,s:0,n:'KLCC'},{c:skyCurve,s:paramNear(skyCurve,kS.x,kS.z),n:'Bukit Nanas'},
     {c:skyCurve,s:paramNear(skyCurve,mS.x,mS.z),n:'Merdeka'},{c:skyCurve,s:paramNear(skyCurve,eS.x,eS.z),n:'TRX'},
     {c:ringCurve,s:0,n:'Suria KLCC'},{c:ringCurve,s:.5,n:'Ampang Park'},
-    {c:outerCurve,s:.12,n:'Sentral'},{c:outerCurve,s:.62,n:'Ampang'}
+    {c:mrtCurve,s:.05,n:'KL Sentral'},{c:mrtCurve,s:.45,n:'TRX Underground'},{c:mrtCurve,s:.95,n:'Ampang Portal'}
   ];
+  function nearStation(curve,u){
+    for(var i=0;i<STAT.length;i++){
+      if(STAT[i].c!==curve)continue;
+      var du=Math.abs(u-STAT[i].s);if(curve===skyCurve||curve===ringCurve)du=Math.min(du,1-du);
+      if(du<.058)return true;
+    }
+    return false;
+  }
+
+  // Sleek flat segmented box-girder viaduct decks (replaces blocky diamond tubes) + overhead portal arches (skipping stations & underground segments)
+  var dm=new T.Object3D(),dp=new T.Vector3(),dtg=new T.Vector3(),dsd=new T.Vector3(),dup=new T.Vector3(0,1,0),dLook=new T.Vector3();
+  var deckSkyN=Math.round(Math.min(115,skyLen/12)*PERF.tubeMul),deckRingN=Math.round(52*PERF.tubeMul),deckMrtN=Math.round(70*PERF.tubeMul);
+  var deckInst=new T.InstancedMesh(new T.BoxGeometry(3.2,.55,1),deckM,deckSkyN+deckRingN+deckMrtN),di0=0;
+  function populateDeck(curve,cnt,len,skipBelow){
+    var segL=len/cnt*1.08;
+    for(var i=0;i<cnt;i++){
+      var u=(i+.5)/cnt;curve.getPointAt(u,dp);curve.getTangentAt(u,dtg);
+      if(skipBelow&&dp.y<1.5){dm.scale.set(0,0,0);dm.updateMatrix();deckInst.setMatrixAt(di0++,dm.matrix);continue}
+      dm.position.set(dp.x,dp.y-.65,dp.z);dm.scale.set(1,1,segL);dLook.copy(dm.position).add(dtg);dm.lookAt(dLook);dm.updateMatrix();
+      deckInst.setMatrixAt(di0++,dm.matrix);
+    }
+  }
+  populateDeck(skyCurve,deckSkyN,skyLen,false);
+  populateDeck(ringCurve,deckRingN,ringLen,false);
+  populateDeck(mrtCurve,deckMrtN,mrtLen,true);
+  scene.add(deckInst);
+
+  var archSky=Math.round(Math.min(28,skyLen/50)*PERF.tubeMul),archRing=Math.round(10*PERF.tubeMul),archTotal=archSky+archRing;
+  var archLegG=new T.BoxGeometry(.28,4.2,.36),archTopG=new T.BoxGeometry(3.9,.32,.42),archLitG=new T.BoxGeometry(3.4,.14,.2);
+  var archLegL=new T.InstancedMesh(archLegG,portalM,archTotal),archLegR=new T.InstancedMesh(archLegG,portalM,archTotal),
+      archTop=new T.InstancedMesh(archTopG,portalM,archTotal),archLit=new T.InstancedMesh(archLitG,railM,archTotal),ai0=0;
+  function populateArches(curve,nArch){
+    for(var j=0;j<nArch;j++){
+      var ua=(j+.5)/nArch;
+      if(nearStation(curve,ua)){dm.scale.set(0,0,0);dm.updateMatrix();archLegL.setMatrixAt(ai0,dm.matrix);archLegR.setMatrixAt(ai0,dm.matrix);archTop.setMatrixAt(ai0,dm.matrix);archLit.setMatrixAt(ai0,dm.matrix);ai0++;continue}
+      curve.getPointAt(ua,dp);curve.getTangentAt(ua,dtg);dsd.crossVectors(dtg,dup).normalize();dm.scale.set(1,1,1);
+      dm.position.set(dp.x-dsd.x*1.85,dp.y+1.25,dp.z-dsd.z*1.85);dLook.copy(dm.position).add(dtg);dm.lookAt(dLook);dm.updateMatrix();archLegL.setMatrixAt(ai0,dm.matrix);
+      dm.position.set(dp.x+dsd.x*1.85,dp.y+1.25,dp.z+dsd.z*1.85);dLook.copy(dm.position).add(dtg);dm.lookAt(dLook);dm.updateMatrix();archLegR.setMatrixAt(ai0,dm.matrix);
+      dm.position.set(dp.x,dp.y+3.35,dp.z);dLook.copy(dm.position).add(dtg);dm.lookAt(dLook);dm.updateMatrix();archTop.setMatrixAt(ai0,dm.matrix);
+      dm.position.set(dp.x,dp.y+3.12,dp.z);dLook.copy(dm.position).add(dtg);dm.lookAt(dLook);dm.updateMatrix();archLit.setMatrixAt(ai0,dm.matrix);
+      ai0++;
+    }
+  }
+  populateArches(skyCurve,archSky);
+  populateArches(ringCurve,archRing);
+  scene.add(archLegL,archLegR,archTop,archLit);
+
+  // Sculpted Underground Tunnel Portals wherever mrtCurve dives beneath or emerges from the city floor
+  (function buildPortals(){
+    var prevY=mrtCurve.getPointAt(0).y,hoodG=new T.BoxGeometry(6.8,5.6,12),glowG=new T.BoxGeometry(5.6,.35,12.2),wallG=new T.BoxGeometry(.65,5.6,12.2);
+    for(var i=1;i<=120;i++){
+      var u=i/120,pp=mrtCurve.getPointAt(u);
+      if((prevY>=2&&pp.y<2)||(prevY<2&&pp.y>=2)){
+        var tg=mrtCurve.getTangentAt(u),pg=new T.Group();
+        pg.position.set(pp.x,2.6,pp.z);pg.lookAt(pp.x+tg.x,2.6,pp.z+tg.z);
+        var hd=new T.Mesh(hoodG,deckM);hd.position.y=1.6;pg.add(hd);
+        var gl=new T.Mesh(glowG,railM);gl.position.y=4.55;pg.add(gl);
+        [-3.2,3.2].forEach(function(wx){var wl=new T.Mesh(wallG,portalM);wl.position.set(wx,0,0);pg.add(wl)});
+        scene.add(pg);
+      }
+      prevY=pp.y;
+    }
+  })();
+
+  // Tapered viaduct pylons grounding Ring (16) and Sky-Line (16), automatically skipping stations & underground segments
+  var pillarM=new T.MeshBasicMaterial({transparent:true,opacity:.78,fog:true});
+  var nRingP=16,nSkyP=16,nMrtP=10,pTot=nRingP+nSkyP+nMrtP;
+  var pillars=new T.InstancedMesh(new T.CylinderGeometry(.5,.95,1,6),pillarM,pTot),
+      pillarCaps=new T.InstancedMesh(new T.BoxGeometry(3.6,.65,1.4),deckM,pTot),pdm=new T.Object3D(),pIdx=0;
+  function addPylons(curve,cnt,sc){
+    for(var i=0;i<cnt;i++){
+      var u=(i+.5)/cnt,pp=curve.getPointAt(u);
+      if(pp.y<6||nearStation(curve,u)){pdm.scale.set(0,0,0);pdm.updateMatrix();pillars.setMatrixAt(pIdx,pdm.matrix);pillarCaps.setMatrixAt(pIdx,pdm.matrix);pIdx++;continue}
+      var ptg=curve.getTangentAt(u),ph=Math.max(4,pp.y-1.0);
+      pdm.position.set(pp.x,ph/2,pp.z);pdm.rotation.set(0,0,0);pdm.scale.set(sc,ph,sc);pdm.updateMatrix();pillars.setMatrixAt(pIdx,pdm.matrix);
+      pdm.position.set(pp.x,pp.y-.95,pp.z);pdm.scale.set(sc,sc,sc);dLook.copy(pdm.position).add(ptg);pdm.lookAt(dLook);pdm.updateMatrix();pillarCaps.setMatrixAt(pIdx,pdm.matrix);pIdx++;
+    }
+  }
+  addPylons(ringCurve,nRingP,1);
+  addPylons(skyCurve,nSkyP,1.08);
+  addPylons(mrtCurve,nMrtP,1.0);
+  scene.add(pillars,pillarCaps);
+
   var stPlatM=new T.MeshBasicMaterial({fog:true}),stCanM=new T.MeshBasicMaterial({transparent:true,opacity:.55,depthWrite:false,fog:true}),stPostM=new T.MeshBasicMaterial({fog:true});
-  var stLampM=new T.MeshBasicMaterial({fog:true}),stPlatG=new T.BoxGeometry(8.6,.7,30),stEdgeG=new T.BoxGeometry(.22,.16,29.6),stCanG=new T.BoxGeometry(7.6,.24,26),stRibG=new T.BoxGeometry(8.2,.32,.48),stPostG=new T.BoxGeometry(.36,5.2,.44),stLampG=new T.BoxGeometry(7.2,.18,26.4);
+  var stLampM=new T.MeshBasicMaterial({fog:true}),stPlatG=new T.BoxGeometry(8.6,.7,28),stEdgeG=new T.BoxGeometry(.22,.16,27.6),stCanG=new T.BoxGeometry(7.6,.24,24),stRibG=new T.BoxGeometry(8.2,.32,.48),stPostG=new T.BoxGeometry(.36,4.8,.44),stLampG=new T.BoxGeometry(7.2,.18,24.4);
   STAT.forEach(function(st){
     var g2=new T.Group(),pp=st.c.getPointAt(st.s),tg=st.c.getTangentAt(st.s);g2.position.copy(pp);g2.lookAt(pp.clone().add(tg));
     st.pos=pp.clone();
-    var pl=new T.Mesh(stPlatG,stPlatM);pl.position.y=-1.95;g2.add(pl);
-    [-3.95,3.95].forEach(function(ex){var ed=new T.Mesh(stEdgeG,stLampM);ed.position.set(ex,-1.55,0);g2.add(ed)});
-    var cn=new T.Mesh(stCanG,stCanM);cn.position.y=3.55;g2.add(cn);
-    [-11,-5.5,0,5.5,11].forEach(function(rz){
-      var rb=new T.Mesh(stRibG,stPostM);rb.position.set(0,3.72,rz);g2.add(rb);
-      [-3.85,3.85].forEach(function(rx){var po=new T.Mesh(stPostG,stPostM);po.position.set(rx,1.1,rz);g2.add(po)});
+    if(pp.y<4)return; // underground stations stay subterranean
+    var pl=new T.Mesh(stPlatG,stPlatM);pl.position.y=-1.65;g2.add(pl);
+    [-3.95,3.95].forEach(function(ex){var ed=new T.Mesh(stEdgeG,stLampM);ed.position.set(ex,-1.25,0);g2.add(ed)});
+    var cn=new T.Mesh(stCanG,stCanM);cn.position.y=3.25;g2.add(cn);
+    [-10,-5,0,5,10].forEach(function(rz){
+      var rb=new T.Mesh(stRibG,stPostM);rb.position.set(0,3.42,rz);g2.add(rb);
+      [-3.85,3.85].forEach(function(rx){var po=new T.Mesh(stPostG,stPostM);po.position.set(rx,1.0,rz);g2.add(po)});
     });
-    var lp=new T.Mesh(stLampG,stLampM);lp.position.y=3.92;g2.add(lp);
+    var lp=new T.Mesh(stLampG,stLampM);lp.position.y=3.62;g2.add(lp);
     scene.add(g2);
   });
 
-  // TRAINS: Sky-Line Express, KLCC Ring, Helix Shuttle, and Wide Outer Metro Express
+  // TRAINS: Sky-Line Express, Underground MRT Express, and KLCC Ring
   var trains=[
     {c:skyCurve,len:skyLen,cars:5,sp:38,off:0,hero:false,name:'Sky-Line Express'},
-    {c:outerCurve,len:outerLen,cars:5,sp:48,off:.1,hero:false,name:'Outer Metro Express'},
-    {c:helixCurve,len:helixLen,cars:3,sp:24,off:.15,hero:false,pp:true,name:'KLCC Helix Shuttle'},
+    {c:mrtCurve,len:mrtLen,cars:5,sp:44,off:.08,hero:false,pp:true,name:'MRT Underground'},
     {c:ringCurve,len:ringLen,cars:4,sp:-16,off:0,hero:false,name:'KLCC Ring West'},
     {c:skyCurve,len:skyLen,cars:5,sp:38,off:.5,hero:false,name:'Sky-Line 02'},
-    {c:outerCurve,len:outerLen,cars:5,sp:-46,off:.6,hero:false,name:'Outer Metro 02'},
+    {c:mrtCurve,len:mrtLen,cars:5,sp:44,off:.58,hero:false,pp:true,name:'MRT Kajang Line'},
     {c:ringCurve,len:ringLen,cars:4,sp:16,off:.5,hero:false,name:'KLCC Ring East'}
   ];
   if(PERF.tier==='low')trains=trains.slice(0,4);
@@ -736,9 +772,9 @@
       for(var i=0;i<=48;i++){curve.getPointAt(i/48,p);var px2=mx(p.x),py2=my(p.z);if(i===0)g.moveTo(px2,py2);else g.lineTo(px2,py2)}
       if(closed)g.closePath();g.strokeStyle=col;g.lineWidth=w;g.stroke();
     }
-    trace(outerCurve,'rgba(127,211,255,.35)',1.5,true);
-    trace(skyCurve,'rgba(127,211,255,.78)',2,true);
-    trace(ringCurve,'rgba(255,210,122,.7)',1.6,true);
+    g.save();g.setLineDash([4,3]);trace(mrtCurve,'rgba(255,210,122,.72)',1.8,false);g.restore();
+    trace(skyCurve,'rgba(127,211,255,.82)',2,true);
+    trace(ringCurve,'rgba(127,211,255,.45)',1.4,true);
     // Live trains
     for(var k=0;k<trains.length;k++){
       var tr=trains[k],tx2=mx(tr.headP.x),ty2=my(tr.headP.z);
@@ -1052,26 +1088,28 @@
       for(i=0;i<=10;i++){f=i/10;var cth=(cT0-cSw*f)*RAD,crr=(cr0+(cr1-cr0)*f)*(1-.2*Math.exp(-Math.pow((((cT0-cSw*f+180)%360+360)%360-180+62)/18,2))),cy=74+124*f; // dips inward where a block stands close to the circle (bearing -62 degrees from Merdeka, checked with the clearance oracle)
         KF.push(['c'+i,A(C.u+Math.cos(cth)*crr,C.w+Math.sin(cth)*crr,cy),A(C.u,C.w,70+.65*(cy-74)),2.3,0])} // near the top the aim eases down a little, so the city fills the lower part of the frame
       row('top0',pt(C,cT1,64),216,C,150,2.0);row('top1',pt(C,cT1,44),236,C,70,2.0);row('top2',pt(C,cT1,20),248,C,0,2.0);
-      // tip over from Merdeka and glide cleanly toward The Exchange 106, bringing its glowing crown squarely into frame
-      var fE=function(f){return lerpUW(C,E,f)};
-      row('fl1',fE(.14),242,fE(.42),92,1.1);row('fl2',fE(.3),228,lerpUW(fE(.6),E,.5),114,1.1);row('fl3',fE(.46),212,E,128,1.15);row('fl4',fE(.6),196,E,124,1.2);
-      // 6 hero showcase & glide down The Exchange 106 (TRX): smooth 150-deg banking arc around its glowing crown and glass face, then curving cleanly into the sky-rail chase
       // 7 street skim rows first (the Exchange descent ends where the skim starts)
       var eR=A(pt(E,16,46).u,pt(E,16,46).w,0),sA=railNear(eR.x,eR.z),sB=sA,SK=[],qv=new T.Vector3(),tg=new T.Vector3();
-      for(i=1;i<400;i++){var ss=(sA+i/400)%1;skyCurve.getPointAt(ss,qv);if(Math.hypot(qv.x,qv.z)<=50){sB=sA+i/400;break}}
+      for(i=1;i<400;i++){var ss=(sA+i/400)%1;skyCurve.getPointAt(ss,qv);if(Math.hypot(qv.x,qv.z)<=54){sB=sA+i/400;break}}
       if(sB===sA)sB=sA+.22;
       chA=sA%1;chB=sB%1;var nS=12;
       for(i=0;i<=nS;i++){var s0=(sA+(sB-sA)*i/nS)%1,s1=(s0+85/skyLen)%1;skyCurve.getPointAt(s0,qv);skyCurve.getTangentAt(s0,tg);
-        var cp=new T.Vector3(qv.x-tg.z*8,Math.max(30,qv.y-26),qv.z+tg.x*8);skyCurve.getPointAt(s1,qv);
-        SK.push([cp,new T.Vector3(qv.x,qv.y-20,qv.z)])}
-      var s0u=UW(SK[0][0].x,SK[0][0].z),fr=(mobile?1.32:1),fTh0=dg(E,C),fTh1=dg(E,s0u),fSw=wrap(fTh0-fTh1);
-      if(fSw<90)fSw+=150;else if(fSw>250)fSw-=120; // guarantee a generous, scenic orbit around TRX regardless of rail tangent angle
-      var fR0=108*fr,fR1=Math.max(64*fr,dist(E,s0u)),nF=11,fk0=KF.length;
+        var cp=new T.Vector3(qv.x-tg.z*9,Math.max(24,qv.y+6),qv.z+tg.x*9);skyCurve.getPointAt(s1,qv);
+        SK.push([cp,new T.Vector3(qv.x,qv.y+2,qv.z)])}
+      // Compute TRX orbit entry e0 FIRST so fl1..fl3 move 100% monotonically forward from Merdeka to e0 (zero overshoot or backward jerk)
+      var s0u=UW(SK[0][0].x,SK[0][0].z),fr=(mobile?1.24:1),fTh0=dg(E,C),fTh1=dg(E,s0u),fSw=wrap(fTh0-fTh1);
+      if(fSw<90)fSw+=140;else if(fSw>240)fSw-=120;
+      var fR0=Math.min(96*fr,dist(C,E)*.46),fR1=Math.max(60*fr,dist(E,s0u)),e0Pt=pt(E,fTh0,fR0);
+      row('fl1',lerpUW(C,e0Pt,.25),238,lerpUW(C,E,.55),105,1.1);
+      row('fl2',lerpUW(C,e0Pt,.52),222,lerpUW(C,E,.82),120,1.1);
+      row('fl3',lerpUW(C,e0Pt,.78),204,E,128,1.15);
+      // 6 hero showcase & glide down The Exchange 106 (TRX): smooth banking arc around its glowing crown & glass face into the viaduct chase
+      var nF=11;
       for(i=0;i<nF;i++){
-        f=i/nF;var fs2=sm(f),th=(fTh0-fSw*fs2)*RAD,r=fR0+(fR1-fR0)*fs2,y=184+(SK[0][0].y+12-184)*Math.pow(f,1.35);
-        var cx=E.u+Math.cos(th)*r,cz=E.w+Math.sin(th)*r,aimY=126-52*fs2;
+        f=i/nF;var fs2=sm(f),th=(fTh0-fSw*fs2)*RAD,r=fR0+(fR1-fR0)*fs2,y=186+(SK[0][0].y+10-186)*Math.pow(f,1.35);
+        var cx=E.u+Math.cos(th)*r,cz=E.w+Math.sin(th)*r,aimY=126-54*fs2;
         KF.push([i?'e'+i:'e0',A(cx,cz,y),A(E.u,E.w,aimY),1.45,0]);
-        if(f>.68)mixAim(KF.length-1,SK[0][1],(f-.68)/.32); // hold gaze on TRX's crown & glass facade, then turn smoothly onto the sky-rail
+        if(f>.7)mixAim(KF.length-1,SK[0][1],(f-.7)/.3);
       }
       var skEndAim=A(ENDC.u,ENDC.w,90);for(i=nS-4;i<=nS;i++)SK[i][1]=SK[i][1].clone().lerp(skEndAim,sm((i-(nS-5))/5));  // the last skim knots turn their aim toward the group, ready for the pull-out
       SK.forEach(function(s,j){KF.push([j?(j===nS?'skEnd':'sk'+j):'sk0',s[0],s[1],j===nS?3.4:1.2,0])});
