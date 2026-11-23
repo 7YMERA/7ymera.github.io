@@ -557,38 +557,36 @@ void main() {
     var zoomIn = 0.25 * spring(T, 0.7, 1) + 0.75 * smoother(0, P.glide, T);
     var settle = spring(T - 0.5, 2.4, 1), exit = spring(T - tx, 0.95, 1), release = spring(T - tx - 0.05, 0.65, 1);
     var dome = 0.15 * P.bulge * (1 - smooth(0.4, 0.95, grow));
-    var view = (1 + (P.startZoom - 1) * (1 - zoomIn)) * (1 - 0.045 * settle) * mix(1, P.finalScale, exit) * (1 - 0.06 * outro) * (1 + ap * 0.55);
+    var view = (1 + (P.startZoom - 1) * (1 - zoomIn)) * (1 - 0.045 * settle) * mix(1, P.finalScale, exit) * (1 - 0.06 * outro);
     var bandW = mix(P.bevelWidth, Math.max(P.bevelWidth, 0.4), drop);
-    var plateScale = mix(P.startSize, 1, grow) * (1 + drift) * (1 + 0.14 * release * (1 - keep)) * (1 - keep * (0.03 * release + 0.06 * outro)) * (1 + ap * 1.35);
+    var plateScale = mix(P.startSize, 1, grow) * (1 + drift) * (1 + 0.14 * release * (1 - keep)) * (1 - keep * (0.03 * release + 0.06 * outro));
     var bg = hexToRgb(P.background);
-    // Interactive optical airlock: pointer movement keeps a subtle prismatic rim alive even after release,
-    // and scrolling down morphs the squircle back into a circular orbital aperture that opens into space.
-    var apGlass = Math.sin(clamp01(ap) * Math.PI) * 0.85;
-    var liveGlass = Math.max(hover * 0.28, apGlass);
+    // Keep the glass tile in its crisp squircle shape and size as the reader scrolls down (no circle morph or expansion);
+    // pointer movement still keeps a subtle prismatic rim alive, and the tile fades cleanly as #reveal scrolls off.
+    var liveGlass = hover * 0.28;
     var effRelease = clamp01(release * (1 - liveGlass * 0.72));
-    var baseShape = mix(2, P.corner, morph);
-    var shapeN = mix(baseShape, 2.0, clamp01(ap * 1.4));
-    var plateAlphaBase = keep ? appear * (1 - outro) : appear * (1 - smooth(0.45, 1, effRelease));
-    var plateAlpha = clamp01(Math.max(plateAlphaBase, apGlass * 0.92)) * (1 - smooth(0.72, 1.0, ap));
-    var bareFade = (1 - keep) * smooth(tx - 0.25, tx, T) * (1 - outro) * (1 - smooth(0.35, 0.92, ap));
+    var shapeN = mix(2, P.corner, morph);
+    var scrollFade = 1 - smooth(0.68, 1.0, ap);
+    var plateAlpha = clamp01(keep ? appear * (1 - outro) : appear * (1 - smooth(0.45, 1, effRelease))) * scrollFade;
+    var bareFade = (1 - keep) * smooth(tx - 0.25, tx, T) * (1 - outro) * scrollFade;
     return {
       uPlateScale: plateScale * (1 + 0.011 * breath * live), uShapeN: shapeN, uCornerN: P.corner, uOptics: Math.max(1 - smooth(0.55, 1, effRelease), liveGlass * 0.85),
       uPlateAlpha: plateAlpha,
       uLogoHalf: P.logoScale * view, uLogoOff: [(P.logoOffset[0] + ptrX * 0.035) * view, (P.logoOffset[1] - ptrY * 0.035) * view],
       uKeep: keep, uSheen: P.sheen, uSweep: (sweepLive != null ? mix(-1.6, 1.6, sweepLive) : mix(-1.6, 1.6, smoother(0.9, tx - 0.1, T))) + ptrX * 0.6 * (sweepLive != null ? 1 : 1.9), uLightAng: P.lightTurn * smoother(0.4, tx + 0.4, T) + ptrX * 1.45 + ptrY * 0.65 + 0.07 * breath * live,
       uBold: P.swell * 0.03 * (1 - zoomIn),
-      uBlur: P.focus * 0.05 * (1 - smooth(0.3, 0.95, grow)) + 0.03 * outro + ap * 0.045,
+      uBlur: P.focus * 0.05 * (1 - smooth(0.3, 0.95, grow)) + 0.03 * outro,
       uFrost: P.focus * (1 - smooth(0.5, 0.95, grow)),
       uPinch: 0.38 * P.stretch * smooth(0.1, 0.9, morph) * smooth(0.75, 0.97, zoomIn),
-      uTilt: P.tilt, uDome: dome + ap * 0.14, uDrop: drop, uRim: 1 + 0.8 * drop + liveGlass * 0.5 + hover * 0.35,
-      uHalo: (P.halo + apGlass * 0.65) * (0.5 + 0.5 * drop) * (1 - keep * release),
-      uShadow: Math.max(P.shadow * smooth(0.45, 0.8, grow) * (1 - smooth(0, 0.6, morph)), 0.8 * P.shadow * keep * release) * (1 - ap),
+      uTilt: P.tilt, uDome: dome, uDrop: drop, uRim: 1 + 0.8 * drop + liveGlass * 0.5 + hover * 0.35,
+      uHalo: P.halo * (0.5 + 0.5 * drop) * (1 - keep * release),
+      uShadow: Math.max(P.shadow * smooth(0.45, 0.8, grow) * (1 - smooth(0, 0.6, morph)), 0.8 * P.shadow * keep * release) * scrollFade,
       uGhost: smooth(0, 0.03, T) * (1 - smooth(0.04, 0.08, T)),
       uRipR: 1 + 0.9 * Math.max(0, T - tl), uRipA: P.ripple * smooth(tl, tl + 0.06, T) * Math.exp(-Math.max(0, T - tl) / 0.6),
       uBare: bareFade,
       uReach: bandW * plateScale, uCornerPull: P.cornerPull, uStreak: P.edgeSmear, uWiden: P.cornerWidth, uSlab: 0.3 * P.opticalDepth,
       uEtaSpread: 0.06, uFocus: P.cornerFocus, uFocusK: 1.0, uFocusSplit: 0.056 * P.colorBleed, uRimLine: 0.09,
-      uCornerOn: smooth(0.35, 1, morph) * (1 - clamp01(ap * 1.2)), uGlow: 0.012 * P.colorBleed, uFaceDisp: 0.012 * P.dispersion, uVivid: 0.85,
+      uCornerOn: smooth(0.35, 1, morph), uGlow: 0.012 * P.colorBleed, uFaceDisp: 0.012 * P.dispersion, uVivid: 0.85,
       uDissolve: effRelease, uDisp: P.dispersion, uDouble: P.doubleBevel, uBevelW: bandW * (1 - effRelease * 0.85), uSpec: P.specular,
       uIconPlate: P.iconPlate ? 1 : 0, uUseColor: P.originalColors ? 1 : 0,
       uLightScene: luminance(bg) > 0.5 ? 1 : 0, uLightGlass: luminance(P.iconPlate ? hexToRgb(P.plateColor) : bg) > 0.5 ? 1 : 0,

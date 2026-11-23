@@ -27,6 +27,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-23 · Keep Liquid-Glass Logo Shape on Scroll
+
+- **Glass Reveal (`assets/home/glass-reveal.js`):** removed the scroll-driven `ap` scale expansion (`plateScale`, `view`), squircle-to-circle morph (`shapeN`), blur/dome distortion, and halo flare in `frameAt()` so the `\7` liquid-glass tile keeps its crisp rounded-square shape and size as you scroll down into `#descent`, fading out cleanly at the bottom of `#reveal`. Key `20261123g`.
+
 ## 2026-11-23 · Cosmic Audio Revamp, Smoother Drone Pathing, Clickable Landmark Portals, Time-Lapse, Audio-Reactive Skyline & Live KL Weather
 
 - **Cosmic-Cinematic Audio Revamp (`assets/sfx.js`):** upgraded `epiano` (lush detuned cosmic pad with slow LPF shimmer), `lead` (crystalline airy saw+triangle voice with subtle stereo pan), `bell` (fifth-harmonic celestial chime), `bassNote` (warm deep sub-bass with filtered fifth), `hat` / `clap` / `kick` (softened, tighter cosmic pulse), while preserving the signature `"VOOOM"` descent cue (`E.descend`).
