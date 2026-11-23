@@ -7,16 +7,19 @@ where the last chat stopped without re-reading everything.
 
 ---
 
-## 22 Nov 2026 (data toys to the lab)
-
-- Company SQL, Jom Al-Quran SQL and Join Atlas moved from /play/ to /lab/ (own bay 02 "Data toys" below the experiments). `LAB_IDS` in `play.js` updated; /play/'s head redirect also maps `#sql-company`, `#sql-jom`, `#atlas`; /play/ lost `join-atlas.css` and the SQL view; cabinet counts on /play/ now 5. Scripts stay lazy (`mountSql`). README Play and Lab sections updated.
-
 ## 16 Nov 2026 (logo)
 
 - Home page header logo text is now `\7ymera` (backslash, as the owner asked), and so is the landing sign (`.op-id`). Other pages, titles, share previews, manifest and feed keep Alif Najmi.
 
 ## Open items (keep this list current)
 
+- **Check on a real GPU / iPhone (owner):** the glass halo fix (premultiplied alpha; if a big ring still shows at rest, it's the scroll aperture from 3.1), smoothness of the gate → chess grid → glass → descent shot, the descent zoom curve, the reverb and gate sounds, touch drag on the satellite, dark mode of the phone HUD.
+- **Tablet (768 px) flight HUD** still has the old overlaps (picker vs compass, horizon gauge vs caption); the phone layout stops at 700 px.
+- **A "clientWidth of null" page error** shows in some Playwright runs, outside the HUD code; not traced.
+- **Gold outline** sits ~15 px off the coast at the closest descent zoom; the gate's 2D stars swap for 3D stars as the halves slide away.
+- **Card hover shadow** (`.card`, site.css) still transitions box-shadow (overflow:hidden + both pseudo-elements in use).
+- **Unused ports kept on purpose** (owner, 22 Nov): `curved-reel.js`, `glance.js` (not loaded, no cost); `glass.js` is used by lab/glass.html.
+- **Cosmos clock** on /portfolio/ shows real MYT time, not the dial's scroll time (owner may want them to agree).
 - **UTP subject descriptions** in `#studied` are drafts written from coursework files. The owner hasn't confirmed the descriptions yet. (The subject *names and counts* were checked against the owner's transcript on 13 Nov 2026: all 42 match.)
 - **DENDROBYTES** (media / community outreach, in Journey) still needs its year from the owner.
 - **REQ cards in the opening's outer columns** (REQ-014, 022, 031, 040): the owner hasn't checked the wording yet.
@@ -24,15 +27,21 @@ where the last chat stopped without re-reading everything.
 - **Jom Al-Quran raw project data** (the Database-2024-Project-Uplift zip) contains real-looking personal data.
   Only the scrubbed `assets/db/jom-al-quran.sqlite` is published. Never commit the raw data.
 
-
-
-
-
-
-
-
-
 ---
+
+## 2026-11-21 → 23 · Session summary: 3.0 to now (one long chat)
+
+The whole arc, so the next chat can pick up without the transcript. Details are in the entries below and the README version table (3.0–3.5).
+
+- **3.0 (21 Nov):** the site split in three. `/` became a cinematic front page (liquid-glass `\7` reveal ported from 21st.dev, orbit → KL descent, drone flight with a Plain / Golden / Night picker, project deck, doors). `/portfolio/` is the recruiter page with a scroll day cycle. `/play/` is the arcade. New sound engine and cursor.
+- **3.1 Solstice:** Gemini's branch merged (optical airlock, Live KL mode, free fly unlock, two new cabinets); README rewritten with early/middle/latest eras.
+- **Between 3.1 and 3.2:** descent from the top view; picker made foldable; glitching letters; portfolio back on the city with a light dusk (no dark flip) and readable panels; notes camera pulled out of a building; Play hero became a full-background slideshow; Skyline anatomy cleaned; free fly with WASD, hints and time buttons; Notes as folders (three pinned, a note about this site, a "master file"); portfolio notes as one centred row.
+- **3.2 Immersion:** glass rests glossy (no replay), sound on by default with glass / cosmos / city zones and cues, NASA satellites, every Malaysian rail line on the descent map, one continuous drone sequence, chrome fades in at drone level.
+- **3.3 Orbit hero:** big lit satellite with the Mirage DataScan x-ray, plexus, flare; sound on everywhere; rail map as plain coloured lines (no names, legend or toggle); no sound pill; Live KL by default; chase train removed after a doubled-train bug; finale buttons clear of the horizon gauge.
+- **3.4 Gate and lab:** a Get started gate over a NASA Earth (owner's GLB textures, reprojected) that unlocks audio; satellite moved to a new `/lab/` that opens on it; `/play/` games only; SQL toys moved to the lab; perf pass (scrollbus, deferred city models, `#skybg`, DPR 1.5, no animated blur); audio pass (one AudioContext, shorter reverbs, gated loops).
+- **3.5 One shot:** the gate's Earth carries into the reveal; the glass refracts it; scroll flies it to "408 km up" and onto Malaysia (map misregistration fixed with `reg()`), into the flight. Gate on every load; cosmos on /portfolio/; slb-screens in the feed; Blue Marble credit.
+- **After 3.5:** chess-grid entry (plain-JS port), boot HUD kept on the gate, glass halo guard; Hide HUD toggle and a 70vh hold before free fly; glass reveal shows only the name; satellite starts zoomed out with a smaller x-ray; Notes index on one centre axis; lab and game views fill the screen; calm phone HUD.
+- **Decisions the owner made:** keep plain JS (no React / shadcn / npm; 21st.dev components get ported); golden hour allowed as a uniform blend; light mode default; big obvious controls; no magenta/pink, no Maybank sign, moon locked, no barrel roll.
 
 ## 2026-11-23 · Calm drone HUD on phones
 
@@ -45,6 +54,14 @@ where the last chat stopped without re-reading everything.
 ## 2026-11-23 · Notes index on one centre axis
 
 - `assets/notes-index.css` rewritten: one container width (`--ni-w`, the top bar's 1128 px) for every section; centred hero card; the image stream is a flat full-width band centred on the page (lost its tilt on purpose); centred section heads; folder grids flex-wrap so a short last row sits on the centre; note list in the same container, odd last card centred. Measured: every container 0 px off the viewport centre at 1920/1440/1300/768/390, light and dark (was -268 px for the hero, +299–454 px for the stream). Satellite: starts zoomed out, smaller x-ray. Key 20261123a.
+
+## 2026-11-22 · Glass reveal: just the name
+
+- The tag line under ALIF NAJMI ("Business analyst who builds what he specifies.") was removed from `#reveal` (owner); `home.js` guards the missing element.
+
+## 2026-11-22 · Data toys to the lab
+
+- Company SQL, Jom Al-Quran SQL and Join Atlas moved from /play/ to /lab/ (own bay 02 "Data toys" below the experiments). `LAB_IDS` in `play.js` updated; /play/'s head redirect also maps `#sql-company`, `#sql-jom`, `#atlas`; /play/ lost `join-atlas.css` and the SQL view; cabinet counts on /play/ now 5. Scripts stay lazy (`mountSql`). README Play and Lab sections updated.
 
 ## 2026-11-22 · Hide HUD in the drone view; a hold before free fly
 
