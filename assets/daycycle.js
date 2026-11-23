@@ -50,11 +50,10 @@
   // The sky gradient (the page background and the haze of the 3D city). KEEP IN STEP with TB in assets/scene.js: day, golden hour, night.
   var SKY = { s1: ['#fcfeff', '#3a60a2', '#5b6aa8'], s2: ['#e4f0fa', '#eea25f', '#a99ad0'], s3: ['#e4f0fa', '#ffd79a', '#f0cfb8'] }, STOP = [1, 0.6, 0.58];
   var tok = [], sky = [];
-  (function read() { // the day and night values come from the page itself: flip the theme twice, in one synchronous task (no paint between)
-    var was = root.getAttribute('data-theme'), cs, d = {}, n = {};
-    root.setAttribute('data-theme', 'light'); cs = getComputedStyle(root); NAMES.forEach(function (x) { d[x] = cs.getPropertyValue(x).trim(); });
-    root.setAttribute('data-theme', 'dark'); cs = getComputedStyle(root); NAMES.forEach(function (x) { n[x] = cs.getPropertyValue(x).trim(); });
-    if (was) root.setAttribute('data-theme', was); else root.removeAttribute('data-theme');
+  (function read() { // day tokens come from the page's light theme; dusk/gold come from the readable palette tables above (no dark-theme flip needed)
+    var was = root.getAttribute('data-theme'), cs, d = {};
+    if (was !== 'light') root.setAttribute('data-theme', 'light');
+    cs = getComputedStyle(root); NAMES.forEach(function (x) { d[x] = cs.getPropertyValue(x).trim(); });
     NAMES.forEach(function (x) {
       var D = parse(d[x]), N = parse(DUSK[x] || d[x]); if (!D || !N) return;
       var G = GOLD[x] ? parse(GOLD[x]) : null; if (!G) { var m = mix(D, N, 0.5); G = parse(str(m)); }

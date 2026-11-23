@@ -39,18 +39,6 @@
   w.__gate = gate;
   root.classList.add('gate-on');
 
-  /* sound: "Enter without sound" must store sfx-on = 0 BEFORE sfx.js sees the same gesture (it arms on pointerdown/keydown/click in
-     the capture phase on window; listeners run in registration order and this file loads first). */
-  var NOSOUND = '.gate-nosound';
-  ['pointerdown', 'touchstart', 'pointerup', 'touchend', 'keydown', 'click'].forEach(function (n) {
-    w.addEventListener(n, function (e) {
-      var t = e.target, hit = t && t.closest && t.closest(NOSOUND);
-      if (!hit && n === 'keydown' && (e.key === 'Enter' || e.key === ' ') && d.activeElement && d.activeElement.matches && d.activeElement.matches(NOSOUND)) hit = true;
-      if (hit) ls('sfx-on', '0');
-    }, { capture: true, passive: true });
-  });
-
-  var soundOff = ls('sfx-on') === '0';
   var MARK = 'M12 8H40L81 108H53Z M94 8H154V29L122 108H96L127 31H94Z';
   var GLY = '#%&/\\<>=+*7YMERA01';
   var DUR = 2000;                   // the counter's eased run, ms
@@ -125,7 +113,7 @@
 
     var live = $('.gate-live'), cv = $('.gate-cv'), ctx = cv.getContext('2d'), kl = $('.gate-kl'), E = null, earthDone = false, earthOn = false, handed = null;
     var num = $('.gate-num'), bar = $('.gate-bar i'), lines = [].slice.call(rootEl.querySelectorAll('.gate-lines p'));
-    var status = $('.gate-status'), clock = $('.gate-clock'), cta = $('.gate-cta'), btn = $('.gate-btn'), nos = $('.gate-nosound'), wrap = $('.gate-btn-wrap');
+    var status = $('.gate-status'), clock = $('.gate-clock'), cta = $('.gate-cta'), btn = $('.gate-btn'), wrap = $('.gate-btn-wrap');
     var label = $('.gate-btn-label'), txt = $('.gate-btn-txt'), word = [].slice.call(rootEl.querySelectorAll('.gw i'));
     var state = 'boot', raf = 0, dead = false, timers = [];
     function later(fn, ms) { var t = setTimeout(function () { if (!dead) fn(); }, ms); timers.push(t); return t; }
@@ -296,8 +284,7 @@
     }
     btn.addEventListener('pointerenter', function () { scramble(label, 'Enter', 360); });
     btn.addEventListener('focus', function () { scramble(label, 'Enter', 360); });
-    btn.addEventListener('click', function () { enter(false); });
-    if (nos) nos.addEventListener('click', function () { enter(false); });
+    btn.addEventListener('click', function () { enter(); });
     w.addEventListener('pointermove', onMove, { passive: true });
     function onMove(e) { mx = e.clientX; my = e.clientY; tpx = (e.clientX / Math.max(1, W)) * 2 - 1; tpy = (e.clientY / Math.max(1, H)) * 2 - 1; }
     if (reduce) { tpx = tpy = 0; }
@@ -310,7 +297,8 @@
       if (e.shiftKey) { if (i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } }
       else if (i === -1 || i === f.length - 1) { e.preventDefault(); f[0].focus(); }
     });
-    d.addEventListener('focusin', function keep(e) { if (dead) { d.removeEventListener('focusin', keep); return; } if (!rootEl.contains(e.target)) { try { (state === 'ready' ? btn : rootEl).focus({ preventScroll: true }); } catch (x) { /* ignore */ } } });
+    function keepFocus(e) { if (dead) { d.removeEventListener('focusin', keepFocus); return; } if (!rootEl.contains(e.target)) { try { (state === 'ready' ? btn : rootEl).focus({ preventScroll: true }); } catch (x) { /* ignore */ } } }
+    d.addEventListener('focusin', keepFocus);
 
     /* ---------------- enter: flash, rings, warp, glitch, split ---------------- */
     function ringPulse() {
@@ -422,39 +410,23 @@
       }
       requestAnimationFrame(step);
     }
-    function snapshot(cy) {   // freeze the current frame into two halves
-      var src = cv;
-      if (E && earthOn) { drawEarth(0); src = d.createElement('canvas'); src.width = cv.width; src.height = cv.height; var sc = src.getContext('2d'); sc.drawImage(cv, 0, 0); sc.drawImage(E.canvas, 0, 0, src.width, src.height); }
-      var h2 = Math.round(cv.height / 2), top = el('div', 'gate-half g-top'), bot = el('div', 'gate-half g-bot'), a = d.createElement('canvas'), b = d.createElement('canvas');
-      a.width = b.width = cv.width; a.height = h2; b.height = cv.height - h2;
-      a.getContext('2d').drawImage(src, 0, 0, cv.width, h2, 0, 0, cv.width, h2);
-      b.getContext('2d').drawImage(src, 0, h2, cv.width, cv.height - h2, 0, 0, cv.width, cv.height - h2);
-      top.appendChild(a); bot.appendChild(b); return [top, bot];
-    }
-    function split() {
-      draw(0, performance.now());
-      var halves = snapshot(), seam = el('i', 'gate-seam');
-      live.hidden = true;
-      halves.forEach(function (h) { rootEl.appendChild(h); }); rootEl.appendChild(seam);
-      rootEl.classList.add('g-split');
-      void rootEl.offsetWidth;
-      opened();
-      rootEl.classList.add('g-go');
-      later(finish, 1250);
-    }
     function opened() {
       if (gate.open) return;
       gate.open = true; root.classList.remove('gate-lock');
-      /* hand the live Earth to the page (assets/home/orbit.js picks it up in its gate.then callback below): the reveal behind the halves is the
+      /* hand the live Earth to the page (assets/home/orbit.js picks it up in its gate.then callback below): the reveal behind the warp is the
          same instance, same view, so the shot does not cut. If nobody takes it, finish() disposes it as before. */
       if (E && earthOn && !w.__orbitEarth) { drawEarth(0); handed = E; w.__orbitEarth = E; E = null; earthOn = false; }
       behind.forEach(function (b) { if (b.a == null) b.n.removeAttribute('aria-hidden'); else b.n.setAttribute('aria-hidden', b.a); if (!b.i) b.n.removeAttribute('inert'); });
       try { d.dispatchEvent(new CustomEvent('gate-open')); } catch (e) { /* ignore */ }
       var f = waiting.splice(0); f.forEach(function (fn) { try { fn(); } catch (e) { if (w.console) console.warn(e); } });
     }
+    function onVis() { if (!d.hidden) { last = performance.now(); } }
     function finish() {
       if (dead) return; dead = true; cancelAnimationFrame(raf); timers.forEach(function (t) { clearTimeout(t); clearInterval(t); });
       w.removeEventListener('pointermove', onMove);
+      d.removeEventListener('focusin', keepFocus);
+      d.removeEventListener('visibilitychange', onVis);
+      if (ro) { ro.disconnect(); ro = null; } else w.removeEventListener('resize', resize);
       if (E) { E.dispose(); E = null; }
       if (handed && w.__orbitEarth === handed) { handed.dispose(); w.__orbitEarth = null; }   // not taken: free it
       cv.width = cv.height = 0; earth = null; stars = [];
@@ -485,7 +457,7 @@
     if (reduce) { status.textContent = 'READY'; num.textContent = '100'; bar.style.transform = 'scaleX(1)'; lines.forEach(function (p, i) { p.textContent = BOOT[i]; }); state = 'boot'; ready(); tick0(); }
     else { startBoot(); kick(); }
     function tick0() { try { clock.textContent = new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kuala_Lumpur', hour12: false }); } catch (e) { /* ignore */ } }
-    d.addEventListener('visibilitychange', function () { if (!d.hidden) { last = performance.now(); } });
+    d.addEventListener('visibilitychange', onVis);
   }
 
   try {

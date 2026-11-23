@@ -43,7 +43,14 @@ facadeBody:`#include <emissivemap_fragment>
         float dl=dot(texture2D(uDay,fuv).rgb,vec3(0.333));
         float gd=distance(vWP,cameraPosition);float gk=mix(0.3*(1.0-smoothstep(70.0,420.0,gd)),0.75*(1.0-0.6*smoothstep(500.0,1200.0,gd)),uNight)*(1.0-uGlass); /* day: faint grid that clears with distance, so far blocks are clean tones; night keeps its grid. (The glass parts of the landmarks have no day grid.) */
         diffuseColor.rgb*=mix(1.0,clamp(dl*1.9,0.0,1.3),wall*gk);
-        /* ---- night: lit windows, per window cell, per building, stable in world space ---- */
+        float low=1.0-smoothstep(0.5,11.0,max(vWP.y,0.0));
+        float gnd=(1.0-wall)*(1.0-step(2.5,vWP.y));
+        float rad=1.0-smoothstep(120.0,820.0,length(vWP.xz+vec2(60.0,60.0)));
+        float pool=smoothstep(0.3,0.9,vn(vWP.xz/16.0))*0.7+0.3*vn(vWP.xz/5.0);
+        float pg=mix(pool,0.45,smoothstep(120.0,500.0,gd));
+        diffuseColor.rgb*=1.0-(1.0-uNight)*(wall*low*0.2+gnd*rad*0.13*pg); /* by day the same shapes are shade, not light: darker feet on every building and soft cloud shadows drifting over the ground */
+        /* ---- night: lit windows, per window cell, per building, stable in world space (skipped entirely in full daylight) ---- */
+        if(uNight>0.001){
         float al=1.0;int li=-1;
         for(int i=0;i<4;i++){vec4 c=uCut[i];if(distance(vWP.xz,c.xy)<c.z){li=i;if(vWP.y>c.w||vWP.y<uLo[i])al=0.0;}} /* spires and shafts have no floors: no lit rooms there */
         float lmF=li>=0?1.0:0.0;
@@ -90,11 +97,11 @@ facadeBody:`#include <emissivemap_fragment>
           float eon=mix(step(h21(vec2(floor(hq/1.6),ef)+(onX?vec2(0.0):vec2(23.0,5.0))),mix(0.04,0.82,ezone)),mix(0.04,0.82,ezone),df);
           wem=vec3(0.84,0.93,1.0)*ewin*eon*(0.6+0.5*rb)*nl*1.05+vec3(0.5,0.68,1.0)*ewin*0.05*nl;}
         wem+=vec3(0.92,0.96,1.0)*(li==1?step(uCut[1].w,vWP.y)*(1.0-smoothstep(uCut[1].w,uCut[1].w+44.0,vWP.y)):0.0)*0.75*wall*uNight;
-        /* Menara KL, from photos: the shaft floodlit white (the brightest part, faintly fluted, a pink blush at the foot), the pod dark blue-violet with rings of white lamps, a white crown on top of it, the lower antenna lit */
+        /* Menara KL: the shaft floodlit crisp white with a warm ivory foot (no pink/magenta), the pod deep blue-indigo with rings of white lamps, white crown, lit lower antenna */
         float kw=li==3?step(vWP.y,uLo[3]):0.0;
         float kang=atan(vWP.z-uCut[3].y,vWP.x-uCut[3].x);
         float kfl=mix(0.84+0.16*step(0.5,fract(kang*24.0/6.2832)),0.92,df);
-        wem+=mix(vec3(1.0,0.7,0.82),vec3(0.9,0.95,1.0),smoothstep(2.0,26.0,vWP.y))*(0.55+0.3*smoothstep(8.0,78.0,vWP.y))*kfl*kw*uNight;
+        wem+=mix(vec3(1.0,0.9,0.76),vec3(0.9,0.95,1.0),smoothstep(2.0,26.0,vWP.y))*(0.55+0.3*smoothstep(8.0,78.0,vWP.y))*kfl*kw*uNight;
         float kp=li==3?al:0.0;
         float kr=fract(vWP.y/2.1),kd=fract(kang*44.0/6.2832);
         float klamp=mix(smoothstep(0.3,0.5,kr)*(1.0-smoothstep(0.5,0.7,kr))*smoothstep(0.28,0.5,kd)*(1.0-smoothstep(0.5,0.72,kd)),0.16,df);
@@ -102,13 +109,7 @@ facadeBody:`#include <emissivemap_fragment>
         wem=mix(wem,(vec3(0.16,0.2,0.62)*0.55+vec3(0.95,0.97,1.0)*(klamp*1.9+ktop*0.9))*uNight,kp);
         wem+=vec3(0.92,0.96,1.0)*(li==3?step(uCut[3].w,vWP.y)*(1.0-smoothstep(uCut[3].w,uCut[3].w+22.0,vWP.y)):0.0)*0.8*uNight;
         /* sodium street light: amber at the feet of buildings and on the ground near them */
-        float low=1.0-smoothstep(0.5,11.0,max(vWP.y,0.0));
-        float gnd=(1.0-wall)*(1.0-step(2.5,vWP.y));
-        float rad=1.0-smoothstep(120.0,820.0,length(vWP.xz+vec2(60.0,60.0)));
-        float pool=smoothstep(0.3,0.9,vn(vWP.xz/16.0))*0.7+0.3*vn(vWP.xz/5.0);
-        float pg=mix(pool,0.45,smoothstep(120.0,500.0,gd));
         vec3 sod=vec3(1.0,0.5,0.15)*uNight*(wall*low*(0.3+0.45*h21(vec2(floor(hq/4.0),bk.x*3.0+bk.y)))*0.8+gnd*rad*(0.04+0.2*pg));
-        diffuseColor.rgb*=1.0-(1.0-uNight)*(wall*low*0.2+gnd*rad*0.13*pg); /* by day the same shapes are shade, not light: darker feet on every building and soft cloud shadows drifting over the ground */
         /* red aviation lights on a few of the tall flat roofs */
         vec2 rc2=floor(vWP.xz/18.0);
         float rl=step(0.9,fn.y)*step(36.0,vWP.y)*(1.0-lmF)*step(0.8,h21(rc2+vec2(11.3,5.9)))*(1.0-smoothstep(0.7,2.2,length(vWP.xz-(rc2+0.5)*18.0)))*uNight;
@@ -116,5 +117,6 @@ facadeBody:`#include <emissivemap_fragment>
         /* night glow of the landmarks: floodlit Petronas pinnacles, the lantern crown of The Exchange 106 */
         float gP=(1.0-step(uCut[0].z,distance(vWP.xz,uCut[0].xy)))*step(uCut[0].w,vWP.y);
         float gE=(1.0-step(uCut[2].z,distance(vWP.xz,uCut[2].xy)))*step(uCut[2].w-4.0,vWP.y);
-        totalEmissiveRadiance+=uNight*(vec3(1.0,0.95,0.86)*gP*mix(0.16+0.95*mix(smoothstep(0.08,0.24,fract(vWP.y/1.3))*(1.0-smoothstep(0.58,0.78,fract(vWP.y/1.3)))*smoothstep(0.0,0.16,fract(hq/1.15))*(1.0-smoothstep(0.76,0.94,fract(hq/1.15))),0.45,df),0.8,smoothstep(uCut[0].w+17.0,uCut[0].w+22.0,vWP.y))+ /* the crowns keep their windows: smaller floors and bays up the tiers, then the pinnacle's ball and mast lit solid */ gE*(vec3(0.5,0.4,1.0)*0.42+vec3(0.9,0.88,1.0)*mix(max(1.0-smoothstep(0.05,0.12,abs(fract((hq+vWP.y)/3.2)-0.5)),1.0-smoothstep(0.05,0.12,abs(fract((hq-vWP.y)/3.2)-0.5))),0.25,df)*0.85+vec3(1.0)*(1.0-step(uCut[2].w-2.2,vWP.y))*0.9)) /* The Exchange's crown: a violet lantern behind a white diamond lattice, with a bright white rim under it */;`
+        totalEmissiveRadiance+=uNight*(vec3(1.0,0.95,0.86)*gP*mix(0.16+0.95*mix(smoothstep(0.08,0.24,fract(vWP.y/1.3))*(1.0-smoothstep(0.58,0.78,fract(vWP.y/1.3)))*smoothstep(0.0,0.16,fract(hq/1.15))*(1.0-smoothstep(0.76,0.94,fract(hq/1.15))),0.45,df),0.8,smoothstep(uCut[0].w+17.0,uCut[0].w+22.0,vWP.y))+ /* the crowns keep their windows: smaller floors and bays up the tiers, then the pinnacle's ball and mast lit solid */ gE*(vec3(0.45,0.52,1.0)*0.42+vec3(0.9,0.88,1.0)*mix(max(1.0-smoothstep(0.05,0.12,abs(fract((hq+vWP.y)/3.2)-0.5)),1.0-smoothstep(0.05,0.12,abs(fract((hq-vWP.y)/3.2)-0.5))),0.25,df)*0.85+vec3(1.0)*(1.0-step(uCut[2].w-2.2,vWP.y))*0.9));
+        }`
 };

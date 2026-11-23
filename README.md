@@ -205,7 +205,7 @@ Every interactive piece below started as a React + Tailwind component on [21st.d
 | 6 | **Coverflow Carousel** | Album-style covers turned away on each side, detail panel below | `assets/coverflow.js` | UTP section | ✅ live |
 | 7 | **Glassmorphism Folder Cards** | Glass folders that lean on hover and fan out their files when opened | `assets/folders.js` | Notes section | ✅ live |
 | 8 | Number ticker, Timeline beam, Border spotlight, Dock, Marquee | Small effects | `extras.js` | Around the page | ✅ live |
-| 11 | **Chess Grid Transition** (Hyperiux Vault) | A fixed grid of blocks that slides in from the right to cover the view and out to the left to reveal the next one | `assets/home/chess-grid.js` | The Get started gate to the `\7` glass | ✅ live |
+| 11 | **Chess Grid Transition** (Hyperiux Vault) | A fixed grid of blocks that slides in from the right to cover the view and out to the left to reveal the next one | `assets/home/chess-grid.js` | Kept as a reference port; the front-page gate now uses Cosmic Warp Drive (`gate.js`) | 💤 unused |
 
 ### 1 · Tilted Grid Hero → curved reel (`curved-reel.js`)
 

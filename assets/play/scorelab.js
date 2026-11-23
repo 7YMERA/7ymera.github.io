@@ -9,7 +9,7 @@
   var playBtn = d.getElementById('sl-play'), moodBtns = [].slice.call(root.querySelectorAll('[data-sl-mood]'));
   var stemBtns = [].slice.call(root.querySelectorAll('[data-sl-stem]'));
   var reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
-  var active = false, raf = 0, bins = null, wave = null, W = 0, H = 0, dpr = 1;
+  var active = false, raf = 0, bins = null, wave = null, W = 0, H = 0, dpr = 1, lastUiKey = '', prevTrack = null;
 
   function S() { return window.SFX || window.__sfx || null; }
 
@@ -22,13 +22,17 @@
     if (cv.width !== pw || cv.height !== ph) { cv.width = pw; cv.height = ph; }
   }
 
-  function syncUI() {
+  function syncUI(force) {
     var s = S(), on = !!(s && s.on);
+    var st = s && s.state ? s.state() : null;
+    var stems = s && s.stems ? s.stems() : null;
+    var key = (on ? '1' : '0') + '|' + (st ? st.bar + '|' + st.chord + '|' + st.mood + '|' + st.bpm + '|' + st.section : '') + '|' + (stems ? Object.keys(stems).map(function (k) { return stems[k] ? '1' : '0'; }).join('') : '');
+    if (!force && key === lastUiKey) return;
+    lastUiKey = key;
     if (playBtn) {
       playBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
       playBtn.textContent = on ? 'Pause score' : 'Play score';
     }
-    var st = s && s.state ? s.state() : null;
     if (st && on) {
       var bar = (((st.bar - 1) % st.total) + st.total) % st.total + 1;
       if (chordEl) chordEl.textContent = st.chord || '---';
@@ -40,14 +44,13 @@
       if (formEl) formEl.textContent = 'Press Play score to start the Web Audio engine';
       if (bpmEl) bpmEl.textContent = '72 bars';
     }
-    var stems = s && s.stems ? s.stems() : null;
     if (stems) stemBtns.forEach(function (b) { b.setAttribute('aria-pressed', stems[b.dataset.slStem] !== false ? 'true' : 'false'); });
   }
 
   function draw(now) {
     raf = 0;
     if (!active || !ctx) return;
-    size();
+    if (!W || !H) size();
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
 
@@ -135,9 +138,18 @@
 
   d.addEventListener('play-view', function (e) {
     var on = e.detail && e.detail.id === 'scorelab';
+    var s = S();
+    if (on && !active && s && s.setTrack) {
+      prevTrack = s.track ? s.track() : 'lab';
+      s.setTrack('home'); // switch to the 72-bar Day/Golden/Night procedural score while Score Lab is open
+    } else if (!on && active && s && s.setTrack && prevTrack) {
+      s.setTrack(prevTrack);
+      prevTrack = null;
+    }
     active = on;
-    if (on) { size(); syncUI(); if (!raf) raf = requestAnimationFrame(draw); }
+    if (on) { size(); syncUI(true); if (!raf) raf = requestAnimationFrame(draw); }
     else if (raf) { cancelAnimationFrame(raf); raf = 0; }
   });
   window.addEventListener('resize', function () { if (active) size(); });
+  if (window.ResizeObserver && cv) new ResizeObserver(function () { if (active) size(); }).observe(cv);
 })();

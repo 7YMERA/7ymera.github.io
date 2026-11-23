@@ -87,8 +87,10 @@
     var me = this; this._loop = function (t) { me.frame(t); };
     this.readSky();
     this.size();
-    this.loadLand();
+    this.landLoaded = false;
+    if (!(window.OrbitStage && window.OrbitStage.intent)) this.loadLand();
     var self = this;
+    document.addEventListener('orbit-state', function () { if (!(window.OrbitStage && window.OrbitStage.intent) && !self.landLoaded) self.loadLand(); });
     if ('ResizeObserver' in window) new ResizeObserver(function () { self.size(); self.cache = {}; self.kick(); }).observe(this.stage);
     new IntersectionObserver(function (en) { self.visible = en[0].isIntersecting; if (self.visible) self.kick(); }, { rootMargin: '10% 0px' }).observe(section);
     var SB = window.ScrollBus || {
@@ -97,11 +99,12 @@
     };
     SB.read(function () { self.readScroll(); return function () { self.kick(); }; });
     SB.move(function (e) {
+      if (!self.visible) return;
       var r = self.stage.getBoundingClientRect();
       return function () {
         self.tmx = e.clientX / innerWidth - .5; self.tmy = e.clientY / innerHeight - .5;
         self.px = e.clientX - r.left; self.py = e.clientY - r.top;
-        if (self.visible) self.kick();
+        self.kick();
       };
     });
     new MutationObserver(function () { self.readSky(); self.cache = {}; self.kick(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
@@ -121,6 +124,8 @@
   };
 
   Descent.prototype.loadLand = function () {
+    if (this.landLoaded) return;
+    this.landLoaded = true;
     var me = this;
     fetch('/assets/halcyon/land.json').then(function (r) { return r.json(); }).then(function (j) {
       var raw = b64(j.data), w = j.w, h = j.h, n = w * h, L = new Float32Array(n), M = new Float32Array(n);

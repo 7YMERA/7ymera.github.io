@@ -12,7 +12,8 @@
    Reduced motion: previews and the hero draw one still frame. Nothing here animates anything but transform and opacity in CSS. */
 (function () {
   'use strict';
-  var d = document, root = d.documentElement, body = d.body;
+  var d = document, root = d.documentElement, body = d.body, VER = '';
+  try { VER = (d.currentScript && d.currentScript.src.match(/[?&]v=([^&]+)/) || [])[1] || ''; } catch (e) {}
   var PAGE = body.getAttribute('data-page') === 'lab' ? 'lab' : 'play', PAGE_NAME = PAGE === 'lab' ? 'Lab' : 'Play', BASE_TITLE = d.title;
   var calmQ = matchMedia('(prefers-reduced-motion: reduce)');
   function calm() { return calmQ.matches; }
@@ -205,7 +206,7 @@
       ['data-db', 'data-drift'].forEach(function (a) { var v = node.getAttribute(a); if (v) node.setAttribute(a, v.replace(/^\.\.\//, '/')); });
       host.textContent = ''; host.appendChild(node);
       // the scripts bind to the element's id when they run, so run a fresh copy each time
-      var s = d.createElement('script'); s.src = c.js + '?v=20261121a&m=' + seq; s.async = false; host.appendChild(s);
+      var s = d.createElement('script'); s.src = c.js + '?v=' + (VER || '20261123q') + '&m=' + seq; s.async = false; host.appendChild(s);
     }).catch(function () {
       if (seq !== sqlSeq) return; sqlNow = '';
       host.innerHTML = '<p class="sql-wait">Could not load the playground. <a href="' + c.note + '">Open it in the note instead</a>.</p>';

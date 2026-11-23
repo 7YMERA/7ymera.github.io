@@ -10,13 +10,14 @@
 <link rel="icon" href="/assets/icons/favicon.ico" sizes="32x32">
 <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/favicon-192.png">
 <link rel="manifest" href="/site.webmanifest">
+<script>(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}})()</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=20261123p">
-<link rel="stylesheet" href="../assets/scene.css?v=20261123p">
-<link rel="stylesheet" href="../assets/timeofday.css?v=20261123p">
-<link rel="stylesheet" href="/assets/palette.css?v=20261123p">
+<link rel="stylesheet" href="../assets/site.css?v=20261123q">
+<link rel="stylesheet" href="../assets/scene.css?v=20261123q">
+<link rel="stylesheet" href="../assets/timeofday.css?v=20261123q">
+<link rel="stylesheet" href="/assets/palette.css?v=20261123q">
 <style>
 /* Flight-only page: the scene is the page. Nothing but the debug panel (opt-in) sits on top of it. */
 html.gl body{margin:0;background:var(--sky-mid)} /* the sky gradient is #skybg (scene.css), a fixed layer; a fixed body background repaints on every scroll */
@@ -41,10 +42,10 @@ html.fp-on .fp{display:grid}
   <h1 class="sr-only">The flight over Kuala Lumpur</h1>
   <section class="enter" id="enter" aria-label="Scroll to fly through Kuala Lumpur">
     <div class="enter-sticky">
-      <div class="hud" id="hud" aria-hidden="true">
-        <i class="hud-c tl"></i><i class="hud-c tr"></i><i class="hud-c bl"></i><i class="hud-c br"></i>
-        <div class="hud-tags"></div>
-        <div class="hud-side">
+      <div class="hud" id="hud">
+        <i class="hud-c tl" aria-hidden="true"></i><i class="hud-c tr" aria-hidden="true"></i><i class="hud-c bl" aria-hidden="true"></i><i class="hud-c br" aria-hidden="true"></i>
+        <div class="hud-tags" aria-label="Kuala Lumpur landmark portals"></div>
+        <div class="hud-side" aria-hidden="true">
           <p class="hud-read"><span>ALT</span><b><span id="h-alt">0</span> m</b></p>
           <div class="hud-rail"><i class="hud-fill" id="h-fill"></i><ol class="hud-ticks"></ol></div>
           <p class="hud-sec" id="h-sec"></p>
@@ -79,11 +80,11 @@ html.fp-on .fp{display:grid}
   <p class="fp-keys"><kbd>H</kbd> panel &nbsp;<kbd>Space</kbd> auto-fly &nbsp;<kbd>&larr;</kbd><kbd>&rarr;</kbd> nudge &nbsp;<kbd>U</kbd> captions &nbsp;<kbd>T</kbd> day / night</p>
 </aside>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
-<script src="../assets/scrollbus.js?v=20261123p" defer></script>
-<script src="../assets/scene-glsl.js?v=20261123p" defer></script>
-<script src="../assets/scene.js?v=20261123p" defer></script>
-<script src="../assets/timeofday.js?v=20261123p" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous" defer></script>
+<script src="../assets/scrollbus.js?v=20261123q" defer></script>
+<script src="../assets/scene-glsl.js?v=20261123q" defer></script>
+<script src="../assets/scene.js?v=20261123q" defer></script>
+<script src="../assets/timeofday.js?v=20261123q" defer></script>
 <script>
 /* The viewer: everything here is optional. Without it, scrolling flies the route. */
 (function(){
@@ -132,7 +133,7 @@ html.fp-on .fp{display:grid}
   requestAnimationFrame(tick);
 })();
 </script>
-<script src="/assets/passport.js?v=20261123p" defer></script>
-<script src="/assets/palette.js?v=20261123p" defer></script>
+<script src="/assets/passport.js?v=20261123q" defer></script>
+<script src="/assets/palette.js?v=20261123q" defer></script>
 </body>
 </html>

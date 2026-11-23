@@ -306,14 +306,23 @@
 
 
     /* ================= ZONES: glass (airy bed), cosmos (orbit), city (the score) + one-shot cues ================= */
-    var zlog = [], zconn = { g: true, c: true, y: true };
-    function act(z, t) { var cur = false, off = -1; for (var k = 0; k < zlog.length; k++) { var ev = zlog[k]; if (ev.t > t + .001) break; if (ev.z === z) cur = true; else if (cur) { cur = false; off = ev.t + ev.tc * 5 + .5; } } return cur || t < off; }
-    // a shared, brighter reverb for the airy zones and the cues (impulse built once in sharedBuffers)
-    var irE = SB.irE;
-    var convE = ac.createConvolver(); convE.buffer = irE; var eRet = g(.7); convE.connect(eRet); eRet.connect(mix);
+    var hasZones = opts.zones !== false;
+    var zlog = [], zconn = { g: hasZones, c: hasZones, y: true };
+    function act(z, t) {
+      if (!hasZones && z !== 'y') return false;
+      var cur = false, off = -1;
+      for (var k = 0; k < zlog.length; k++) { var ev = zlog[k]; if (ev.t > t + .001) break; if (ev.z === z) cur = true; else if (cur) { cur = false; off = ev.t + ev.tc * 5 + .5; } }
+      return cur || t < off;
+    }
+    // a shared, brighter reverb for the airy zones and the cues (on non-zone pages, reuse main conv to save a full stereo ConvolverNode)
+    var convE = conv;
+    if (hasZones) {
+      var irE = SB.irE;
+      convE = ac.createConvolver(); convE.buffer = irE; var eRet = g(.7); convE.connect(eRet); eRet.connect(mix);
+    }
     function zbus(rev) { var z = { src: g(1), zin: g(0) }; z.src.connect(z.zin); z.zin.connect(mix); z.rs = g(rev); z.zin.connect(z.rs); z.rs.connect(convE); return z; }
-    var Zc = zbus(.8), Zg = zbus(1);
-    var zNode = { g: Zg.zin, c: Zc.zin, y: cityZ }, zLevel = { g: 1.25, c: .45, y: 1 };
+    var Zc = hasZones ? zbus(.8) : null, Zg = hasZones ? zbus(1) : null;
+    var zNode = { g: Zg ? Zg.zin : null, c: Zc ? Zc.zin : null, y: cityZ }, zLevel = { g: 1.25, c: .45, y: 1 };
     var Cue = g(1.5), cueRev = g(.45); Cue.connect(mix); Cue.connect(cueRev); cueRev.connect(convE);
     function crystal(t, m, vel, pn, dur, dest, ratio) {
       if (live > MAXLIVE) return; live++; var f = hz(m), cr = osc('sine', f), md = osc('sine', f * (ratio || 3.5)), mg = g(0), h2 = osc('sine', f * 2), hg = g(.18), e = g(0), p = pan(pn);
@@ -322,39 +331,43 @@
       md.connect(mg); mg.connect(cr.frequency); cr.connect(e); h2.connect(hg); hg.connect(e); e.connect(p); p.connect(dest);
       cr.onended = function () { live--; }; cr.start(t); md.start(t); h2.start(t); cr.stop(t + dur + .05); md.stop(t + dur + .05); h2.stop(t + dur + .05);
     }
-    /* cosmos: sub drone, orbit pad with a slow sweep, choir formants, crystalline arps into a long ping-pong, star twinkles, thin atmosphere */
-    var cArp = g(1), cdIn = g(.7), cdL = ac.createDelay(4), cdR = ac.createDelay(4), cfL = g(.58), cfR = g(.58), clL = flt('lowpass', 3600), clR = flt('lowpass', 3600), cpL = pan(-.85), cpR = pan(.85);
-    cdL.delayTime.value = .94; cdR.delayTime.value = .94; cArp.connect(Zc.src); cArp.connect(cdIn); cdIn.connect(cdL); cdL.connect(cpL); cdR.connect(cpR); cdL.connect(clL); clL.connect(cfL); cfL.connect(cdR); cdR.connect(clR); clR.connect(cfR); cfR.connect(cdL); cpL.connect(Zc.src); cpR.connect(Zc.src);
-    var cSub = osc('sine', 36.7), cSubG = g(.2); cSub.connect(cSubG); cSubG.connect(Zc.src); cSub.start();
-    var cDrF = flt('lowpass', 170, .7), cDrG = g(.06), cDr = [osc('sawtooth', 73.4), osc('sawtooth', 73.4)]; cDr[0].detune.value = -7; cDr[1].detune.value = 7; cDr.forEach(function (o) { o.connect(cDrF); o.start(); }); cDrF.connect(cDrG); cDrG.connect(Zc.src);
-    var cdl = osc('sine', .021), cdlg = g(70); cdl.connect(cdlg); cdlg.connect(cDrF.frequency); cdl.start();
-    var cPadF = flt('lowpass', 1300, .9), cPadG = g(.075), cPad = []; cPadF.connect(cPadG); cPadG.connect(Zc.src);
-    var orb1 = osc('sine', .037), orb1g = g(900), orb2 = osc('sine', .0113), orb2g = g(520); orb1.connect(orb1g); orb1g.connect(cPadF.frequency); orb2.connect(orb2g); orb2g.connect(cPadF.frequency); orb1.start(); orb2.start();
-    [-.6, -.2, .2, .6].forEach(function (pv) { var a = osc('sawtooth', 220), b = osc('sawtooth', 220), va = g(.22), vb = g(.22), pa = pan(clamp(pv - .35, -1, 1)), pb = pan(clamp(pv + .35, -1, 1)); a.detune.value = -9; b.detune.value = 9; a.connect(va); va.connect(pa); pa.connect(cPadF); b.connect(vb); vb.connect(pb); pb.connect(cPadF); a.start(); b.start(); cPad.push([a, b]); });
-    var cChIn = g(1), cChSw = g(.55), cChOut = g(.9), cForm = [[800, 10, 1], [1150, 12, .55], [2900, 14, .22]].map(function (fq) { var f = flt('bandpass', fq[0], fq[1]), fg = g(fq[2]); cChIn.connect(f); f.connect(fg); fg.connect(cChSw); return f; });
-    cChSw.connect(cChOut); cChOut.connect(Zc.src); cChOut.connect(Zc.rs);
-    var chSwL = osc('sine', .055), chSwG = g(.4); chSwL.connect(chSwG); chSwG.connect(cChSw.gain); chSwL.start();
-    var chVib = osc('sine', 5.2), chVibG = g(11); chVib.connect(chVibG); chVib.start(); var cCh = [];
-    [0, 1, 2].forEach(function (v) { var a = osc('sawtooth', 220), b = osc('sawtooth', 220), vg = g(.085); a.detune.value = -6; b.detune.value = 6; chVibG.connect(a.detune); chVibG.connect(b.detune); a.connect(vg); b.connect(vg); vg.connect(cChIn); a.start(); b.start(); cCh.push([a, b]); });
-    var cAtmF = flt('bandpass', 520, .6), cAtmG = g(.05), cAtmP = pan(0), cAtmL = mkLoop(ac, brown, cAtmF, 5); cAtmF.connect(cAtmG); cAtmG.connect(cAtmP); cAtmP.connect(Zc.src);
-    var atL = osc('sine', .03), atG = g(280); atL.connect(atG); atG.connect(cAtmF.frequency); atL.start(); if (cAtmP.pan) { var apL = osc('sine', .045), apG = g(.7); apL.connect(apG); apG.connect(cAtmP.pan); apL.start(); }
-    var cGlF = flt('bandpass', 6200, 1), cGlG = g(.006), cGlL = mkLoop(ac, white, cGlF, 1.5); cGlF.connect(cGlG); cGlG.connect(Zc.src);
+    var cArp = null, cSub = null, cDr = null, cPad = null, cCh = null, cForm = null, cAtmL = null, cGlL = null, gOs = null, gAirL = null;
     // D lydian-ish orbit chords, 16 seconds each: [root, pad voices, choir voices, vowel]
     var VOW = [[800, 1150, 2900], [450, 800, 2830], [325, 700, 2530], [530, 1840, 2480]];
     var COS = [[38, [57, 61, 64, 69], [62, 69, 73], 0], [35, [54, 62, 66, 69], [62, 66, 73], 1], [43, [55, 62, 66, 71], [67, 71, 74], 2], [45, [57, 64, 69, 71], [64, 69, 76], 3]];
+    var GS = [[88, 95, 92, 99], [86, 93, 90, 97], [84, 91, 88, 95], [90, 97, 93, 100]];
+    if (hasZones) {
+      /* cosmos: sub drone, orbit pad with a slow sweep, choir formants, crystalline arps into a long ping-pong, star twinkles, thin atmosphere */
+      cArp = g(1); var cdIn = g(.7), cdL = ac.createDelay(4), cdR = ac.createDelay(4), cfL = g(.58), cfR = g(.58), clL = flt('lowpass', 3600), clR = flt('lowpass', 3600), cpL = pan(-.85), cpR = pan(.85);
+      cdL.delayTime.value = .94; cdR.delayTime.value = .94; cArp.connect(Zc.src); cArp.connect(cdIn); cdIn.connect(cdL); cdL.connect(cpL); cdR.connect(cpR); cdL.connect(clL); clL.connect(cfL); cfL.connect(cdR); cdR.connect(clR); clR.connect(cfR); cfR.connect(cdL); cpL.connect(Zc.src); cpR.connect(Zc.src);
+      cSub = osc('sine', 36.7); var cSubG = g(.2); cSub.connect(cSubG); cSubG.connect(Zc.src); cSub.start();
+      var cDrF = flt('lowpass', 170, .7), cDrG = g(.06); cDr = [osc('sawtooth', 73.4), osc('sawtooth', 73.4)]; cDr[0].detune.value = -7; cDr[1].detune.value = 7; cDr.forEach(function (o) { o.connect(cDrF); o.start(); }); cDrF.connect(cDrG); cDrG.connect(Zc.src);
+      var cdl = osc('sine', .021), cdlg = g(70); cdl.connect(cdlg); cdlg.connect(cDrF.frequency); cdl.start();
+      var cPadF = flt('lowpass', 1300, .9), cPadG = g(.075); cPad = []; cPadF.connect(cPadG); cPadG.connect(Zc.src);
+      var orb1 = osc('sine', .037), orb1g = g(900), orb2 = osc('sine', .0113), orb2g = g(520); orb1.connect(orb1g); orb1g.connect(cPadF.frequency); orb2.connect(orb2g); orb2g.connect(cPadF.frequency); orb1.start(); orb2.start();
+      [-.6, -.2, .2, .6].forEach(function (pv) { var a = osc('sawtooth', 220), b = osc('sawtooth', 220), va = g(.22), vb = g(.22), pa = pan(clamp(pv - .35, -1, 1)), pb = pan(clamp(pv + .35, -1, 1)); a.detune.value = -9; b.detune.value = 9; a.connect(va); va.connect(pa); pa.connect(cPadF); b.connect(vb); vb.connect(pb); pb.connect(cPadF); a.start(); b.start(); cPad.push([a, b]); });
+      var cChIn = g(1), cChSw = g(.55), cChOut = g(.9); cForm = [[800, 10, 1], [1150, 12, .55], [2900, 14, .22]].map(function (fq) { var f = flt('bandpass', fq[0], fq[1]), fg = g(fq[2]); cChIn.connect(f); f.connect(fg); fg.connect(cChSw); return f; });
+      cChSw.connect(cChOut); cChOut.connect(Zc.src); cChOut.connect(Zc.rs);
+      var chSwL = osc('sine', .055), chSwG = g(.4); chSwL.connect(chSwG); chSwG.connect(cChSw.gain); chSwL.start();
+      var chVib = osc('sine', 5.2), chVibG = g(11); chVib.connect(chVibG); chVib.start(); cCh = [];
+      [0, 1, 2].forEach(function (v) { var a = osc('sawtooth', 220), b = osc('sawtooth', 220), vg = g(.085); a.detune.value = -6; b.detune.value = 6; chVibG.connect(a.detune); chVibG.connect(b.detune); a.connect(vg); b.connect(vg); vg.connect(cChIn); a.start(); b.start(); cCh.push([a, b]); });
+      var cAtmF = flt('bandpass', 520, .6), cAtmG = g(.05), cAtmP = pan(0); cAtmL = mkLoop(ac, brown, cAtmF, 5); cAtmF.connect(cAtmG); cAtmG.connect(cAtmP); cAtmP.connect(Zc.src);
+      var atL = osc('sine', .03), atG = g(280); atL.connect(atG); atG.connect(cAtmF.frequency); atL.start(); if (cAtmP.pan) { var apL = osc('sine', .045), apG = g(.7); apL.connect(apG); apG.connect(cAtmP.pan); apL.start(); }
+      var cGlF = flt('bandpass', 6200, 1), cGlG = g(.006); cGlL = mkLoop(ac, white, cGlF, 1.5); cGlF.connect(cGlG); cGlG.connect(Zc.src);
+      /* glass: a quiet high shimmer pad and very sparse glassy bells */
+      var gHP = flt('highpass', 1100, .5), gTr = g(.65), gSh = g(.024); gOs = []; gHP.connect(gTr); gTr.connect(gSh); gSh.connect(Zg.src);
+      var gtl = osc('sine', .13), gtg = g(.35); gtl.connect(gtg); gtg.connect(gTr.gain); gtl.start();
+      [0, 1, 2, 3].forEach(function (k) { var a = osc('sine', 2000), b = osc('sine', 2000); a.detune.value = -1.4; b.detune.value = 1.4; var vg = g(.25); a.connect(vg); b.connect(vg); vg.connect(gHP); a.start(); b.start(); gOs.push([a, b]); });
+      var gAirF = flt('bandpass', 7000, .9), gAirG = g(.004); gAirL = mkLoop(ac, white, gAirF, 1.5); gAirF.connect(gAirG); gAirG.connect(Zg.src);
+    }
     function applyCos(t, c) {
+      if (!hasZones) return;
       var gl = 3; cSub.frequency.setTargetAtTime(hz(c[0]), t, gl); cDr[0].frequency.setTargetAtTime(hz(c[0] + 12), t, gl); cDr[1].frequency.setTargetAtTime(hz(c[0] + 12), t, gl);
       for (var v = 0; v < 4; v++) { cPad[v][0].frequency.setTargetAtTime(hz(c[1][v]), t, gl); cPad[v][1].frequency.setTargetAtTime(hz(c[1][v]), t, gl); }
       for (v = 0; v < 3; v++) { cCh[v][0].frequency.setTargetAtTime(hz(c[2][v]), t, gl); cCh[v][1].frequency.setTargetAtTime(hz(c[2][v]), t, gl); }
       for (v = 0; v < 3; v++) cForm[v].frequency.setTargetAtTime(VOW[c[3]][v], t, 2.2);
     }
-    /* glass: a quiet high shimmer pad and very sparse glassy bells */
-    var gHP = flt('highpass', 1100, .5), gTr = g(.65), gSh = g(.024), gOs = []; gHP.connect(gTr); gTr.connect(gSh); gSh.connect(Zg.src);
-    var gtl = osc('sine', .13), gtg = g(.35); gtl.connect(gtg); gtg.connect(gTr.gain); gtl.start();
-    [0, 1, 2, 3].forEach(function (k) { var a = osc('sine', 2000), b = osc('sine', 2000); a.detune.value = -1.4; b.detune.value = 1.4; var vg = g(.25); a.connect(vg); b.connect(vg); vg.connect(gHP); a.start(); b.start(); gOs.push([a, b]); });
-    var gAirF = flt('bandpass', 7000, .9), gAirG = g(.004), gAirL = mkLoop(ac, white, gAirF, 1.5); gAirF.connect(gAirG); gAirG.connect(Zg.src);
-    var GS = [[88, 95, 92, 99], [86, 93, 90, 97], [84, 91, 88, 95], [90, 97, 93, 100]];
-    function applyGlass(t, c) { for (var k = 0; k < 4; k++) { var f = hz(c[k]); gOs[k][0].frequency.setTargetAtTime(f, t, 3); gOs[k][1].frequency.setTargetAtTime(f, t, 3); } }
+    function applyGlass(t, c) { if (!hasZones) return; for (var k = 0; k < 4; k++) { var f = hz(c[k]); gOs[k][0].frequency.setTargetAtTime(f, t, 3); gOs[k][1].frequency.setTargetAtTime(f, t, 3); } }
     /* the ambient clock: one "bar" is four seconds; the chord changes every four bars */
     var AMB = 4, amb = { nextT: 0, bar: 0, cosC: -1, glC: -1 };
     function ambBar(t0, bar) {
@@ -441,18 +454,18 @@
       [0, 7, 12, 19].forEach(function (iv, j) { var o = osc('sine', hz(50 + iv)), en = cueEnv(t + 1.4, 1.2, .03, 0, 1.8); o.frequency.setValueAtTime(hz(50 + iv) * .8, t + 1.4); o.frequency.exponentialRampToValueAtTime(hz(50 + iv), t + 2.6); o.connect(en); en.connect(Cue); o.start(t + 1.4); o.stop(t + 4.5); });
     };
     E.setZone = function (name, t, tc) {
-      var z = name === 'glass' ? 'g' : name === 'cosmos' ? 'c' : 'y'; zlog.push({ t: t, z: z, tc: tc || 0 }); if (zlog.length > 12) zlog.shift();
-      ['g', 'c', 'y'].forEach(function (k) { var v = k === z ? zLevel[k] : 0, pr = zNode[k].gain; if (tc > 0) pr.setTargetAtTime(v, t, tc); else pr.setValueAtTime(v, t); });
+      var z = !hasZones ? 'y' : (name === 'glass' ? 'g' : name === 'cosmos' ? 'c' : 'y'); zlog.push({ t: t, z: z, tc: tc || 0 }); if (zlog.length > 12) zlog.shift();
+      ['g', 'c', 'y'].forEach(function (k) { if (!zNode[k]) return; var v = k === z ? zLevel[k] : 0, pr = zNode[k].gain; if (tc > 0) pr.setTargetAtTime(v, t, tc); else pr.setValueAtTime(v, t); });
       if (z === 'y') cityLP.frequency.setTargetAtTime(20000, t, .3);
       if (amb.nextT > t + .2) amb.nextT = t + .1;
       if (opts.power) E.power(t);
     };
-    function wire(k, on) { if (zconn[k] === on) return; zconn[k] = on; try { if (k === 'y') { if (on) cityLP.connect(cityZ); else cityLP.disconnect(cityZ); } else { var Z = k === 'c' ? Zc : Zg; if (on) Z.src.connect(Z.zin); else Z.src.disconnect(Z.zin); } } catch (x) {} }
+    function wire(k, on) { if (zconn[k] === on) return; zconn[k] = on; try { if (k === 'y') { if (on) cityLP.connect(cityZ); else cityLP.disconnect(cityZ); } else if (hasZones) { var Z = k === 'c' ? Zc : Zg; if (on) Z.src.connect(Z.zin); else Z.src.disconnect(Z.zin); } } catch (x) {} }
     // zone gating: a zone's connection and its noise loops are live only while the zone is audible (or fading); see mkLoop
-    var zLoops = { y: [humL, cityL], c: [cAtmL, cGlL], g: [gAirL] };
+    var zLoops = { y: [humL, cityL], c: hasZones ? [cAtmL, cGlL] : [], g: hasZones ? [gAirL] : [] };
     function gateLoops(k, on) { var t0 = opts.power ? ac.currentTime : 0; zLoops[k].forEach(function (l) { if (on) l.start(t0); else l.stop(t0); }); }
-    E.power = function (t) { ['y', 'c', 'g'].forEach(function (k) { var a = act(k, t); wire(k, a); gateLoops(k, a); }); };
-    if (!opts.power) gateLoops('y', true), gateLoops('c', true), gateLoops('g', true);   // offline: everything runs, as before
+    E.power = function (t) { (hasZones ? ['y', 'c', 'g'] : ['y']).forEach(function (k) { var a = act(k, t); wire(k, a); gateLoops(k, a); }); };
+    if (!opts.power) { gateLoops('y', true); if (hasZones) { gateLoops('c', true); gateLoops('g', true); } }   // offline: everything runs, as before
     E.zones = function (t) { return { glass: act('g', t), cosmos: act('c', t), city: act('y', t) }; };
 
     /* sequencer state */
@@ -463,6 +476,12 @@
       return m;
     }
     var trk = env.track || TRACK_ID;
+    E.setTrack = function (id, t) {
+      if (!TRACK_META[id] || id === trk) return;
+      trk = id; env.track = id; st.ch = null; st.mood = null; st.bpm = tempoFor(env.T);
+      if (t != null) ctrl(t);
+    };
+    E.track = function () { return trk; };
     function tempoFor(T) {
       if (trk === 'portfolio') return 78;
       if (trk === 'play') return 124;
@@ -631,7 +650,7 @@
         });
       }
       /* bells: sparse pings from the chord, in the intro, bridge and outro */
-      if (lay.bells && pool.length > 3 && (bo % 2 === 0 || name === 'Bridge')) bell(S(rnd() < .5 ? 0 : 6), pool[pool.length - 1 - (rnd() * 3 | 0)] + 12 > 96 ? pool[pool.length - 1] : pool[pool.length - 1 - (rnd() * 3 | 0)] + 12, .55, rnd() * 1.4 - .7, 4);
+      if (lay.bells && pool.length > 3 && (bo % 2 === 0 || name === 'Bridge')) { var bm = pool[pool.length - 1 - (rnd() * 3 | 0)]; bell(S(rnd() < .5 ? 0 : 6), bm + 12 > 96 ? bm : bm + 12, .55, rnd() * 1.4 - .7, 4); }
       /* drums */
       var dv = en;
       if (lay.kick) {
@@ -667,7 +686,7 @@
     E.pump = function (until) {
       var n = 0; if (opts.power) { E.resync(ac.currentTime); E.power(until); }
       if (act('y', until)) { while (st.nextT < until && n++ < 4) { var len = buildBar(st.bar, st.nextT); st.nextT += len; st.bar++; } } else if (st.nextT < until) st.nextT = until;
-      n = 0; while (amb.nextT < until && n++ < 3) { ambBar(amb.nextT, amb.bar); amb.nextT += AMB; amb.bar++; }
+      if (hasZones) { n = 0; while (amb.nextT < until && n++ < 3) { ambBar(amb.nextT, amb.bar); amb.nextT += AMB; amb.bar++; } }
     };
     E.state = function () { var L = locate(st.bar - 1 < 0 ? 0 : st.bar - 1); return { bar: st.bar, total: TOTAL, section: trk === 'home' ? L.seg.n : (st.lastSeg || trk), track: trk, bo: L.bo, bpm: Math.round(st.bpm), chord: st.ch ? st.ch.name : '', mood: st.mood, nextT: st.nextT, live: live }; };
     E.train = function (t) { train(t, 8, Math.random() < .5 ? -1 : 1); };
@@ -699,10 +718,8 @@
     var key = env.flight + '|' + env.ctx + '|' + env.energy;   // ctrl() writes a dozen automation events: only when the page state moved
     if (key !== lastKey) { lastKey = key; if (eng && ac) eng.ctrl(ac.currentTime); }
   }
-  // page reading while sound is on: one rAF per frame, reads first (rects), writes after (attribute, audio params)
-  var pageRaf = 0;
-  function pageFrame() { pageRaf = 0; if (!on || d.hidden) return; readPage(); pageRaf = requestAnimationFrame(pageFrame); }
-  function pageKick() { if (!pageRaf && on && !d.hidden) pageRaf = requestAnimationFrame(pageFrame); }
+  // page reading is driven by scroll, resize, and root class changes (flying/free-fly) instead of a 60fps idle rAF loop
+  new MutationObserver(function () { if (on && !d.hidden) readPage(); }).observe(root, { attributes: true, attributeFilter: ['class'] });
   // the zone that fills most of the viewport (sections marked data-sfx-zone); pages without any keep the plain score
   var zone = null, zoneEls = null;
   function pickZone() {
@@ -723,7 +740,7 @@
     if (!Ctx) return false;
     try {
       ac = new Ctx(); env.T = sceneT(); readPage(true);
-      eng = Engine(ac, env, { power: true });
+      eng = Engine(ac, env, { power: true, zones: !!d.querySelector('[data-sfx-zone]') });
       fadeG = ac.createGain(); fadeG.gain.value = 0; uiG = ac.createGain(); uiG.gain.value = .9;
       // Subtle scroll-velocity wind layer (active during orbital descent & KL drone flight)
       var wLen = ac.sampleRate * 2, wBuf = ac.createBuffer(1, wLen, ac.sampleRate), wData = wBuf.getChannelData(0), b0 = 0, b1 = 0, b2 = 0;
@@ -772,7 +789,7 @@
     v = !!v;
     if (v) {
       if (!ensure()) { on = false; sync(); return; }
-      on = true; started = performance.now(); armed = ac.state !== 'running'; clearTimeout(offTimer); var pr = ac.resume(); if (pr && pr.then) pr.then(onState, function () {}); fadeTo(vgain(), 1.5); loop(); pageKick(); if (!armed) onState();
+      on = true; started = performance.now(); armed = ac.state !== 'running'; clearTimeout(offTimer); var pr = ac.resume(); if (pr && pr.then) pr.then(onState, function () {}); fadeTo(vgain(), 1.5); loop(); readPage(true); if (!armed) onState();
     } else {
       on = false; armed = false; disarm(); if (ac) { fadeTo(0, 1.5); clearTimeout(offTimer); offTimer = setTimeout(function () { if (!on && ac && ac.state === 'running') ac.suspend(); }, 1700); }   // the context is kept (nothing is rebuilt); suspended it costs nothing
     }
@@ -800,6 +817,8 @@
     stems: function () { return eng ? eng.stems() : { pad: true, bass: true, keys: true, lead: true, air: true, drums: true }; },
     setStem: function (k, v) { if (!on) set(true); if (eng && ac) eng.setStem(k, v, ac.currentTime); },
     setMood: function (t) { env.T = clamp(+t, 0, 2); if (!on) set(true); if (eng && ac) eng.ctrl(ac.currentTime); },
+    track: function () { return env.track || TRACK_ID; },
+    setTrack: function (id) { if (!TRACK_META[id]) return; env.track = id; if (eng && ac) eng.setTrack(id, ac.currentTime); paintPop(); },
     setRain: function (v) {
       if (!ac || !rainG || !rainL) return;
       var t = ac.currentTime, p = rainG.gain; p.cancelScheduledValues(t);
@@ -863,8 +882,10 @@
   function paintPop() {
     if (!pop) return; var p = Math.round(vol * 100); rng.value = p; rng.style.setProperty('--p', p + '%'); outEl.textContent = p + '%';
     var b = pop.querySelector('button'); b.setAttribute('aria-pressed', on || armed ? 'true' : 'false'); b.textContent = on ? 'Sound on: tap to stop' : armed ? 'Starts at your next tap' : 'Sound off: tap to play';
-    var tm = TRACK_META[TRACK_ID] || TRACK_META.home, s = api.state();
-    if (s && on) secEl.textContent = s.section + ' · bar ' + (((s.bar - 1) % 72 + 72) % 72 + 1) + (TRACK_ID === 'home' ? '/72' : '') + ' · ' + s.bpm + ' bpm' + (TRACK_ID === 'home' ? ' · ' + ['day', 'golden hour', 'night'][s.mood == null ? 0 : s.mood] : '');
+    var activeTrack = env.track || TRACK_ID;
+    var tm = TRACK_META[activeTrack] || TRACK_META.home, s = api.state();
+    var tb = pop.querySelector('b'); if (tb && tb.textContent !== tm.title) tb.textContent = tm.title;
+    if (s && on) secEl.textContent = s.section + ' · bar ' + (((s.bar - 1) % 72 + 72) % 72 + 1) + (activeTrack === 'home' ? '/72' : '') + ' · ' + s.bpm + ' bpm' + (activeTrack === 'home' ? ' · ' + ['day', 'golden hour', 'night'][s.mood == null ? 0 : s.mood] : '');
     else secEl.textContent = tm.sub;
   }
   function popShow(autoHide) {
@@ -930,7 +951,7 @@
     });
   }
   addEventListener('scroll', onScroll, { passive: true }); addEventListener('resize', onScroll);
-  d.addEventListener('visibilitychange', function () { if (!ac || !on) return; if (d.hidden) ac.suspend(); else { var pr = ac.resume(); if (eng) eng.resync(ac.currentTime); if (pr && pr.then) pr.then(function () { if (eng && ac) eng.resync(ac.currentTime); onState(); }, function () {}); meterKick(); pageKick(); } });
+  d.addEventListener('visibilitychange', function () { if (!ac || !on) return; if (d.hidden) ac.suspend(); else { var pr = ac.resume(); if (eng) eng.resync(ac.currentTime); if (pr && pr.then) pr.then(function () { if (eng && ac) eng.resync(ac.currentTime); onState(); }, function () {}); meterKick(); readPage(true); } });
   var armGate = 0, armEvs = ['pointerdown', 'pointerup', 'touchstart', 'touchend', 'keydown', 'click'];
   function go(e) {
     if (e && e.type === 'keydown' && (e.key === 'Escape' || e.key === 'Shift' || e.key === 'Control' || e.key === 'Alt' || e.key === 'Meta')) return;   // those do not count as a user activation

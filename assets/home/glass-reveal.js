@@ -473,7 +473,7 @@ void main() {
     var loc = gl.getAttribLocation(prog, 'aPos'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     var U = {}, count = gl.getProgramParameter(prog, gl.ACTIVE_UNIFORMS), i;
     for (i = 0; i < count; i++) { var info = gl.getActiveUniform(prog, i); U[info.name] = gl.getUniformLocation(prog, info.name); }
-    var sdfTex = gl.createTexture(), colTex = gl.createTexture(), earthTex = null;
+    var sdfTex = gl.createTexture(), colTex = gl.createTexture(), earthTex = null, earthW = 0, earthH = 0;
     gl.uniform1i(U.uSdf, 0); gl.uniform1i(U.uCol, 1); gl.uniform1i(U.uEarth, 2);
     var hasLogo = false;
     function params(filter) {
@@ -492,12 +492,19 @@ void main() {
         gl.generateMipmap(gl.TEXTURE_2D); params(gl.LINEAR_MIPMAP_LINEAR);
         hasLogo = true;
       },
-      /* take the Earth canvas as a texture (call right after the Earth rendered, in the same task) */
+      /* take the Earth canvas as a texture (call right after the Earth rendered, in the same task); reuse storage with texSubImage2D when size is unchanged */
       setEarth: function (src) {
         gl.activeTexture(gl.TEXTURE2);
-        if (!earthTex) { earthTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, earthTex); params(gl.LINEAR); } else gl.bindTexture(gl.TEXTURE_2D, earthTex);
+        var sw = src.width || 0, sh = src.height || 0;
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, src);
+        if (!earthTex) { earthTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, earthTex); params(gl.LINEAR); earthW = 0; earthH = 0; }
+        else gl.bindTexture(gl.TEXTURE_2D, earthTex);
+        if (sw && sh && sw === earthW && sh === earthH) {
+          gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, gl.RGBA, gl.UNSIGNED_BYTE, src);
+        } else {
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, src);
+          earthW = sw; earthH = sh;
+        }
       },
       render: function (fr, w, h, tilePx, cy, er, amt) {
         if (!hasLogo) return;
@@ -745,13 +752,13 @@ void main() {
   /* one pass of the shader for the state the last tick worked out */
   GlassReveal.prototype.draw = function () {
     var D = this._d; if (!D || !this.renderer || this.lost || this.disposed) return;
-    var cv = this.cv, dpr = Math.min(window.devicePixelRatio || 1, 2), cw = cv.clientWidth, ch = cv.clientHeight;
+    var cv = this.cv, dpr = Math.min(window.devicePixelRatio || 1, 1.5), cw = cv.clientWidth, ch = cv.clientHeight;
     var w = Math.max(1, Math.round(cw * dpr)), h = Math.max(1, Math.round(ch * dpr)), P = D.P;
     if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
     var tile = Math.min(P.tileSize, Math.min(cw, ch) / 1.75);
     var cyFrac = this.opts.centerY == null ? .5 : this.opts.centerY, er = null, amt = 0, st = this.stage;
     if (st && st.intent) {   // over the stage: the Earth itself once it is up, plain space until then (the tile is the only opaque part either way)
-      if (st.live && this.hasEarth) { er = [cv.getBoundingClientRect().top * dpr, st.W * dpr, st.H * dpr, h]; amt = st.amt; } else er = [0, 1, 1, 1];
+      if (st.live && this.hasEarth) { er = [(-window.scrollY) * dpr, st.W * dpr, st.H * dpr, h]; amt = st.amt; } else er = [0, 1, 1, 1];
     }
     this.renderer.render(frameAt(Math.min(this.time, D.end), P, 0, { ptrX: this.ptrX, ptrY: this.ptrY, hover: this.hover, aperture: this.aperture, live: D.live, breath: D.breath, sweep: D.restOn ? D.sweep : undefined }), w, h, tile * dpr, h * (1 - cyFrac), er, amt);
     this.dirty = false;

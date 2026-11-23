@@ -143,9 +143,14 @@
     var space = !!o.space, starPts = null, bgTex = null;
     function buildSpace() {
       if (starPts) return;
-      var c = document.createElement('canvas'); c.width = 16; c.height = 256; var g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 256);
-      gr.addColorStop(0, '#02040c'); gr.addColorStop(1, '#070d22'); g.fillStyle = gr; g.fillRect(0, 0, 16, 256);
-      bgTex = new T.CanvasTexture(c); bgTex.minFilter = bgTex.magFilter = T.LinearFilter; bgTex.generateMipmaps = false;
+      // Pure Uint8Array DataTexture (never CanvasTexture) so iOS Safari Canvas2D fingerprinting noise cannot speckle space or glass refraction
+      var bw = 2, bh = 256, bd = new Uint8Array(bw * bh * 4), y, x, p;
+      for (y = 0; y < bh; y++) {
+        var f = 1 - y / (bh - 1); // DataTexture row 0 is bottom in WebGL: #02040c at top -> #070d22 at bottom
+        var r = Math.round(2 + (7 - 2) * f), g = Math.round(4 + (13 - 4) * f), b = Math.round(12 + (34 - 12) * f);
+        for (x = 0; x < bw; x++) { p = (y * bw + x) * 4; bd[p] = r; bd[p + 1] = g; bd[p + 2] = b; bd[p + 3] = 255; }
+      }
+      bgTex = new T.DataTexture(bd, bw, bh, T.RGBAFormat); bgTex.minFilter = bgTex.magFilter = T.LinearFilter; bgTex.generateMipmaps = false; bgTex.needsUpdate = true;
       var n = 560, pos = new Float32Array(n * 3), col = new Float32Array(n * 3), seed = 17, i;
       function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
       for (i = 0; i < n; i++) {
@@ -184,7 +189,8 @@
       mB.makeBasis(vD, vE, vC).multiply(mA.transpose());
       group.quaternion.setFromRotationMatrix(mB); group.scale.setScalar(s); group.position.copy(C);
       halo.position.copy(C); halo.scale.setScalar(s); halo.material.uniforms.uR.value = s;
-      cam.far = Math.max(20, s * 3 + 60); cam.updateProjectionMatrix();
+      var wantFar = Math.max(20, s * 3 + 60);
+      if (Math.abs(cam.far - wantFar) > 0.01) { cam.far = wantFar; cam.updateProjectionMatrix(); }
       sun.copy(sunA).lerp(sunB, view.sunK || 0).normalize();
     }
     function size() {

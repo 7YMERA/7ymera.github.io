@@ -269,13 +269,15 @@
   /* ==================== MAGNETIC BUTTON + SCRAMBLE ==================== */
   function attachMagnet(btn, labelEl, baseText) {
     if (!btn || reduce) return function () {};
-    var mx = -1e4, my = -1e4, bx = 0, by = 0, scr = 0, dead = false, raf = 0;
+    var mx = -1e4, my = -1e4, bx = 0, by = 0, scr = 0, dead = false, raf = 0, rect = null;
     function onMove(e) { mx = e.clientX; my = e.clientY; }
+    function onResize() { rect = null; }
     w.addEventListener('pointermove', onMove, { passive: true });
+    w.addEventListener('resize', onResize, { passive: true });
     function loop() {
       if (dead) return;
-      var r = btn.getBoundingClientRect(), cx = r.left + r.width * .5, cy = r.top + r.height * .5;
-      var dx = mx - cx, dy = my - cy, dist = Math.hypot(dx, dy), pull = dist < 240 ? (1 - dist / 240) : 0;
+      if (!rect) { var r = btn.getBoundingClientRect(); rect = { cx: r.left + r.width * .5, cy: r.top + r.height * .5 }; }
+      var dx = mx - rect.cx, dy = my - rect.cy, dist = Math.hypot(dx, dy), pull = dist < 240 ? (1 - dist / 240) : 0;
       var tx = clamp(dx * .16 * (.35 + pull), -14, 14) * (pull ? 1 : 0);
       var ty = clamp(dy * .2 * (.35 + pull), -10, 10) * (pull ? 1 : 0);
       bx += (tx - bx) * .16; by += (ty - by) * .16;
@@ -296,7 +298,7 @@
     }
     btn.addEventListener('pointerenter', scramble);
     btn.addEventListener('focus', scramble);
-    return function () { dead = true; cancelAnimationFrame(raf); w.removeEventListener('pointermove', onMove); };
+    return function () { dead = true; cancelAnimationFrame(raf); w.removeEventListener('pointermove', onMove); w.removeEventListener('resize', onResize); };
   }
 
   /* ==================== BUILD ENTRY GATE ==================== */
@@ -393,13 +395,29 @@
       '<div class="ig-stage">' + centerHtml + '</div>' +
       doorsHtml;
 
+    var behind = [];
+    [].slice.call(d.body.children).forEach(function (n) {
+      if (n.tagName === 'SCRIPT' || n.tagName === 'NOSCRIPT' || n.tagName === 'STYLE') return;
+      behind.push({ n: n, a: n.getAttribute('aria-hidden'), i: n.hasAttribute('inert') });
+      n.setAttribute('aria-hidden', 'true'); n.setAttribute('inert', '');
+    });
     d.body.appendChild(el);
+    d.documentElement.classList.add('ig-lock');
 
     var clkEl = el.querySelector('[data-ig-clk]');
     var clkTimer = setInterval(function () { if (clkEl) clkEl.textContent = mytClock(); }, 1000);
     var cvCtrl = startCanvas(el.querySelector('.ig-cv'), page);
     var mainBtn = el.querySelector('button.ig-btn');
     var stopMag = attachMagnet(mainBtn, el.querySelector('.ig-btn-label'), hud.btn);
+    if (mainBtn) { try { mainBtn.focus({ preventScroll: true }); } catch (e) {} }
+
+    function restoreBehind() {
+      d.documentElement.classList.remove('ig-lock');
+      behind.forEach(function (b) {
+        if (b.a == null) b.n.removeAttribute('aria-hidden'); else b.n.setAttribute('aria-hidden', b.a);
+        if (!b.i) b.n.removeAttribute('inert');
+      });
+    }
 
     var done = false;
     function dismiss(ev) {
@@ -407,6 +425,9 @@
       done = true;
       clearInterval(clkTimer);
       stopMag();
+      d.removeEventListener('keydown', onKey);
+      d.removeEventListener('focusin', trapFocus);
+      restoreBehind();
       unlockAudio();
       var stEl = el.querySelector('[data-ig-st]');
       if (stEl) stEl.textContent = page === 'play' ? '01 · READY' : page === 'lab' ? 'IGNITED' : page === 'notes' ? 'BOOTING' : 'OPEN';
@@ -429,13 +450,23 @@
       setTimeout(function () { cvCtrl.stop(); if (el.parentNode) el.remove(); }, hold + 500);
     }
 
+    function trapFocus(e) {
+      if (done) return;
+      if (d.querySelector('#cmd-backdrop.open')) return;
+      if (!el.contains(e.target) && mainBtn) { try { mainBtn.focus({ preventScroll: true }); } catch (x) {} }
+    }
+    function onKey(e) {
+      if (done) return;
+      if (d.querySelector('#cmd-backdrop.open')) return;
+      var tg = e.target; if (tg && /^(INPUT|TEXTAREA|SELECT)$/.test(tg.tagName)) return;
+      if (e.key === 'Tab' && mainBtn) { e.preventDefault(); mainBtn.focus(); return; }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); dismiss(); }
+    }
     el.addEventListener('click', function (e) {
       if (e.target.closest('[data-ig-go]')) dismiss(e);
     });
-    d.addEventListener('keydown', function onKey(e) {
-      if (done) { d.removeEventListener('keydown', onKey); return; }
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); dismiss(); }
-    });
+    d.addEventListener('keydown', onKey);
+    d.addEventListener('focusin', trapFocus);
   }
 
   /* ==================== NOTES: SCROLL-DRIVEN 3D HARDCOVER JOURNAL FLIP ==================== */

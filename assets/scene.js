@@ -118,7 +118,7 @@
       var pos=b64(d.positions,Float32Array),out=new T.Group();
       [['body',bm],['glass',glassModelM]].forEach(function(p){
         var geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));geo.setIndex(new T.BufferAttribute(b64(d[p[0]],Uint16Array),1));
-        geo=geo.toNonIndexed();geo.computeVertexNormals();out.add(new T.Mesh(geo,p[1]))});
+        geo.computeVertexNormals();out.add(new T.Mesh(geo,p[1]))});
       out.scale.setScalar(SC);out.position.set(x,0,z);out.rotation.y=ry;g.add(out);if(done)done(out);recolor();need=true;
     }).catch(function(){if(fallback)fallback();recolor();need=true});
   }
@@ -206,15 +206,17 @@
     var geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));var ix=b64(d.indices,Uint16Array);
     if(DIST)ix=clearPlots(pos,ix); // make room: the landmarks' plots, and the district's own coarse landmarks, are cut out of the mesh
     geo.setIndex(new T.BufferAttribute(ix,1));
-    geo=geo.toNonIndexed();geo.computeVertexNormals(); // flat normals: the lighting needs them
+    geo.computeVertexNormals(); // keep indexed: toon/facade compute flat face normals per fragment via dFdx/dFdy(vWP), cutting vertex RAM ~3x
     cityMesh=new T.Mesh(geo,cityM);cityMesh.scale.setScalar(SC);g.add(cityMesh);need=true;
   }).catch(function(){})});
-  // KL Tower
-  var kl=new T.Group();kl.position.set(LAY.kl[0],0,LAY.kl[1]); // stand-in, ?bg=osm only (the district always has the model)
-  var shaft=new T.Mesh(new T.CylinderGeometry(2,3.4,120,8),towerB);shaft.position.y=60;
-  var pod=new T.Mesh(new T.CylinderGeometry(9,6,9,10),glassM);pod.position.y=118;
-  var ant=new T.Mesh(new T.CylinderGeometry(.3,1,50,6),towerB);ant.position.y=148;
-  kl.add(shaft,pod,ant);if(!DIST)g.add(kl);
+  // KL Tower stand-in (?bg=osm only; the district always loads the hand-made model)
+  var kl=new T.Group();kl.position.set(LAY.kl[0],0,LAY.kl[1]);
+  if(!DIST){
+    var shaft=new T.Mesh(new T.CylinderGeometry(2,3.4,120,8),towerB);shaft.position.y=60;
+    var pod=new T.Mesh(new T.CylinderGeometry(9,6,9,10),glassM);pod.position.y=118;
+    var ant=new T.Mesh(new T.CylinderGeometry(.3,1,50,6),towerB);ant.position.y=148;
+    kl.add(shaft,pod,ant);g.add(kl);
+  }
   // orb and ring
   var orb=new T.Group();orb.position.set(-57,230,131);
   orb.add(new T.Mesh(new T.SphereGeometry(12,18,14),orbM));
@@ -537,7 +539,6 @@
   var headGlowM=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xfff0c0,opacity:.9}),headGlows=trains.map(function(){var sp=new T.Sprite(headGlowM);sp.scale.set(16,16,1);scene.add(sp);return sp});
   var tailGlowM=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xff3a2a,opacity:.8}),tailGlows=trains.map(function(){var sp=new T.Sprite(tailGlowM);sp.scale.set(6,6,1);scene.add(sp);return sp});
   var trD=new T.Object3D(),trP=new T.Vector3(),trT=new T.Vector3(),trTarget=new T.Vector3(),trUp=new T.Vector3(0,.3,0),heroS=0,heroOn=false;
-  var tK=0,tM=0;(function(){var kp=A0(kU[0],kU[1],62),mp=A0(mU[0],mU[1],70),bk=1e9,bm=1e9,q=new T.Vector3();for(var i=0;i<400;i++){skyCurve.getPointAt(i/400,q);var dk=Math.hypot(q.x-kp.x,q.z-kp.z),dm=Math.hypot(q.x-mp.x,q.z-mp.z);if(dk<bk){bk=dk;tK=i/400}if(dm<bm){bm=dm;tM=i/400}}})();
   function setCar(tr,c,p,tg,flip){
     trD.position.copy(p);trD.scale.set(1,1,1);trTarget.copy(p);if(flip)trTarget.sub(tg);else trTarget.add(tg);trD.lookAt(trTarget);trD.updateMatrix();
     if(c===0)carCab.setMatrixAt(tr.k0,trD.matrix);else if(c===tr.cars-1)carCab.setMatrixAt(tr.k0+1,trD.matrix);else carMid.setMatrixAt(tr.m0+c-1,trD.matrix);
@@ -591,20 +592,7 @@
   var BEAC=(function(){var a=lp('klcc',11,-10),b=lp('klcc',-11,10),m=crown('mer'),e=crown('ex'),k=crown('kl');return [[a[0],134,a[1]],[b[0],134,b[1]],[m[0],193,m[1]],[e[0],136,e[1]],[k[0],130,k[1]]]})(); // both Petronas spires, then the tips of Merdeka 118, The Exchange 106 and Menara KL
   var beacons=BEAC.map(function(b,i){var m=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xff3a2a,fog:false,opacity:0}),sp=new T.Sprite(m);sp.scale.set(i===2?22:14,i===2?22:14,1);sp.position.set(b[0],b[1],b[2]);sp.renderOrder=6;g.add(sp);return{m:m,ph:i*.37}});
   function beaconUpdate(time){var t=time/1000;beacons.forEach(function(b){var p=((t/1.7+b.ph)%1+1)%1,a=(p<.09||(p>.2&&p<.29))?1:.08;b.m.opacity=a*beaconK;b.m.blending=beaconAdd?T.AdditiveBlending:T.NormalBlending})}
-  // Night moon: put in the clearest part of the picture. Each frame, a few candidate spots on the screen are scored by their distance from the projected landmark tops (and their spires),
-  // the best one wins (with a bias for the current one, so it does not hop), and the moon eases there, 1100 units out along that ray. Day keeps the old fixed placement.
-  var sciPos=new T.Vector3(),MCAND=[[.74,.62],[-.74,.62],[0,.82],[.86,.18],[-.86,.18],[.45,.84],[-.45,.84]],mIdx=0,mX=.74,mY=.62,mP=new T.Vector3(),mTop=[];
-  LM.forEach(function(l){mTop.push(l.top.clone(),l.top.clone().add(new T.Vector3(0,40,0)),l.top.clone().add(new T.Vector3(0,-40,0)))});
-  function moonPlace(still){
-    cam.updateMatrixWorld();var asp=cam.aspect,pts=[],i,j;
-    for(i=0;i<mTop.length;i++){mP.copy(mTop[i]).project(cam);if(mP.z<1)pts.push(mP.x*asp,mP.y)}
-    var best=-1,bi=mIdx;
-    for(j=0;j<MCAND.length;j++){var cx=MCAND[j][0]*asp,cy=MCAND[j][1],sc=9;
-      for(i=0;i<pts.length;i+=2){var d=Math.hypot(pts[i]-cx,pts[i+1]-cy);if(d<sc)sc=d}
-      if(j===mIdx)sc+=.25;if(sc>best){best=sc;bi=j}}
-    mIdx=bi;var k=still?1:.12;mX+=(MCAND[mIdx][0]-mX)*k;mY+=(MCAND[mIdx][1]-mY)*k;
-    mP.set(mX,mY,.5).unproject(cam).sub(cam.position).normalize().multiplyScalar(1100).add(cam.position);moonG.position.copy(mP)}
-  moonG.position.set(-265,326,-831); // behind the skyline as the page opens, high enough to clear the tops
+  moonG.position.set(-265,326,-831); // locked behind the skyline as the page opens, high enough to clear the tops
   function sciUpdate(time,still,inRide){
     beaconUpdate(time);
     var t=still?0:time*.001,cl=Math.hypot(cam.position.x,cam.position.z)||1,dx=cam.position.x/cl,dz=cam.position.z/cl;
@@ -724,11 +712,12 @@
     var st=null;try{st=localStorage.getItem(K)}catch(e){}
     set(st==='1',false);b.addEventListener('click',function(){set(!rt.classList.contains('hud-off'),true)});host.appendChild(b)})();
   var again=document.getElementById('fly-again'),DBGCR=/[?&]dbg/.test(location.search);
-  var freeBtn=null,freeHint=null,freeTime=null,freeWp=null,flyMap=null,flyMapCv=null,flyMapOn=false,flyMapAt=0;
-  var freeOn=false,freeDrag=false,freeLx=0,freeLy=0,fKeys={},trainCamOn=false,trainCamIdx=0,trainBtn=null,rainBtn=null,mapBtn=null,lapseOn=false,lapseBtn=null,lapsePhase=0,klWx='';
+  var freeBtn=null,freeHint=null,freeTime=null,freeWp=null,flyMap=null,flyMapCv=null,flyMapBg=null,flyMapOn=false,flyMapAt=0;
+  var freeOn=false,freeDrag=false,freeLx=0,freeLy=0,fKeys={},trainCamOn=false,trainCamIdx=0,trainBtn=null,rainBtn=null,mapBtn=null,lapseOn=false,lapseBtn=null,lapsePhase=0,klWx='',klWet=false;
   // Silent live Kuala Lumpur weather telemetry (zero API key, graceful offline fallback)
   (function(){if(!window.fetch)return;fetch('https://api.open-meteo.com/v1/forecast?latitude=3.1579&longitude=101.7116&current=temperature_2m,rain,weather_code').then(function(r){return r.ok?r.json():null}).then(function(d){
     if(!d||!d.current)return;var temp=Math.round(d.current.temperature_2m),wet=(d.current.rain||0)>0||(d.current.weather_code>=51);
+    klWet=wet;
     klWx='KL LIVE · '+temp+'°C · '+(wet?'RAIN':'CLEAR');
     if(cp&&cp.gps)cp.gps.textContent=klWx;
     if(wet&&freeOn&&!rainOn&&window.TimeOfDay&&TimeOfDay.current&&TimeOfDay.current()==='live')setRain(true);
@@ -758,35 +747,40 @@
     if(flyMap)flyMap.classList.toggle('on',flyMapOn&&freeOn);
     if(mapBtn)mapBtn.setAttribute('aria-pressed',flyMapOn?'true':'false');
   }
-  function drawTransitMap(now){
-    if(!flyMapOn||!freeOn||!flyMapCv)return;
-    if(now-flyMapAt<62)return; // ~16 fps max: zero perf impact
-    flyMapAt=now;
-    var g=flyMapCv.getContext('2d'),S=220,cx=S/2,cy=S/2,sc=S/720;
-    g.clearRect(0,0,S,S);
+  function buildTransitMapBg(){
+    var S=220,cx=S/2,cy=S/2,sc=S/720,c=document.createElement('canvas');c.width=c.height=S;
+    var g=c.getContext('2d'),p=new T.Vector3();
     g.fillStyle='rgba(5,11,26,.92)';g.fillRect(0,0,S,S);
     function mx(x){return cx+(x-GC[0])*sc}
     function my(z){return cy+(z-GC[1])*sc}
     function trace(curve,col,w,closed){
-      g.beginPath();var p=new T.Vector3();
+      g.beginPath();
       for(var i=0;i<=48;i++){curve.getPointAt(i/48,p);var px2=mx(p.x),py2=my(p.z);if(i===0)g.moveTo(px2,py2);else g.lineTo(px2,py2)}
       if(closed)g.closePath();g.strokeStyle=col;g.lineWidth=w;g.stroke();
     }
     g.save();g.setLineDash([4,3]);trace(mrtCurve,'rgba(255,210,122,.72)',1.8,false);g.restore();
     trace(skyCurve,'rgba(127,211,255,.82)',2,true);
     trace(ringCurve,'rgba(127,211,255,.45)',1.4,true);
-    // Live trains
-    for(var k=0;k<trains.length;k++){
-      var tr=trains[k],tx2=mx(tr.headP.x),ty2=my(tr.headP.z);
-      g.beginPath();g.arc(tx2,ty2,trainCamOn&&k===trainCamIdx?4.5:3,0,6.2832);
-      g.fillStyle=trainCamOn&&k===trainCamIdx?'#ffffff':'#ffd27a';g.fill();
-    }
-    // Stations
     g.font='600 8.5px "JetBrains Mono",monospace';g.textAlign='center';
     for(var s=0;s<STAT.length;s++){
       var st=STAT[s],sx2=mx(st.pos.x),sy2=my(st.pos.z);
       g.beginPath();g.arc(sx2,sy2,3.4,0,6.2832);g.fillStyle='#7fd3ff';g.fill();
       g.fillStyle='rgba(234,242,255,.88)';g.fillText(st.n,sx2,sy2-6);
+    }
+    return c;
+  }
+  function drawTransitMap(now){
+    if(!flyMapOn||!freeOn||!flyMapCv)return;
+    if(now-flyMapAt<62)return; // ~16 fps max: zero perf impact
+    flyMapAt=now;
+    if(!flyMapBg)flyMapBg=buildTransitMapBg();
+    var g=flyMapCv.getContext('2d'),S=220,cx=S/2,cy=S/2,sc=S/720;
+    g.drawImage(flyMapBg,0,0);
+    // Live trains only (static tracks & stations cached once in flyMapBg)
+    for(var k=0;k<trains.length;k++){
+      var tr=trains[k],tx2=cx+(tr.headP.x-GC[0])*sc,ty2=cy+(tr.headP.z-GC[1])*sc;
+      g.beginPath();g.arc(tx2,ty2,trainCamOn&&k===trainCamIdx?4.5:3,0,6.2832);
+      g.fillStyle=trainCamOn&&k===trainCamIdx?'#ffffff':'#ffd27a';g.fill();
     }
   }
   function setFree(v){
@@ -798,6 +792,7 @@
     if(v&&!ONLY&&scrollY>pinEnd()-2){var se=document.documentElement.style,sb=se.scrollBehavior;se.scrollBehavior='auto';scrollTo(0,pinEnd()-Math.round(.35*BUFV*innerHeight));se.scrollBehavior=sb} // back onto the pinned stage before the page locks
     if(v){
       if(window.FlightLog)window.FlightLog.unlock('freefly');
+      if(klWet&&!rainOn&&window.TimeOfDay&&TimeOfDay.current&&TimeOfDay.current()==='live')setRain(true);
       // seed free-fly orbit from the current camera so there is zero jump
       var dx=cam.position.x-GC[0],dz=cam.position.z-GC[1];
       freeState.cx=freeState.tcx=GC[0];freeState.cz=freeState.tcz=GC[1];freeState.cy=freeState.tcy=72;
@@ -1011,8 +1006,6 @@
   // Critically damped follow (no overshoot, no jump when a wheel notch lands): the camera glides to where the scroll bar is.
   function damp(c,t,v,st,dt){var o=2/st,x=o*dt,e=1/(1+x+.48*x*x+.235*x*x*x),ch=c-t,tmp=(v.v+o*ch)*dt;v.v=(v.v-o*tmp)*e;return t+(ch+tmp)*e}
   function poseCam(p){p=mob(p);var a=p[2]*Math.PI/180;return{pos:new T.Vector3(p[0]+Math.cos(a)*p[3],p[4],p[1]+Math.sin(a)*p[3]),tgt:new T.Vector3(p[0],p[5],p[1])}} // camera of a director pose
-  function orbitPose(p,pxv){var e=Math.sin(p*Math.PI),ang=.55+p*Math.PI*1.7+pxv*.12*(1-p),rad=(mobile?290:250)-e*30,hgt=(mobile?112:100)+e*60;
-    return{pos:new T.Vector3(Math.cos(ang)*rad,hgt,Math.sin(ang)*rad),tgt:new T.Vector3(0,H*(mobile?.5:.52)-e*18,0)}}
 
   // THE FLIGHT. One direction only, never back on itself:
   //   swing in from the side -> line up with the skybridge head-on -> over the bridge and out through the gap between the towers
@@ -1201,7 +1194,7 @@
     for(i=0;i<=NT;i++){var pre=iS===0?1:i<iS?0:clamp((i-iS)/6,0,1);bankTab[i]=clamp(kS[i]*8,-.105,.105)*pre; // gentle cinema bank into turns, capped at ~12 deg
       var sp=clamp((sS[i]-lo)/Math.max(1e-6,hi-lo),0,1);fovTab[i]=i<iS?0:9*sp*sp*(3-2*sp)}
     bankTab[0]=0;bankTab[NT]=0;fovTab[NT]=0;for(i=iS;i<=iS+4&&i<=NT;i++)fovTab[i]=fovTab[i]*(i-iS)/4}
-  function rollAt(u){return 0; /* no barrel roll: the owner tried it twice and turned it off twice. Do not turn it back on unless asked. The drone still banks into turns. */var n=rollK.length;if(n<2)return 0;var f=clamp(u,0,1)*(n-1),i=Math.min(n-2,Math.floor(f)),t=f-i;t=t*t*(3-2*t);return rollK[i]+(rollK[i+1]-rollK[i])*t}
+  function rollAt(){return 0} /* no barrel roll: owner's rule; banking into turns comes from bankTab */
   // ---- HUD (DOM) ----
   var hud=document.getElementById('hud'),hTags=[],hAlt=document.getElementById('h-alt'),hSec=document.getElementById('h-sec'),hFill=document.getElementById('h-fill'),hTicks=[],hLast=-1,hSecLast=-1;
   if(hud){var tg=hud.querySelector('.hud-tags');LM.forEach(function(l){var e=document.createElement('a');e.className='lm-tag';e.href=l.href||'/portfolio/';
@@ -1242,8 +1235,10 @@
   function cockpitUpdate(c,time){
     if(!cp.ready)return;
     cpFwd.set(0,0,-1).applyQuaternion(cam.quaternion);cpRight.set(1,0,0).applyQuaternion(cam.quaternion);cpUp.set(0,1,0).applyQuaternion(cam.quaternion);
-    var hdg=(Math.atan2(cpFwd.x,-cpFwd.z)*180/Math.PI+360)%360,pitch=Math.asin(clamp(cpFwd.y,-1,1))*180/Math.PI,roll=Math.atan2(cpRight.y,cpUp.y)*180/Math.PI;
+    var hdg=(Math.atan2(cpFwd.x,-cpFwd.z)*180/Math.PI+360)%360;
     cp.track.style.transform='translate3d('+(-(hdg*PPD)+0).toFixed(1)+'px,0,0)';
+    if(W<=700)return; // on phones only the compass strip is visible (scene.css)
+    var pitch=Math.asin(clamp(cpFwd.y,-1,1))*180/Math.PI,roll=Math.atan2(cpRight.y,cpUp.y)*180/Math.PI;
     cp.hz.setAttribute('transform','rotate('+roll.toFixed(1)+' 60 60) translate(0 '+(pitch*2.2).toFixed(1)+')');
     var dt=Math.max(.001,(time-cpPrevT)/1000);
     if(cpPrev&&dt<.5){var dx=cam.position.distanceTo(cpPrev)*KU/dt,dy=(cam.position.y-cpPrev.y)*KU/dt;spdS+=(clamp(dx*3.6,0,260)-spdS)*.15;vsS+=(clamp(dy,-90,90)-vsS)*.15}
@@ -1280,7 +1275,6 @@
   var tick=0,droneReady=false;
   // the lead-in sections show their label while they are on screen
   if('IntersectionObserver' in window){var stObs=new IntersectionObserver(function(es){es.forEach(function(e){e.target.classList.toggle('on',e.isIntersecting&&e.intersectionRatio>.55)})},{threshold:[0,.55,1]});document.querySelectorAll('.stage').forEach(function(el){stObs.observe(el)})}
-  function ringUpdate(){} // the screens that floated behind the towers (ring, then conveyor) were removed; see docs/claude-log.md
   var flying=false;
   // ONE CAMERA. Above, the director (before the flight) and the flight (inside #enter) each only say where the camera should be.
   // This follower is the only thing that actually moves it: position, rotation, lens and the sideways push all chase their target
@@ -1319,12 +1313,13 @@
         if(!freeDrag&&!trainCamOn)freeState.ta+=dtF*.16;
       }
       if(trainCamOn&&trains[trainCamIdx]){
-        // Train-Cam ("Ride the Sky-Rail"): perch just above the lead cab looking forward along the viaduct through the glowing portal arches
+        // Train-Cam ("Ride the Sky-Rail"): perch just above the lead cab looking forward along the viaduct through the glowing portal arches.
+        // When riding the Underground MRT below street level, skim just above the glowing X-ray conduit so the camera never clips beneath the ground plane.
         var trR=trains[trainCamIdx];
         if(fKeys.w||fKeys.a||fKeys.s||fKeys.d){setTrainCam(false)}
         else{
-          cam.position.copy(trR.headP).addScaledVector(trR.headT,-2.8);cam.position.y+=3.4;
-          tgtV.copy(trR.headP).addScaledVector(trR.headT,46);tgtV.y+=1.4;
+          cam.position.copy(trR.headP).addScaledVector(trR.headT,-2.8);cam.position.y=Math.max(5.5,trR.headP.y+3.4);
+          tgtV.copy(trR.headP).addScaledVector(trR.headT,46);tgtV.y=Math.max(2.5,trR.headP.y+1.4);
           cam.lookAt(tgtV);
           cam.setViewOffset(W,Hh,0,0,W,Hh);
         }
@@ -1355,16 +1350,7 @@
       rideP.getPoint(u,cam.position);
       if(cr>HOLD0){ // the hold: the scene drifts slowly sideways as you scroll, so the whole map is shown while the page moves on
         var hf=clamp((cr-HOLD0)/(1-HOLD0),0,1),tg0=rideT.getPoint(u,chL);tv.copy(tg0).sub(cam.position).normalize();tv.cross(cam.up);cam.position.addScaledVector(tv,(hf-.5*Math.min(1,hf*6))*(mobile?70:150));cam.position.y+=hf*(mobile?-40:14)}
-      // THE CHASE: along the street skim (knots 'sk0' to 'skEnd') the "hero" train on the sky line is driven by the scroll (from chA to chB on the rail)
-      // and the camera blends onto a chase position behind and below it, so the train runs ahead of the camera along the rail overhead.
-      var cwA=KI['sk0'],cwE=KI['skEnd'],cwB=KI['pull'],cw=0;heroOn=false;rideT.getPoint(u,tgtV);
-      if(cwA!=null&&cwB!=null&&cr>cwA&&cr<cwB){
-        var cf=clamp((cr-cwA)/(cwE-cwA),0,1),csm=function(x){x=clamp(x,0,1);return x*x*(3-2*x)},cwO=cwE-.15*(cwE-cwA);cw=csm((cr-cwA)/(.25*(cwE-cwA)))*csm((cwB-cr)/(cwB-cwO)); // in over the first quarter of the skim, out between just before its end and the start of the pull-out
-        var cd=chB-chA;if(cd<0)cd+=1;heroS=((chA+cd*(.5*cf+.5*csm(cf)))%1+1)%1;heroOn=cw>.02;
-        if(heroOn){skyCurve.getPointAt(heroS,chH);skyCurve.getTangentAt(heroS,chT);chS.crossVectors(chT,cam.up).normalize();
-          skyCurve.getPointAt(((heroS-56/skyLen)%1+1)%1,chP);chP.y-=11;chP.addScaledVector(chS,6*Math.sin((time||0)*.0009)); // 40 units behind the train along the rail (not along its tangent, so a bend in the rail turns the view gradually), 24 below it
-          skyCurve.getPointAt((heroS+50/skyLen)%1,chL);chL.y-=1;                                                              // looking 90 units ahead along the rail
-          cam.position.lerp(chP,cw);tgtV.lerp(chL,cw)}}else if(cwA!=null&&cwB!=null){heroS=cr>=cwB?chB:chA}
+      heroOn=false;rideT.getPoint(u,tgtV);
       cam.lookAt(tgtV);cam.setViewOffset(W,Hh,0,0,W,Hh);
       // finale: widen the view (phones a lot, desktop a little) and push the fog back, so the whole skyline is in frame
       var ke=KI['sweep1']!=null?KI['sweep1']:(KI['pass']!=null?KI['pass']:.7),ke2=KI['end']||HOLD0,fs=clamp((cr-ke-.4*(ke2-ke))/(.6*(ke2-ke)),0,1);fs=fs*fs*(3-2*fs);
@@ -1386,7 +1372,6 @@
     for(var ci=0;ci<caps.length;ci++){var c=caps[ci],on=cr>=+c.dataset.from&&cr<+c.dataset.to;if(on!==c.classList.contains('on'))c.classList.toggle('on',on)}
     if(again){if(DBGCR)again.dataset.cr=cr.toFixed(3);var aOn=(inRide&&fc>.93&&(ONLY||scrollY<=pinEnd()-2))||freeOn;if(aOn!==again.classList.contains('on')){again.classList.toggle('on',aOn);document.documentElement.classList.toggle('fly-end',aOn);if(aOn&&inRide&&window.FlightLog)window.FlightLog.unlock('flight')}if(freeBtn&&aOn!==freeBtn.classList.contains('on'))freeBtn.classList.toggle('on',aOn)}
     if(spin&&sH){var sy=scrollY-(sTop-innerHeight),sf=sy/Math.max(1,sH),sOn=sf>.18&&sf<.95;if(sOn!==spin.classList.contains('on'))spin.classList.toggle('on',sOn)} // the coordinates tag
-    ringUpdate(time,inRide);
     orb.rotation.y=time*.0004;ring.rotation.z=time*.0006;orb.position.y=230+Math.sin(time*.0009)*3;
     specks.rotation.y=time*.00003;fxUpdate(time,reduce);sciUpdate(time,reduce,inRide);rainUpdate(dtF);audioReact();drawTransitMap(time)}
   var raf=0,run=true,last=0,lastR=0;
@@ -1405,10 +1390,14 @@
     }else if(PERF.emaDt<.020){PERF.badFrames=0}
   }
   function frame(time){
+    raf=0;
+    // On the front page, #gl is invisible outside the flight chapter (!html.city-on): sleep the WebGL loop until city-on turns back on
+    if(HOMEDS&&shown&&!freeOn&&!root.classList.contains('city-on')){return}
     var dt=clamp((time-last)/1000,.001,.05);last=time;dtF=dt;tick++;
     if(reduce)snap();else{for(var j=0;j<8;j++)curPose[j]=damp(curPose[j],tgtPose[j],vPose[j],.55,dt);var cr0=cr;cr=clamp(damp(cr,tr,vr,.86,dt),0,1);if(flying){var cap=.085*dt;if(cr-cr0>cap){cr=cr0+cap;vr.v=Math.min(vr.v,cap/dt)}else if(cr0-cr>cap){cr=cr0-cap;vr.v=Math.max(vr.v,-cap/dt)}} /* speed limit: a fast flick can't whip the camera */px=damp(px,tx,vx,.6,dt)}
     // Idle drift: in the drone flight, when the reader has stopped scrolling, the page creeps forward by itself so slow scrolling never shows as a stutter.
-    if(flying&&!freeOn&&enter&&!reduce&&!document.hidden&&time-lastUser>900&&scrollY>=(GEO?GEO.rv:0)&&scrollY<eTop+eH-innerHeight-6){
+    var palOpen=!!document.querySelector('#cmd-backdrop.open');
+    if(flying&&!freeOn&&!palOpen&&enter&&!reduce&&!document.hidden&&time-lastUser>900&&scrollY>=(GEO?GEO.rv:0)&&scrollY<eTop+eH-innerHeight-6){
       driftAcc+=(mobile?20:28)*clamp((time-lastUser-900)/1500,0,1)*dt;
       if(driftAcc>=1){var dy=Math.floor(driftAcc);driftAcc-=dy;scrollBy({top:dy,behavior:'instant'})}}
     // Background drift: when the reader is idle outside the flight, the camera slowly swings and breathes (the page itself never moves),
@@ -1422,7 +1411,9 @@
     var moving=freeOn||Math.abs(tr-cr)>(flying?.00002:.0003);for(var j2=0;j2<8;j2++)if(Math.abs(tgtPose[j2]-curPose[j2])>.02){moving=true;break}
     // While the reader is only reading, redraw at about 15 fps (the beams and pulses still drift); while scrolling, every frame.
     if(moving||need||(!reduce&&time-lastR>iv)){if(moving)perfWatch(dt);if(idleK>0&&!moving&&lastR>0&&!arcOn){dIv+=time-lastR;if(++dN>=90){if(dIv/dN>48)driftOff=true;dIv=0;dN=0}}place(reduce?0:time);renderer.render(scene,cam);need=false;lastR=time;if(!shown){shown=true;root.classList.add('gl-on');startLater()}}
-    raf=run?requestAnimationFrame(frame):0}
+    if(run)raf=requestAnimationFrame(frame)}
+  function wakeScene(){if(run&&!raf&&!document.hidden){last=performance.now();need=true;raf=requestAnimationFrame(frame)}}
+  if(HOMEDS)new MutationObserver(function(){if(root.classList.contains('city-on'))wakeScene()}).observe(root,{attributes:true,attributeFilter:['class']});
   var lastUser=0,driftAcc=0,idleK=0,driftOff=false,dIv=0,dN=0;
   ['wheel','touchstart','touchmove','keydown','pointerdown'].forEach(function(n){addEventListener(n,function(){lastUser=performance.now();driftAcc=0},{passive:true})});
   function retarget(){tgtPose=dirPose(scrollY);tr=rideProg();need=true}

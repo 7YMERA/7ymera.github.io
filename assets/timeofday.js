@@ -146,6 +146,6 @@
       if (++tries < 60) setTimeout(apply, 100);
     })();
   }
-  window.TimeOfDay = { mount: function (el, compact) { var p = build(el, !!compact); show(window.SceneTime ? nearest(SceneTime.get()) : 'day'); return p; }, choose: choose };
+  window.TimeOfDay = { mount: function (el, compact) { var p = build(el, !!compact); show(window.SceneTime ? nearest(SceneTime.get()) : 'day'); return p; }, choose: choose, current: function () { return liveOn ? 'live' : (window.SceneTime ? nearest(SceneTime.get()) : 'day'); } };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();

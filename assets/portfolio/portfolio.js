@@ -19,9 +19,15 @@
     range.addEventListener('input', function () { touched = true; set(range.value); });
     var tabs = cmp.querySelectorAll('[role="tab"]');
     var panel = ba;
+    var preloaded = false;
+    function preloadTabs() {
+      if (preloaded) return; preloaded = true;
+      tabs.forEach(function (t) { if (t.dataset.v1) new Image().src = t.dataset.v1; if (t.dataset.v2) new Image().src = t.dataset.v2; });
+    }
     tabs.forEach(function (tab, idx) {
-      new Image().src = tab.dataset.v1; new Image().src = tab.dataset.v2;
+      tab.addEventListener('pointerenter', preloadTabs, { once: true });
       tab.addEventListener('click', function () {
+        preloadTabs();
         tabs.forEach(function (x) { x.setAttribute('aria-selected', String(x === tab)); x.tabIndex = x === tab ? 0 : -1; });
         panel.setAttribute('aria-labelledby', tab.id);
         var what = tab.dataset.what;
@@ -42,11 +48,13 @@
         tabs[to].focus(); tabs[to].click();
       });
     });
-    // One sweep when it first scrolls into view, so both versions get seen
-    if (!calmMotion && 'IntersectionObserver' in window) {
+    // One sweep when it first scrolls into view, so both versions get seen (and preload comparator tabs lazily)
+    if ('IntersectionObserver' in window) {
       var io = new IntersectionObserver(function (entries) {
         if (!entries[0].isIntersecting) return;
         io.disconnect();
+        preloadTabs();
+        if (calmMotion) return;
         var t0 = null, from = 50;
         function step(ts) {
           if (touched) return;
@@ -109,8 +117,8 @@
     ['SMK Subang data dashboard', '#p-smk', 'project'], ['TaskMatch v2', '#p-taskmatch', 'project'], ['MyLokalEvent v2', '#p-mle', 'project'], ['IT Asset Disposal (SLB)', '#p-slb', 'project'], ['KakiLima', '#p-kakilima', 'project'], ['JumaatFinder', '#p-jumaat', 'project'], ['EagleSan Sandbox (Roblox)', '#p-roblox', 'project'],
     ['Download CV (PDF)', '/assets/Muhammad-Alif-Najmi-CV.pdf?v=cv20261119a', 'cv'], ['Email Alif', 'mailto:alifnajmx@gmail.com', 'contact'], ['LinkedIn', 'https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin', 'link'], ['GitHub', 'https://github.com/7YMERA', 'link'], ['Credly badges', 'https://www.credly.com/users/muhammad-alif-najmi-md-hisamudin', 'link'], ['AWS badges', 'https://skillsprofile.skillbuilder.aws/user/najmi/certification-badges', 'link'], ['Kracked Devs', 'https://krackeddevs.com/profile/alifnajmx', 'link'], ['Résumé (read online)', '/resume.html', 'link'],
     ['Try TaskMatch demo', 'https://taskmatch-umber.vercel.app', 'live'], ['Visit MyLokalEvent', 'https://mylokalevent.vercel.app', 'live'], ['Visit KakiLima', 'https://kakilima-iota.vercel.app', 'live'], ['Click through the IT Asset Disposal app', '/notes/slb-screens.html', 'live'],
-    ['Home', '/', 'page'], ['Play (games and toys)', '/play/', 'page'], ['Fly the drone view', '/#enter', 'page'], ['All notes', '/notes/', 'note'],
-    ['Note: Nine charts before one screen (SLB data model)', '/notes/slb-design.html', 'note'], ['Note: A dashboard 150 teachers actually open', '/notes/smk-dashboard.html', 'note'], ['Note: From coursework to something people could trust', '/notes/mylokalevent-v2.html', 'note'], ['Note: Accessible first, in four languages', '/notes/kakilima.html', 'note'], ['Note: Where can I solat Jumaat from here?', '/notes/jumaatfinder.html', 'note'], ['Note: One VPC, two departments, $56 (AWS coursework)', '/notes/aws-two-departments.html', 'note'], ['Note: A whole company in 49 tables (SQL playground)', '/notes/database.html', 'note'], ['Note: Jom Al-Quran, 56 tables (SQL playground)', '/notes/jom-al-quran.html', 'note'], ['Note: Rebuilding my FYP properly', '/notes/taskmatch-v2.html', 'note'], ['Note: From reply-all to Power Apps', '/notes/slb-power-apps.html', 'note'], ['Note: Four years, one walk across the stage', '/notes/convocation-2026.html', 'note'],
+    ['Home', '/', 'page'], ['Play (games and toys)', '/play/', 'page'], ['Lab (satellites, shaders, SQL, Score Lab)', '/lab/', 'page'], ['Fly the drone view', '/#enter', 'page'], ['All notes', '/notes/', 'note'],
+    ['Note: Building this site (3D KL, zero frameworks)', '/notes/portfolio-site.html', 'note'], ['Note: Nine charts before one screen (SLB data model)', '/notes/slb-design.html', 'note'], ['Note: A dashboard 150 teachers actually open', '/notes/smk-dashboard.html', 'note'], ['Note: From coursework to something people could trust', '/notes/mylokalevent-v2.html', 'note'], ['Note: Accessible first, in four languages', '/notes/kakilima.html', 'note'], ['Note: Where can I solat Jumaat from here?', '/notes/jumaatfinder.html', 'note'], ['Note: One VPC, two departments, $56 (AWS coursework)', '/notes/aws-two-departments.html', 'note'], ['Note: A whole company in 49 tables (SQL playground)', '/notes/database.html', 'note'], ['Note: Jom Al-Quran, 56 tables (SQL playground)', '/notes/jom-al-quran.html', 'note'], ['Note: Rebuilding my FYP properly', '/notes/taskmatch-v2.html', 'note'], ['Note: From reply-all to Power Apps', '/notes/slb-power-apps.html', 'note'], ['Note: Four years, one walk across the stage', '/notes/convocation-2026.html', 'note'],
     ['Keyboard shortcuts', '#do-keys', 'action'], ['Sound on or off', '#do-sound', 'action'], ['Share this site', '#do-share', 'action']
   ];
   var qj = document.getElementById('qj'), qi = document.getElementById('qj-input'), ql = document.getElementById('qj-list'), sel = 0, last = null;

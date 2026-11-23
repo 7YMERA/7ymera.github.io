@@ -21,22 +21,30 @@
     { g: 'Lab & Games', t: 'Liquid Glass Lab — WebGL2 Optical Shader', k: 'Lab', href: '/lab/#lglass' },
     { g: 'Lab & Games', t: 'Orbit Globe & Particle Lab (Halcyon)', k: 'Lab', href: '/lab/#orbit' },
     { g: 'Lab & Games', t: 'Company SQL (49 tables) & Join Atlas', k: 'SQL', href: '/lab/#sql-company' },
-    { g: 'Lab & Games', t: 'Jom Al-Quran SQL (26 tables)', k: 'SQL', href: '/lab/#sql-jom' },
+    { g: 'Lab & Games', t: 'Jom Al-Quran SQL (56 tables)', k: 'SQL', href: '/lab/#sql-jom' },
     { g: 'Lab & Games', t: 'Skyline Stack — Stack past Merdeka 118', k: 'Game', href: '/play/#stack' },
     { g: 'Lab & Games', t: 'Last Train — KL Runner', k: 'Game', href: '/play/#train' },
     { g: 'Lab & Games', t: 'Scope Creep — 45s BA Triage', k: 'Game', href: '/play/#creep' },
     { g: 'Lab & Games', t: 'Spec Match — Tool & Project Pairs', k: 'Game', href: '/play/#match' },
-    // Notes
+    // Notes (all 13)
     { g: 'Notes', t: 'Building this site (3D KL, zero frameworks)', k: 'Note', href: '/notes/portfolio-site.html' },
     { g: 'Notes', t: 'TaskMatch v2 — Rebuilding my FYP properly', k: 'Note', href: '/notes/taskmatch-v2.html' },
     { g: 'Notes', t: 'SLB IT Asset Disposal — 26 Interactive Screens', k: 'Note', href: '/notes/slb-screens.html' },
+    { g: 'Notes', t: 'SLB IT Asset Disposal — From reply-all to Power Apps', k: 'Note', href: '/notes/slb-power-apps.html' },
+    { g: 'Notes', t: 'SLB Design — Nine charts before one screen', k: 'Note', href: '/notes/slb-design.html' },
     { g: 'Notes', t: 'SMK Subang — Dashboard 150 teachers open', k: 'Note', href: '/notes/smk-dashboard.html' },
     { g: 'Notes', t: 'MyLokalEvent v2 — BM-first rebuild', k: 'Note', href: '/notes/mylokalevent-v2.html' },
     { g: 'Notes', t: 'KakiLima — Accessible civic reporting in 4 languages', k: 'Note', href: '/notes/kakilima.html' },
     { g: 'Notes', t: 'JumaatFinder — 565 geocoded masjid & surau', k: 'Note', href: '/notes/jumaatfinder.html' },
     { g: 'Notes', t: 'Jom Al-Quran — 56 tables back from Oracle', k: 'Note', href: '/notes/jom-al-quran.html' },
+    { g: 'Notes', t: 'Company SQL — A whole company in 49 tables', k: 'Note', href: '/notes/database.html' },
+    { g: 'Notes', t: 'AWS — One VPC, two departments, $56', k: 'Note', href: '/notes/aws-two-departments.html' },
+    { g: 'Notes', t: 'Convocation 2026 — Four years, one walk', k: 'Note', href: '/notes/convocation-2026.html' },
     // Actions
-    { g: 'Actions', t: 'Switch Light / Dark Theme', k: 'Theme', act: function () {
+    { g: 'Actions', t: root.hasAttribute('data-daycycle') ? 'Toggle Pin Daylight (Portfolio Reading Mode)' : 'Switch Light / Dark Theme', k: 'Theme', act: function () {
+      if (root.hasAttribute('data-daycycle')) {
+        var pin = d.querySelector('.dc-pin'); if (pin) pin.click(); return;
+      }
       var cur = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
       var next = cur === 'dark' ? 'light' : 'dark';
       root.setAttribute('data-theme', next);
@@ -87,13 +95,14 @@
       return (it.t + ' ' + it.g + ' ' + it.k).toLowerCase().indexOf(s) >= 0;
     });
     idx = 0;
-    if (!shown.length) { list.innerHTML = '<p class="cmd-empty">No matching destinations or actions.</p>'; return; }
+    if (!shown.length) { list.innerHTML = '<p class="cmd-empty">No matching destinations or actions.</p>'; input.removeAttribute('aria-activedescendant'); return; }
     var html = '', lastG = '';
     shown.forEach(function (it, i) {
       if (it.g !== lastG) { lastG = it.g; html += '<p class="cmd-grp">' + lastG + '</p>'; }
-      html += '<button type="button" class="cmd-item' + (i === 0 ? ' on' : '') + '" data-i="' + i + '" role="option"><span>' + it.t + '</span><small>' + it.k + '</small></button>';
+      html += '<button type="button" id="cmd-opt-' + i + '" class="cmd-item' + (i === 0 ? ' on' : '') + '" data-i="' + i + '" role="option" aria-selected="' + (i === 0 ? 'true' : 'false') + '"><span>' + it.t + '</span><small>' + it.k + '</small></button>';
     });
     list.innerHTML = html;
+    input.setAttribute('aria-activedescendant', 'cmd-opt-0');
   }
 
   function highlight(n) {
@@ -103,7 +112,8 @@
     for (var i = 0; i < btns.length; i++) {
       var on = i === idx;
       btns[i].classList.toggle('on', on);
-      if (on) btns[i].scrollIntoView({ block: 'nearest' });
+      btns[i].setAttribute('aria-selected', on ? 'true' : 'false');
+      if (on) { btns[i].scrollIntoView({ block: 'nearest' }); input.setAttribute('aria-activedescendant', btns[i].id); }
     }
   }
 
@@ -146,6 +156,14 @@
     }
     if (!isOpen) return;
     if (e.key === 'Escape') { e.preventDefault(); close(); }
+    else if (e.key === 'Tab') {
+      var focusables = [].slice.call(bd.querySelectorAll('input, button, a[href]'));
+      if (focusables.length) {
+        var fi = focusables.indexOf(d.activeElement);
+        e.preventDefault();
+        focusables[e.shiftKey ? (fi <= 0 ? focusables.length - 1 : fi - 1) : (fi < 0 || fi === focusables.length - 1 ? 0 : fi + 1)].focus();
+      }
+    }
     else if (e.key === 'ArrowDown') { e.preventDefault(); highlight(idx + 1); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); highlight(idx - 1); }
     else if (e.key === 'Enter') { e.preventDefault(); run(idx); }

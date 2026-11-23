@@ -2,6 +2,7 @@
    Matching Home's cosmic production quality. GPU-only animations (transform + opacity), zero magenta/pink,
    full light/dark & reduced-motion support. */
 
+html.ig-lock,html.ig-lock body{overflow:hidden;overscroll-behavior:none}
 .ig-gate{
   --ig-gold:#ffd27a;
   --ig-ice:#7fd3ff;
