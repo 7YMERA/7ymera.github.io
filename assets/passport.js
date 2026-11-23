@@ -73,7 +73,119 @@
           '<span><b>' + s.title + '</b>' + (compact ? '' : '<small>' + s.desc + '</small>') + '</span></a>';
       });
       html += '</div>';
+      if (!compact) {
+        var full = n >= STAMPS.length;
+        html += '<div class="fl-actions">' +
+          '<button type="button" class="fl-pass-btn' + (full ? ' full' : '') + '" data-fl-pass>' +
+          (full ? 'Download Certified Pilot Boarding Pass (.PNG)' : 'Download Flight Log Boarding Pass (' + n + '/' + STAMPS.length + ' .PNG)') +
+          '</button>' +
+          (full
+            ? '<a class="fl-reward" href="/#enter">Grand Fireworks unlocked in Free Fly &#8599;</a>'
+            : '<span class="fl-hint">Unlock all 8 stamps for the Certified Pilot seal &amp; Grand Finale Fireworks over KL.</span>') +
+          '</div>';
+      }
       host.innerHTML = html;
+      var btn = host.querySelector('[data-fl-pass]');
+      if (btn) btn.addEventListener('click', function () { api.downloadBoardingPass(); });
+    },
+    downloadBoardingPass: function () {
+      var o = load(), n = api.count(), full = n >= STAMPS.length;
+      var W = 1200, H = 520, cv = d.createElement('canvas');
+      cv.width = W; cv.height = H;
+      var g = cv.getContext('2d');
+
+      // Deep night KL sky backdrop
+      var bg = g.createLinearGradient(0, 0, W, H);
+      bg.addColorStop(0, '#040a1a'); bg.addColorStop(0.6, '#0a1c3f'); bg.addColorStop(1, '#07122b');
+      g.fillStyle = bg; g.fillRect(0, 0, W, H);
+
+      // Subtle architectural grid
+      g.strokeStyle = 'rgba(127, 211, 255, 0.06)'; g.lineWidth = 1;
+      for (var x = 40; x < W; x += 48) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke(); }
+      for (var y = 40; y < H; y += 48) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
+
+      // Outer border & perforated stub divider
+      g.strokeStyle = full ? '#ffd27a' : '#7fd3ff'; g.lineWidth = 3;
+      g.strokeRect(20, 20, W - 40, H - 40);
+      var stubX = 860;
+      g.save();
+      g.setLineDash([8, 8]); g.strokeStyle = 'rgba(255, 210, 122, 0.45)'; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(stubX, 20); g.lineTo(stubX, H - 20); g.stroke();
+      g.restore();
+
+      // Top header bar
+      g.fillStyle = full ? '#ffd27a' : '#7fd3ff';
+      g.font = '700 16px "JetBrains Mono", monospace';
+      g.fillText('\\7YMERA · KUALA LUMPUR FLIGHT LOG BOARDING PASS', 54, 68);
+      g.fillStyle = '#9db6dc';
+      g.font = '500 14px "JetBrains Mono", monospace';
+      g.fillText('3.1390° N · 101.6869° E · KLCC / MERDEKA 118 AIRSPACE', 54, 94);
+
+      // Title & status
+      g.fillStyle = '#ffffff';
+      g.font = '800 42px "Bricolage Grotesque", system-ui, sans-serif';
+      g.fillText(full ? 'CERTIFIED 7YMERA PILOT' : 'KL FLIGHT LOG PASS', 54, 152);
+      g.fillStyle = full ? '#ffd27a' : '#7fd3ff';
+      g.font = '600 17px "JetBrains Mono", monospace';
+      g.fillText(full ? 'ALL 8/8 STAMPS CLEARED · GRAND FIREWORKS UNLOCKED' : 'CLEARANCE PROGRESS: ' + n + ' OF ' + STAMPS.length + ' STAMPS COLLECTED', 54, 184);
+
+      // Stamp grid (2 columns x 4 rows)
+      STAMPS.forEach(function (s, idx) {
+        var col = idx % 2, row = Math.floor(idx / 2);
+        var sx = 54 + col * 388, sy = 216 + row * 62, got = !!o[s.id];
+        g.fillStyle = got ? 'rgba(255, 210, 122, 0.14)' : 'rgba(255, 255, 255, 0.03)';
+        g.strokeStyle = got ? '#ffd27a' : 'rgba(157, 182, 220, 0.25)';
+        g.lineWidth = 1.5;
+        g.fillRect(sx, sy, 368, 48); g.strokeRect(sx, sy, 368, 48);
+        g.fillStyle = got ? '#ffd27a' : '#5b7b8c';
+        g.font = '700 16px "JetBrains Mono", monospace';
+        g.fillText(got ? '[✓]' : '[ ]', sx + 14, sy + 30);
+        g.fillStyle = got ? '#ffffff' : '#6a7d96';
+        g.font = '600 17px "Albert Sans", system-ui, sans-serif';
+        g.fillText(s.title, sx + 56, sy + 30);
+      });
+
+      // Right stub: Scores, date, skyline silhouette & faux barcode
+      var playB = {}, arcB = {};
+      try { playB = JSON.parse(localStorage.getItem('play-best') || '{}'); } catch (e) {}
+      try { arcB = JSON.parse(localStorage.getItem('arc-best') || '{}'); } catch (e) {}
+      var rx = stubX + 34;
+      g.fillStyle = '#ffd27a'; g.font = '700 14px "JetBrains Mono", monospace';
+      g.fillText('FLIGHT STUB', rx, 68);
+      g.fillStyle = '#ffffff'; g.font = '800 54px "JetBrains Mono", monospace';
+      g.fillText(n + '/' + STAMPS.length, rx, 134);
+      g.fillStyle = '#9db6dc'; g.font = '600 12px "JetBrains Mono", monospace';
+      g.fillText('ISSUED (MYT)', rx, 174);
+      g.fillStyle = '#eaf1ff'; g.font = '600 16px "JetBrains Mono", monospace';
+      var dtStr = new Date().toLocaleDateString('en-MY', { year: 'numeric', month: 'short', day: '2-digit' });
+      g.fillText(dtStr.toUpperCase(), rx, 198);
+
+      g.fillStyle = '#9db6dc'; g.font = '600 12px "JetBrains Mono", monospace';
+      g.fillText('ARCADE TELEMETRY', rx, 240);
+      g.fillStyle = '#eaf1ff'; g.font = '500 15px "JetBrains Mono", monospace';
+      g.fillText('STACK    : ' + (+playB.stack || 0) + ' FLR', rx, 268);
+      g.fillText('DISPATCH : ' + (+playB.dispatch || 0) + ' PTS', rx, 294);
+      g.fillText('TRAIN    : ' + (+arcB.train || 0) + ' PTS', rx, 320);
+
+      // Skyline mini-silhouette + boarding barcode
+      g.fillStyle = 'rgba(127, 211, 255, 0.22)';
+      g.fillRect(rx, 378, 272, 2);
+      var bars = [18, 28, 12, 42, 42, 16, 26, 52, 22, 34, 14, 24];
+      bars.forEach(function (bh, bi) { g.fillRect(rx + bi * 22, 378 - bh, 14, bh); });
+      g.fillStyle = '#eaf1ff';
+      for (var k = 0; k < 34; k++) {
+        var bw = (k * 7 + n * 3) % 3 === 0 ? 5 : 2;
+        g.fillRect(rx + k * 8, 404, bw, 56);
+      }
+      g.fillStyle = '#9db6dc'; g.font = '500 11px "JetBrains Mono", monospace';
+      g.fillText('7YMERA.GITHUB.IO · KL FLIGHT LOG', rx, 480);
+
+      try {
+        var a = d.createElement('a');
+        a.download = '7ymera-kl-boarding-pass-' + n + 'of' + STAMPS.length + '.png';
+        a.href = cv.toDataURL('image/png');
+        a.click();
+      } catch (e) {}
     }
   };
 

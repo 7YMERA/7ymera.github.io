@@ -29,12 +29,12 @@
      saved scores
      ===================================================================== */
   function scores() {
-    var o = { stack: 0, train: 0, creep: 0, match: 0 };
+    var o = { stack: 0, dispatch: 0, train: 0, creep: 0, match: 0 };
     try { var a = JSON.parse(localStorage.getItem('arc-best') || '{}'); ['train', 'creep', 'match'].forEach(function (k) { if (+a[k] > 0) o[k] = +a[k]; }); } catch (e) { /* private mode */ }
-    try { var b = JSON.parse(localStorage.getItem('play-best') || '{}'); if (+b.stack > 0) o.stack = +b.stack; } catch (e) { /* private mode */ }
+    try { var b = JSON.parse(localStorage.getItem('play-best') || '{}'); if (+b.stack > 0) o.stack = +b.stack; if (+b.dispatch > 0) o.dispatch = +b.dispatch; } catch (e) { /* private mode */ }
     return o;
   }
-  var UNIT = { stack: 'floors', train: 'pts', creep: 'pts', match: 'moves' };
+  var UNIT = { stack: 'floors', dispatch: 'pts', train: 'pts', creep: 'pts', match: 'moves' };
   function paintScores() {
     var s = scores();
     $$('[data-hi-show]').forEach(function (el) { var v = s[el.dataset.hiShow]; el.textContent = v ? String(v).padStart(3, '0') : '---'; el.classList.toggle('on', !!v); });
@@ -50,9 +50,10 @@
   var stage = $('#stage'), hall = $('#hall'), stageTitle = $('#stage-title'), stageSub = $('#stage-sub');
   var CAB = {
     stack: { view: 'stack', title: 'Skyline Stack', sub: 'Arcade floor · cabinet 01', score: 'stack' },
-    train: { view: 'arcade', title: 'Last Train', sub: 'Arcade floor · cabinet 02', score: 'train', pick: 'train' },
-    creep: { view: 'arcade', title: 'Scope Creep', sub: 'Arcade floor · cabinet 03', score: 'creep', pick: 'creep' },
-    match: { view: 'arcade', title: 'Spec Match', sub: 'Arcade floor · cabinet 04', score: 'match', pick: 'match' },
+    dispatch: { view: 'dispatch', title: 'KL Sky-Rail Dispatch', sub: 'Arcade floor · cabinet 02', score: 'dispatch' },
+    train: { view: 'arcade', title: 'Last Train', sub: 'Arcade floor · cabinet 03', score: 'train', pick: 'train' },
+    creep: { view: 'arcade', title: 'Scope Creep', sub: 'Arcade floor · cabinet 04', score: 'creep', pick: 'creep' },
+    match: { view: 'arcade', title: 'Spec Match', sub: 'Arcade floor · cabinet 05', score: 'match', pick: 'match' },
     orbit: { view: 'halcyon', title: 'Orbit', sub: 'The lab · Halcyon', pick: 'orbit' },
     lab: { view: 'halcyon', title: 'Particle lab', sub: 'The lab · Halcyon', pick: 'lab' },
     glass: { view: 'glass', title: 'Glass lab', sub: 'The lab · one WebGL shader', src: '/lab/glass.html' },
@@ -206,7 +207,7 @@
       ['data-db', 'data-drift'].forEach(function (a) { var v = node.getAttribute(a); if (v) node.setAttribute(a, v.replace(/^\.\.\//, '/')); });
       host.textContent = ''; host.appendChild(node);
       // the scripts bind to the element's id when they run, so run a fresh copy each time
-      var s = d.createElement('script'); s.src = c.js + '?v=' + (VER || '20261123q') + '&m=' + seq; s.async = false; host.appendChild(s);
+      var s = d.createElement('script'); s.src = c.js + '?v=' + (VER || '20261123r') + '&m=' + seq; s.async = false; host.appendChild(s);
     }).catch(function () {
       if (seq !== sqlSeq) return; sqlNow = '';
       host.innerHTML = '<p class="sql-wait">Could not load the playground. <a href="' + c.note + '">Open it in the note instead</a>.</p>';
@@ -330,6 +331,39 @@
       g.fillStyle = C.gold; g.globalAlpha = .9; g.fillRect(bxp - w / 2, by, w, FHh - 1); g.globalAlpha = 1;
       px(g, 14); g.textAlign = 'left'; g.fillStyle = C.ink; g.fillText('FLOOR ' + String(k + 1).padStart(2, '0'), 12, 22);
       px(g, 11); g.fillStyle = C.gold; if (ph < .25 && k > 1 && k % 3 === 0) { g.textAlign = 'center'; g.globalAlpha = 1 - ph * 4; g.fillText('PERFECT', x, ground - (k + 1) * FHh - 8 - ph * 30); g.globalAlpha = 1; }
+    },
+    dispatch: function (g, t) {
+      backdrop(g);
+      var cyc = Math.floor(t / 1.8), sw0 = cyc % 2, sw1 = Math.floor(cyc / 2) % 2, sw2 = (cyc + 1) % 2;
+      var sx = 18, sy = 100, j0 = [90, 100], j1 = [184, 56], j2 = [184, 144];
+      var ds = [[280, 32, C.gold, 'PT'], [280, 78, C.blue, 'KL'], [280, 122, C.teal, 'EX'], [280, 168, C.ink, 'M118']];
+      function ln(a, b, on, col) {
+        g.strokeStyle = on ? col : C.dim; g.lineWidth = on ? 2.5 : 1.3; g.globalAlpha = on ? .95 : .55;
+        g.beginPath(); var cx = (a[0] + b[0]) / 2; g.moveTo(a[0], a[1]); g.bezierCurveTo(cx, a[1], cx, b[1], b[0], b[1]); g.stroke(); g.globalAlpha = 1;
+      }
+      ln([sx, sy], j0, true, C.blue);
+      ln(j0, j1, sw0 === 0, C.blue); ln(j0, j2, sw0 === 1, C.blue);
+      ln(j1, ds[0], sw1 === 0, ds[0][2]); ln(j1, ds[1], sw1 === 1, ds[1][2]);
+      ln(j2, ds[2], sw2 === 0, ds[2][2]); ln(j2, ds[3], sw2 === 1, ds[3][2]);
+      ds.forEach(function (d0) {
+        g.fillStyle = '#0d2535'; g.strokeStyle = d0[2]; g.lineWidth = 1.4;
+        rr(g, d0[0] - 6, d0[1] - 10, 38, 20, 5); g.fill(); g.stroke();
+        mono(g, 8); g.fillStyle = d0[2]; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(d0[3], d0[0] + 13, d0[1] + 0.5);
+      });
+      [j0, j1, j2].forEach(function (j) {
+        g.fillStyle = '#091834'; g.strokeStyle = C.gold; g.lineWidth = 1.6;
+        g.beginPath(); g.arc(j[0], j[1], 7, 0, 7); g.fill(); g.stroke();
+      });
+      // Animated train gliding along active route
+      var p = (t * 0.55) % 1, dest = sw0 === 0 ? (sw1 === 0 ? ds[0] : ds[1]) : (sw2 === 0 ? ds[2] : ds[3]);
+      var mid = sw0 === 0 ? j1 : j2;
+      var a0, b0, u;
+      if (p < .33) { a0 = [sx, sy]; b0 = j0; u = p / .33; }
+      else if (p < .66) { a0 = j0; b0 = mid; u = (p - .33) / .33; }
+      else { a0 = mid; b0 = dest; u = (p - .66) / .34; }
+      var tx = a0[0] + (b0[0] - a0[0]) * u, ty = a0[1] + (b0[1] - a0[1]) * u;
+      g.fillStyle = dest[2]; rr(g, tx - 11, ty - 5, 22, 10, 4); g.fill();
+      g.textBaseline = 'alphabetic'; px(g, 11); g.textAlign = 'left'; g.fillStyle = C.mute; g.fillText('3 SWITCHES · 4 KL STATIONS', 12, 190);
     },
     orbit: function (g, t) {
       backdrop(g); var cx = 160, cy = 100, R = 66, yaw = t * .35;
@@ -577,6 +611,7 @@
   var HS = [
     ['train', 'Game', 'Last Train', 'the skyline.', 'An arcade in one room. Ride the KL line, jump the scope creep and grab every requirement before the last train home.'],
     ['stack', 'Game', 'Skyline Stack', 'the tower.', 'One button, one tower. Stack Kuala Lumpur floor by floor, past Menara TM, KL Tower and Petronas, all the way up Merdeka 118.'],
+    ['dispatch', 'Game', 'KL Sky-Rail Dispatch', 'the switches.', 'Sixty seconds of rush hour at KL Sentral. Flip 3 junctions to route every express train to its matching landmark station.'],
     ['creep', 'Game', 'Scope Creep', 'the backlog.', 'Forty-five seconds of triage. Real requirement or creep? Build it or park it.'],
     ['match', 'Game', 'Spec Match', 'the stack.', 'Pair each tool with the project it shipped in. Fewest moves wins.']
   ];

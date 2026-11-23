@@ -30,17 +30,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@500;600&display=swap">
-<link rel="stylesheet" href="/assets/site.css?v=20261123q">
-<link rel="stylesheet" href="/assets/fx.css?v=20261123q">
-<link rel="stylesheet" href="/assets/cursor.css?v=20261123q">
-<link rel="stylesheet" href="/assets/arcade.css?v=20261123q">
-<link rel="stylesheet" href="/assets/halcyon.css?v=20261123q">
-<link rel="stylesheet" href="/assets/join-atlas.css?v=20261123q">
-<link rel="stylesheet" href="/assets/play/play.css?v=20261123q">
-<link rel="stylesheet" href="/assets/play/anatomy.css?v=20261123q">
-<link rel="stylesheet" href="/assets/play/sat.css?v=20261123q">
-<link rel="stylesheet" href="/assets/palette.css?v=20261123q">
-<link rel="stylesheet" href="/assets/intro-gate.css?v=20261123q">
+<link rel="stylesheet" href="/assets/site.css?v=20261123r">
+<link rel="stylesheet" href="/assets/fx.css?v=20261123r">
+<link rel="stylesheet" href="/assets/cursor.css?v=20261123r">
+<link rel="stylesheet" href="/assets/arcade.css?v=20261123r">
+<link rel="stylesheet" href="/assets/halcyon.css?v=20261123r">
+<link rel="stylesheet" href="/assets/join-atlas.css?v=20261123r">
+<link rel="stylesheet" href="/assets/play/play.css?v=20261123r">
+<link rel="stylesheet" href="/assets/play/anatomy.css?v=20261123r">
+<link rel="stylesheet" href="/assets/play/sat.css?v=20261123r">
+<link rel="stylesheet" href="/assets/palette.css?v=20261123r">
+<link rel="stylesheet" href="/assets/intro-gate.css?v=20261123r">
 <script>/* #sat is the hero itself */if(location.hash==="#sat")location.replace("#satellite");</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Lab","url":"https://7ymera.github.io/lab/","description":"Experiments by Alif Najmi: a NASA satellite inspector, a globe, particles, exploded landmarks and glass shaders.","isPartOf":{"@type":"WebSite","name":"Alif Najmi","url":"https://7ymera.github.io/"}}</script>
 </head>
@@ -230,10 +230,20 @@
             <span class="sl-meta" id="sl-form">Press Play score to start the Web Audio engine</span>
             <span class="sl-meta" id="sl-bpm">72 bars</span>
           </div>
-          <button class="sl-play" id="sl-play" type="button" aria-pressed="false">Play score</button>
+          <div class="sl-actions">
+            <button class="sl-wav" id="sl-wav" type="button">Export 8-bar .WAV</button>
+            <button class="sl-play" id="sl-play" type="button" aria-pressed="false">Play score</button>
+          </div>
         </div>
         <div class="sl-stage">
           <canvas id="sl-cv" width="840" height="300" role="img" aria-label="Live frequency spectrum and waveform of the procedural Web Audio score."></canvas>
+        </div>
+        <div class="sl-tracks" role="group" aria-label="Select procedural soundtrack">
+          <button class="sl-btn" type="button" data-sl-track="home" aria-pressed="true">Night Drive · KL</button>
+          <button class="sl-btn" type="button" data-sl-track="lab" aria-pressed="false">The Grid · 118</button>
+          <button class="sl-btn" type="button" data-sl-track="portfolio" aria-pressed="false">Lounge · 78</button>
+          <button class="sl-btn" type="button" data-sl-track="play" aria-pressed="false">Arcade · 124</button>
+          <button class="sl-btn" type="button" data-sl-track="notes" aria-pressed="false">Quiet Study · 64</button>
         </div>
         <div class="sl-moods" role="group" aria-label="Harmonic mood">
           <button class="sl-btn" type="button" data-sl-mood="0" aria-pressed="false">Day · Major 9th</button>
@@ -248,7 +258,13 @@
           <button class="sl-btn" type="button" data-sl-stem="air" aria-pressed="true"><span>Swell / Air</span><i aria-hidden="true"></i></button>
           <button class="sl-btn" type="button" data-sl-stem="drums" aria-pressed="true"><span>Drums</span><i aria-hidden="true"></i></button>
         </div>
-        <p class="sl-note">100% synthesised in your browser via Web Audio API (`assets/sfx.js`): zero audio files, voice-led chord progressions, ping-pong delay, generated impulse reverb, and sidechain ducking.</p>
+        <div class="sl-pads" role="group" aria-label="In-key live jam pads (keys 1 to 4)">
+          <button class="sl-pad" type="button" data-sl-jam="0"><kbd>1</kbd><b>FM Bell</b><span>Crystalline chime</span></button>
+          <button class="sl-pad" type="button" data-sl-jam="1"><kbd>2</kbd><b>Glass Lead</b><span>Soaring voice</span></button>
+          <button class="sl-pad" type="button" data-sl-jam="2"><kbd>3</kbd><b>Chord Roll</b><span>Warm felt keys</span></button>
+          <button class="sl-pad" type="button" data-sl-jam="3"><kbd>4</kbd><b>Sub + Spark</b><span>Bass &amp; air</span></button>
+        </div>
+        <p class="sl-note">100% synthesised in your browser via Web Audio API (`assets/sfx.js`): switch all 5 soundtracks, solo/mute stems, improvise in key with pads 1–4, or render your custom mix offline to a real 16-bit stereo `.WAV` file.</p>
       </div>
     </section>
 
@@ -270,19 +286,19 @@
   paint();
 })();
 </script>
-<script src="/assets/sfx.js?v=20261123q" defer></script>
-<script src="/assets/fx.js?v=20261123q" defer></script>
-<script src="/assets/cursor.js?v=20261123q" defer></script>
-<script src="/assets/halcyon.js?v=20261123q" defer></script>
-<script src="/assets/play/anatomy.js?v=20261123q" defer></script>
-<script src="/assets/play/scorelab.js?v=20261123q" defer></script>
+<script src="/assets/sfx.js?v=20261123r" defer></script>
+<script src="/assets/fx.js?v=20261123r" defer></script>
+<script src="/assets/cursor.js?v=20261123r" defer></script>
+<script src="/assets/halcyon.js?v=20261123r" defer></script>
+<script src="/assets/play/anatomy.js?v=20261123r" defer></script>
+<script src="/assets/play/scorelab.js?v=20261123r" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous" defer></script>
-<script src="/assets/home/sat/satellite.js?v=20261123q" defer></script>
-<script src="/assets/play/pad.js?v=20261123q" defer></script>
-<script src="/assets/play/play.js?v=20261123q" defer></script>
-<script src="/assets/passport.js?v=20261123q" defer></script>
-<script src="/assets/palette.js?v=20261123q" defer></script>
-<script src="/assets/intro-gate.js?v=20261123q" defer></script>
+<script src="/assets/home/sat/satellite.js?v=20261123r" defer></script>
+<script src="/assets/play/pad.js?v=20261123r" defer></script>
+<script src="/assets/play/play.js?v=20261123r" defer></script>
+<script src="/assets/passport.js?v=20261123r" defer></script>
+<script src="/assets/palette.js?v=20261123r" defer></script>
+<script src="/assets/intro-gate.js?v=20261123r" defer></script>
 <script>(function(){var h=document.getElementById('sat-hero');if(h)h.addEventListener('pointerdown',function(){if(window.FlightLog)window.FlightLog.unlock('satellite')},{once:true,passive:true})})();</script>
 </body>
 </html>

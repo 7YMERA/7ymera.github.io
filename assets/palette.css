@@ -73,4 +73,20 @@
 [data-fl-compact] .fl-stamp b { font-size: .72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 [data-fl-compact] .fl-dot { width: 16px; height: 16px; font-size: 9px; }
 @media (max-width: 600px) { [data-fl-compact] .fl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (prefers-reduced-motion: reduce) { .cmd-backdrop, .cmd-dlg { transition: none; } }
+.fl-actions { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.fl-pass-btn {
+  min-height: 46px; padding: 10px 18px; border-radius: 12px;
+  border: 1.5px solid var(--accent, #1559c9); background: var(--accent, #1559c9); color: #fff;
+  font: 600 .84rem var(--f-mono, monospace); letter-spacing: .04em; cursor: pointer;
+  transition: transform .15s ease, opacity .15s ease;
+}
+.fl-pass-btn:hover { opacity: .92; transform: translateY(-1px); }
+.fl-pass-btn.full { background: #ffd27a; border-color: #ffd27a; color: #050912; }
+.fl-reward {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 8px 16px; border-radius: 999px;
+  border: 1.5px solid #ffd27a; background: rgba(255, 210, 122, .14); color: var(--ink, #0b2a6b);
+  font: 600 .82rem var(--f-mono, monospace); text-decoration: none;
+}
+:root[data-theme="dark"] .fl-reward { color: #ffd27a; }
+.fl-hint { font: 400 .82rem/1.45 var(--f-body, system-ui); color: var(--muted, #6a7d96); }
+@media (prefers-reduced-motion: reduce) { .cmd-backdrop, .cmd-dlg, .fl-pass-btn { transition: none; } }

@@ -23,6 +23,7 @@
     { g: 'Lab & Games', t: 'Company SQL (49 tables) & Join Atlas', k: 'SQL', href: '/lab/#sql-company' },
     { g: 'Lab & Games', t: 'Jom Al-Quran SQL (56 tables)', k: 'SQL', href: '/lab/#sql-jom' },
     { g: 'Lab & Games', t: 'Skyline Stack — Stack past Merdeka 118', k: 'Game', href: '/play/#stack' },
+    { g: 'Lab & Games', t: 'KL Sky-Rail Dispatch — 60s Rail Switchboard', k: 'Game', href: '/play/#dispatch' },
     { g: 'Lab & Games', t: 'Last Train — KL Runner', k: 'Game', href: '/play/#train' },
     { g: 'Lab & Games', t: 'Scope Creep — 45s BA Triage', k: 'Game', href: '/play/#creep' },
     { g: 'Lab & Games', t: 'Spec Match — Tool & Project Pairs', k: 'Game', href: '/play/#match' },

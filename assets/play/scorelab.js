@@ -6,8 +6,11 @@
   if (!root) return;
   var cv = d.getElementById('sl-cv'), ctx = cv ? cv.getContext('2d') : null;
   var chordEl = d.getElementById('sl-chord'), formEl = d.getElementById('sl-form'), bpmEl = d.getElementById('sl-bpm');
-  var playBtn = d.getElementById('sl-play'), moodBtns = [].slice.call(root.querySelectorAll('[data-sl-mood]'));
+  var playBtn = d.getElementById('sl-play'), wavBtn = d.getElementById('sl-wav');
+  var moodBtns = [].slice.call(root.querySelectorAll('[data-sl-mood]'));
   var stemBtns = [].slice.call(root.querySelectorAll('[data-sl-stem]'));
+  var trackBtns = [].slice.call(root.querySelectorAll('[data-sl-track]'));
+  var jamBtns = [].slice.call(root.querySelectorAll('[data-sl-jam]'));
   var reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   var active = false, raf = 0, bins = null, wave = null, W = 0, H = 0, dpr = 1, lastUiKey = '', prevTrack = null;
 
@@ -26,23 +29,25 @@
     var s = S(), on = !!(s && s.on);
     var st = s && s.state ? s.state() : null;
     var stems = s && s.stems ? s.stems() : null;
-    var key = (on ? '1' : '0') + '|' + (st ? st.bar + '|' + st.chord + '|' + st.mood + '|' + st.bpm + '|' + st.section : '') + '|' + (stems ? Object.keys(stems).map(function (k) { return stems[k] ? '1' : '0'; }).join('') : '');
+    var curTrk = s && s.track ? s.track() : 'home';
+    var key = (on ? '1' : '0') + '|' + curTrk + '|' + (st ? st.bar + '|' + st.chord + '|' + st.mood + '|' + st.bpm + '|' + st.section : '') + '|' + (stems ? Object.keys(stems).map(function (k) { return stems[k] ? '1' : '0'; }).join('') : '');
     if (!force && key === lastUiKey) return;
     lastUiKey = key;
     if (playBtn) {
       playBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
       playBtn.textContent = on ? 'Pause score' : 'Play score';
     }
+    trackBtns.forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.slTrack === curTrk ? 'true' : 'false'); });
     if (st && on) {
       var bar = (((st.bar - 1) % st.total) + st.total) % st.total + 1;
       if (chordEl) chordEl.textContent = st.chord || '---';
-      if (formEl) formEl.textContent = st.section + ' · Bar ' + bar + ' / ' + st.total;
+      if (formEl) formEl.textContent = st.section + ' · Bar ' + bar + (curTrk === 'home' ? ' / ' + st.total : '');
       if (bpmEl) bpmEl.textContent = st.bpm + ' BPM';
       moodBtns.forEach(function (b) { b.setAttribute('aria-pressed', +b.dataset.slMood === st.mood ? 'true' : 'false'); });
     } else {
       if (chordEl) chordEl.textContent = 'STANDBY';
       if (formEl) formEl.textContent = 'Press Play score to start the Web Audio engine';
-      if (bpmEl) bpmEl.textContent = '72 bars';
+      if (bpmEl) bpmEl.textContent = curTrk === 'home' ? '72 bars' : 'Live loop';
     }
     if (stems) stemBtns.forEach(function (b) { b.setAttribute('aria-pressed', stems[b.dataset.slStem] !== false ? 'true' : 'false'); });
   }
@@ -133,6 +138,50 @@
       s.setStem(b.dataset.slStem, next);
       b.setAttribute('aria-pressed', next ? 'true' : 'false');
       if (window.FlightLog) window.FlightLog.unlock('scorelab');
+    });
+  });
+
+  trackBtns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var s = S(); if (!s || !s.setTrack) return;
+      if (!s.on) s.set(true);
+      s.setTrack(b.dataset.slTrack);
+      syncUI(true);
+      if (window.FlightLog) window.FlightLog.unlock('scorelab');
+    });
+  });
+
+  function hitPad(idx) {
+    var s = S(); if (!s || !s.jam) return;
+    s.jam(idx);
+    var b = jamBtns[idx];
+    if (b) { b.classList.remove('hit'); void b.offsetWidth; b.classList.add('hit'); }
+    if (window.FlightLog) window.FlightLog.unlock('scorelab');
+  }
+  jamBtns.forEach(function (b) {
+    b.addEventListener('pointerdown', function () { hitPad(+b.dataset.slJam); });
+  });
+  d.addEventListener('keydown', function (e) {
+    if (!active || e.ctrlKey || e.metaKey || e.altKey) return;
+    var tg = e.target; if (tg && /^(INPUT|TEXTAREA|SELECT)$/.test(tg.tagName)) return;
+    var k = e.key;
+    if (k === '1' || k === '2' || k === '3' || k === '4') { e.preventDefault(); hitPad(+k - 1); }
+  });
+
+  if (wavBtn) wavBtn.addEventListener('click', function () {
+    var s = S(); if (!s || !s.exportWav || wavBtn.disabled) return;
+    var orig = wavBtn.textContent;
+    wavBtn.disabled = true; wavBtn.textContent = 'Rendering .WAV…';
+    s.exportWav(8).then(function (res) {
+      var url = URL.createObjectURL(res.blob), a = d.createElement('a');
+      a.href = url; a.download = res.filename; a.click();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      wavBtn.textContent = 'Downloaded!';
+      if (window.FlightLog) window.FlightLog.unlock('scorelab');
+      setTimeout(function () { wavBtn.textContent = orig; wavBtn.disabled = false; }, 1800);
+    }).catch(function () {
+      wavBtn.textContent = 'Export unavailable';
+      setTimeout(function () { wavBtn.textContent = orig; wavBtn.disabled = false; }, 2000);
     });
   });
 

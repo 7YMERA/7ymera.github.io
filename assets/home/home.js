@@ -101,8 +101,8 @@
     var y = scrollY, vh = innerHeight, ap = -1, city = false, i;
     // optical airlock: as the reader scrolls out of #reveal into #descent, relax the glass tile into a circular orbital lens
     if (gr && rv && !reduce) ap = clamp((y - vh * .05) / (vh * .78), 0, 1);
-    // the 3D city only shows from the end of the descent to the end of the flight (the CSS fades it); outside that it stays hidden
-    if (enter && enter.offsetHeight) { var top = enter.offsetTop, bot = top + enter.offsetHeight; city = y > top - vh * 1.18 && y < bot + vh * .2; }
+    // the 3D city wakes & pre-positions behind the clouds (from Malaysia zoom, ~2.1 screens before #enter) so it is already at opacity 1 and locked on top-down OVER before the clouds dissolve
+    if (enter && enter.offsetHeight) { var top = enter.offsetTop, bot = top + enter.offsetHeight; city = y > top - vh * 2.1 && y < bot + vh * .2; }
     // header tone: light type over the dark descent stage
     var dr = dsEl ? dsEl.getBoundingClientRect() : null, onDark = !!dr && dr.top < 60 && dr.bottom > 60 && !(dsStage && +dsStage.style.opacity < .35);
     if (!onDark && rv && onStage()) { var rr = rv.getBoundingClientRect(); onDark = rr.top < 60 && rr.bottom > 60; }

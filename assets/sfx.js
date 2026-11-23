@@ -446,6 +446,25 @@
         var o3 = osc('square', 76), g3 = g(.35); o3.frequency.setValueAtTime(76, t); o3.frequency.exponentialRampToValueAtTime(300, t + 2.2); o3.frequency.exponentialRampToValueAtTime(190, t + 3.4); o.connect(lp); o3.connect(g3); g3.connect(lp); lp.connect(e); e.connect(Cue);
         o.start(t); o3.start(t); o.stop(t + 3.7); o3.stop(t + 3.7); sweepNoise(t + .1, 3, 200, 2800, 1, .12, .62, 0);
       }
+      else if (name === 'thunder') {
+        // distant KL monsoon thunderclap: lowpass-swept brown noise rumble + 38 Hz sub roll
+        var ts = ac.createBufferSource(); ts.buffer = brown; ts.loop = true;
+        var tlp = flt('lowpass', 280, .8), te = g(.0002), tp = pan((Math.random() - .5) * .9);
+        tlp.frequency.setValueAtTime(320, t); tlp.frequency.exponentialRampToValueAtTime(58, t + 3.4);
+        te.gain.setValueAtTime(.0002, t); te.gain.linearRampToValueAtTime(.42, t + .18); te.gain.exponentialRampToValueAtTime(.14, t + 1.1); te.gain.exponentialRampToValueAtTime(.0002, t + 3.8);
+        ts.connect(tlp); tlp.connect(te); te.connect(tp); tp.connect(Cue); ts.start(t, Math.random() * 4); ts.stop(t + 3.9);
+        thunk(t + .05, .3, 46);
+      }
+      else if (name === 'firework') {
+        // skyline firework starburst: muffled boom + crackling noise sparks
+        var fp = (Math.random() - .5) * 1.1;
+        thunk(t, .22, 95);
+        sweepNoise(t + .02, .55, 2200, 620, .9, .14, .1, fp);
+        for (k = 0; k < 4; k++) {
+          var cf2 = flt('bandpass', 2800 + k * 700, 2.5);
+          noiseHit(t + .08 + k * .065 + Math.random() * .03, .06, Cue, cf2, .055, .002);
+        }
+      }
     };
     // cosmos to city: a riser, wind, the low pass opening and a soft landing under the city
     E.descend = function (t) {
@@ -690,6 +709,21 @@
     };
     E.state = function () { var L = locate(st.bar - 1 < 0 ? 0 : st.bar - 1); return { bar: st.bar, total: TOTAL, section: trk === 'home' ? L.seg.n : (st.lastSeg || trk), track: trk, bo: L.bo, bpm: Math.round(st.bpm), chord: st.ch ? st.ch.name : '', mood: st.mood, nextT: st.nextT, live: live }; };
     E.train = function (t) { train(t, 8, Math.random() < .5 ? -1 : 1); };
+    E.jam = function (pad, t) {
+      var vl = st.vl || [60, 64, 67, 71], rt = st.root || 45;
+      if (pad === 0) {
+        var m0 = vl[(Math.random() * vl.length) | 0] + 12;
+        bell(t, m0, .85, (Math.random() - .5) * .9, 3.6, bLead);
+      } else if (pad === 1) {
+        var m1 = vl[vl.length - 1] + (Math.random() < .4 ? 12 : 0);
+        lead(t, m1, .85, .82, (Math.random() - .5) * .6);
+      } else if (pad === 2) {
+        vl.forEach(function (m, j) { felt(t + j * .035, m, 2.2, .72 - j * .05, (j - 1.5) * .35, bKeys); });
+      } else {
+        bassNote(t, rt, 1.1, .95);
+        bell(t + .04, vl[2] + 12, .55, 0, 2.8, bAir);
+      }
+    };
     E.bell = bell; E.bBell = bKeys;
     E.nextBarTime = function () { return st.nextT; };
     return E;
@@ -819,6 +853,38 @@
     setMood: function (t) { env.T = clamp(+t, 0, 2); if (!on) set(true); if (eng && ac) eng.ctrl(ac.currentTime); },
     track: function () { return env.track || TRACK_ID; },
     setTrack: function (id) { if (!TRACK_META[id]) return; env.track = id; if (eng && ac) eng.setTrack(id, ac.currentTime); paintPop(); },
+    jam: function (pad) { if (!on) set(true); if (eng && ac) eng.jam(pad | 0, ac.currentTime + .015); },
+    exportWav: function (bars) {
+      if (!OCtx) return Promise.reject(new Error('OfflineAudioContext unavailable'));
+      var trkNow = env.track || TRACK_ID, Tnow = env.T;
+      var bpm = trkNow === 'portfolio' ? 78 : trkNow === 'play' ? 124 : trkNow === 'lab' ? 118 : trkNow === 'notes' ? 64 : (Tnow <= 1 ? lerp(88, 80, Tnow) : lerp(80, 70, Tnow - 1));
+      var nBars = clamp(bars || 8, 4, 16), sec = Math.min(32, nBars * (60 / bpm) * 4 + 2.5), sr = 44100;
+      var oc = new OCtx(2, Math.floor(sr * sec), sr);
+      var e2 = { T: Tnow, energy: .82, flight: .65, ctx: .95, track: trkNow };
+      var en = Engine(oc, e2, { zones: false });
+      var curStems = eng ? eng.stems() : null;
+      if (curStems) Object.keys(curStems).forEach(function (k) { en.setStem(k, curStems[k], 0); });
+      var outG = oc.createGain(); outG.gain.setValueAtTime(.001, 0); outG.gain.linearRampToValueAtTime(.9, .35);
+      outG.gain.setValueAtTime(.9, Math.max(.5, sec - 2.2)); outG.gain.linearRampToValueAtTime(.0001, sec - .05);
+      en.out.connect(outG); outG.connect(oc.destination);
+      en.start(.05, 0); en.ctrl(0); en.setZone('city', 0, 0);
+      for (var u = .5; u < sec - 1.8; u += .5) en.pump(u);
+      return oc.startRendering().then(function (ab) {
+        var ch0 = ab.getChannelData(0), ch1 = ab.numberOfChannels > 1 ? ab.getChannelData(1) : ch0;
+        var len = ch0.length, buf = new ArrayBuffer(44 + len * 4), dv = new DataView(buf), o = 0;
+        function ws(s) { for (var j = 0; j < s.length; j++) dv.setUint8(o++, s.charCodeAt(j)); }
+        ws('RIFF'); dv.setUint32(o, 36 + len * 4, true); o += 4; ws('WAVE'); ws('fmt ');
+        dv.setUint32(o, 16, true); o += 4; dv.setUint16(o, 1, true); o += 2; dv.setUint16(o, 2, true); o += 2;
+        dv.setUint32(o, sr, true); o += 4; dv.setUint32(o, sr * 4, true); o += 4; dv.setUint16(o, 4, true); o += 2; dv.setUint16(o, 16, true); o += 2;
+        ws('data'); dv.setUint32(o, len * 4, true); o += 4;
+        for (var i = 0; i < len; i++) {
+          var l = clamp(ch0[i], -1, 1), r = clamp(ch1[i], -1, 1);
+          dv.setInt16(o, l < 0 ? l * 0x8000 : l * 0x7fff, true); o += 2;
+          dv.setInt16(o, r < 0 ? r * 0x8000 : r * 0x7fff, true); o += 2;
+        }
+        return { blob: new Blob([buf], { type: 'audio/wav' }), filename: '7ymera-' + trkNow + '-' + nBars + 'bars.wav' };
+      });
+    },
     setRain: function (v) {
       if (!ac || !rainG || !rainL) return;
       var t = ac.currentTime, p = rainG.gain; p.cancelScheduledValues(t);

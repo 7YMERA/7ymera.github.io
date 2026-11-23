@@ -8,7 +8,7 @@ html.home body::before { display: none; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* the city: only visible around the flight; scroll.js-free, home.js toggles city-on */
-html.gl.home #gl, html.gl.gl-on.home #gl, html.gl.home #skybg { opacity: 0; transition: opacity .8s ease-out; }
+html.gl.home #gl, html.gl.gl-on.home #gl, html.gl.home #skybg { opacity: 0; transition: opacity .35s ease-out; }
 html.gl.gl-on.home.city-on #gl, html.gl.home.city-on #skybg { opacity: 1; }
 html.home #fx-grain, html.home #fx-vig { opacity: 0 !important; }
 html.home.city-on #fx-vig { opacity: 1 !important; }

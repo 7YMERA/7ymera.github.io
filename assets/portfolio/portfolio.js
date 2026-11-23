@@ -157,6 +157,106 @@
     else if (e.key === 'ArrowUp' && links.length) { e.preventDefault(); sel = (sel - 1 + links.length) % links.length; render(); }
     else if (e.key === 'Enter' && links[sel]) { e.preventDefault(); links[sel].click(); }
   });
+
+  // Interactive BA Requirement Simulator (#ba-sim)
+  var SIM_DATA = {
+    smk: {
+      pt: 'Scattered Linktree & spreadsheets',
+      pd: '~150 teachers at SMK Subang chased ministry deadlines across dead links and WhatsApp forwards with zero overdue visibility.',
+      st: 'Zero-PII data model & triage spec',
+      sd: 'Separated public aggregate counts from authenticated teacher names (RLS), mapped role-scoped views, and spec\'d one-tap WhatsApp reminder exports.',
+      ot: 'Live daily hub (~150 teachers)',
+      od: 'Shipped in Next.js, Express, Supabase & Apps Script. Adopted daily on mobile across the school.',
+      href: '/notes/smk-dashboard.html', lbl: 'Read the full write-up \u2192'
+    },
+    slb: {
+      pt: 'Reply-all emails & manual Excel logs',
+      pd: 'IT asset disposals at SLB bounced across email threads with missing sign-offs, unclear custody, and slow audit prep.',
+      st: '9 process charts, 3NF ERD & RBAC',
+      sd: 'Mapped end-to-end BPMN flows before a single screen, normalized SharePoint lists into a clean relational model, and defined role-gated approval states.',
+      ot: '26-screen Power Apps workflow',
+      od: 'Built end-to-end with Power Apps & Power Automate — full audit trail and clickable 26-screen interactive walkthrough.',
+      href: '/notes/slb-screens.html', lbl: 'Click through all 26 screens \u2192'
+    },
+    tm: {
+      pt: 'Tasks assigned by gut feel',
+      pd: 'Project leads overloaded senior members while junior skills went unused, with no objective view of workload or fit.',
+      st: 'Weighted fit scoring & API contracts',
+      sd: 'Specified a 100-point transparent fit formula (skills, proven history, capacity, track record) with self-tuning weights and role-based audit rules.',
+      ot: 'Production v2 with CI & live demo',
+      od: 'Rebuilt from UTP FYP into Next.js + FastAPI + Supabase with 13 releases, pytest CI, and zero-login public demo.',
+      href: '/notes/taskmatch-v2.html', lbl: 'Read the TaskMatch v2 story \u2192'
+    }
+  };
+  var simTabs = document.querySelectorAll('[data-sim]');
+  if (simTabs.length) {
+    var simOut = document.getElementById('ba-sim-out');
+    simTabs.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var d = SIM_DATA[b.dataset.sim]; if (!d) return;
+        simTabs.forEach(function (x) { x.setAttribute('aria-selected', String(x === b)); });
+        document.getElementById('sim-p-t').textContent = d.pt;
+        document.getElementById('sim-p-d').textContent = d.pd;
+        document.getElementById('sim-s-t').textContent = d.st;
+        document.getElementById('sim-s-d').textContent = d.sd;
+        document.getElementById('sim-o-t').textContent = d.ot;
+        document.getElementById('sim-o-d').textContent = d.od;
+        var lnk = document.getElementById('sim-link'); lnk.href = d.href; lnk.textContent = d.lbl;
+        if (simOut) { simOut.classList.remove('pop'); void simOut.offsetWidth; simOut.classList.add('pop'); }
+        if (window.SFX && SFX.tick) SFX.tick();
+      });
+    });
+  }
+
+  // Interactive Role Fit Matrix (#role-fit)
+  var ROLE_FIT = {
+    ba: {
+      keys: ['Requirements elicitation', 'FRD / FSD', 'Process mapping', 'Gap & issue tracking', 'AI use-case discovery', 'SQL', 'Data modelling (3NF)', 'Power BI', 'UAT planning', 'End-to-end test cases', 'Postman API testing', 'Claude', 'ChatGPT', 'Gemini', 'Statistics'],
+      msg: '<strong>Business Analyst fit:</strong> Daily BA in a Solution Architect team across 6 sectors — requirements, BPMN, 3NF ERDs, UAT packs, and live prototypes.',
+      links: [['SLB 9 Charts & ERD', '/notes/slb-design.html'], ['SMK Subang Spec', '/notes/smk-dashboard.html'], ['Download CV', '/assets/Muhammad-Alif-Najmi-CV.pdf?v=cv20261119a']]
+    },
+    se: {
+      keys: ['AI use-case discovery', 'Requirements elicitation', 'Process mapping', 'SQL', 'PostgreSQL', 'Row-level security', 'Data modelling (3NF)', 'Python', 'FastAPI', 'Power Apps', 'Power Automate', 'SharePoint', 'Supabase', 'AWS (VPC, IAM)', 'Amazon Bedrock', 'Postman API testing', 'Networking', 'Security & encryption'],
+      msg: '<strong>Solutions Engineer fit:</strong> Translates client workflows into working AWS / Power Platform / AI PoCs with clean security, VPC isolation, and API specs.',
+      links: [['AWS Multi-Dept VPC', '/notes/aws-two-departments.html'], ['SLB 26 Screens', '/notes/slb-screens.html'], ['Jom Al-Quran SQL', '/notes/jom-al-quran.html']]
+    },
+    pb: {
+      keys: ['TypeScript', 'Next.js', 'React', 'Tailwind', 'Python', 'FastAPI', 'Express', 'Git & GitHub Actions', 'PostgreSQL', 'Row-level security', 'Supabase', 'Vercel', 'Google Apps Script', 'Claude Code & Kiro', 'End-to-end test cases'],
+      msg: '<strong>Product Builder fit:</strong> Ships end-to-end production apps solo — WCAG-audited UI, RLS databases, CI test suites, and zero-framework WebGL.',
+      links: [['TaskMatch v2', '/notes/taskmatch-v2.html'], ['MyLokalEvent v2', '/notes/mylokalevent-v2.html'], ['Building This Site', '/notes/portfolio-site.html']]
+    }
+  };
+  var fitBtns = document.querySelectorAll('[data-role]'), fitNote = document.getElementById('role-fit-note');
+  if (fitBtns.length) {
+    var leaves = [].slice.call(document.querySelectorAll('#toolkit .st-leaves li'));
+    var branches = [].slice.call(document.querySelectorAll('#toolkit .st-branch'));
+    fitBtns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var r = b.dataset.role, cfg = ROLE_FIT[r];
+        fitBtns.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+        if (!cfg) {
+          leaves.forEach(function (li) { li.classList.remove('fit-on', 'fit-dim'); });
+          if (fitNote) { fitNote.hidden = true; fitNote.innerHTML = ''; }
+          return;
+        }
+        branches.forEach(function (d) { d.open = true; });
+        var matched = 0;
+        leaves.forEach(function (li) {
+          var txt = (li.firstChild && li.firstChild.textContent ? li.firstChild.textContent : li.textContent).trim();
+          var hit = cfg.keys.indexOf(txt) >= 0;
+          li.classList.toggle('fit-on', hit);
+          li.classList.toggle('fit-dim', !hit);
+          if (hit) matched++;
+        });
+        if (fitNote) {
+          fitNote.innerHTML = '<p>' + cfg.msg + ' <span class="pf-fit-cnt">' + matched + ' matching skills highlighted</span></p><div class="pf-fit-links">' +
+            cfg.links.map(function (l) { return '<a href="' + l[1] + '">' + l[0] + ' \u2192</a>'; }).join('') + '</div>';
+          fitNote.hidden = false;
+        }
+        if (window.SFX && SFX.tick) SFX.tick();
+      });
+    });
+  }
 })();
 /* Portfolio page: header height, the on-page nav, Highlights / Full story, and quiet reveals.
    Everything here is enhancement: without it the page is one long, fully readable column. */

@@ -32,16 +32,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600&display=swap"></noscript>
-<link rel="stylesheet" href="/assets/site.css?v=20261123q">
-<link rel="stylesheet" href="/assets/scene.css?v=20261123q">
-<link rel="stylesheet" href="/assets/delight.css?v=20261123q">
-<link rel="stylesheet" href="/assets/fx.css?v=20261123q">
-<link rel="stylesheet" href="/assets/cursor.css?v=20261123q">
-<link rel="stylesheet" href="/assets/daycycle.css?v=20261123q">
-<link rel="stylesheet" href="/assets/cosmos.css?v=20261123q">
-<link rel="stylesheet" href="/assets/portfolio/portfolio.css?v=20261123q">
-<link rel="stylesheet" href="/assets/palette.css?v=20261123q">
-<link rel="stylesheet" href="/assets/intro-gate.css?v=20261123q">
+<link rel="stylesheet" href="/assets/site.css?v=20261123r">
+<link rel="stylesheet" href="/assets/scene.css?v=20261123r">
+<link rel="stylesheet" href="/assets/delight.css?v=20261123r">
+<link rel="stylesheet" href="/assets/fx.css?v=20261123r">
+<link rel="stylesheet" href="/assets/cursor.css?v=20261123r">
+<link rel="stylesheet" href="/assets/daycycle.css?v=20261123r">
+<link rel="stylesheet" href="/assets/cosmos.css?v=20261123r">
+<link rel="stylesheet" href="/assets/portfolio/portfolio.css?v=20261123r">
+<link rel="stylesheet" href="/assets/palette.css?v=20261123r">
+<link rel="stylesheet" href="/assets/intro-gate.css?v=20261123r">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "ProfilePage", "url": "https://7ymera.github.io/portfolio/", "mainEntity": {"@type": "Person", "name": "Muhammad Alif Najmi", "alternateName": "Alif Najmi", "url": "https://7ymera.github.io/portfolio/", "jobTitle": "Business Analyst", "worksFor": {"@type": "Organization", "name": "axrail.ai"}, "alumniOf": {"@type": "CollegeOrUniversity", "name": "Universiti Teknologi PETRONAS"}, "address": {"@type": "PostalAddress", "addressLocality": "Kuala Lumpur", "addressCountry": "MY"}, "sameAs": ["https://github.com/7YMERA", "https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin", "https://krackeddevs.com/profile/alifnajmx", "https://www.credly.com/users/muhammad-alif-najmi-md-hisamudin"], "image": "https://7ymera.github.io/assets/og-skyline-3.jpg"}}</script>
 </head>
 <body class="pf">
@@ -136,6 +136,21 @@
           <li><b>I build it full stack</b><p>Next.js, Supabase and FastAPI, tested in CI, so the spec and the build never drift apart.</p></li>
           <li><b>I design for privacy</b><p>Row-level security, audit logs and PDPA in mind from the first table.</p></li>
         </ol>
+      </div>
+      <div class="pf-sim" id="ba-sim" aria-labelledby="ba-sim-h">
+        <div class="pf-sim-head">
+          <div><span class="eyebrow">Interactive · Try my BA process</span><h3 id="ba-sim-h">From messy stakeholder prompt to shipped system</h3></div>
+          <div class="pf-sim-tabs" role="tablist" aria-label="Choose a real stakeholder prompt">
+            <button type="button" role="tab" aria-selected="true" data-sim="smk">“Teachers miss links”</button>
+            <button type="button" role="tab" aria-selected="false" data-sim="slb">“Approvals stuck in email”</button>
+            <button type="button" role="tab" aria-selected="false" data-sim="tm">“Tasks assigned by gut feel”</button>
+          </div>
+        </div>
+        <div class="pf-sim-steps" id="ba-sim-out" role="tabpanel" aria-live="polite">
+          <div class="pf-sim-col"><small>01 · As-Is Pain</small><b id="sim-p-t">Scattered Linktree &amp; spreadsheets</b><p id="sim-p-d">~150 teachers at SMK Subang chased ministry deadlines across dead links and WhatsApp forwards with zero overdue visibility.</p></div>
+          <div class="pf-sim-col"><small>02 · BA Spec &amp; Architecture</small><b id="sim-s-t">Zero-PII data model &amp; triage spec</b><p id="sim-s-d">Separated public aggregate counts from authenticated teacher names (RLS), mapped role-scoped views, and spec'd one-tap WhatsApp reminder exports.</p></div>
+          <div class="pf-sim-col"><small>03 · Shipped Outcome</small><b id="sim-o-t">Live daily hub (~150 teachers)</b><p id="sim-o-d">Shipped in Next.js, Express, Supabase &amp; Apps Script. Adopted daily on mobile across the school.</p><a class="pf-sim-link" id="sim-link" href="/notes/smk-dashboard.html">Read the full write-up &rarr;</a></div>
+        </div>
       </div>
     </div>
   </section>
@@ -341,6 +356,16 @@
       <div class="marquee" role="group" aria-label="Tools I work with">
         <ul class="mq-track"><li><i style="background:#742774"></i>Power Apps</li><li><i style="background:#0066ff"></i>Power Automate</li><li><i style="background:#038387"></i>SharePoint</li><li><i style="background:currentColor"></i>Next.js</li><li><i style="background:#58c4dc"></i>React</li><li><i style="background:#3178c6"></i>TypeScript</li><li><i style="background:#3776ab"></i>Python</li><li><i style="background:#009688"></i>FastAPI</li><li><i style="background:#3ecf8e"></i>Supabase</li><li><i style="background:#4169e1"></i>PostgreSQL</li><li><i style="background:#38bdf8"></i>Tailwind</li><li><i style="background:currentColor"></i>Vercel</li><li><i style="background:#ff9900"></i>AWS</li><li><i style="background:#01a88d"></i>Amazon Bedrock</li><li><i style="background:#f2c811"></i>Power BI</li><li><i style="background:#2088ff"></i>GitHub Actions</li><li><i style="background:#4285f4"></i>Google Apps Script</li><li><i style="background:#d97757"></i>Claude</li></ul>
         <ul class="mq-track" aria-hidden="true"><li><i style="background:#742774"></i>Power Apps</li><li><i style="background:#0066ff"></i>Power Automate</li><li><i style="background:#038387"></i>SharePoint</li><li><i style="background:currentColor"></i>Next.js</li><li><i style="background:#58c4dc"></i>React</li><li><i style="background:#3178c6"></i>TypeScript</li><li><i style="background:#3776ab"></i>Python</li><li><i style="background:#009688"></i>FastAPI</li><li><i style="background:#3ecf8e"></i>Supabase</li><li><i style="background:#4169e1"></i>PostgreSQL</li><li><i style="background:#38bdf8"></i>Tailwind</li><li><i style="background:currentColor"></i>Vercel</li><li><i style="background:#ff9900"></i>AWS</li><li><i style="background:#01a88d"></i>Amazon Bedrock</li><li><i style="background:#f2c811"></i>Power BI</li><li><i style="background:#2088ff"></i>GitHub Actions</li><li><i style="background:#4285f4"></i>Google Apps Script</li><li><i style="background:#d97757"></i>Claude</li></ul>
+      </div>
+      <div class="pf-fit" id="role-fit" aria-label="Compare skills against your role">
+        <div class="pf-fit-bar" role="group" aria-label="Filter skill tree by hiring role">
+          <span class="pf-fit-lbl">Hiring for:</span>
+          <button type="button" data-role="all" aria-pressed="true">All 41 skills</button>
+          <button type="button" data-role="ba" aria-pressed="false">Business Analyst</button>
+          <button type="button" data-role="se" aria-pressed="false">Solutions Engineer</button>
+          <button type="button" data-role="pb" aria-pressed="false">Product Builder</button>
+        </div>
+        <div class="pf-fit-note" id="role-fit-note" hidden></div>
       </div>
       <div class="skilltree">
         <ul class="st-legend" aria-label="Where each skill comes from"><li><i class="o-w"></i>Work</li><li><i class="o-s"></i>SLB internship</li><li><i class="o-p"></i>Side projects</li><li><i class="o-u"></i>UTP</li><li><i class="o-c"></i>Certification</li></ul>
@@ -602,23 +627,23 @@
   </div>
 </div>
 
-<script src="/assets/scrollbus.js?v=20261123q" defer></script>
-<script src="/assets/portfolio/portfolio.js?v=20261123q" defer></script>
-<script src="/assets/folders.js?v=20261123q" defer></script>
-<script src="/assets/coverflow.js?v=20261123q" defer></script>
-<script src="/assets/extras.js?v=20261123q" defer></script>
-<script src="/assets/delight.js?v=20261123q" defer></script>
-<script src="/assets/sfx.js?v=20261123q" defer></script>
-<script src="/assets/fx.js?v=20261123q" defer></script>
-<script src="/assets/cursor.js?v=20261123q" defer></script>
-<script src="/assets/pulse.js?v=20261123q" defer></script>
+<script src="/assets/scrollbus.js?v=20261123r" defer></script>
+<script src="/assets/portfolio/portfolio.js?v=20261123r" defer></script>
+<script src="/assets/folders.js?v=20261123r" defer></script>
+<script src="/assets/coverflow.js?v=20261123r" defer></script>
+<script src="/assets/extras.js?v=20261123r" defer></script>
+<script src="/assets/delight.js?v=20261123r" defer></script>
+<script src="/assets/sfx.js?v=20261123r" defer></script>
+<script src="/assets/fx.js?v=20261123r" defer></script>
+<script src="/assets/cursor.js?v=20261123r" defer></script>
+<script src="/assets/pulse.js?v=20261123r" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous" defer></script>
-<script src="/assets/scene-glsl.js?v=20261123q" defer></script>
-<script src="/assets/scene.js?v=20261123q" defer></script>
-<script src="/assets/daycycle.js?v=20261123q" defer></script>
-<script src="/assets/cosmos.js?v=20261123q" defer></script>
-<script src="/assets/passport.js?v=20261123q" defer></script>
-<script src="/assets/palette.js?v=20261123q" defer></script>
-<script src="/assets/intro-gate.js?v=20261123q" defer></script>
+<script src="/assets/scene-glsl.js?v=20261123r" defer></script>
+<script src="/assets/scene.js?v=20261123r" defer></script>
+<script src="/assets/daycycle.js?v=20261123r" defer></script>
+<script src="/assets/cosmos.js?v=20261123r" defer></script>
+<script src="/assets/passport.js?v=20261123r" defer></script>
+<script src="/assets/palette.js?v=20261123r" defer></script>
+<script src="/assets/intro-gate.js?v=20261123r" defer></script>
 </body>
 </html>

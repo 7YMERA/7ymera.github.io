@@ -28,12 +28,12 @@ toonHaze:`#ifdef USE_FOG
       #endif`,
 
 /* Uniforms and the hash and noise helpers of the facade shader. Goes before main() (facade() in scene.js). */
-facadeHead:`uniform sampler2D uDay;uniform sampler2D uNightTex;uniform float uNight,uGlass;uniform vec4 uCut[4];uniform float uLo[4];
+facadeHead:`uniform sampler2D uDay;uniform sampler2D uNightTex;uniform float uNight,uGlass,uTime,uRain,uGoldF;uniform vec4 uCut[4];uniform float uLo[4];
         float h21(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
         float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(h21(i),h21(i+vec2(1.0,0.0)),f.x),mix(h21(i+vec2(0.0,1.0)),h21(i+vec2(1.0,1.0)),f.x),f.y);}
         void main() {`,
 
-/* The facade itself: the day grid, the night windows, each landmark's own lighting (li 0 Petronas, 1 Merdeka 118, 2 The Exchange 106, 3 Menara KL), street glow and day shade. Replaces <emissivemap_fragment>. */
+/* The facade itself: the day grid, natural KL ground flooring (Klang River, KLCC Park, Bukit Nanas greenspace, landmark plazas, Klang Valley foothills & wet rain sheen), the night windows, each landmark's own lighting (li 0 Petronas, 1 Merdeka 118, 2 The Exchange 106, 3 Menara KL), street glow and day shade. Replaces <emissivemap_fragment>. */
 facadeBody:`#include <emissivemap_fragment>
         vec3 fn=normalize(cross(dFdx(vWP),dFdy(vWP)));
         float wall=1.0-smoothstep(0.45,0.75,abs(fn.y));
@@ -48,6 +48,47 @@ facadeBody:`#include <emissivemap_fragment>
         float rad=1.0-smoothstep(120.0,820.0,length(vWP.xz+vec2(60.0,60.0)));
         float pool=smoothstep(0.3,0.9,vn(vWP.xz/16.0))*0.7+0.3*vn(vWP.xz/5.0);
         float pg=mix(pool,0.45,smoothstep(120.0,500.0,gd));
+        /* ---- natural KL ground flooring: Klang River, KLCC Park & Bukit Nanas greenery, landmark plazas, soft Klang Valley terrain ---- */
+        float hillG=(1.0-wall)*smoothstep(2.0,18.0,vWP.y)*smoothstep(410.0,520.0,length(vWP.xz));
+        if(gnd>0.01||hillG>0.01){
+          float gMask=max(gnd,hillG);
+          float macroN=vn(vWP.xz/110.0)*0.6+vn(vWP.xz/36.0)*0.4;
+          float microN=vn(vWP.xz/11.0);
+          /* organic Klang Valley soil/park variation (no sterile flat plane) */
+          vec3 parkDay=vec3(0.46,0.68,0.66),parkGold=vec3(0.58,0.56,0.48),parkNight=vec3(0.05,0.11,0.16);
+          vec3 parkCol=mix(mix(parkDay,parkGold,uGoldF),parkNight,uNight);
+          /* KLCC Park (beside Petronas) & Bukit Nanas Forest Eco Park (around Menara KL) + valley foothills */
+          float dKlccP=length((vWP.xz-vec2(26.0,34.0))/vec2(46.0,34.0))+macroN*0.28-0.14;
+          float dBktN=length((vWP.xz-uCut[3].xy)/vec2(52.0,44.0))+macroN*0.32-0.16;
+          float parkK=clamp(max(1.0-smoothstep(0.65,1.18,dKlccP),1.0-smoothstep(0.62,1.22,dBktN))+hillG*0.85,0.0,1.0);
+          /* subtle urban block grain on the valley floor */
+          vec3 floorTint=diffuseColor.rgb*(0.92+0.14*macroN+(microN-0.5)*0.05*(1.0-smoothstep(120.0,480.0,gd)));
+          floorTint=mix(floorTint,parkCol*(0.88+0.22*macroN),parkK*0.72);
+          /* subtle stone plaza aprons around the 4 landmark footprints */
+          float plz=0.0;
+          for(int pi=0;pi<4;pi++){float dp=distance(vWP.xz,uCut[pi].xy);plz=max(plz,1.0-smoothstep(uCut[pi].z*0.75,uCut[pi].z*1.28,dp));}
+          vec3 plazaCol=mix(mix(vec3(0.76,0.85,0.95),vec3(0.76,0.69,0.78),uGoldF),vec3(0.09,0.14,0.28),uNight);
+          floorTint=mix(floorTint,plazaCol,plz*0.42*(1.0-hillG));
+          /* Klang River meandering naturally across the west side of the city */
+          float rCenter=-78.0+26.0*sin(vWP.z*0.0085)+11.0*cos(vWP.z*0.021);
+          float rDist=abs(vWP.x-rCenter);
+          float rBank=1.0-smoothstep(12.0,19.0,rDist);
+          float rWater=(1.0-smoothstep(7.5,12.5,rDist))*(1.0-hillG);
+          float rip=vn(vec2(vWP.x*0.35,vWP.z*0.18-uTime*0.65))*0.5+vn(vec2(vWP.x*0.7+uTime*0.3,vWP.z*0.4))*0.5;
+          vec3 watDay=vec3(0.36,0.64,0.88),watGold=vec3(0.82,0.58,0.42),watNight=vec3(0.04,0.11,0.24);
+          vec3 watCol=mix(mix(watDay,watGold,uGoldF),watNight,uNight)+(0.08+0.12*uGoldF)*smoothstep(0.55,0.92,rip)*(1.0-uNight*0.5);
+          floorTint=mix(floorTint,parkCol*0.86,rBank*0.45*(1.0-rWater));
+          floorTint=mix(floorTint,watCol,rWater);
+          /* KLCC Symphony Lake basin right beside Petronas */
+          float lakeD=length((vWP.xz-vec2(18.0,32.0))/vec2(16.0,11.0));
+          float lakeK=(1.0-smoothstep(0.85,1.08,lakeD))*(1.0-hillG);
+          floorTint=mix(floorTint,watCol*1.08,lakeK);
+          /* wet monsoon rain darkening & shimmer on the ground */
+          float wetRip=uRain*(0.06+0.12*smoothstep(0.52,0.88,vn(vWP.xz*0.28+vec2(uTime*0.4,-uTime*0.25))));
+          floorTint*=mix(1.0,0.82,uRain*gMask);
+          diffuseColor.rgb=mix(diffuseColor.rgb,floorTint,gMask);
+          totalEmissiveRadiance+=(rWater+lakeK)*uNight*vec3(0.18,0.34,0.58)*(0.22+0.35*rip)+wetRip*gMask*mix(vec3(0.35,0.55,0.85),vec3(0.95,0.68,0.36),uNight*0.65)*rad;
+        }
         diffuseColor.rgb*=1.0-(1.0-uNight)*(wall*low*0.2+gnd*rad*0.13*pg); /* by day the same shapes are shade, not light: darker feet on every building and soft cloud shadows drifting over the ground */
         /* ---- night: lit windows, per window cell, per building, stable in world space (skipped entirely in full daylight) ---- */
         if(uNight>0.001){

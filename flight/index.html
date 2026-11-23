@@ -14,10 +14,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@500;600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=20261123q">
-<link rel="stylesheet" href="../assets/scene.css?v=20261123q">
-<link rel="stylesheet" href="../assets/timeofday.css?v=20261123q">
-<link rel="stylesheet" href="/assets/palette.css?v=20261123q">
+<link rel="stylesheet" href="../assets/site.css?v=20261123r">
+<link rel="stylesheet" href="../assets/scene.css?v=20261123r">
+<link rel="stylesheet" href="../assets/timeofday.css?v=20261123r">
+<link rel="stylesheet" href="/assets/palette.css?v=20261123r">
 <style>
 /* Flight-only page: the scene is the page. Nothing but the debug panel (opt-in) sits on top of it. */
 html.gl body{margin:0;background:var(--sky-mid)} /* the sky gradient is #skybg (scene.css), a fixed layer; a fixed body background repaints on every scroll */
@@ -52,12 +52,12 @@ html.fp-on .fp{display:grid}
         </div>
       </div>
       <div class="ride-caps" aria-live="polite">
-      <p class="ride-cap" data-from="0.012" data-to="0.2"><b>Petronas Twin Towers</b><span>452 m. We drop to street level, rush in between the blocks, then climb round both towers.</span></p>
-      <p class="ride-cap" data-from="0.2" data-to="0.35"><b>The skybridge</b><span>Line up, then straight through the gap between the towers.</span></p>
-      <p class="ride-cap" data-from="0.35" data-to="0.45"><b>Menara Kuala Lumpur</b><span>421 m. Out of the gap and one level circle round the pod, the skyline sliding past behind it.</span></p>
-      <p class="ride-cap" data-from="0.45" data-to="0.75"><b>Merdeka 118</b><span>678.9 m, the tallest in Malaysia. Up its faceted face, over the spire, then a look straight down.</span></p>
-      <p class="ride-cap" data-from="0.75" data-to="0.85"><b>The Exchange 106</b><span>445 m. Tip over and fall down its glass face, almost to the street.</span></p>
-      <p class="ride-cap" data-from="0.85" data-to="1.01"><b>The whole skyline</b><span>A run beside the train, then pull out and hold. Four landmarks, one city. Scroll on when you are ready.</span></p>
+      <p class="ride-cap" data-from="0.012" data-to="0.2"><b>KLCC Park &amp; Petronas</b><span>452 m. Swoop across the Klang Valley into KLCC Park, skim the Lake Symphony fountains, and spiral up both towers.</span></p>
+      <p class="ride-cap" data-from="0.2" data-to="0.35"><b>The Skybridge</b><span>Line up dead-center and thread straight through the canyon gap between the twin towers.</span></p>
+      <p class="ride-cap" data-from="0.35" data-to="0.45"><b>Bukit Nanas &amp; Menara KL</b><span>421 m. Sweep above the forest canopy and orbit the illuminated sky-pod before diving toward the river.</span></p>
+      <p class="ride-cap" data-from="0.45" data-to="0.75"><b>Klang River &amp; Merdeka 118</b><span>678.9 m, the tallest in Malaysia. Skim the shimmering river bend, corkscrew up its faceted spine, and peer straight over the spire.</span></p>
+      <p class="ride-cap" data-from="0.75" data-to="0.85"><b>The Exchange 106</b><span>445 m. Soar off Merdeka's peak, bank around the glowing diamond crown, and waterfall-dive down its glass face.</span></p>
+      <p class="ride-cap" data-from="0.85" data-to="1.01"><b>Sky-Rail &amp; Klang Valley</b><span>Race beside the elevated viaduct, then pull out across all four landmarks, river, parks, and Titiwangsa foothills.</span></p>
     </div>
       <p class="ride-hint">Keep scrolling</p>
     <button class="fly-again" id="fly-again" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg><b>Fly it again in dark mode</b></button>
@@ -81,10 +81,10 @@ html.fp-on .fp{display:grid}
 </aside>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous" defer></script>
-<script src="../assets/scrollbus.js?v=20261123q" defer></script>
-<script src="../assets/scene-glsl.js?v=20261123q" defer></script>
-<script src="../assets/scene.js?v=20261123q" defer></script>
-<script src="../assets/timeofday.js?v=20261123q" defer></script>
+<script src="../assets/scrollbus.js?v=20261123r" defer></script>
+<script src="../assets/scene-glsl.js?v=20261123r" defer></script>
+<script src="../assets/scene.js?v=20261123r" defer></script>
+<script src="../assets/timeofday.js?v=20261123r" defer></script>
 <script>
 /* The viewer: everything here is optional. Without it, scrolling flies the route. */
 (function(){
@@ -133,7 +133,7 @@ html.fp-on .fp{display:grid}
   requestAnimationFrame(tick);
 })();
 </script>
-<script src="/assets/passport.js?v=20261123q" defer></script>
-<script src="/assets/palette.js?v=20261123q" defer></script>
+<script src="/assets/passport.js?v=20261123r" defer></script>
+<script src="/assets/palette.js?v=20261123r" defer></script>
 </body>
 </html>
