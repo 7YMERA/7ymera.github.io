@@ -63,8 +63,9 @@
     if(dk){C.far=css('--n-far');C.mid=css('--n-mid');C.near=css('--n-near')}}
   readColors();
   function mat(role,opts){var m=new T.MeshLambertMaterial(Object.assign({flatShading:true},opts||{}));m.userData.role=role;m.onBeforeCompile=function(sh){toon(sh)};mats.push(m);return m}
-  function bands(){var c=document.createElement('canvas');c.width=8;c.height=64;var x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,8,64);x.fillStyle='#fff';x.fillRect(0,50,8,6);
-    var t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;return t}
+  function bands(){var w=8,h=64,d=new Uint8Array(w*h*4),y,x,p;
+    for(y=0;y<h;y++){var v=(y>=8&&y<14)?255:0;for(x=0;x<w;x++){p=(y*w+x)*4;d[p]=d[p+1]=d[p+2]=v;d[p+3]=255}}
+    var t=new T.DataTexture(d,w,h,T.RGBAFormat);t.wrapS=t.wrapT=T.RepeatWrapping;t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.needsUpdate=true;return t}
   var tex=bands();
   var tower=mat('near',{emissiveMap:tex,emissive:0xffffff}),towerB=mat('near'),podium=mat('mid'),city=mat('mid'),cityF=mat('far'),ground=mat('ground'),glassM=mat('ring',{emissive:0xffffff,emissiveIntensity:.5});
   var orbM=mat('orb'),ringM=new T.MeshBasicMaterial({color:C.ring});
@@ -286,10 +287,13 @@
   var starM=new T.PointsMaterial({size:SMALL?2.4:2,sizeAttenuation:false,transparent:true,depthWrite:false,fog:false,vertexColors:true});
   var stars=new T.Points(starGeo,starM);stars.renderOrder=-20;stars.frustumCulled=false;sci.add(stars);
   // -- moon: a cratered sphere, a tilted ring, a halo, and a small moon going round it
-  function moonTex(){var c=document.createElement('canvas');c.width=256;c.height=128;var x=c.getContext('2d');x.fillStyle='#d8d8d8';x.fillRect(0,0,256,128);
-    for(var i=0;i<46;i++){var cx=Math.random()*256,cy=Math.random()*128,r=3+Math.random()*13;x.fillStyle='rgba(60,70,90,'+(.1+Math.random()*.2)+')';x.beginPath();x.arc(cx,cy,r,0,6.2832);x.fill();
-      x.fillStyle='rgba(255,255,255,'+(.14+Math.random()*.12)+')';x.beginPath();x.arc(cx-r*.25,cy-r*.25,r*.7,0,6.2832);x.fill()}
-    var t=new T.CanvasTexture(c);return t}
+  function moonTex(){var W2=256,H2=128,d=new Uint8Array(W2*H2*4),i,x,y,p;
+    for(i=0;i<d.length;i+=4){d[i]=d[i+1]=d[i+2]=216;d[i+3]=255}
+    function disc(cx,cy,r,cr,cg,cb,a){var x0=Math.max(0,Math.floor(cx-r)),x1=Math.min(W2-1,Math.ceil(cx+r)),y0=Math.max(0,Math.floor(cy-r)),y1=Math.min(H2-1,Math.ceil(cy+r));
+      for(y=y0;y<=y1;y++)for(x=x0;x<=x1;x++){if((x-cx)*(x-cx)+(y-cy)*(y-cy)<=r*r){p=(y*W2+x)*4;d[p]=d[p]+(cr-d[p])*a;d[p+1]=d[p+1]+(cg-d[p+1])*a;d[p+2]=d[p+2]+(cb-d[p+2])*a}}}
+    for(i=0;i<46;i++){var cx=Math.random()*W2,cy=Math.random()*H2,r=3+Math.random()*13;
+      disc(cx,cy,r,60,70,90,.1+Math.random()*.2);disc(cx-r*.25,cy-r*.25,r*.7,255,255,255,.14+Math.random()*.12)}
+    var t=new T.DataTexture(d,W2,H2,T.RGBAFormat);t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.needsUpdate=true;return t}
   function radialTex(fn){var S=128,h=S*.5,d=new Uint8Array(S*S*4),y,x,p;
     for(y=0;y<S;y++)for(x=0;x<S;x++){var r=Math.hypot((x+.5-h)/h,(y+.5-h)/h),a=r>=1?0:Math.max(0,Math.min(1,fn(r)));
       p=(y*S+x)*4;d[p]=d[p+1]=d[p+2]=255;d[p+3]=Math.round(a*255)}
