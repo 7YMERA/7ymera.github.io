@@ -8,8 +8,8 @@ html.home body::before { display: none; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* the city: only visible around the flight; scroll.js-free, home.js toggles city-on */
-html.gl.home #gl, html.gl.gl-on.home #gl { opacity: 0; transition: opacity .8s ease-out; }
-html.gl.gl-on.home.city-on #gl { opacity: 1; }
+html.gl.home #gl, html.gl.gl-on.home #gl, html.gl.home #skybg { opacity: 0; transition: opacity .8s ease-out; }
+html.gl.gl-on.home.city-on #gl, html.gl.home.city-on #skybg { opacity: 1; }
 html.home #fx-grain, html.home #fx-vig { opacity: 0 !important; }
 html.home.city-on #fx-vig { opacity: 1 !important; }
 html.home.city-on #fx-grain { opacity: .45 !important; }
@@ -77,7 +77,7 @@ html.flying .rail { opacity: 0; pointer-events: none; }
 
 /* ---------- 01 descent ---------- */
 .ds { position: relative; height: 600svh; background: transparent; }
-.ds-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: #02040c; color: #dfeaff; --capc: #9fb8dc; }
+.ds-stage { position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: hidden; background: #02040c; color: #dfeaff; --capc: #9fb8dc; }
 .ds-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .ds-stage .cap { color: var(--capc); } .ds-stage .cap span, .ds-stage .cap em { color: #ffd27a; }
 .ds-stage .hc { color: #9fd0ff; }
@@ -189,7 +189,7 @@ html.flying .rail { opacity: 0; pointer-events: none; }
 }
 
 /* ---------- the orbit stage: one HD Earth behind 00 Mark and 01 Descent (assets/home/orbit.js) ---------- */
-.orbit { position: fixed; left: 0; top: 0; width: 100%; height: 100vh; height: 100svh; z-index: 0; pointer-events: none; overflow: hidden; background: linear-gradient(#02040c, #070d22); transition: opacity .24s ease; }
+.orbit { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: linear-gradient(#02040c, #070d22); transition: opacity .24s ease; }
 .orbit.gone { visibility: hidden; }
 .orbit.swap { opacity: 0; }   /* reduced motion: fade through black between the three still frames */
 .orbit-earth { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }

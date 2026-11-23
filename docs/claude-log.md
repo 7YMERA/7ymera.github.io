@@ -27,6 +27,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-23 · Fix iOS Bottom Sky Bleed During Space Descent & Unique Music Per Tab
+
+- **iOS Viewport Bleed Fix (`assets/home/home.css`):** switched `.orbit` from `height: 100svh` to `position: fixed; inset: 0`, switched `.ds-stage` to `100dvh`, and gated `#skybg` behind `html.home.city-on` alongside `#gl` so the golden-hour sky can never peek out below the Earth stage when Safari's bottom bar collapses.
+- **Unique Soundtracks Per Tab (`assets/sfx.js`):** added route-aware procedural compositions (`buildTabBar`) with custom synth voices (`felt`, `chip`, `acid`, `glitch`) and dynamic sound-popover titles — **Home/Flight** (`Night Drive over KL`), **Portfolio/Resume** (`Executive Lounge · KLCC`, warm Neo-Soul Rhodes jazz at 78 BPM), **Play** (`Arcade Pulse · 124 BPM`, chiptune square arps + octave synthwave bass), **Lab** (`Quantum Reactor · IDM`, 136 BPM Euclidean 5/16 & 7/16 TB-303 acid squelch + FM metallic glitch percussion + broken breakbeat), and **Notes** (`Quiet Study · 64 BPM`, calm felt piano). Also fixed `rainL.start/stop` in `setRain()`. Key `20261123j`.
+
 ## 2026-11-23 · Fix iOS Safari Confetti Texture Noise Across Entire 3D Scene
 
 - **Zero `CanvasTexture` in `assets/scene.js`:** replaced all `CanvasTexture`s (`glowTex()`, `discTex()`, `fade()`, `bands()`, and `moonTex()`) with pure `Uint8Array` `THREE.DataTexture`s, completely eliminating iOS Safari's Canvas2D fingerprinting noise speckles on the golden-hour sun/glare, train headlight/taillight glow sprites, moon, light beams, and tower bands. Key `20261123i`.

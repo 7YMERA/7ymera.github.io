@@ -45,6 +45,27 @@
     { n: 'Bridge', p: 'bridge', b: 8 }, { n: "A'", p: 'A', b: 16 }, { n: 'Outro', p: 'outro', b: 8 }
   ];
   var TOTAL = 0; FORM.forEach(function (s) { s.s0 = TOTAL; TOTAL += s.b; });
+  var TRACK_ID = (function () {
+    var p = (location.pathname || '/').toLowerCase();
+    if (p.indexOf('/portfolio') === 0 || p.indexOf('/resume') === 0) return 'portfolio';
+    if (p.indexOf('/play') === 0) return 'play';
+    if (p.indexOf('/lab') === 0) return 'lab';
+    if (p.indexOf('/notes') === 0) return 'notes';
+    return 'home';
+  })();
+  var TRACK_META = {
+    home:      { title: 'Night Drive over KL',     sub: 'Cosmic skyline score · 70–88 bpm' },
+    portfolio: { title: 'Executive Lounge · KLCC', sub: 'Warm Neo-Soul Rhodes · 78 bpm' },
+    play:      { title: 'Arcade Pulse · 124 BPM',  sub: 'Retro Chiptune × Synthwave' },
+    lab:       { title: 'Quantum Reactor · IDM',   sub: 'Acid 303 × Polyrhythmic Glitch · 136 bpm' },
+    notes:     { title: 'Quiet Study · 64 BPM',    sub: 'Felt piano & warm ambient air' }
+  };
+  var TAB_PROG = {
+    portfolio: 'D:m9 G:69 C:maj9 A:m11 F:maj9 E:m7 D:m9 G:sus4'.split(' ').map(chord),
+    play:      'A:m9 F:maj9 C:maj9 G:69 D:m9 F:maj9 G:sus4 E:7sus'.split(' ').map(chord),
+    lab:       'F:maj7s11 E:7sus Bb:maj7s11 D:m11 A:m9 E:7sus Bb:maj7s11 F:maj7s11'.split(' ').map(chord),
+    notes:     'C:maj9 A:m9 F:maj9 G:69 E:m7 A:m9 D:m9 G:sus4'.split(' ').map(chord)
+  };
   var progCache = {};
   function progOf(name, mood) { var k = name + mood; return progCache[k] || (progCache[k] = PROG[name][mood].split(' ').map(chord)); }
   function locate(bar) { var b = ((bar % TOTAL) + TOTAL) % TOTAL; for (var i = 0; i < FORM.length; i++) if (b < FORM[i].s0 + FORM[i].b) return { seg: FORM[i], bo: b - FORM[i].s0, i: i }; }
@@ -224,6 +245,36 @@
       lp.frequency.setValueAtTime(680, t); lp.frequency.exponentialRampToValueAtTime(260 + 260 * (1 - env.T / 2), t + .28);
       e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .26, t + .01); e.gain.setTargetAtTime(vel * .16, t + .02, .14); e.gain.setTargetAtTime(0, t + dur, .07);
       a.connect(lp); s.connect(sg); sg.connect(e); lp.connect(e); e.connect(bBass.in); a.onended = function () { live--; }; a.start(t); s.start(t); a.stop(t + dur + .45); s.stop(t + dur + .45);
+    }
+    // Portfolio & Notes: warm felt piano / mellow Rhodes voice
+    function felt(t, m, dur, vel, pn, busOut) {
+      if (live > MAXLIVE) return; live++; var f = hz(m), a = osc('sine', f), b = osc('triangle', f * 2), bg = g(.14), lp = flt('lowpass', 1500, .5), e = g(0), p = pan(pn || 0);
+      lp.frequency.setValueAtTime(1900, t); lp.frequency.exponentialRampToValueAtTime(520, t + dur * .85);
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .22, t + .009); e.gain.exponentialRampToValueAtTime(vel * .06, t + Math.min(.6, dur * .5)); e.gain.exponentialRampToValueAtTime(.0002, t + dur);
+      a.connect(lp); b.connect(bg); bg.connect(lp); lp.connect(e); e.connect(p); p.connect((busOut || bKeys).in);
+      a.onended = function () { live--; }; a.start(t); b.start(t); a.stop(t + dur + .06); b.stop(t + dur + .06);
+    }
+    // Play / Arcade: crisp 8-bit/16-bit square chiptune voice
+    function chip(t, m, dur, vel, pn, busOut, wave) {
+      if (live > MAXLIVE) return; live++; var f = hz(m), o = osc(wave || 'square', f), lp = flt('lowpass', 3600, .9), e = g(0), p = pan(pn || 0);
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .14, t + .003); e.gain.setTargetAtTime(vel * .08, t + .01, .06); e.gain.exponentialRampToValueAtTime(.0002, t + dur);
+      o.connect(lp); lp.connect(e); e.connect(p); p.connect((busOut || bKeys).in);
+      o.onended = function () { live--; }; o.start(t); o.stop(t + dur + .04);
+    }
+    // Lab / Quantum Reactor: resonant TB-303 acid squelch synth
+    function acid(t, m, dur, vel, accent, pn) {
+      if (live > MAXLIVE) return; live++; var f = hz(m), o = osc('sawtooth', f), lp = flt('lowpass', accent ? 3800 : 1800, accent ? 12.5 : 8.2), e = g(0), p = pan(pn || 0);
+      lp.frequency.setValueAtTime(accent ? 3900 : 2100, t); lp.frequency.exponentialRampToValueAtTime(240, t + Math.max(.09, dur * .82));
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * (accent ? .24 : .17), t + .004); e.gain.exponentialRampToValueAtTime(.0002, t + dur);
+      o.connect(lp); lp.connect(e); e.connect(p); p.connect(bBass.in);
+      o.onended = function () { live--; }; o.start(t); o.stop(t + dur + .05);
+    }
+    // Lab / Quantum Reactor: FM metallic glitch micro-percussion
+    function glitch(t, vel, pn, ratio) {
+      if (dlive > DMAX) return; dlive++; var f = 420 + (ratio || 1) * 280, cr = osc('sine', f), md = osc('square', f * (3.7 + (ratio || 1))), mg = g(f * 2.4), e = g(0), p = pan(pn || 0);
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .16, t + .002); e.gain.exponentialRampToValueAtTime(.0002, t + .045);
+      md.connect(mg); mg.connect(cr.frequency); cr.connect(e); e.connect(p); p.connect(bDr);
+      cr.onended = function () { dlive--; }; cr.start(t); md.start(t); cr.stop(t + .06); md.stop(t + .06);
     }
     function noiseHit(t, dur, dest, filt, vol, atk) {
       var s = ac.createBufferSource(); s.buffer = white; var e = g(0); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vol, t + (atk || .002)); e.gain.exponentialRampToValueAtTime(.0002, t + dur);
@@ -417,7 +468,14 @@
       if (st.mood != null && Math.abs(T - st.mood) < .68) return st.mood;
       return m;
     }
-    function tempoFor(T) { return T <= 1 ? lerp(88, 80, T) : lerp(80, 70, T - 1); }
+    var trk = env.track || TRACK_ID;
+    function tempoFor(T) {
+      if (trk === 'portfolio') return 78;
+      if (trk === 'play') return 124;
+      if (trk === 'lab') return 136;
+      if (trk === 'notes') return 64;
+      return T <= 1 ? lerp(88, 80, T) : lerp(80, 70, T - 1);
+    }
     function bassMidi(pc) { var m = 36 + (((pc - 36) % 12) + 12) % 12; if (env.T > 1.6 && m >= 41) m -= 12; return m; }
     function ctrl(t) {
       var T = env.T, br = 1 - T / 2, fl = env.flight, night = smooth(.9, 2, T), tc = 1.1;
@@ -433,7 +491,85 @@
     }
     E.ctrl = ctrl;
 
+    function buildTabBar(bar, t0) {
+      st.bpm = tempoFor(env.T); var sd = st.sd = 60 / st.bpm / 4, beat = sd * 4, sw = trk === 'portfolio' ? .28 : trk === 'play' ? .04 : 0;
+      var delT = beat * (trk === 'lab' ? .375 : .75); dL.delayTime.setTargetAtTime(delT, t0, .05); dR.delayTime.setTargetAtTime(delT * (trk === 'lab' ? 1.5 : 1), t0, .05);
+      var rnd = rngFor(bar * 19 + 13), chs = TAB_PROG[trk] || TAB_PROG.portfolio, ci = Math.floor(bar / (trk === 'play' ? 1 : 2)) % chs.length;
+      ctrl(t0);
+      if (bar % (trk === 'play' ? 1 : 2) === 0 || !st.ch) {
+        st.mood = moodNow(); st.ch = chs[ci]; st.vl = voice(st.ch, st.vl); st.root = bassMidi(st.ch.r);
+        padTo(t0, st.vl, trk === 'lab' ? .08 : .45); swTo(t0, st.root, .6); sub.frequency.setTargetAtTime(hz(st.root - 12), t0, .14);
+        padSw.gain.setTargetAtTime(trk === 'lab' ? .032 : trk === 'notes' ? .045 : .06, t0, .2);
+      }
+      var vl = st.vl, rt = st.root, s, k;
+      function S(x) { return t0 + x * sd; } function W(x) { return t0 + x * sd + ((x & 1) ? sw * sd : 0); }
+
+      if (trk === 'portfolio') {
+        // Executive Lounge · KLCC: rolled Rhodes chords, woody upright bass, swung jazz rim & brushed hats
+        vl.forEach(function (m, j) { felt(S(0) + j * .028, m, sd * 11, .72 - j * .05, (j - 1.5) * .32, bKeys); });
+        if (bar % 2 === 1) vl.forEach(function (m, j) { felt(W(10) + j * .024, m + (j === 3 ? 2 : 0), sd * 5, .48, (j - 1.5) * .3, bKeys); });
+        if (rnd() < .7) { var lk = vl[3] + 12; felt(W(6), lk, sd * 2.5, .42, .35, bLead); felt(W(8), lk - 2, sd * 4, .36, -.25, bLead); }
+        bassNote(S(0), rt, sd * 6, .68); bassNote(W(6), rt + 7, sd * 3, .45); bassNote(S(10), rt + 12, sd * 3, .52); bassNote(W(14), rt + 5, sd * 2, .42);
+        kick(S(0), .52); if (bar % 2 === 1) kick(W(10), .38);
+        rim(S(4), .55); rim(S(12), .6); if (rnd() < .4) rim(W(15), .25);
+        for (s = 0; s < 16; s += 2) hat(W(s), s % 4 === 0 ? .28 : .16, s === 14 && bar % 2 === 1);
+        st.lastSeg = 'Lounge';
+      } else if (trk === 'play') {
+        // Arcade Pulse · 124 BPM: fast chiptune square arps, octave synthwave bass, 4-on-the-floor arcade groove
+        var arpSeq = [vl[0], vl[1], vl[2], vl[3], vl[2] + 12, vl[3], vl[2], vl[1]];
+        for (s = 0; s < 16; s++) {
+          if (s % 2 === 0 || (bar % 2 === 1 && s % 4 === 3)) {
+            chip(W(s), arpSeq[(s + bar) % arpSeq.length] + (s >= 12 ? 12 : 0), sd * 1.4, s % 4 === 0 ? .72 : .46, (s % 2 ? .55 : -.55), bKeys, 'square');
+          }
+        }
+        for (s = 0; s < 16; s += 2) bassNote(S(s), s % 4 === 0 ? rt : rt + 12, sd * 1.65, s % 4 === 0 ? .88 : .62);
+        [0, 4, 8, 12].forEach(function (st2) { kick(S(st2), .82); });
+        clap(S(4), .74); clap(S(12), .78);
+        for (s = 0; s < 16; s += 2) hat(S(s), s % 4 === 2 ? .42 : .18, s === 14);
+        if (bar % 4 === 1 || bar % 4 === 2) {
+          [[0, 3, 3], [3, 2, 2], [6, 3, 2], [8, 0, 4], [12, 2, 2], [14, 3, 2]].forEach(function (n) {
+            chip(S(n[0]), vl[n[1]] + 12, sd * n[2] * .9, .72, .12, bLead, 'square');
+          });
+        }
+        st.lastSeg = 'Arcade';
+      } else if (trk === 'lab') {
+        // Quantum Reactor · IDM (136 BPM): Euclidean 5/16 & 7/16 Acid 303 squelch + FM Glitch percs + broken breakbeat
+        var scale = [rt, rt + 1, rt + 6, rt + 7, rt + 10, rt + 12, rt + 13, rt + 18];
+        for (s = 0; s < 16; s++) {
+          var stepIdx = bar * 16 + s;
+          if (stepIdx % 5 === 0 || stepIdx % 7 === 0) {
+            var acc = stepIdx % 5 === 0 && (s % 4 !== 0);
+            var note = scale[(stepIdx * 3 + bar) % scale.length] + (acc ? 12 : 0);
+            acid(S(s), note, sd * (acc ? 1.7 : 1.1), .88, acc, ((s % 5) - 2) * .35);
+          }
+          if ((stepIdx % 3 === 0 && rnd() < .55) || (bar % 2 === 1 && s >= 13)) {
+            glitch(S(s), .52 + rnd() * .4, rnd() * 1.6 - .8, (stepIdx % 7) * .6 + .5);
+            if (bar % 2 === 1 && s === 14) glitch(S(s) + sd * .5, .45, -.7, 2.8); // 32nd-note IDM ratchet
+          }
+        }
+        [0, 3, 10].forEach(function (st2, idx) { kick(S(st2), idx === 0 ? .88 : .64); });
+        if (bar % 2 === 1) { clap(S(4), .55); clap(S(12), .68); }
+        [5, 11, 13].forEach(function (st2) { if (rnd() < .75) rim(S(st2), .48); });
+        if (bar % 2 === 0) {
+          var qm = vl[(bar / 2) % vl.length] + 12;
+          crystal(S(2), qm, .72, -.65, 2.8, bLead.in, 3.5);
+          crystal(S(9), qm + 6, .58, .65, 2.4, bAir.in, 2.76);
+        }
+        st.lastSeg = 'Reactor';
+      } else {
+        // Quiet Study · 64 BPM (Notes): calm felt piano, zero drums, generous breathing space
+        vl.forEach(function (m, j) { felt(S(0) + j * .04, m, sd * 14, .52 - j * .04, (j - 1.5) * .28, bKeys); });
+        if (bar % 2 === 0) bassNote(S(0), rt, sd * 12, .38);
+        if (rnd() < .65) felt(S(6), vl[3] + 12, sd * 8, .42, .3, bLead);
+        if (rnd() < .45) bell(S(12), vl[2] + 12, .34, -.35, 4.5, bAir);
+        st.lastSeg = 'Study';
+      }
+      st.bar = bar; st.lastBo = bar % 8;
+      return beat * 4;
+    }
+
     function buildBar(bar, t0) {
+      if (trk !== 'home') return buildTabBar(bar, t0);
       var L = locate(bar), seg = L.seg, bo = L.bo, name = seg.n, last = bo === seg.b - 1, sd, sw = .15, i;
       st.bpm = lerp(st.bpm, tempoFor(env.T), .55); sd = st.sd = 60 / st.bpm / 4;
       var beat = sd * 4, delT = beat * .75; dL.delayTime.setTargetAtTime(delT, t0, .05); dR.delayTime.setTargetAtTime(delT * 1.0, t0, .05);
@@ -536,7 +672,7 @@
       if (act('y', until)) { while (st.nextT < until && n++ < 4) { var len = buildBar(st.bar, st.nextT); st.nextT += len; st.bar++; } } else if (st.nextT < until) st.nextT = until;
       n = 0; while (amb.nextT < until && n++ < 3) { ambBar(amb.nextT, amb.bar); amb.nextT += AMB; amb.bar++; }
     };
-    E.state = function () { var L = locate(st.bar - 1 < 0 ? 0 : st.bar - 1); return { bar: st.bar, total: TOTAL, section: L.seg.n, bo: L.bo, bpm: Math.round(st.bpm), chord: st.ch ? st.ch.name : '', mood: st.mood, nextT: st.nextT, live: live }; };
+    E.state = function () { var L = locate(st.bar - 1 < 0 ? 0 : st.bar - 1); return { bar: st.bar, total: TOTAL, section: trk === 'home' ? L.seg.n : (st.lastSeg || trk), track: trk, bo: L.bo, bpm: Math.round(st.bpm), chord: st.ch ? st.ch.name : '', mood: st.mood, nextT: st.nextT, live: live }; };
     E.train = function (t) { train(t, 8, Math.random() < .5 ? -1 : 1); };
     E.bell = bell; E.bBell = bKeys;
     E.nextBarTime = function () { return st.nextT; };
@@ -670,8 +806,8 @@
     setRain: function (v) {
       if (!ac || !rainG || !rainL) return;
       var t = ac.currentTime, p = rainG.gain; p.cancelScheduledValues(t);
-      if (v && on) { rainL.on(t); p.setTargetAtTime(.18, t, .4); }
-      else { p.setTargetAtTime(.0001, t, .35); rainL.off(t + .9); }
+      if (v && on) { rainL.start(t); p.setTargetAtTime(.18, t, .4); }
+      else { p.setTargetAtTime(.0001, t, .35); rainL.stop(t + .9); }
     },
     zone: function () { return zone; },
     cue: function (n) { d.dispatchEvent(new CustomEvent('sfx-cue', { detail: { name: n } })); },
@@ -716,8 +852,9 @@
       '.sfxp button{margin-top:6px;width:100%;min-height:44px;border-radius:9px;border:1px solid var(--accent,#0a6c74);background:transparent;color:var(--ink,#111);font:700 .74rem var(--f-mono,monospace);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}' +
       '.sfxp button[aria-pressed=true]{background:var(--accent,#0a6c74);color:var(--accent-ink,#fff)}';
     d.head.appendChild(st);
+    var tm = TRACK_META[TRACK_ID] || TRACK_META.home;
     pop = d.createElement('div'); pop.className = 'sfxp'; pop.setAttribute('role', 'group'); pop.setAttribute('aria-label', 'Sound settings');
-    pop.innerHTML = '<b>Night Drive over KL</b><span class="s">Generative score, made in your browser</span><label class="v"><input type="range" min="0" max="100" step="1" aria-label="Volume"><span></span></label><button type="button" aria-pressed="false"></button>';
+    pop.innerHTML = '<b>' + tm.title + '</b><span class="s">' + tm.sub + '</span><label class="v"><input type="range" min="0" max="100" step="1" aria-label="Volume"><span></span></label><button type="button" aria-pressed="false"></button>';
     d.body.appendChild(pop);
     rng = pop.querySelector('input'); outEl = pop.querySelector('.v span'); secEl = pop.querySelector('.s');
     rng.addEventListener('input', function () { api.volume(rng.value / 100); });
@@ -729,7 +866,9 @@
   function paintPop() {
     if (!pop) return; var p = Math.round(vol * 100); rng.value = p; rng.style.setProperty('--p', p + '%'); outEl.textContent = p + '%';
     var b = pop.querySelector('button'); b.setAttribute('aria-pressed', on || armed ? 'true' : 'false'); b.textContent = on ? 'Sound on: tap to stop' : armed ? 'Starts at your next tap' : 'Sound off: tap to play';
-    var s = api.state(); if (s && on) secEl.textContent = s.section + ' · bar ' + (((s.bar - 1) % 72 + 72) % 72 + 1) + '/72 · ' + s.bpm + ' bpm · ' + ['day', 'golden hour', 'night'][s.mood == null ? 0 : s.mood]; else secEl.textContent = 'Generative score, made in your browser';
+    var tm = TRACK_META[TRACK_ID] || TRACK_META.home, s = api.state();
+    if (s && on) secEl.textContent = s.section + ' · bar ' + (((s.bar - 1) % 72 + 72) % 72 + 1) + (TRACK_ID === 'home' ? '/72' : '') + ' · ' + s.bpm + ' bpm' + (TRACK_ID === 'home' ? ' · ' + ['day', 'golden hour', 'night'][s.mood == null ? 0 : s.mood] : '');
+    else secEl.textContent = tm.sub;
   }
   function popShow(autoHide) {
     if (!btn) return; buildPop(); if (!pop) return; var r = btn.getBoundingClientRect();
