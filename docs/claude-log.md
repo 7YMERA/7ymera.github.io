@@ -27,6 +27,14 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-23 · Unique Per-Tab Interactive Entry Gates & Notes PC-to-Journal Book Flip
+
+- **Per-Tab Audio-Unlocking Entry Gates (`assets/intro-gate.css`, `assets/intro-gate.js`):** added GPU-only (`transform` + `opacity`, reduced-motion safe, auto-skipped on `#hash` deep links) interactive opening screens on `/play/`, `/lab/`, `/portfolio/`, and `/notes/` that unlock each tab's unique Web Audio soundtrack on click (with an `Enter quietly` option):
+  - **Play (`/play/`):** gold `\7` coin drops into an arcade coin slot with a dual-tone arcade chime, then the CRT arcade screen zooms in to reveal the game hall (`Arcade Pulse · 124 BPM`).
+  - **Lab (`/lab/`):** spinning Level-4 Quantum Reactor core flashes and splits the top/bottom blast-door containment hatches apart (`Quantum Reactor · IDM 136 BPM`).
+  - **Portfolio (`/portfolio/`):** gold `\7` Executive Dossier parts twin folio leaves left and right (`Executive Lounge · KLCC 78 BPM`).
+  - **Notes (`/notes/`):** boots a `7YMERA OS` Desktop PC screen that zooms into the 10 project folders (`Quiet Study · 64 BPM`), then as you scroll down out of the PC folder workspace into `Every note` (`.ni-list`), a 3D hardcover **Field Notes Journal** (`nj-cover`) flips open (`rotateY(-138deg)`) to reveal all 13 write-ups in journal style. Key `20261123m`.
+
 ## 2026-11-23 · Fix & Upgrade The Exchange 106 (TRX) Drone Pathing
 
 - **TRX Hero Showcase (`assets/scene.js`):** fixed beat 6 in `buildKF()` where the reworked `skyCurve` tangent + low `0.5` slow factor + look-away tangent caused the drone to skip past The Exchange 106. Now `fl1..fl4` frame TRX's glowing crown directly ahead as you leave Merdeka 118, and `e0..e10` sweep a guaranteed scenic banking arc around TRX (`slow = 1.45`, gaze locked on TRX's crown and glass facade for the first 68% before smoothly handoff-blending onto the sky-rail train chase). Key `20261123l`.

@@ -1,0 +1,217 @@
+/* Unique per-tab entry gates (Arcade Coin Drop, Lab Reactor Hatch, Portfolio Executive Dossier, Notes PC Boot + Journal Book Flip)
+   GPU-only animations (transform + opacity), big obvious buttons, full light/dark & reduced-motion support. */
+
+.ig-gate{
+  position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:20px;
+  overflow:hidden;background:#050914;color:#eaf2ff;
+  transition:opacity .45s ease,visibility 0s .45s;
+}
+.ig-gate.ig-out{opacity:0;visibility:hidden;pointer-events:none}
+
+/* Shared card / buttons */
+.ig-stage{position:relative;z-index:2;display:grid;justify-items:center;gap:18px;text-align:center;width:min(520px,100%);will-change:transform,opacity}
+.ig-kicker{font:600 .72rem/1 var(--f-mono,ui-monospace,monospace);letter-spacing:.22em;text-transform:uppercase;color:#7fd3ff;margin:0}
+.ig-title{font:800 clamp(1.75rem,5vw,2.75rem)/1.05 var(--f-display,system-ui);letter-spacing:-.02em;margin:0;color:#fff}
+.ig-sub{font:400 .95rem/1.5 var(--f-body,system-ui);color:#a9bddb;max-width:38ch;margin:0}
+.ig-actions{display:grid;justify-items:center;gap:10px;margin-top:4px}
+.ig-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:12px;
+  min-height:56px;padding:0 30px;border-radius:14px;border:2px solid #7fd3ff;
+  background:#1559c9;color:#fff;font:700 .98rem var(--f-mono,ui-monospace,monospace);
+  letter-spacing:.08em;text-transform:uppercase;cursor:pointer;
+  box-shadow:0 14px 36px -8px rgba(21,89,201,.65),4px 4px 0 #000;
+  transition:transform .16s ease,background-color .16s ease;
+}
+.ig-btn:hover{transform:translate3d(-1px,-2px,0);background:#1b66e0}
+.ig-btn:active{transform:translate3d(1px,1px,0)}
+.ig-btn:focus-visible{outline:3px solid #ffd27a;outline-offset:4px}
+.ig-quiet{
+  background:none;border:0;color:#8fa6cc;font:500 .76rem var(--f-mono,ui-monospace,monospace);
+  letter-spacing:.1em;text-transform:uppercase;cursor:pointer;padding:8px 14px;
+  text-decoration:underline;text-underline-offset:4px;
+}
+.ig-quiet:hover{color:#eaf2ff}
+
+/* ================= 1. PLAY / ARCADE: COIN DROP + CRT ZOOM-IN ================= */
+.ig-gate--play{background:radial-gradient(ellipse 85% 70% at 50% 42%,#101c3a 0%,#050914 72%)}
+.ig-crt{
+  position:relative;width:min(420px,90vw);padding:26px 24px 22px;border-radius:22px;
+  background:linear-gradient(160deg,#0c1733,#060c1c);
+  border:3px solid #3aa0ee;box-shadow:0 0 0 6px rgba(58,160,238,.14),0 24px 60px rgba(0,0,0,.7);
+  display:grid;justify-items:center;gap:14px;will-change:transform,opacity;
+}
+.ig-crt::after{
+  content:"";position:absolute;inset:8px;border-radius:14px;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(127,211,255,.045) 0 2px,transparent 2px 5px);
+}
+.ig-coin-rig{position:relative;height:78px;width:90px;display:grid;place-items:end center}
+.ig-coin{
+  position:absolute;top:0;width:44px;height:44px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff3c4,#ffd27a 48%,#c4821a 100%);
+  border:2px solid #fff2be;color:#2b1700;font:800 1rem var(--f-mono,monospace);
+  display:grid;place-items:center;box-shadow:0 6px 18px rgba(255,210,122,.45);
+  animation:igCoinFloat 1.8s ease-in-out infinite;will-change:transform,opacity;
+}
+.ig-slot{
+  width:62px;height:14px;border-radius:7px;background:#02050d;
+  border:2px solid #ffd27a;box-shadow:inset 0 2px 6px #000,0 0 12px rgba(255,210,122,.35);
+}
+@keyframes igCoinFloat{50%{transform:translate3d(0,-7px,0)}}
+.ig-gate--play .ig-btn{background:#ffd27a;color:#050914;border-color:#fff2be;box-shadow:0 12px 30px -6px rgba(255,210,122,.5),4px 4px 0 #000}
+.ig-gate--play .ig-btn:hover{background:#ffe09c}
+
+.ig-gate--play.ig-go .ig-coin{animation:igCoinDrop .36s cubic-bezier(.4,0,.9,.6) forwards}
+.ig-gate--play.ig-go .ig-crt{animation:igCrtZoom .62s .26s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes igCoinDrop{
+  0%{transform:translate3d(0,0,0) scale(1);opacity:1}
+  75%{transform:translate3d(0,48px,0) scale(.86);opacity:1}
+  100%{transform:translate3d(0,60px,0) scale(.5);opacity:0}
+}
+@keyframes igCrtZoom{
+  0%{transform:scale(1);opacity:1}
+  30%{transform:scale(1.06);opacity:1}
+  100%{transform:scale(2.8);opacity:0}
+}
+
+/* ================= 2. LAB: QUANTUM REACTOR BLAST HATCH ================= */
+.ig-gate--lab{background:#030812}
+.ig-hatch{
+  position:absolute;left:0;right:0;height:50%;z-index:1;
+  background:linear-gradient(180deg,#08152e,#040a18);will-change:transform;
+}
+.ig-hatch--top{top:0;border-bottom:2px solid rgba(127,211,255,.45)}
+.ig-hatch--bot{bottom:0;border-top:2px solid rgba(127,211,255,.45)}
+.ig-core{
+  position:relative;width:128px;height:128px;display:grid;place-items:center;
+}
+.ig-ring{
+  position:absolute;inset:0;border-radius:50%;border:2px dashed rgba(127,211,255,.65);
+  animation:igSpin 14s linear infinite;will-change:transform;
+}
+.ig-ring--2{
+  inset:16px;border:2px solid rgba(255,210,122,.7);border-top-color:transparent;border-bottom-color:transparent;
+  animation:igSpinRev 8s linear infinite;
+}
+.ig-core-dot{
+  width:46px;height:46px;border-radius:50%;
+  background:radial-gradient(circle,#eaf6ff 0%,#3aa0ee 55%,#0e2d66 100%);
+  box-shadow:0 0 28px rgba(58,160,238,.7);display:grid;place-items:center;
+  font:800 .9rem var(--f-mono,monospace);color:#041024;
+}
+@keyframes igSpin{to{transform:rotate(360deg)}}
+@keyframes igSpinRev{to{transform:rotate(-360deg)}}
+.ig-gate--lab.ig-go .ig-stage{animation:igCoreFlash .45s ease forwards}
+.ig-gate--lab.ig-go .ig-hatch--top{animation:igHatchUp .62s .14s cubic-bezier(.7,0,.2,1) forwards}
+.ig-gate--lab.ig-go .ig-hatch--bot{animation:igHatchDown .62s .14s cubic-bezier(.7,0,.2,1) forwards}
+@keyframes igCoreFlash{0%{transform:scale(1);opacity:1}45%{transform:scale(1.16);opacity:1}100%{transform:scale(1.45);opacity:0}}
+@keyframes igHatchUp{to{transform:translate3d(0,-105%,0)}}
+@keyframes igHatchDown{to{transform:translate3d(0,105%,0)}}
+
+/* ================= 3. PORTFOLIO: EXECUTIVE DOSSIER UNSEAL ================= */
+.ig-gate--portfolio{background:transparent}
+.ig-leaf{
+  position:absolute;top:0;bottom:0;width:50.5%;z-index:1;
+  background:linear-gradient(135deg,#071329,#0c1e42);will-change:transform;
+}
+.ig-leaf--l{left:0;border-right:1.5px solid rgba(255,210,122,.35)}
+.ig-leaf--r{right:0;border-left:1.5px solid rgba(255,210,122,.35)}
+.ig-seal{
+  width:76px;height:76px;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 35% 30%,#ffe4a8,#d49a38 72%,#8a5d14 100%);
+  color:#081224;font:800 1.45rem var(--f-display,system-ui);
+  border:3px solid rgba(255,244,214,.85);box-shadow:0 12px 32px rgba(0,0,0,.5);
+}
+.ig-gate--portfolio .ig-btn{background:#eaf2ff;color:#081633;border-color:#ffd27a}
+.ig-gate--portfolio .ig-btn:hover{background:#fff}
+.ig-gate--portfolio.ig-go .ig-stage{animation:igFadeUp .35s ease forwards}
+.ig-gate--portfolio.ig-go .ig-leaf--l{animation:igLeafL .62s .12s cubic-bezier(.7,0,.2,1) forwards}
+.ig-gate--portfolio.ig-go .ig-leaf--r{animation:igLeafR .62s .12s cubic-bezier(.7,0,.2,1) forwards}
+@keyframes igFadeUp{to{transform:scale(.92);opacity:0}}
+@keyframes igLeafL{to{transform:translate3d(-105%,0,0)}}
+@keyframes igLeafR{to{transform:translate3d(105%,0,0)}}
+
+/* ================= 4. NOTES: PC WORKSTATION BOOT + SCROLL JOURNAL BOOK FLIP ================= */
+.ig-gate--notes{background:radial-gradient(ellipse 80% 70% at 50% 45%,#0c1a36 0%,#040812 75%)}
+.ig-pc{
+  width:min(440px,92vw);border-radius:18px;overflow:hidden;
+  background:#091326;border:3px solid #3aa0ee;
+  box-shadow:0 28px 70px rgba(0,0,0,.7),0 0 0 5px rgba(58,160,238,.12);
+  will-change:transform,opacity;
+}
+.ig-pc-bar{
+  display:flex;align-items:center;gap:7px;padding:10px 14px;
+  background:#0f2040;border-bottom:1.5px solid rgba(127,211,255,.22);
+  font:600 .7rem var(--f-mono,monospace);color:#9db6dc;letter-spacing:.08em;
+}
+.ig-pc-bar i{width:9px;height:9px;border-radius:50%;background:rgba(127,211,255,.45)}
+.ig-pc-bar i:first-child{background:#ffd27a}
+.ig-pc-bar span{margin-left:auto;text-transform:uppercase}
+.ig-pc-scr{padding:24px 20px 22px;display:grid;justify-items:center;gap:14px}
+.ig-pc-icons{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.ig-pc-ic{
+  display:grid;justify-items:center;gap:5px;padding:10px 12px;border-radius:10px;
+  background:rgba(127,211,255,.08);border:1px solid rgba(127,211,255,.22);
+  font:600 .68rem var(--f-mono,monospace);color:#cfe4ff;
+}
+.ig-pc-ic svg{width:24px;height:24px;color:#ffd27a}
+.ig-gate--notes.ig-go .ig-pc{animation:igPcZoom .65s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes igPcZoom{
+  0%{transform:scale(1);opacity:1}
+  25%{transform:scale(1.04);opacity:1}
+  100%{transform:scale(2.5);opacity:0}
+}
+
+/* Notes page: PC-to-Journal Book Flip Transition when scrolling into Every Note (.ni-list) */
+.nj-wrap{
+  position:relative;perspective:1600px;margin-top:18px;
+}
+.nj-book{
+  position:relative;border-radius:14px;
+  background:color-mix(in srgb,var(--surface,#fff) 96%,#f7eed8 4%);
+  border:2px solid var(--fx,#2aa6e8);
+  box-shadow:6px 6px 0 var(--hard,#0b2f8a);
+  padding:22px clamp(14px,3vw,28px) 26px;
+}
+:root[data-theme="dark"] .nj-book{
+  background:linear-gradient(180deg,#0c1730,#091226);
+}
+.nj-book-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding-bottom:14px;margin-bottom:18px;border-bottom:1.5px dashed var(--line);
+  font:600 .74rem var(--f-mono,ui-monospace,monospace);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+}
+.nj-book-head b{color:var(--accent);font-weight:700}
+.nj-cover{
+  position:absolute;inset:0;z-index:8;border-radius:14px;
+  transform-origin:left center;transform:rotateY(0deg);
+  background:linear-gradient(135deg,#0b2354 0%,#13377a 55%,#091a3d 100%);
+  border:2px solid #ffd27a;box-shadow:8px 10px 32px rgba(0,0,0,.45);
+  color:#f2f7ff;display:grid;place-items:center;padding:28px;text-align:center;
+  cursor:pointer;backface-visibility:hidden;
+  transition:transform .95s cubic-bezier(.22,1,.36,1),opacity .5s .45s ease,visibility 0s .95s;
+}
+.nj-cover::before{
+  content:"";position:absolute;left:18px;top:0;bottom:0;width:3px;
+  background:rgba(255,210,122,.45);
+}
+.nj-cover-in{display:grid;justify-items:center;gap:10px;max-width:320px}
+.nj-cover-in small{font:600 .72rem var(--f-mono,monospace);letter-spacing:.22em;text-transform:uppercase;color:#ffd27a}
+.nj-cover-in strong{font:800 clamp(1.5rem,3.6vw,2.2rem)/1.05 var(--f-display,system-ui);letter-spacing:-.02em}
+.nj-cover-in span{font:500 .86rem/1.4 var(--f-body,system-ui);color:#c3d7f5}
+.nj-cover-in em{
+  margin-top:6px;font-style:normal;padding:8px 16px;border-radius:999px;
+  background:#ffd27a;color:#081633;font:700 .75rem var(--f-mono,monospace);
+  letter-spacing:.08em;text-transform:uppercase;
+}
+.nj-wrap.nj-open .nj-cover{
+  transform:rotateY(-138deg);opacity:0;visibility:hidden;pointer-events:none;
+}
+.nj-book .notes-index{gap:12px}
+.nj-book .note-card{
+  border-left:4px solid var(--accent);
+}
+
+@media (prefers-reduced-motion:reduce){
+  .ig-gate,.ig-coin,.ig-crt,.ig-hatch,.ig-ring,.ig-stage,.ig-leaf,.ig-pc,.nj-cover{animation:none!important;transition:none!important}
+  .nj-wrap.nj-open .nj-cover{display:none}
+}
