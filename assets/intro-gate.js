@@ -58,7 +58,7 @@
         '<div class="ig-hatch ig-hatch--bot" aria-hidden="true"></div>' +
         '<div class="ig-stage">' +
           '<div class="ig-core" aria-hidden="true"><div class="ig-ring"></div><div class="ig-ring ig-ring--2"></div><div class="ig-core-dot">L4</div></div>' +
-          '<p class="ig-kicker">SECTOR 04 · EXPERIMENTAL LAB · QUANTUM IDM 136 BPM</p>' +
+          '<p class="ig-kicker">SECTOR 04 · EXPERIMENTAL LAB · THE GRID 118 BPM</p>' +
           '<h2 class="ig-title">Ignite the Reactor</h2>' +
           '<p class="ig-sub">Unseal the containment hatch to inspect the NASA satellite, live shaders, SQL playgrounds &amp; Score Lab.</p>' +
           '<div class="ig-actions">' +

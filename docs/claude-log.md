@@ -27,6 +27,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-23 · Rework Lab Soundtrack ("The Grid · 118 BPM")
+
+- **Lab Score Overhaul (`assets/sfx.js`, `assets/intro-gate.js`):** replaced the discordant 136 BPM acid/glitch experiment with **The Grid · Lab Pulse (118 BPM)** — dark D-minor TRON: Legacy × Blade Runner 2049 analog sci-fi synth featuring a fat detuned dual-saw Moog rolling 16th bass arp (`tronPulse`) with an 8-bar breathing filter sweep, heavy cyberpunk half-time kick/clap groove, and a soaring heroic D-minor synth lead. Key `20261123n`.
+
 ## 2026-11-23 · Unique Per-Tab Interactive Entry Gates & Notes PC-to-Journal Book Flip
 
 - **Per-Tab Audio-Unlocking Entry Gates (`assets/intro-gate.css`, `assets/intro-gate.js`):** added GPU-only (`transform` + `opacity`, reduced-motion safe, auto-skipped on `#hash` deep links) interactive opening screens on `/play/`, `/lab/`, `/portfolio/`, and `/notes/` that unlock each tab's unique Web Audio soundtrack on click (with an `Enter quietly` option):

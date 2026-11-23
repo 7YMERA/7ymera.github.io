@@ -57,13 +57,13 @@
     home:      { title: 'Night Drive over KL',     sub: 'Cosmic skyline score · 70–88 bpm' },
     portfolio: { title: 'Executive Lounge · KLCC', sub: 'Warm Neo-Soul Rhodes · 78 bpm' },
     play:      { title: 'Arcade Pulse · 124 BPM',  sub: 'Retro Chiptune × Synthwave' },
-    lab:       { title: 'Quantum Reactor · IDM',   sub: 'Acid 303 × Polyrhythmic Glitch · 136 bpm' },
+    lab:       { title: 'The Grid · Lab Pulse',    sub: 'Dark analog sci-fi synth · 118 bpm' },
     notes:     { title: 'Quiet Study · 64 BPM',    sub: 'Felt piano & warm ambient air' }
   };
   var TAB_PROG = {
     portfolio: 'D:m9 G:69 C:maj9 A:m11 F:maj9 E:m7 D:m9 G:sus4'.split(' ').map(chord),
     play:      'A:m9 F:maj9 C:maj9 G:69 D:m9 F:maj9 G:sus4 E:7sus'.split(' ').map(chord),
-    lab:       'F:maj7s11 E:7sus Bb:maj7s11 D:m11 A:m9 E:7sus Bb:maj7s11 F:maj7s11'.split(' ').map(chord),
+    lab:       'D:m9 Bb:maj9 F:maj9 C:add9 D:m9 G:m9 Bb:maj9 A:7sus'.split(' ').map(chord),
     notes:     'C:maj9 A:m9 F:maj9 G:69 E:m7 A:m9 D:m9 G:sus4'.split(' ').map(chord)
   };
   var progCache = {};
@@ -261,20 +261,14 @@
       o.connect(lp); lp.connect(e); e.connect(p); p.connect((busOut || bKeys).in);
       o.onended = function () { live--; }; o.start(t); o.stop(t + dur + .04);
     }
-    // Lab / Quantum Reactor: resonant TB-303 acid squelch synth
-    function acid(t, m, dur, vel, accent, pn) {
-      if (live > MAXLIVE) return; live++; var f = hz(m), o = osc('sawtooth', f), lp = flt('lowpass', accent ? 3800 : 1800, accent ? 12.5 : 8.2), e = g(0), p = pan(pn || 0);
-      lp.frequency.setValueAtTime(accent ? 3900 : 2100, t); lp.frequency.exponentialRampToValueAtTime(240, t + Math.max(.09, dur * .82));
-      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * (accent ? .24 : .17), t + .004); e.gain.exponentialRampToValueAtTime(.0002, t + dur);
-      o.connect(lp); lp.connect(e); e.connect(p); p.connect(bBass.in);
-      o.onended = function () { live--; }; o.start(t); o.stop(t + dur + .05);
-    }
-    // Lab / Quantum Reactor: FM metallic glitch micro-percussion
-    function glitch(t, vel, pn, ratio) {
-      if (dlive > DMAX) return; dlive++; var f = 420 + (ratio || 1) * 280, cr = osc('sine', f), md = osc('square', f * (3.7 + (ratio || 1))), mg = g(f * 2.4), e = g(0), p = pan(pn || 0);
-      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .16, t + .002); e.gain.exponentialRampToValueAtTime(.0002, t + .045);
-      md.connect(mg); mg.connect(cr.frequency); cr.connect(e); e.connect(p); p.connect(bDr);
-      cr.onended = function () { dlive--; }; cr.start(t); md.start(t); cr.stop(t + .06); md.stop(t + .06);
+    // Lab / The Grid: fat detuned dual-saw Moog analog bass & arp pulse (warm resonant filter, zero harshness)
+    function tronPulse(t, m, dur, vel, cut, pn, busOut) {
+      if (live > MAXLIVE) return; live++; var f = hz(m), a = osc('sawtooth', f), b = osc('sawtooth', f), lp = flt('lowpass', cut || 900, 3.1), e = g(0), p = pan(pn || 0);
+      a.detune.value = -9; b.detune.value = 9;
+      lp.frequency.setValueAtTime((cut || 900) * 1.9, t); lp.frequency.exponentialRampToValueAtTime(Math.max(180, (cut || 900) * .38), t + Math.max(.09, dur * .85));
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .16, t + .005); e.gain.exponentialRampToValueAtTime(.0002, t + dur);
+      a.connect(lp); b.connect(lp); lp.connect(e); e.connect(p); p.connect((busOut || bBass).in);
+      a.onended = function () { live--; }; a.start(t); b.start(t); a.stop(t + dur + .05); b.stop(t + dur + .05);
     }
     function noiseHit(t, dur, dest, filt, vol, atk) {
       var s = ac.createBufferSource(); s.buffer = white; var e = g(0); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vol, t + (atk || .002)); e.gain.exponentialRampToValueAtTime(.0002, t + dur);
@@ -472,7 +466,7 @@
     function tempoFor(T) {
       if (trk === 'portfolio') return 78;
       if (trk === 'play') return 124;
-      if (trk === 'lab') return 136;
+      if (trk === 'lab') return 118;
       if (trk === 'notes') return 64;
       return T <= 1 ? lerp(88, 80, T) : lerp(80, 70, T - 1);
     }
@@ -493,13 +487,13 @@
 
     function buildTabBar(bar, t0) {
       st.bpm = tempoFor(env.T); var sd = st.sd = 60 / st.bpm / 4, beat = sd * 4, sw = trk === 'portfolio' ? .28 : trk === 'play' ? .04 : 0;
-      var delT = beat * (trk === 'lab' ? .375 : .75); dL.delayTime.setTargetAtTime(delT, t0, .05); dR.delayTime.setTargetAtTime(delT * (trk === 'lab' ? 1.5 : 1), t0, .05);
+      var delT = beat * .75; dL.delayTime.setTargetAtTime(delT, t0, .05); dR.delayTime.setTargetAtTime(delT, t0, .05);
       var rnd = rngFor(bar * 19 + 13), chs = TAB_PROG[trk] || TAB_PROG.portfolio, ci = Math.floor(bar / (trk === 'play' ? 1 : 2)) % chs.length;
       ctrl(t0);
       if (bar % (trk === 'play' ? 1 : 2) === 0 || !st.ch) {
         st.mood = moodNow(); st.ch = chs[ci]; st.vl = voice(st.ch, st.vl); st.root = bassMidi(st.ch.r);
-        padTo(t0, st.vl, trk === 'lab' ? .08 : .45); swTo(t0, st.root, .6); sub.frequency.setTargetAtTime(hz(st.root - 12), t0, .14);
-        padSw.gain.setTargetAtTime(trk === 'lab' ? .032 : trk === 'notes' ? .045 : .06, t0, .2);
+        padTo(t0, st.vl, trk === 'lab' ? .28 : .45); swTo(t0, st.root, .6); sub.frequency.setTargetAtTime(hz(st.root - 12), t0, .14);
+        padSw.gain.setTargetAtTime(trk === 'lab' ? .075 : trk === 'notes' ? .045 : .06, t0, .2);
       }
       var vl = st.vl, rt = st.root, s, k;
       function S(x) { return t0 + x * sd; } function W(x) { return t0 + x * sd + ((x & 1) ? sw * sd : 0); }
@@ -533,29 +527,32 @@
         }
         st.lastSeg = 'Arcade';
       } else if (trk === 'lab') {
-        // Quantum Reactor · IDM (136 BPM): Euclidean 5/16 & 7/16 Acid 303 squelch + FM Glitch percs + broken breakbeat
-        var scale = [rt, rt + 1, rt + 6, rt + 7, rt + 10, rt + 12, rt + 13, rt + 18];
+        // The Grid · Lab Pulse (118 BPM): TRON: Legacy × Blade Runner dark rolling Moog bass arp, half-time cyberpunk pulse & soaring sci-fi lead
+        var swell = .5 - .5 * Math.cos(bar * .785); // smooth 8-bar analog filter breathe
+        var cut = 520 + swell * 1350;
+        var bassPat = [0, 0, 12, 0, 0, 7, 12, 0, 0, 0, 12, 0, 7, 12, 7, 0];
         for (s = 0; s < 16; s++) {
-          var stepIdx = bar * 16 + s;
-          if (stepIdx % 5 === 0 || stepIdx % 7 === 0) {
-            var acc = stepIdx % 5 === 0 && (s % 4 !== 0);
-            var note = scale[(stepIdx * 3 + bar) % scale.length] + (acc ? 12 : 0);
-            acid(S(s), note, sd * (acc ? 1.7 : 1.1), .88, acc, ((s % 5) - 2) * .35);
-          }
-          if ((stepIdx % 3 === 0 && rnd() < .55) || (bar % 2 === 1 && s >= 13)) {
-            glitch(S(s), .52 + rnd() * .4, rnd() * 1.6 - .8, (stepIdx % 7) * .6 + .5);
-            if (bar % 2 === 1 && s === 14) glitch(S(s) + sd * .5, .45, -.7, 2.8); // 32nd-note IDM ratchet
-          }
+          var acc = s % 4 === 0 || s === 6 || s === 14;
+          tronPulse(S(s), rt + bassPat[s], sd * (acc ? 1.15 : .8), acc ? .92 : .55, cut * (acc ? 1.25 : .85), (s % 2 ? .18 : -.18), bBass);
         }
-        [0, 3, 10].forEach(function (st2, idx) { kick(S(st2), idx === 0 ? .88 : .64); });
-        if (bar % 2 === 1) { clap(S(4), .55); clap(S(12), .68); }
-        [5, 11, 13].forEach(function (st2) { if (rnd() < .75) rim(S(st2), .48); });
-        if (bar % 2 === 0) {
-          var qm = vl[(bar / 2) % vl.length] + 12;
-          crystal(S(2), qm, .72, -.65, 2.8, bLead.in, 3.5);
-          crystal(S(9), qm + 6, .58, .65, 2.4, bAir.in, 2.76);
+        // Subtle wide analog upper arp on offbeats
+        for (s = 0; s < 16; s += 2) {
+          if (bar >= 1) tronPulse(S(s), vl[(s / 2) % vl.length] + 12, sd * 1.4, .34 + swell * .22, 950 + swell * 1200, (s % 4 === 0 ? -.55 : .55), bKeys);
         }
-        st.lastSeg = 'Reactor';
+        // Heavy cyberpunk half-time groove
+        [0, 6, 10].forEach(function (st2, idx) { kick(S(st2), idx === 0 ? .95 : .72); });
+        clap(S(8), .82);
+        if (bar % 2 === 1) rim(S(14), .48);
+        for (s = 0; s < 16; s++) hat(S(s), s % 4 === 0 ? .34 : s % 2 === 0 ? .22 : .11, s === 14 && bar % 2 === 1);
+        // Heroic dark D-minor sci-fi synth lead
+        var ph = bar % 8;
+        if (ph === 2 || ph === 6) {
+          [[0, 62, 6], [6, 65, 2], [8, 69, 6], [14, 67, 2]].forEach(function (n) { lead(S(n[0]), n[1], sd * n[2] * .95, .78, .12); });
+        } else if (ph === 3 || ph === 7) {
+          [[0, 65, 4], [4, 64, 4], [8, 62, 8]].forEach(function (n) { lead(S(n[0]), n[1], sd * n[2] * .95, .74, -.12); });
+        }
+        if (bar % 2 === 0) bell(S(0), vl[3] + 12, .45, .45, 3.8, bAir);
+        st.lastSeg = 'The Grid';
       } else {
         // Quiet Study · 64 BPM (Notes): calm felt piano, zero drums, generous breathing space
         vl.forEach(function (m, j) { felt(S(0) + j * .04, m, sd * 14, .52 - j * .04, (j - 1.5) * .28, bKeys); });
