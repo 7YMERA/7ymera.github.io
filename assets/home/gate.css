@@ -86,22 +86,19 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
 .gate-cta { display: grid; justify-items: center; gap: 14px; width: 100%; animation: gate-rise .9s var(--g-ease) both; }
 .gate-cta[hidden] { display: none !important; }
 @keyframes gate-rise { from { opacity: 0; transform: translate3d(0, 22px, 0); } to { opacity: 1; transform: none; } }
-.gate-btn-wrap { position: relative; width: min(420px, 100%); }
+.gate-btn-wrap { position: relative; width: min(290px, 86vw); }
 .gate-btn-wrap::before, .gate-btn-wrap::after { content: ""; position: absolute; inset: 0; border-radius: 999px; border: 1.5px solid rgba(255, 210, 122, .8); opacity: 0; pointer-events: none; animation: gate-ring 3.4s ease-out infinite; will-change: transform, opacity; }
 .gate-btn-wrap::after { animation-delay: 1.7s; }
 @keyframes gate-ring { 0% { transform: scale(1, 1); opacity: .6; } 100% { transform: scale(1.16, 1.55); opacity: 0; } }
-.gate-btn { position: relative; display: flex; align-items: center; gap: 16px; width: 100%; min-height: 88px; padding: 0 26px 0 20px; border-radius: 999px; color: #fff; isolation: isolate; overflow: hidden; will-change: transform;
+.gate-btn { position: relative; display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; min-height: 76px; padding: 0 32px; border-radius: 999px; color: #fff; isolation: isolate; overflow: hidden; will-change: transform;
   background: linear-gradient(180deg, rgba(255, 255, 255, .13), rgba(255, 255, 255, .035)); box-shadow: inset 0 0 0 1.5px rgba(255, 210, 122, .75), inset 0 1px 0 rgba(255, 255, 255, .28), 0 14px 60px rgba(255, 190, 90, .22), 0 0 0 1px rgba(0, 0, 0, .3); }
 .gate-btn-fill { position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: linear-gradient(100deg, rgba(255, 210, 122, .42), rgba(255, 170, 90, .22)); opacity: 0; transition: opacity .35s ease; }
 .gate-btn:hover .gate-btn-fill, .gate-btn:focus-visible .gate-btn-fill { opacity: 1; }
 .gate-btn-glint { position: absolute; top: -20%; bottom: -20%; left: 0; width: 38%; z-index: -1; background: linear-gradient(100deg, transparent, rgba(255, 245, 220, .42), transparent); transform: translate3d(-130%, 0, 0) skewX(-18deg); animation: gate-glint 3.8s ease-in-out 1s infinite; will-change: transform; }
 @keyframes gate-glint { 0% { transform: translate3d(-130%, 0, 0) skewX(-18deg); } 38%, 100% { transform: translate3d(330%, 0, 0) skewX(-18deg); } }
-.gate-btn-ico { flex: none; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(255, 210, 122, .6); color: var(--g-gold); background: rgba(255, 210, 122, .08); }
-.gate-btn-ico svg { width: 24px; height: 24px; }
-.gate-btn-txt { flex: 1; display: grid; gap: 5px; text-align: left; will-change: transform; }
-.gate-btn-label { font-size: clamp(1.4rem, 5.4vw, 1.75rem); font-weight: 650; letter-spacing: -.005em; line-height: 1.05; white-space: nowrap; min-height: 1.05em; }
-.gate-btn-sub { font: 500 .6875rem/1 var(--f-mono, ui-monospace, Menlo, Consolas, monospace); letter-spacing: .2em; text-transform: uppercase; color: var(--g-gold); }
-.gate-btn-arr { flex: none; display: grid; place-items: center; width: 26px; height: 26px; transition: transform .35s var(--g-ease); }
+.gate-btn-txt { display: grid; text-align: center; will-change: transform; }
+.gate-btn-label { font-size: clamp(1.35rem, 5vw, 1.65rem); font-weight: 650; letter-spacing: .16em; text-transform: uppercase; line-height: 1.05; white-space: nowrap; min-height: 1.05em; }
+.gate-btn-arr { flex: none; display: grid; place-items: center; width: 24px; height: 24px; transition: transform .35s var(--g-ease); }
 .gate-btn-arr svg { width: 24px; height: 24px; }
 .gate-btn:hover .gate-btn-arr, .gate-btn:focus-visible .gate-btn-arr { transform: translate3d(6px, 0, 0); }
 .gate-btn:focus-visible, .gate-nosound:focus-visible { outline: 3px solid var(--g-gold); outline-offset: 5px; }

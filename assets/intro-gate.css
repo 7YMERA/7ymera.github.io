@@ -1,217 +1,357 @@
-/* Unique per-tab entry gates (Arcade Coin Drop, Lab Reactor Hatch, Portfolio Executive Dossier, Notes PC Boot + Journal Book Flip)
-   GPU-only animations (transform + opacity), big obvious buttons, full light/dark & reduced-motion support. */
+/* intro-gate.css: World-class full-bleed interactive entry gates for Play, Lab, Portfolio & Notes
+   Matching Home's cosmic production quality. GPU-only animations (transform + opacity), zero magenta/pink,
+   full light/dark & reduced-motion support. */
 
 .ig-gate{
-  position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:20px;
-  overflow:hidden;background:#050914;color:#eaf2ff;
-  transition:opacity .45s ease,visibility 0s .45s;
+  --ig-gold:#ffd27a;
+  --ig-ice:#7fd3ff;
+  --ig-ease:cubic-bezier(.76,0,.24,1);
+  position:fixed;inset:0;z-index:1000;overflow:hidden;
+  background:#030712;color:#f2f7ff;
+  font-family:var(--f-display,system-ui,-apple-system,sans-serif);
+  user-select:none;-webkit-user-select:none;
+  transition:opacity .48s ease,visibility 0s .48s;
 }
 .ig-gate.ig-out{opacity:0;visibility:hidden;pointer-events:none}
+.ig-cv{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1}
+.ig-vig{
+  position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(ellipse 76% 72% at 50% 48%,transparent 36%,rgba(2,5,14,.76) 100%);
+}
 
-/* Shared card / buttons */
-.ig-stage{position:relative;z-index:2;display:grid;justify-items:center;gap:18px;text-align:center;width:min(520px,100%);will-change:transform,opacity}
-.ig-kicker{font:600 .72rem/1 var(--f-mono,ui-monospace,monospace);letter-spacing:.22em;text-transform:uppercase;color:#7fd3ff;margin:0}
-.ig-title{font:800 clamp(1.75rem,5vw,2.75rem)/1.05 var(--f-display,system-ui);letter-spacing:-.02em;margin:0;color:#fff}
-.ig-sub{font:400 .95rem/1.5 var(--f-body,system-ui);color:#a9bddb;max-width:38ch;margin:0}
-.ig-actions{display:grid;justify-items:center;gap:10px;margin-top:4px}
+/* Corner HUD telemetry brackets (consistent family with Home's gate) */
+.ig-hud{
+  position:absolute;z-index:5;display:flex;align-items:center;gap:10px;
+  font:500 .68rem/1 var(--f-mono,ui-monospace,Menlo,monospace);
+  letter-spacing:.2em;text-transform:uppercase;color:rgba(218,233,255,.72);
+  pointer-events:none;opacity:0;animation:igFade .8s ease .15s forwards;
+}
+.ig-hud b{font-weight:600;color:var(--ig-gold)}
+.ig-hud i{width:18px;height:18px;border:1.5px solid rgba(127,211,255,.45);display:block;flex:none}
+.ig-hud.tl{left:max(18px,env(safe-area-inset-left));top:max(18px,env(safe-area-inset-top))}
+.ig-hud.tl i{border-right:0;border-bottom:0}
+.ig-hud.tr{right:max(18px,env(safe-area-inset-right));top:max(18px,env(safe-area-inset-top))}
+.ig-hud.tr i{border-left:0;border-bottom:0}
+.ig-hud.bl{left:max(18px,env(safe-area-inset-left));bottom:max(18px,env(safe-area-inset-bottom))}
+.ig-hud.bl i{border-right:0;border-top:0}
+.ig-hud.br{right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom))}
+.ig-hud.br i{border-left:0;border-top:0}
+@keyframes igFade{to{opacity:1}}
+
+/* Center choreography stage */
+.ig-stage{
+  position:relative;z-index:6;height:100%;display:grid;place-items:center;
+  padding:clamp(64px,10vh,96px) 20px;will-change:transform,opacity;
+}
+.ig-inner{
+  display:grid;justify-items:center;gap:18px;text-align:center;
+  width:min(540px,100%);will-change:transform,opacity;
+}
+.ig-kicker{
+  margin:0;font:600 .7rem/1.2 var(--f-mono,ui-monospace,monospace);
+  letter-spacing:.26em;text-transform:uppercase;color:var(--ig-ice);
+  opacity:0;animation:igRise .7s var(--ig-ease) .1s forwards;
+}
+.ig-title{
+  margin:0;font:800 clamp(2.1rem,6.5vw,3.8rem)/.98 var(--f-display,system-ui);
+  letter-spacing:-.025em;color:#fff;
+  text-shadow:0 6px 36px rgba(4,12,32,.85);
+  opacity:0;animation:igRise .8s var(--ig-ease) .18s forwards;
+}
+.ig-sub{
+  margin:0;font:400 clamp(.9rem,1.4vw,1.02rem)/1.55 var(--f-body,system-ui);
+  color:rgba(205,222,248,.82);max-width:40ch;
+  opacity:0;animation:igRise .8s var(--ig-ease) .28s forwards;
+}
+@keyframes igRise{from{opacity:0;transform:translate3d(0,18px,0)}to{opacity:1;transform:none}}
+
+/* Magnetic glowing pill button (matches Home's prestige craft) */
+.ig-btn-wrap{
+  position:relative;margin-top:6px;width:min(310px,86vw);
+  opacity:0;animation:igRise .85s var(--ig-ease) .36s forwards;
+}
+.ig-btn-wrap::before,.ig-btn-wrap::after{
+  content:"";position:absolute;inset:0;border-radius:999px;pointer-events:none;
+  border:1.5px solid rgba(255,210,122,.72);opacity:0;
+  animation:igRingPulse 3.2s ease-out infinite;will-change:transform,opacity;
+}
+.ig-btn-wrap::after{animation-delay:1.6s}
+@keyframes igRingPulse{0%{transform:scale(1,1);opacity:.55}100%{transform:scale(1.16,1.52);opacity:0}}
+
 .ig-btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:12px;
-  min-height:56px;padding:0 30px;border-radius:14px;border:2px solid #7fd3ff;
-  background:#1559c9;color:#fff;font:700 .98rem var(--f-mono,ui-monospace,monospace);
-  letter-spacing:.08em;text-transform:uppercase;cursor:pointer;
-  box-shadow:0 14px 36px -8px rgba(21,89,201,.65),4px 4px 0 #000;
-  transition:transform .16s ease,background-color .16s ease;
+  position:relative;width:100%;min-height:72px;padding:0 28px;border-radius:999px;border:0;
+  display:flex;align-items:center;justify-content:center;gap:14px;cursor:pointer;
+  color:#fff;isolation:isolate;overflow:hidden;will-change:transform;
+  background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.04));
+  box-shadow:inset 0 0 0 1.5px rgba(255,210,122,.82),inset 0 1px 0 rgba(255,255,255,.32),0 14px 52px rgba(255,195,95,.22),0 0 0 1px rgba(0,0,0,.35);
 }
-.ig-btn:hover{transform:translate3d(-1px,-2px,0);background:#1b66e0}
-.ig-btn:active{transform:translate3d(1px,1px,0)}
-.ig-btn:focus-visible{outline:3px solid #ffd27a;outline-offset:4px}
-.ig-quiet{
-  background:none;border:0;color:#8fa6cc;font:500 .76rem var(--f-mono,ui-monospace,monospace);
-  letter-spacing:.1em;text-transform:uppercase;cursor:pointer;padding:8px 14px;
-  text-decoration:underline;text-underline-offset:4px;
+.ig-btn-fill{
+  position:absolute;inset:0;z-index:-1;border-radius:inherit;opacity:0;transition:opacity .3s ease;
+  background:linear-gradient(100deg,rgba(255,210,122,.42),rgba(58,160,238,.28));
 }
-.ig-quiet:hover{color:#eaf2ff}
+.ig-btn:hover .ig-btn-fill,.ig-btn:focus-visible .ig-btn-fill{opacity:1}
+.ig-btn-glint{
+  position:absolute;top:-20%;bottom:-20%;left:0;width:36%;z-index:-1;
+  background:linear-gradient(100deg,transparent,rgba(255,246,222,.44),transparent);
+  transform:translate3d(-140%,0,0) skewX(-18deg);
+  animation:igGlint 3.6s ease-in-out .9s infinite;will-change:transform;
+}
+@keyframes igGlint{0%{transform:translate3d(-140%,0,0) skewX(-18deg)}40%,100%{transform:translate3d(340%,0,0) skewX(-18deg)}}
+.ig-btn-label{
+  font:700 clamp(1.05rem,3.6vw,1.26rem)/1 var(--f-mono,ui-monospace,monospace);
+  letter-spacing:.16em;text-transform:uppercase;white-space:nowrap;
+}
+.ig-btn-arr{
+  width:22px;height:22px;flex:none;display:grid;place-items:center;
+  transition:transform .3s var(--ig-ease);
+}
+.ig-btn-arr svg{width:22px;height:22px}
+.ig-btn:hover .ig-btn-arr,.ig-btn:focus-visible .ig-btn-arr{transform:translate3d(6px,0,0)}
+.ig-btn:focus-visible{outline:3px solid var(--ig-gold);outline-offset:5px}
 
-/* ================= 1. PLAY / ARCADE: COIN DROP + CRT ZOOM-IN ================= */
-.ig-gate--play{background:radial-gradient(ellipse 85% 70% at 50% 42%,#101c3a 0%,#050914 72%)}
-.ig-crt{
-  position:relative;width:min(420px,90vw);padding:26px 24px 22px;border-radius:22px;
-  background:linear-gradient(160deg,#0c1733,#060c1c);
-  border:3px solid #3aa0ee;box-shadow:0 0 0 6px rgba(58,160,238,.14),0 24px 60px rgba(0,0,0,.7);
-  display:grid;justify-items:center;gap:14px;will-change:transform,opacity;
+/* Ripple burst on click */
+.ig-flash{
+  position:fixed;z-index:10;width:420px;height:420px;margin:-210px 0 0 -210px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(255,244,218,.95),rgba(127,211,255,.35) 52%,transparent);
+  animation:igFlash .65s ease-out forwards;
 }
-.ig-crt::after{
-  content:"";position:absolute;inset:8px;border-radius:14px;pointer-events:none;
-  background:repeating-linear-gradient(0deg,rgba(127,211,255,.045) 0 2px,transparent 2px 5px);
+@keyframes igFlash{0%{transform:scale(.25);opacity:0}25%{opacity:1}100%{transform:scale(2.8);opacity:0}}
+
+/* ================= 1. PLAY / ARCADE: 3D COIN DROP + CRT ZOOM-THROUGH ================= */
+.ig-coin-rig{
+  position:relative;width:132px;height:112px;display:grid;place-items:end center;
+  cursor:pointer;margin-bottom:4px;
 }
-.ig-coin-rig{position:relative;height:78px;width:90px;display:grid;place-items:end center}
 .ig-coin{
-  position:absolute;top:0;width:44px;height:44px;border-radius:50%;
-  background:radial-gradient(circle at 35% 30%,#fff3c4,#ffd27a 48%,#c4821a 100%);
-  border:2px solid #fff2be;color:#2b1700;font:800 1rem var(--f-mono,monospace);
-  display:grid;place-items:center;box-shadow:0 6px 18px rgba(255,210,122,.45);
-  animation:igCoinFloat 1.8s ease-in-out infinite;will-change:transform,opacity;
+  position:absolute;top:0;width:66px;height:66px;border-radius:50%;
+  background:radial-gradient(circle at 32% 28%,#fff7d6 0%,#ffd27a 42%,#c57f18 88%,#754304 100%);
+  border:2.5px solid #fff3c4;color:#2c1600;
+  font:800 1.4rem/1 var(--f-display,system-ui);letter-spacing:-.04em;
+  display:grid;place-items:center;
+  box-shadow:0 0 36px rgba(255,210,122,.55),inset 0 0 0 4px rgba(255,248,220,.35);
+  animation:igCoinSpin 2.8s ease-in-out infinite;will-change:transform,opacity;
 }
-.ig-slot{
-  width:62px;height:14px;border-radius:7px;background:#02050d;
-  border:2px solid #ffd27a;box-shadow:inset 0 2px 6px #000,0 0 12px rgba(255,210,122,.35);
+.ig-coin-rig:hover .ig-coin{filter:brightness(1.12)}
+@keyframes igCoinSpin{
+  0%,100%{transform:translate3d(0,0,0) rotateY(0deg)}
+  50%{transform:translate3d(0,-10px,0) rotateY(180deg)}
 }
-@keyframes igCoinFloat{50%{transform:translate3d(0,-7px,0)}}
-.ig-gate--play .ig-btn{background:#ffd27a;color:#050914;border-color:#fff2be;box-shadow:0 12px 30px -6px rgba(255,210,122,.5),4px 4px 0 #000}
-.ig-gate--play .ig-btn:hover{background:#ffe09c}
-
-.ig-gate--play.ig-go .ig-coin{animation:igCoinDrop .36s cubic-bezier(.4,0,.9,.6) forwards}
-.ig-gate--play.ig-go .ig-crt{animation:igCrtZoom .62s .26s cubic-bezier(.22,1,.36,1) forwards}
-@keyframes igCoinDrop{
+.ig-slot-plate{
+  position:relative;width:104px;height:28px;border-radius:10px;
+  background:linear-gradient(180deg,#1a2c54,#081126);
+  border:1.5px solid rgba(255,210,122,.65);
+  box-shadow:0 10px 28px rgba(0,0,0,.6),0 0 22px rgba(255,210,122,.22);
+  display:grid;place-items:center;
+}
+.ig-slot-slit{
+  width:68px;height:9px;border-radius:5px;background:#010308;
+  box-shadow:inset 0 2px 6px #000,0 0 12px rgba(255,210,122,.5);
+}
+.ig-gate--play.ig-go .ig-coin{animation:igCoinPlunge .36s cubic-bezier(.45,0,.85,.5) forwards}
+.ig-gate--play.ig-go .ig-hud{opacity:0;transition:opacity .25s ease}
+.ig-gate--play.ig-go .ig-stage{animation:igCrtZoom .68s .26s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes igCoinPlunge{
   0%{transform:translate3d(0,0,0) scale(1);opacity:1}
-  75%{transform:translate3d(0,48px,0) scale(.86);opacity:1}
-  100%{transform:translate3d(0,60px,0) scale(.5);opacity:0}
+  72%{transform:translate3d(0,72px,0) scale(.84,.45);opacity:1}
+  100%{transform:translate3d(0,88px,0) scale(.45,.1);opacity:0}
 }
 @keyframes igCrtZoom{
   0%{transform:scale(1);opacity:1}
-  30%{transform:scale(1.06);opacity:1}
-  100%{transform:scale(2.8);opacity:0}
+  25%{transform:scale(1.06);opacity:1}
+  100%{transform:scale(3.1);opacity:0}
 }
 
-/* ================= 2. LAB: QUANTUM REACTOR BLAST HATCH ================= */
-.ig-gate--lab{background:#030812}
+/* ================= 2. LAB: QUANTUM REACTOR + LASER BLAST DOORS ================= */
 .ig-hatch{
-  position:absolute;left:0;right:0;height:50%;z-index:1;
-  background:linear-gradient(180deg,#08152e,#040a18);will-change:transform;
+  position:absolute;left:0;right:0;height:50.5%;z-index:8;pointer-events:none;
+  background:linear-gradient(180deg,#061126,#030814);
+  opacity:0;will-change:transform,opacity;
 }
-.ig-hatch--top{top:0;border-bottom:2px solid rgba(127,211,255,.45)}
-.ig-hatch--bot{bottom:0;border-top:2px solid rgba(127,211,255,.45)}
-.ig-core{
-  position:relative;width:128px;height:128px;display:grid;place-items:center;
+.ig-hatch--top{top:0;border-bottom:2px solid #7fd3ff;box-shadow:0 4px 28px rgba(127,211,255,.45)}
+.ig-hatch--bot{bottom:0;border-top:2px solid #7fd3ff;box-shadow:0 -4px 28px rgba(127,211,255,.45)}
+.ig-laser{
+  position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;z-index:9;pointer-events:none;
+  background:linear-gradient(90deg,transparent,#fff 20%,#7fd3ff 50%,#fff 80%,transparent);
+  box-shadow:0 0 22px #7fd3ff,0 0 42px #3aa0ee;
+  transform:scaleX(0);opacity:0;will-change:transform,opacity;
 }
-.ig-ring{
-  position:absolute;inset:0;border-radius:50%;border:2px dashed rgba(127,211,255,.65);
-  animation:igSpin 14s linear infinite;will-change:transform;
+.ig-reactor{
+  position:relative;width:136px;height:136px;display:grid;place-items:center;margin-bottom:2px;
 }
-.ig-ring--2{
-  inset:16px;border:2px solid rgba(255,210,122,.7);border-top-color:transparent;border-bottom-color:transparent;
-  animation:igSpinRev 8s linear infinite;
+.ig-r-ring{
+  position:absolute;inset:0;border-radius:50%;border:1.5px dashed rgba(127,211,255,.65);
+  animation:igSpin 16s linear infinite;will-change:transform;
 }
-.ig-core-dot{
+.ig-r-ring--2{
+  inset:16px;border:2px solid rgba(255,210,122,.78);border-top-color:transparent;border-bottom-color:transparent;
+  animation:igSpinRev 7s linear infinite;
+}
+.ig-r-ring--3{
+  inset:32px;border:1.5px solid rgba(127,211,255,.45);border-left-color:transparent;
+  animation:igSpin 4.5s linear infinite;
+}
+.ig-r-core{
   width:46px;height:46px;border-radius:50%;
-  background:radial-gradient(circle,#eaf6ff 0%,#3aa0ee 55%,#0e2d66 100%);
-  box-shadow:0 0 28px rgba(58,160,238,.7);display:grid;place-items:center;
-  font:800 .9rem var(--f-mono,monospace);color:#041024;
+  background:radial-gradient(circle,#ffffff 0%,#7fd3ff 42%,#1559c9 100%);
+  box-shadow:0 0 36px rgba(127,211,255,.85),0 0 70px rgba(21,89,201,.55);
+  display:grid;place-items:center;font:800 .85rem var(--f-mono,monospace);color:#030a1a;
 }
 @keyframes igSpin{to{transform:rotate(360deg)}}
 @keyframes igSpinRev{to{transform:rotate(-360deg)}}
-.ig-gate--lab.ig-go .ig-stage{animation:igCoreFlash .45s ease forwards}
-.ig-gate--lab.ig-go .ig-hatch--top{animation:igHatchUp .62s .14s cubic-bezier(.7,0,.2,1) forwards}
-.ig-gate--lab.ig-go .ig-hatch--bot{animation:igHatchDown .62s .14s cubic-bezier(.7,0,.2,1) forwards}
-@keyframes igCoreFlash{0%{transform:scale(1);opacity:1}45%{transform:scale(1.16);opacity:1}100%{transform:scale(1.45);opacity:0}}
-@keyframes igHatchUp{to{transform:translate3d(0,-105%,0)}}
-@keyframes igHatchDown{to{transform:translate3d(0,105%,0)}}
 
-/* ================= 3. PORTFOLIO: EXECUTIVE DOSSIER UNSEAL ================= */
-.ig-gate--portfolio{background:transparent}
-.ig-leaf{
-  position:absolute;top:0;bottom:0;width:50.5%;z-index:1;
-  background:linear-gradient(135deg,#071329,#0c1e42);will-change:transform;
-}
-.ig-leaf--l{left:0;border-right:1.5px solid rgba(255,210,122,.35)}
-.ig-leaf--r{right:0;border-left:1.5px solid rgba(255,210,122,.35)}
-.ig-seal{
-  width:76px;height:76px;border-radius:50%;display:grid;place-items:center;
-  background:radial-gradient(circle at 35% 30%,#ffe4a8,#d49a38 72%,#8a5d14 100%);
-  color:#081224;font:800 1.45rem var(--f-display,system-ui);
-  border:3px solid rgba(255,244,214,.85);box-shadow:0 12px 32px rgba(0,0,0,.5);
-}
-.ig-gate--portfolio .ig-btn{background:#eaf2ff;color:#081633;border-color:#ffd27a}
-.ig-gate--portfolio .ig-btn:hover{background:#fff}
-.ig-gate--portfolio.ig-go .ig-stage{animation:igFadeUp .35s ease forwards}
-.ig-gate--portfolio.ig-go .ig-leaf--l{animation:igLeafL .62s .12s cubic-bezier(.7,0,.2,1) forwards}
-.ig-gate--portfolio.ig-go .ig-leaf--r{animation:igLeafR .62s .12s cubic-bezier(.7,0,.2,1) forwards}
-@keyframes igFadeUp{to{transform:scale(.92);opacity:0}}
-@keyframes igLeafL{to{transform:translate3d(-105%,0,0)}}
-@keyframes igLeafR{to{transform:translate3d(105%,0,0)}}
+.ig-gate--lab.ig-go .ig-stage,.ig-gate--lab.ig-go .ig-hud{animation:igCoreBurst .42s ease forwards}
+.ig-gate--lab.ig-go .ig-laser{animation:igLaserCut .55s ease forwards}
+.ig-gate--lab.ig-go .ig-hatch--top{opacity:1;animation:igHatchUp .7s .18s var(--ig-ease) forwards}
+.ig-gate--lab.ig-go .ig-hatch--bot{opacity:1;animation:igHatchDown .7s .18s var(--ig-ease) forwards}
+.ig-gate--lab.ig-go .ig-cv,.ig-gate--lab.ig-go .ig-vig{opacity:0;transition:opacity .32s .22s ease}
+@keyframes igCoreBurst{0%{transform:scale(1);opacity:1}40%{transform:scale(1.14);opacity:1}100%{transform:scale(1.4);opacity:0}}
+@keyframes igLaserCut{0%{transform:scaleX(0);opacity:1}45%{transform:scaleX(1);opacity:1}100%{transform:scaleX(1);opacity:0}}
+@keyframes igHatchUp{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(0,-104%,0)}}
+@keyframes igHatchDown{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(0,104%,0)}}
 
-/* ================= 4. NOTES: PC WORKSTATION BOOT + SCROLL JOURNAL BOOK FLIP ================= */
-.ig-gate--notes{background:radial-gradient(ellipse 80% 70% at 50% 45%,#0c1a36 0%,#040812 75%)}
+/* ================= 3. PORTFOLIO: ARCHITECTURAL SKYLINE MONOGRAPH FOLIO ================= */
+.ig-folio{
+  position:absolute;top:0;bottom:0;width:50.5%;z-index:8;pointer-events:none;
+  background:linear-gradient(155deg,#071329 0%,#0b1d3d 100%);
+  opacity:0;will-change:transform,opacity;
+}
+.ig-folio--l{left:0;border-right:1.5px solid rgba(255,210,122,.55)}
+.ig-folio--r{right:0;border-left:1.5px solid rgba(255,210,122,.55)}
+.ig-seam-v{
+  position:absolute;top:0;bottom:0;left:50%;width:2px;margin-left:-1px;z-index:9;pointer-events:none;
+  background:linear-gradient(180deg,transparent,#fff3d0 25%,#ffd27a 50%,#fff3d0 75%,transparent);
+  transform:scaleY(0);opacity:0;will-change:transform,opacity;
+}
+.ig-mark{width:88px;height:64px;overflow:visible;margin-bottom:2px}
+.ig-mark .igm-line{
+  fill:none;stroke:#ffd27a;stroke-width:2.4;stroke-dasharray:1;stroke-dashoffset:1;
+  animation:igStroke 1.2s var(--ig-ease) .1s forwards;
+}
+.ig-mark .igm-fill{
+  fill:#f4f8ff;opacity:0;animation:igFade .7s ease .75s forwards;
+}
+@keyframes igStroke{to{stroke-dashoffset:0}}
+.ig-pf-name{
+  margin:0;font:300 clamp(2.1rem,6.6vw,4.1rem)/1 var(--f-display,system-ui);
+  letter-spacing:.28em;padding-left:.28em;text-transform:uppercase;color:#fff;
+  opacity:0;animation:igRise .85s var(--ig-ease) .22s forwards;
+}
+.ig-pf-rule{
+  width:120px;height:1px;background:linear-gradient(90deg,transparent,#ffd27a,transparent);
+  opacity:0;animation:igFade .7s ease .34s forwards;
+}
+.ig-gate--portfolio.ig-go .ig-stage,.ig-gate--portfolio.ig-go .ig-hud{animation:igSoftOut .36s ease forwards}
+.ig-gate--portfolio.ig-go .ig-seam-v{animation:igSeamV .52s ease forwards}
+.ig-gate--portfolio.ig-go .ig-folio--l{opacity:1;animation:igFolioL .76s .18s var(--ig-ease) forwards}
+.ig-gate--portfolio.ig-go .ig-folio--r{opacity:1;animation:igFolioR .76s .18s var(--ig-ease) forwards}
+.ig-gate--portfolio.ig-go .ig-cv,.ig-gate--portfolio.ig-go .ig-vig{opacity:0;transition:opacity .3s .2s ease}
+@keyframes igSoftOut{to{transform:scale(.94);opacity:0}}
+@keyframes igSeamV{0%{transform:scaleY(0);opacity:1}50%{transform:scaleY(1);opacity:1}100%{transform:scaleY(1);opacity:0}}
+@keyframes igFolioL{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-104%,0,0)}}
+@keyframes igFolioR{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(104%,0,0)}}
+
+/* ================= 4. NOTES: 7YMERA OS WORKSTATION BOOT + 3D JOURNAL BOOK FLIP ================= */
 .ig-pc{
-  width:min(440px,92vw);border-radius:18px;overflow:hidden;
-  background:#091326;border:3px solid #3aa0ee;
-  box-shadow:0 28px 70px rgba(0,0,0,.7),0 0 0 5px rgba(58,160,238,.12);
+  width:min(490px,92vw);border-radius:18px;overflow:hidden;text-align:left;
+  background:rgba(7,15,34,.86);border:2px solid rgba(127,211,255,.55);
+  box-shadow:0 28px 80px rgba(0,0,0,.72),0 0 0 6px rgba(58,160,238,.12);
   will-change:transform,opacity;
+  opacity:0;animation:igRise .8s var(--ig-ease) .1s forwards;
 }
 .ig-pc-bar{
-  display:flex;align-items:center;gap:7px;padding:10px 14px;
-  background:#0f2040;border-bottom:1.5px solid rgba(127,211,255,.22);
-  font:600 .7rem var(--f-mono,monospace);color:#9db6dc;letter-spacing:.08em;
+  display:flex;align-items:center;gap:7px;padding:11px 16px;
+  background:linear-gradient(90deg,#0f2347,#0b1936);
+  border-bottom:1px solid rgba(127,211,255,.25);
+  font:600 .7rem var(--f-mono,ui-monospace,monospace);color:#a9c4eb;letter-spacing:.12em;
 }
-.ig-pc-bar i{width:9px;height:9px;border-radius:50%;background:rgba(127,211,255,.45)}
+.ig-pc-bar i{width:9px;height:9px;border-radius:50%;background:rgba(127,211,255,.38)}
 .ig-pc-bar i:first-child{background:#ffd27a}
 .ig-pc-bar span{margin-left:auto;text-transform:uppercase}
-.ig-pc-scr{padding:24px 20px 22px;display:grid;justify-items:center;gap:14px}
-.ig-pc-icons{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
-.ig-pc-ic{
-  display:grid;justify-items:center;gap:5px;padding:10px 12px;border-radius:10px;
-  background:rgba(127,211,255,.08);border:1px solid rgba(127,211,255,.22);
-  font:600 .68rem var(--f-mono,monospace);color:#cfe4ff;
+.ig-pc-body{padding:22px 22px 24px;display:grid;gap:16px;justify-items:center;text-align:center}
+.ig-term{
+  width:100%;padding:12px 14px;border-radius:10px;text-align:left;
+  background:rgba(2,7,18,.82);border:1px solid rgba(127,211,255,.22);
+  font:500 .73rem/1.65 var(--f-mono,ui-monospace,monospace);color:#8fd3ff;
+  min-height:74px;
 }
-.ig-pc-ic svg{width:24px;height:24px;color:#ffd27a}
-.ig-gate--notes.ig-go .ig-pc{animation:igPcZoom .65s cubic-bezier(.22,1,.36,1) forwards}
-@keyframes igPcZoom{
+.ig-term p{margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ig-term b{color:#ffd27a;font-weight:600}
+.ig-pc-chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.ig-pc-chip{
+  display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:8px;
+  background:rgba(127,211,255,.08);border:1px solid rgba(127,211,255,.25);
+  font:600 .7rem var(--f-mono,monospace);color:#dbeaff;letter-spacing:.06em;
+}
+.ig-pc-chip svg{width:16px;height:16px;color:#ffd27a}
+.ig-pc-prog{width:100%;height:3px;border-radius:2px;background:rgba(127,211,255,.15);overflow:hidden}
+.ig-pc-prog i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#3aa0ee,#ffd27a);transform-origin:left;transform:scaleX(.28);transition:transform .45s var(--ig-ease)}
+.ig-gate--notes.ig-go .ig-pc-prog i{transform:scaleX(1)}
+.ig-gate--notes.ig-go .ig-hud{opacity:0;transition:opacity .24s ease}
+.ig-gate--notes.ig-go .ig-stage{animation:igPcDive .68s .16s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes igPcDive{
   0%{transform:scale(1);opacity:1}
-  25%{transform:scale(1.04);opacity:1}
-  100%{transform:scale(2.5);opacity:0}
+  26%{transform:scale(1.05);opacity:1}
+  100%{transform:scale(2.85);opacity:0}
 }
 
-/* Notes page: PC-to-Journal Book Flip Transition when scrolling into Every Note (.ni-list) */
-.nj-wrap{
-  position:relative;perspective:1600px;margin-top:18px;
-}
+/* Notes page: 3D Hardcover Journal Book Flip when scrolling out of PC Folders into Every Note */
+.nj-wrap{position:relative;perspective:1800px;margin-top:20px}
 .nj-book{
   position:relative;border-radius:14px;
-  background:color-mix(in srgb,var(--surface,#fff) 96%,#f7eed8 4%);
+  background:color-mix(in srgb,var(--surface,#fff) 94%,#f5ead0 6%);
   border:2px solid var(--fx,#2aa6e8);
-  box-shadow:6px 6px 0 var(--hard,#0b2f8a);
-  padding:22px clamp(14px,3vw,28px) 26px;
+  box-shadow:8px 8px 0 var(--hard,#0b2f8a);
+  padding:24px clamp(16px,3vw,30px) 28px;
 }
 :root[data-theme="dark"] .nj-book{
-  background:linear-gradient(180deg,#0c1730,#091226);
+  background:linear-gradient(180deg,#0c1833,#081126);
+}
+.nj-book::before{
+  content:"";position:absolute;top:0;right:26px;width:20px;height:34px;
+  background:linear-gradient(180deg,#ffd27a,#c7881f);
+  clip-path:polygon(0 0,100% 0,100% 100%,50% 74%,0 100%);
+  pointer-events:none;
 }
 .nj-book-head{
   display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
-  padding-bottom:14px;margin-bottom:18px;border-bottom:1.5px dashed var(--line);
+  padding-bottom:14px;margin-bottom:18px;padding-right:34px;
+  border-bottom:1.5px dashed var(--line);
   font:600 .74rem var(--f-mono,ui-monospace,monospace);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
 }
 .nj-book-head b{color:var(--accent);font-weight:700}
 .nj-cover{
-  position:absolute;inset:0;z-index:8;border-radius:14px;
+  position:absolute;inset:0;z-index:8;border-radius:14px;border:2px solid #ffd27a;
   transform-origin:left center;transform:rotateY(0deg);
-  background:linear-gradient(135deg,#0b2354 0%,#13377a 55%,#091a3d 100%);
-  border:2px solid #ffd27a;box-shadow:8px 10px 32px rgba(0,0,0,.45);
+  background:linear-gradient(135deg,#081838 0%,#12316e 52%,#071430 100%);
+  box-shadow:10px 14px 40px rgba(0,0,0,.5);
   color:#f2f7ff;display:grid;place-items:center;padding:28px;text-align:center;
   cursor:pointer;backface-visibility:hidden;
-  transition:transform .95s cubic-bezier(.22,1,.36,1),opacity .5s .45s ease,visibility 0s .95s;
+  transition:transform 1.05s cubic-bezier(.22,1,.36,1),opacity .5s .52s ease,visibility 0s 1.05s;
 }
 .nj-cover::before{
-  content:"";position:absolute;left:18px;top:0;bottom:0;width:3px;
-  background:rgba(255,210,122,.45);
+  content:"";position:absolute;left:22px;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,transparent,#ffd27a 18%,#ffd27a 82%,transparent);
 }
-.nj-cover-in{display:grid;justify-items:center;gap:10px;max-width:320px}
-.nj-cover-in small{font:600 .72rem var(--f-mono,monospace);letter-spacing:.22em;text-transform:uppercase;color:#ffd27a}
-.nj-cover-in strong{font:800 clamp(1.5rem,3.6vw,2.2rem)/1.05 var(--f-display,system-ui);letter-spacing:-.02em}
-.nj-cover-in span{font:500 .86rem/1.4 var(--f-body,system-ui);color:#c3d7f5}
+.nj-cover-in{display:grid;justify-items:center;gap:12px;max-width:340px}
+.nj-cover-in small{font:600 .72rem var(--f-mono,monospace);letter-spacing:.24em;text-transform:uppercase;color:#ffd27a}
+.nj-cover-in strong{font:800 clamp(1.65rem,3.8vw,2.35rem)/1.05 var(--f-display,system-ui);letter-spacing:-.02em}
+.nj-cover-in span{font:500 .88rem/1.45 var(--f-body,system-ui);color:#c3d7f5}
 .nj-cover-in em{
-  margin-top:6px;font-style:normal;padding:8px 16px;border-radius:999px;
-  background:#ffd27a;color:#081633;font:700 .75rem var(--f-mono,monospace);
-  letter-spacing:.08em;text-transform:uppercase;
+  margin-top:6px;font-style:normal;padding:9px 18px;border-radius:999px;
+  background:#ffd27a;color:#071329;font:700 .75rem var(--f-mono,monospace);
+  letter-spacing:.1em;text-transform:uppercase;
 }
-.nj-wrap.nj-open .nj-cover{
-  transform:rotateY(-138deg);opacity:0;visibility:hidden;pointer-events:none;
-}
+.nj-wrap.nj-open .nj-cover{transform:rotateY(-142deg);opacity:0;visibility:hidden;pointer-events:none}
 .nj-book .notes-index{gap:12px}
-.nj-book .note-card{
-  border-left:4px solid var(--accent);
-}
+.nj-book .note-card{border-left:4px solid var(--accent)}
 
+@media (max-width:639px){
+  .ig-hud{font-size:.6rem;letter-spacing:.12em}
+  .ig-hud.br{display:none}
+  .ig-btn{min-height:66px}
+}
 @media (prefers-reduced-motion:reduce){
-  .ig-gate,.ig-coin,.ig-crt,.ig-hatch,.ig-ring,.ig-stage,.ig-leaf,.ig-pc,.nj-cover{animation:none!important;transition:none!important}
+  .ig-gate,.ig-gate *,.ig-gate *::before,.ig-gate *::after,.nj-cover{animation:none!important;transition:none!important;opacity:1!important}
+  .ig-gate.ig-out{display:none}
   .nj-wrap.nj-open .nj-cover{display:none}
 }

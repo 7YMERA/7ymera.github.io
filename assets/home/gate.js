@@ -88,21 +88,18 @@
             '</div>' +
             '<div class="gate-cta" hidden>' +
               '<div class="gate-btn-wrap">' +
-                '<button class="gate-btn" type="button" aria-label="Get started, with sound">' +
+                '<button class="gate-btn" type="button" aria-label="Enter">' +
                   '<span class="gate-btn-fill" aria-hidden="true"></span><span class="gate-btn-glint" aria-hidden="true"></span>' +
-                  '<span class="gate-btn-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4.5" height="7" rx="1.6"/><rect x="16.5" y="14" width="4.5" height="7" rx="1.6"/></svg></span>' +
-                  '<span class="gate-btn-txt" aria-hidden="true"><span class="gate-btn-label">Get started</span><span class="gate-btn-sub">' + (soundOff ? 'sound is off' : 'with sound') + '</span></span>' +
+                  '<span class="gate-btn-txt" aria-hidden="true"><span class="gate-btn-label">Enter</span></span>' +
                   '<span class="gate-btn-arr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>' +
                 '</button>' +
               '</div>' +
-              (soundOff ? '' : '<button class="gate-nosound" type="button">Enter without sound</button>') +
             '</div>' +
           '</div>' +
         '</div>' +
-        '<p class="gate-hp" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4.5" height="7" rx="1.6"/><rect x="16.5" y="14" width="4.5" height="7" rx="1.6"/></svg><span>Best with headphones</span></p>' +
         '<p class="gate-credit" aria-hidden="true">Earth: NASA 3D Resources · NASA Blue Marble</p>' +
       '</div>' +
-      '<p class="gate-sr" id="gate-desc">Entry screen. Choose Get started to enter with sound, or Enter without sound.</p>';
+      '<p class="gate-sr" id="gate-desc">Entry screen. Press Enter to launch the experience.</p>';
 
     var rootEl = el('div', 'gate' + (reduce ? ' reduce' : ''), tpl);
     rootEl.id = 'gate'; rootEl.setAttribute('role', 'dialog'); rootEl.setAttribute('aria-modal', 'true');
@@ -297,17 +294,17 @@
         if (k < n) requestAnimationFrame(step); else node.textContent = text;
       })();
     }
-    btn.addEventListener('pointerenter', function () { scramble(label, 'Get started', 420); });
-    btn.addEventListener('focus', function () { scramble(label, 'Get started', 420); });
+    btn.addEventListener('pointerenter', function () { scramble(label, 'Enter', 360); });
+    btn.addEventListener('focus', function () { scramble(label, 'Enter', 360); });
     btn.addEventListener('click', function () { enter(false); });
-    if (nos) nos.addEventListener('click', function () { enter(true); });
+    if (nos) nos.addEventListener('click', function () { enter(false); });
     w.addEventListener('pointermove', onMove, { passive: true });
     function onMove(e) { mx = e.clientX; my = e.clientY; tpx = (e.clientX / Math.max(1, W)) * 2 - 1; tpy = (e.clientY / Math.max(1, H)) * 2 - 1; }
     if (reduce) { tpx = tpy = 0; }
     /* focus trap while the gate is up */
     rootEl.addEventListener('keydown', function (e) {
       if (e.key !== 'Tab') return;
-      var f = [btn, nos].filter(function (n) { return n && !cta.hidden; });
+      var f = [btn].filter(function (n) { return n && !cta.hidden; });
       if (!f.length) { e.preventDefault(); rootEl.focus(); return; }
       var i = f.indexOf(d.activeElement);
       if (e.shiftKey) { if (i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } }
@@ -329,13 +326,14 @@
         if (k < 1) requestAnimationFrame(step);
       })();
     }
-    function enter(silent) {
+    function enter() {
       if (state !== 'ready') return;
       state = 'leaving';
-      if (silent) ls('sfx-on', '0');
+      ls('sfx-on', '1');
+      if (w.SFX && !w.SFX.on) { try { w.SFX.set(true); } catch (e) {} }
       ss('gate-seen', '1');
       try { d.dispatchEvent(new CustomEvent('sfx-cue', { detail: { name: 'gate' } })); } catch (e) { /* no sound */ }
-      rootEl.classList.add('leaving'); btn.disabled = true; if (nos) nos.disabled = true; status.textContent = silent ? 'SILENT' : 'WARP';
+      rootEl.classList.add('leaving'); btn.disabled = true; status.textContent = 'WARP';
       if (reduce) { rootEl.classList.add('fade'); later(function () { opened(); finish(); }, 420); return; }
       ringPulse(); tWarp = 1; kick();
       later(glitchWord, 90);

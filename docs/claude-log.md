@@ -27,6 +27,15 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-23 · Clean Home "Enter" Button & Full-Bleed Canvas2D Cinematic Entry Gates Across All Tabs
+
+- **Home Entry Gate (`assets/home/gate.js`, `assets/home/gate.css`):** simplified the CTA pill to clean centered **`Enter`** (removed headphone icon, subtitle, `Best with headphones` footer, and `Enter without sound` option; clicking `Enter` always enables audio and fires Cosmic Warp Drive).
+- **World-Class Per-Tab Full-Bleed Canvas2D Entry Gates (`assets/intro-gate.css`, `assets/intro-gate.js`):** rebuilt all 4 tab gates to match Home's production quality with full-bleed pointer-reactive Canvas2D worlds, corner HUD telemetry brackets, live MYT clock, magnetic glowing buttons with text scramble, zero silent-entry clutter, and bespoke exit choreography:
+  - **Play (`/play/`):** scrolling cobalt-gold synthwave horizon grid with vector KL skyline silhouette + 3D spinning gold `\7` coin plunging into an illuminated slot → pixel spark explosion + 6× turbo grid + CRT zoom-through into the arcade hall (`Arcade Pulse · 124 BPM`).
+  - **Lab (`/lab/`):** real-time 3D-projected Fibonacci particle sphere + radar telemetry + concentric Level-4 reactor rings → core implosion/shockwave detonation + horizontal laser-cut seam + vertical blast-door hatch split (`The Grid · 118 BPM`).
+  - **Portfolio (`/portfolio/`):** midnight-navy architectural blueprint drafting canvas with live wireframe KL skyline elevation + golden compass arcs + self-drawing `\7` SVG monogram → vertical gold rule + twin matte-navy folio doors parting left & right (`Executive Lounge · 78 BPM`).
+  - **Notes (`/notes/`):** `7YMERA OS` isometric blueprint dot-matrix canvas with floating wireframe folders + terminal boot console → monitor glass dive into the 10 project folders (`Quiet Study · 64 BPM`), followed by the scroll-driven 3D hardcover **Field Notes Journal** book flip (with ribbon bookmark & embossed spine). Key `20261123p`.
+
 ## 2026-11-23 · Underground MRT Tunnel Network, Clean Station-Cleared Viaducts & TRX Camera Jerk Fix
 
 - **Underground MRT Corridor (`assets/scene.js`):** removed the lazy encircling outer oval (`outerCurve`) and the tangled diagonal `helixCurve` stabbing through KLCC station. Replaced them with a cross-city **Underground MRT Line (`mrtCurve`)** that dives below ground (`y = -12`) under Merdeka & KLCC through **sculpted glowing Underground Tunnel Portals (`buildPortals`)**, leaves a glowing subterranean X-ray conduit line visible from overhead (`mrtXray`), and surfaces at KL Sentral, TRX Underground, and Ampang Portal.
