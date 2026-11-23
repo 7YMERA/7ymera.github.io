@@ -1052,11 +1052,11 @@
       for(i=0;i<=10;i++){f=i/10;var cth=(cT0-cSw*f)*RAD,crr=(cr0+(cr1-cr0)*f)*(1-.2*Math.exp(-Math.pow((((cT0-cSw*f+180)%360+360)%360-180+62)/18,2))),cy=74+124*f; // dips inward where a block stands close to the circle (bearing -62 degrees from Merdeka, checked with the clearance oracle)
         KF.push(['c'+i,A(C.u+Math.cos(cth)*crr,C.w+Math.sin(cth)*crr,cy),A(C.u,C.w,70+.65*(cy-74)),2.3,0])} // near the top the aim eases down a little, so the city fills the lower part of the frame
       row('top0',pt(C,cT1,64),216,C,150,2.0);row('top1',pt(C,cT1,44),236,C,70,2.0);row('top2',pt(C,cT1,20),248,C,0,2.0);
-      // tip over and fly to The Exchange, still heading the same way (the camera sits behind Merdeka's axis, looking along the line to The Exchange), the aim coming up from the floor to the horizon
+      // tip over from Merdeka and glide cleanly toward The Exchange 106, bringing its glowing crown squarely into frame
       var fE=function(f){return lerpUW(C,E,f)};
-      row('fl1',fE(.14),246,fE(.34),40,1.0);row('fl2',fE(.3),236,fE(.54),50,.9);row('fl3',fE(.46),222,fE(.7),62,.9);row('fl4',fE(.6),205,fE(.84),78,.9);
-      // 6 fall down The Exchange: clockwise round its glass face from the Merdeka side, radius 100 closing to the rail, height 214 to the street; the aim is ahead and down, turned so the tower stands on the right third of the frame
-      // 7 street skim rows first (the fall ends where the skim starts)
+      row('fl1',fE(.14),242,fE(.42),92,1.1);row('fl2',fE(.3),228,lerpUW(fE(.6),E,.5),114,1.1);row('fl3',fE(.46),212,E,128,1.15);row('fl4',fE(.6),196,E,124,1.2);
+      // 6 hero showcase & glide down The Exchange 106 (TRX): smooth 150-deg banking arc around its glowing crown and glass face, then curving cleanly into the sky-rail chase
+      // 7 street skim rows first (the Exchange descent ends where the skim starts)
       var eR=A(pt(E,16,46).u,pt(E,16,46).w,0),sA=railNear(eR.x,eR.z),sB=sA,SK=[],qv=new T.Vector3(),tg=new T.Vector3();
       for(i=1;i<400;i++){var ss=(sA+i/400)%1;skyCurve.getPointAt(ss,qv);if(Math.hypot(qv.x,qv.z)<=50){sB=sA+i/400;break}}
       if(sB===sA)sB=sA+.22;
@@ -1064,11 +1064,15 @@
       for(i=0;i<=nS;i++){var s0=(sA+(sB-sA)*i/nS)%1,s1=(s0+85/skyLen)%1;skyCurve.getPointAt(s0,qv);skyCurve.getTangentAt(s0,tg);
         var cp=new T.Vector3(qv.x-tg.z*8,Math.max(30,qv.y-26),qv.z+tg.x*8);skyCurve.getPointAt(s1,qv);
         SK.push([cp,new T.Vector3(qv.x,qv.y-20,qv.z)])}
-      var s0u=UW(SK[0][0].x,SK[0][0].z),fr=(mobile?1.3:1),fTh0=dg(E,C),fTh1=dg(E,s0u),fSw=wrap(fTh0-fTh1),fR0=100*fr,fR1=dist(E,s0u),nF=10,fk0=KF.length;
-      for(i=0;i<nF;i++){f=i/nF;var th=(fTh0-fSw*(1-Math.pow(1-f,2.1)))*RAD,r=fR1+(fR0-fR1)*Math.pow(1-f,1.6),y=SK[0][0].y+(214-SK[0][0].y)*(1-Math.pow(f,1.7)), /* the turn round the tower comes first, while still high; then the height goes all at once, on a nearly straight line, so it reads as a fall and the turn limit does not slow it */ phi=26*RAD,Lh=60,pit=Math.atan(.9-.55*f);
-        var cx=E.u+Math.cos(th)*r,cz=E.w+Math.sin(th)*r;
-        KF.push([i?'e'+i:'e0',A(cx,cz,y),A(cx+Lh*(-Math.cos(phi)*Math.cos(th)+Math.sin(phi)*Math.sin(th)),cz+Lh*(-Math.cos(phi)*Math.sin(th)-Math.sin(phi)*Math.cos(th)),Math.max(0,y-Lh*Math.tan(pit))),i<nF-1?.5:1.0,1.2*Math.sin(f*Math.PI)]);
-        mixAim(KF.length-1,SK[0][1],(f-.45)/.5);if(f<.3)mixAim(KF.length-1,KF[fk0-1][2],1-f/.3)}   // the first fall knots keep the aim of the flight in, the last ones turn it to where the skim looks
+      var s0u=UW(SK[0][0].x,SK[0][0].z),fr=(mobile?1.32:1),fTh0=dg(E,C),fTh1=dg(E,s0u),fSw=wrap(fTh0-fTh1);
+      if(fSw<90)fSw+=150;else if(fSw>250)fSw-=120; // guarantee a generous, scenic orbit around TRX regardless of rail tangent angle
+      var fR0=108*fr,fR1=Math.max(64*fr,dist(E,s0u)),nF=11,fk0=KF.length;
+      for(i=0;i<nF;i++){
+        f=i/nF;var fs2=sm(f),th=(fTh0-fSw*fs2)*RAD,r=fR0+(fR1-fR0)*fs2,y=184+(SK[0][0].y+12-184)*Math.pow(f,1.35);
+        var cx=E.u+Math.cos(th)*r,cz=E.w+Math.sin(th)*r,aimY=126-52*fs2;
+        KF.push([i?'e'+i:'e0',A(cx,cz,y),A(E.u,E.w,aimY),1.45,0]);
+        if(f>.68)mixAim(KF.length-1,SK[0][1],(f-.68)/.32); // hold gaze on TRX's crown & glass facade, then turn smoothly onto the sky-rail
+      }
       var skEndAim=A(ENDC.u,ENDC.w,90);for(i=nS-4;i<=nS;i++)SK[i][1]=SK[i][1].clone().lerp(skEndAim,sm((i-(nS-5))/5));  // the last skim knots turn their aim toward the group, ready for the pull-out
       SK.forEach(function(s,j){KF.push([j?(j===nS?'skEnd':'sk'+j):'sk0',s[0],s[1],j===nS?3.4:1.2,0])});
       // 8 pull-out: from the end of the skim, outward and up on an arc round the middle of the group (ENDC) to the finale camera

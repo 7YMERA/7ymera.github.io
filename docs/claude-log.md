@@ -27,6 +27,10 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-23 · Fix & Upgrade The Exchange 106 (TRX) Drone Pathing
+
+- **TRX Hero Showcase (`assets/scene.js`):** fixed beat 6 in `buildKF()` where the reworked `skyCurve` tangent + low `0.5` slow factor + look-away tangent caused the drone to skip past The Exchange 106. Now `fl1..fl4` frame TRX's glowing crown directly ahead as you leave Merdeka 118, and `e0..e10` sweep a guaranteed scenic banking arc around TRX (`slow = 1.45`, gaze locked on TRX's crown and glass facade for the first 68% before smoothly handoff-blending onto the sky-rail train chase). Key `20261123l`.
+
 ## 2026-11-23 · Eliminate iOS Safari Scroll-Resize Flicker
 
 - **Static `100lvh` Canvases + Toolbar Resize Guard (`assets/home/home.css`, `assets/scene.css`, `assets/scene.js`):** locked `.orbit`, `#gl`, and `#skybg` to static `height: 100lvh` (so they cover the full screen even when Safari's bottom bar collapses without ever changing height or triggering `ResizeObserver`), restored `.ds-stage` to static `100svh`, and guarded `scene.js`'s `resize` handler against mobile toolbar-only height changes (`W <= 820 && innerWidth === W && Math.abs(innerHeight - Hh) < 180`). Key `20261123k`.
