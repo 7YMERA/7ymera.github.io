@@ -373,22 +373,28 @@ html.fly-end .hud .cp-adi{opacity:0!important;visibility:hidden!important}
 .hud-tog svg{width:20px;height:20px}.hud-tog:hover{transform:translateY(-1px)}.hud-tog:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .hud-tog[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink,#fff);border-color:var(--accent)}
 .cp-id{top:140px}
-html.hud-off .hud,html.hud-off .ride-caps,html.hud-off .ride-hint,html.hud-off .fly-skip,html.hud-off .tod--hud,html.hud-off .fly-again,html.hud-off .fly-free,html.hud-off .fly-free-hint,html.hud-off .fly-free-time,html.hud-off .fly-free-wp{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity .3s,visibility 0s .3s!important}
+html.hud-off .hud,html.hud-off .ride-caps,html.hud-off .ride-hint,html.hud-off .fly-skip,html.hud-off .tod--hud,html.hud-off .fly-again,html.hud-off .fly-free,html.hud-off .fly-free-hint,html.hud-off .fly-free-time,html.hud-off .fly-free-wp,html.hud-off .fly-map{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity .3s,visibility 0s .3s!important}
 html.home-ds .hud-tog{opacity:0;visibility:hidden;transition:opacity .35s,visibility 0s .35s}
 html.home-ds.drone-ready .hud-tog{opacity:1;visibility:visible;transition:opacity .6s ease .1s,visibility 0s .1s}
 @media (max-width:700px){.hud-tog{right:14px;top:76px;min-height:44px;padding:0 14px;font-size:14px}}
 @media (prefers-reduced-motion:reduce){.hud-tog{transition:none}}
 
-/* ---- FREE-FLY WAYPOINTS & POSTCARD BAR ---- */
-.fly-free-wp{position:absolute;left:50%;bottom:clamp(94px,15svh,142px);transform:translate3d(-50%,10px,0);z-index:6;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:8px;border-radius:16px;background:rgba(5,10,24,.82);border:1.5px solid rgba(223,234,255,.22);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s,transform .3s,visibility 0s .3s;max-width:min(680px,calc(100vw - 32px))}
+/* ---- FREE-FLY WAYPOINTS, TRAIN-CAM, TRANSIT MAP & POSTCARD BAR ---- */
+.fly-free-wp{position:absolute;left:50%;bottom:clamp(94px,15svh,142px);transform:translate3d(-50%,10px,0);z-index:6;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:8px;border-radius:16px;background:rgba(5,10,24,.84);border:1.5px solid rgba(223,234,255,.22);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s,transform .3s,visibility 0s .3s;max-width:min(860px,calc(100vw - 32px))}
 .fly-free-wp.on{opacity:1;visibility:visible;pointer-events:auto;transform:translate3d(-50%,0,0);transition:opacity .3s,transform .3s}
 .fly-free-wp button{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 13px;border:1.5px solid rgba(223,234,255,.24);border-radius:10px;background:rgba(255,255,255,.07);color:#eaf2ff;font:600 .8rem var(--f-mono,ui-monospace,monospace);letter-spacing:.03em;cursor:pointer;white-space:nowrap}
 .fly-free-wp button:hover{border-color:rgba(223,234,255,.7);background:rgba(255,255,255,.14)}
 .fly-free-wp button[aria-pressed="true"]{background:#eaf2ff;color:#0b1a3a;border-color:#eaf2ff}
+.fly-free-wp button.ff-train[aria-pressed="true"]{background:#ffd27a;border-color:#ffd27a;color:#050912}
 .fly-free-wp button.ff-snap{background:var(--accent);border-color:var(--accent);color:var(--accent-ink,#fff)}
 .fly-free-wp button.ff-snap svg{width:15px;height:15px}
 .fly-free-wp button:focus-visible{outline:3px solid #7fd3ff;outline-offset:2px}
-@media (prefers-reduced-motion:reduce){.fly-free-wp{transition:none}}
+.fly-map{position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:84px;z-index:6;width:220px;border-radius:16px;overflow:hidden;background:rgba(5,11,26,.92);border:1.5px solid rgba(127,211,255,.35);box-shadow:0 18px 42px -12px rgba(0,0,0,.6);opacity:0;visibility:hidden;pointer-events:none;transform:translate3d(-10px,0,0);transition:opacity .25s,transform .25s,visibility 0s .25s}
+.fly-map.on{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:opacity .25s,transform .25s}
+.fly-map .fm-head{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;border-bottom:1px solid rgba(127,211,255,.2);font:600 10px/1 var(--f-mono,monospace);letter-spacing:.1em;text-transform:uppercase;color:#ffd27a}
+.fly-map .fm-head span{color:#9db6dc}
+.fly-map canvas{display:block;width:220px;height:220px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.fly-free-wp,.fly-map{transition:none}}
 
 /* ---- TABLET HUD (701px..960px): prevent picker/compass and horizon/caption overlaps ---- */
 @media (min-width:701px) and (max-width:960px){

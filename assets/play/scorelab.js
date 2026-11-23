@@ -129,6 +129,7 @@
       var next = b.getAttribute('aria-pressed') !== 'true';
       s.setStem(b.dataset.slStem, next);
       b.setAttribute('aria-pressed', next ? 'true' : 'false');
+      if (window.FlightLog) window.FlightLog.unlock('scorelab');
     });
   });
 

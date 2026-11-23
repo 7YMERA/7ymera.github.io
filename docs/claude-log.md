@@ -27,6 +27,13 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-23 · Cosmic Warp Drive, Wide Outer KL Rails, Adaptive PERF Governor, Train-Cam, Transit Map, Monsoon Rain, Flight Log & Ctrl+K Palette
+
+- **Cosmic Warp Drive (`assets/home/gate.js`, `assets/home/home.css`, `index.html`):** removed `chess-grid.js` from the front page and replaced it with a Canvas2D cobalt/ice-white radial hyperspace warp tunnel that peaks at the Earth handoff and zooms the glassy `\7` logo (`.rv-gl.warp-zoom`) from deep space into place (`transform` + `opacity` only, reduced-motion safe).
+- **Wider KL Rail Network + Adaptive PERF Governor (`assets/scene.js`):** added a sweeping **Outer KL Metro Loop (`outerCurve`)** around the wider basin with Sentral and Ampang stations + express trains. Added a startup device tier (`low` / `mid` / `high` scaling DPR cap, tube segment counts, instanced arches/ties, train count, trails, and rain count) plus a live **FPS watchdog (`perfWatch`)** that automatically steps down DPR, hides trails, and halves sim cadence (`simSkip`) if frame time exceeds 31ms so phones and laptops never lag.
+- **Free-Fly Upgrades (`assets/scene.js`, `assets/scene.css`, `assets/sfx.js`):** added **Ride Train (Train-Cam)** riding live viaduct trains through the portal arches (tap again to cycle Sky-Line / Outer Metro / Helix Shuttle), toggleable **Interactive KL Transit Map** minimap (live train dots + tap-to-glide stations), and **Monsoon** rain toggle (GPU-light instanced camera-wrapped rain streaks + wet fog + gated Web Audio rain bed via `SFX.setRain()`).
+- **Cross-Site Flight Log Passport & Site-Wide `Ctrl+K` Palette (`assets/passport.js`, `assets/palette.js`, `assets/palette.css`):** 8 localStorage discovery stamps with unlock toasts, full Passport bay on `/play/#passport`, and a site-wide `Ctrl+K` / `⌘K` command palette loaded across Home, Portfolio, Lab, Play, Notes, and Flight. Key `20261123e`.
+
 ## 2026-11-23 · Epic KL viaduct railway, Free-Fly waypoints & postcard, Score Lab, Inspect Spec & 3 doors
 
 - **3D Railway rework (`assets/scene.js`):** replaced the thin 5-sided rail tubes and boxy stations with an architectural twin-rail KL viaduct (box-girder deck spine, dual parallel glowing maglev rails, under-deck soffit glow), sweeping multi-elevation `skyCurve`, instanced cross-ties, instanced overhead portal arches/gantries framing the drone chase, sculpted tapered viaduct pylons grounding both the ring and sky lines, ribbed vaulted stations with glowing platform safety edges, and kinetic slipstream light trails behind every train. Full Day / Golden / Night `SceneTime` harmony (no magenta/pink).

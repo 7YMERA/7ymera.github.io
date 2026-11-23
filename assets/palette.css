@@ -1,0 +1,76 @@
+/* palette.css: Site-wide Ctrl+K Command Palette & Flight Log Passport styles.
+   Only transform and opacity animate. High contrast in both light and dark themes. */
+.cmd-backdrop {
+  position: fixed; inset: 0; z-index: 1200; display: grid; place-items: start center;
+  padding: clamp(54px, 10vh, 110px) 16px 24px;
+  background: rgba(4, 9, 22, .68); opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity .18s ease, visibility 0s .18s;
+}
+.cmd-backdrop.open { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .18s ease; }
+.cmd-dlg {
+  width: min(640px, 100%); max-height: min(76svh, 640px); display: grid; grid-template-rows: auto 1fr auto;
+  border-radius: 18px; overflow: hidden;
+  background: var(--surface, #fff); color: var(--ink, #0b2a6b);
+  border: 2px solid var(--fx, #2aa6e8); box-shadow: 0 28px 70px -18px rgba(0, 0, 0, .55);
+  transform: translate3d(0, -10px, 0) scale(.98); transition: transform .2s ease;
+}
+.cmd-backdrop.open .cmd-dlg { transform: none; }
+:root[data-theme="dark"] .cmd-dlg { background: #0a1428; color: #eef5ff; border-color: rgba(127, 211, 255, .45); }
+.cmd-top { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line, rgba(120, 150, 190, .25)); }
+.cmd-top svg { width: 20px; height: 20px; color: var(--muted, #52636a); flex: none; }
+.cmd-in {
+  flex: 1; min-width: 0; border: 0; background: transparent; color: inherit;
+  font: 500 1rem/1.3 var(--f-body, system-ui); outline: none;
+}
+.cmd-in::placeholder { color: var(--muted, #6a7d96); }
+.cmd-esc {
+  padding: 4px 8px; border-radius: 6px; border: 1px solid var(--line, rgba(120, 150, 190, .35));
+  background: transparent; color: var(--muted, #52636a); font: 600 11px var(--f-mono, monospace); cursor: pointer;
+}
+.cmd-list { overflow-y: auto; padding: 10px; display: grid; gap: 4px; align-content: start; }
+.cmd-grp { margin: 10px 8px 4px; font: 600 11px/1 var(--f-mono, monospace); letter-spacing: .14em; text-transform: uppercase; color: var(--muted, #52636a); }
+.cmd-grp:first-child { margin-top: 2px; }
+.cmd-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;
+  min-height: 44px; padding: 9px 12px; border: 0; border-radius: 10px; background: transparent;
+  color: inherit; text-decoration: none; text-align: left; cursor: pointer; font: 500 .9375rem/1.25 var(--f-body, system-ui);
+}
+.cmd-item small { font: 500 .72rem var(--f-mono, monospace); color: var(--muted, #6a7d96); white-space: nowrap; }
+.cmd-item:hover, .cmd-item.on { background: color-mix(in srgb, var(--accent, #1559c9) 14%, transparent); }
+.cmd-item.on { outline: 1.5px solid var(--accent, #1559c9); outline-offset: -1.5px; }
+.cmd-empty { padding: 24px 12px; text-align: center; color: var(--muted, #6a7d96); font-size: .9rem; }
+.cmd-foot { padding: 10px 14px; border-top: 1px solid var(--line, rgba(120, 150, 190, .25)); background: color-mix(in srgb, var(--bg, #f3f6f6) 65%, transparent); }
+:root[data-theme="dark"] .cmd-foot { background: rgba(5, 10, 24, .65); }
+
+/* Flight Log Passport (both /play/ full card and Ctrl+K compact strip) */
+.fl-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.fl-eye { display: block; font: 600 11px/1 var(--f-mono, monospace); letter-spacing: .15em; text-transform: uppercase; color: var(--accent, #1559c9); }
+:root[data-theme="dark"] .fl-eye { color: #ffd27a; }
+.fl-head h3 { margin: 4px 0 0; font: 700 1.25rem/1.15 var(--f-display, system-ui); }
+.fl-badge { padding: 5px 11px; border-radius: 999px; border: 1.5px solid var(--line, rgba(120, 150, 190, .35)); font: 600 12px var(--f-mono, monospace); }
+.fl-badge b { color: var(--accent, #1559c9); }
+:root[data-theme="dark"] .fl-badge b { color: #ffd27a; }
+.fl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+.fl-stamp {
+  display: flex; align-items: flex-start; gap: 10px; padding: 11px 12px; border-radius: 12px;
+  border: 1px solid var(--line, rgba(120, 150, 190, .3)); background: var(--surface, #fff);
+  color: inherit; text-decoration: none; opacity: .66; transition: opacity .2s, border-color .2s;
+}
+:root[data-theme="dark"] .fl-stamp { background: rgba(255, 255, 255, .04); }
+.fl-stamp:hover { opacity: 1; border-color: var(--accent, #1559c9); }
+.fl-stamp.got { opacity: 1; border-color: color-mix(in srgb, var(--accent, #1559c9) 60%, transparent); }
+.fl-dot {
+  flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+  border: 1.5px solid var(--line, rgba(120, 150, 190, .4)); font: 700 11px var(--f-mono, monospace); color: var(--muted, #6a7d96);
+}
+.fl-stamp.got .fl-dot { background: var(--accent, #1559c9); border-color: var(--accent, #1559c9); color: #fff; }
+:root[data-theme="dark"] .fl-stamp.got .fl-dot { background: #ffd27a; border-color: #ffd27a; color: #050912; }
+.fl-stamp b { display: block; font: 600 .88rem/1.2 var(--f-display, system-ui); }
+.fl-stamp small { display: block; margin-top: 3px; font: 400 .76rem/1.35 var(--f-body, system-ui); color: var(--muted, #6a7d96); }
+[data-fl-compact] .fl-head { margin-bottom: 8px; }
+[data-fl-compact] .fl-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+[data-fl-compact] .fl-stamp { padding: 6px 8px; align-items: center; gap: 6px; }
+[data-fl-compact] .fl-stamp b { font-size: .72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+[data-fl-compact] .fl-dot { width: 16px; height: 16px; font-size: 9px; }
+@media (max-width: 600px) { [data-fl-compact] .fl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { .cmd-backdrop, .cmd-dlg { transition: none; } }

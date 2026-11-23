@@ -544,7 +544,7 @@
 
   /* ================= realtime wrapper ================= */
   var env = { T: root.getAttribute('data-theme') === 'light' ? 0 : (root.getAttribute('data-theme') ? 2 : 0), energy: .55, flight: 0, ctx: .78 };
-  var on = false, armed = false, ac = null, eng = null, fadeG = null, uiG = null, windG = null, windF = null, windL = null, an = null, timer = 0, vol = .75, lastGlyph = 0, lastTick = 0, started = 0, sawScene = false;
+  var on = false, armed = false, ac = null, eng = null, fadeG = null, uiG = null, windG = null, windF = null, windL = null, rainG = null, rainF = null, rainL = null, an = null, timer = 0, vol = .75, lastGlyph = 0, lastTick = 0, started = 0, sawScene = false;
   var LOOK = .5;
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -597,6 +597,12 @@
       windF = ac.createBiquadFilter(); windF.type = 'bandpass'; windF.frequency.value = 320; windF.Q.value = 1.5;
       windG = ac.createGain(); windG.gain.value = .0001; windL = mkLoop(ac, wBuf, windF, 1.5);   // runs only while the page is scrolling in the descent or flight
       windF.connect(windG); windG.connect(fadeG);
+      // Optional KL monsoon rain bed (off until toggled in Free Fly; zero CPU when stopped)
+      var rLen = ac.sampleRate * 2, rBuf = ac.createBuffer(1, rLen, ac.sampleRate), rData = rBuf.getChannelData(0);
+      for (var ri = 0; ri < rLen; ri++) rData[ri] = (Math.random() * 2 - 1) * .22;
+      rainF = ac.createBiquadFilter(); rainF.type = 'bandpass'; rainF.frequency.value = 1750; rainF.Q.value = .65;
+      rainG = ac.createGain(); rainG.gain.value = .0001; rainL = mkLoop(ac, rBuf, rainF, 1.8);
+      rainF.connect(rainG); rainG.connect(fadeG);
       var clip = ac.createWaveShaper(); clip.curve = new Float32Array([-.97, .97]);
       eng.out.connect(fadeG); uiG.connect(fadeG); fadeG.connect(clip); clip.connect(ac.destination);
       an = ac.createAnalyser(); an.fftSize = 256; an.smoothingTimeConstant = .78; clip.connect(an);
@@ -660,6 +666,12 @@
     stems: function () { return eng ? eng.stems() : { pad: true, bass: true, keys: true, lead: true, air: true, drums: true }; },
     setStem: function (k, v) { if (!on) set(true); if (eng && ac) eng.setStem(k, v, ac.currentTime); },
     setMood: function (t) { env.T = clamp(+t, 0, 2); if (!on) set(true); if (eng && ac) eng.ctrl(ac.currentTime); },
+    setRain: function (v) {
+      if (!ac || !rainG || !rainL) return;
+      var t = ac.currentTime, p = rainG.gain; p.cancelScheduledValues(t);
+      if (v && on) { rainL.on(t); p.setTargetAtTime(.18, t, .4); }
+      else { p.setTargetAtTime(.0001, t, .35); rainL.off(t + .9); }
+    },
     zone: function () { return zone; },
     cue: function (n) { d.dispatchEvent(new CustomEvent('sfx-cue', { detail: { name: n } })); },
     beep: function (f, len, type, v, slide) { tone(f, v || .04, len || .1, type || 'square', 0, slide); },

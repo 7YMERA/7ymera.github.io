@@ -335,20 +335,94 @@
       if (silent) ls('sfx-on', '0');
       ss('gate-seen', '1');
       try { d.dispatchEvent(new CustomEvent('sfx-cue', { detail: { name: 'gate' } })); } catch (e) { /* no sound */ }
-      rootEl.classList.add('leaving'); btn.disabled = true; if (nos) nos.disabled = true; status.textContent = silent ? 'SILENT' : 'GO';
-      if (reduce) { sweep(); return; }
+      rootEl.classList.add('leaving'); btn.disabled = true; if (nos) nos.disabled = true; status.textContent = silent ? 'SILENT' : 'WARP';
+      if (reduce) { rootEl.classList.add('fade'); later(function () { opened(); finish(); }, 420); return; }
       ringPulse(); tWarp = 1; kick();
-      later(glitchWord, 120);
-      later(sweep, 560);
+      later(glitchWord, 90);
+      later(warpDrive, 340);
     }
-    /* the chess grid covers the gate (navy and gold blocks slide in from the right), the page is set underneath (gate dismissed, the Earth handed to
-       the reveal), then the blocks sweep out to the left onto the \7 glass on the Earth. No grid script (or it throws): the old split seam. */
-    function sweep() {
-      if (!w.ChessGrid) { if (reduce) { rootEl.classList.add('fade'); later(function () { opened(); finish(); }, 420); } else split(); return; }
-      var m = innerWidth < 640;
-      try {
-        w.ChessGrid.play({ cols: m ? 6 : 8, color: '#040b1f', color2: '#0f2a5e', edge: 'rgba(255,210,122,.38)', duration: m ? .62 : .72, onCovered: function () { try { drawEarth(0); } catch (e) { /* ignore */ } opened(); finish(); } });
-      } catch (e) { if (w.console) console.warn(e); opened(); finish(); }
+    /* Cosmic Warp Drive: cobalt/ice-white radial hyperspace streaks blast outward from the centre,
+       peak as the gate hands the live Earth to orbit.js and zooms the glassy \7 logo from deep space into place, then dissolve. */
+    function warpDrive() {
+      var wc = d.createElement('canvas');
+      wc.className = 'gate-warp';
+      wc.setAttribute('aria-hidden', 'true');
+      wc.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:1002;pointer-events:none;';
+      d.body.appendChild(wc);
+      var wdpr = Math.min(w.devicePixelRatio || 1, innerWidth <= 820 ? 1.2 : 1.5);
+      var ww = Math.max(1, innerWidth), wh = Math.max(1, innerHeight);
+      wc.width = Math.round(ww * wdpr); wc.height = Math.round(wh * wdpr);
+      var g = wc.getContext('2d');
+      var cx = ww * .5, cy = wh * .5, maxR = Math.hypot(cx, cy) * 1.15;
+      var N = innerWidth <= 820 ? 120 : 210, streaks = [], i;
+      for (i = 0; i < N; i++) {
+        var ang = Math.random() * 6.2832;
+        var tier = Math.random();
+        streaks.push({
+          a: ang, r: Math.random() * maxR * .65 + 14, sp: .55 + Math.random() * 1.45,
+          w: tier > .85 ? 2.6 : (tier > .45 ? 1.5 : .9),
+          col: tier > .88 ? '#ffffff' : (tier > .72 ? '#bfe4ff' : (tier > .16 ? '#3b7cff' : '#ffd27a'))
+        });
+      }
+      var start = performance.now(), PEAK = 460, TOTAL = 1080, swapped = false;
+      function step(now) {
+        var el = now - start, k = clamp(el / TOTAL, 0, 1);
+        g.setTransform(wdpr, 0, 0, wdpr, 0, 0);
+        g.clearRect(0, 0, ww, wh);
+        var inPhase = clamp(el / PEAK, 0, 1);
+        var outPhase = clamp((el - PEAK) / (TOTAL - PEAK), 0, 1);
+        var speed = (1 - outPhase * .72) * (18 + inPhase * 42);
+        var alpha = el < PEAK ? Math.min(1, inPhase * 1.5) : (1 - outPhase * outPhase);
+
+        // Deep cobalt hyperspace tunnel vignette during ignition
+        if (alpha > .01) {
+          var bg = g.createRadialGradient(cx, cy, 8, cx, cy, maxR);
+          bg.addColorStop(0, 'rgba(6, 16, 48, ' + (alpha * .35).toFixed(3) + ')');
+          bg.addColorStop(.55, 'rgba(18, 52, 148, ' + (alpha * .52).toFixed(3) + ')');
+          bg.addColorStop(1, 'rgba(4, 10, 32, ' + (alpha * .82).toFixed(3) + ')');
+          g.fillStyle = bg; g.fillRect(0, 0, ww, wh);
+        }
+
+        g.lineCap = 'round';
+        for (i = 0; i < N; i++) {
+          var s = streaks[i];
+          s.r += s.sp * speed;
+          if (s.r > maxR) s.r = 10 + Math.random() * 60;
+          var len = Math.min(s.r * .78, (26 + s.sp * 88) * (el < PEAK ? (.45 + inPhase * .95) : (1.2 - outPhase * .75)));
+          var r0 = Math.max(4, s.r - len), ca = Math.cos(s.a), sa = Math.sin(s.a);
+          g.strokeStyle = s.col;
+          g.globalAlpha = clamp(alpha * (.35 + (s.r / maxR) * .65), 0, 1);
+          g.lineWidth = s.w * (.65 + (s.r / maxR) * .9);
+          g.beginPath(); g.moveTo(cx + ca * r0, cy + sa * r0); g.lineTo(cx + ca * s.r, cy + sa * s.r); g.stroke();
+        }
+        g.globalAlpha = 1;
+
+        // Crisp sapphire-white central warp flash right at the handoff
+        var flash = Math.exp(-Math.pow((el - PEAK) / 140, 2));
+        if (flash > .02) {
+          var fg = g.createRadialGradient(cx, cy, 0, cx, cy, maxR * .65);
+          fg.addColorStop(0, 'rgba(240, 248, 255, ' + (flash * .92).toFixed(3) + ')');
+          fg.addColorStop(.35, 'rgba(105, 178, 255, ' + (flash * .48).toFixed(3) + ')');
+          fg.addColorStop(1, 'rgba(10, 28, 86, 0)');
+          g.fillStyle = fg; g.fillRect(0, 0, ww, wh);
+        }
+
+        if (!swapped && el >= PEAK) {
+          swapped = true;
+          var rvGl = d.getElementById('rv-gl');
+          if (rvGl) {
+            rvGl.classList.remove('warp-zoom');
+            void rvGl.offsetWidth;
+            rvGl.classList.add('warp-zoom');
+          }
+          try { drawEarth(0); } catch (e) { /* ignore */ }
+          opened();
+          finish();
+        }
+        if (k < 1) requestAnimationFrame(step);
+        else { wc.width = wc.height = 0; wc.remove(); }
+      }
+      requestAnimationFrame(step);
     }
     function snapshot(cy) {   // freeze the current frame into two halves
       var src = cv;

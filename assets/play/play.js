@@ -88,8 +88,8 @@
     if (c.pick && c.view === 'arcade' && window.__arcade) window.__arcade.pick(c.pick);
     if (c.pick && c.view === 'halcyon' && window.__halcyon) window.__halcyon.pick(c.pick);
     if (c.view === 'glass') { var f = $('#glass-frame'); var th = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; f.title = c.title; f.src = (c.src || '/lab/glass.html') + '?embed=1&theme=' + th; }
-    if (c.view === 'sql') mountSql(c.sql);
-    if (c.view === 'egg') eggPaint();
+    if (c.view === 'sql') { mountSql(c.sql); if (window.FlightLog) window.FlightLog.unlock('sql'); }
+    if (c.view === 'egg') { eggPaint(); if (window.FlightLog) window.FlightLog.unlock('egg'); }
     d.dispatchEvent(new CustomEvent('play-view', { detail: { id: c.view === 'stack' ? 'stack' : c.view, cab: id } }));
     // let layout settle, then nudge the games to measure their canvases
     setTimeout(function () { try { dispatchEvent(new Event('resize')); } catch (e) { /* fine */ } }, 40);
