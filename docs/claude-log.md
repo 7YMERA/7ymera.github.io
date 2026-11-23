@@ -27,6 +27,13 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-23 · Cosmic Audio Revamp, Smoother Drone Pathing, Clickable Landmark Portals, Time-Lapse, Audio-Reactive Skyline & Live KL Weather
+
+- **Cosmic-Cinematic Audio Revamp (`assets/sfx.js`):** upgraded `epiano` (lush detuned cosmic pad with slow LPF shimmer), `lead` (crystalline airy saw+triangle voice with subtle stereo pan), `bell` (fifth-harmonic celestial chime), `bassNote` (warm deep sub-bass with filtered fifth), `hat` / `clap` / `kick` (softened, tighter cosmic pulse), while preserving the signature `"VOOOM"` descent cue (`E.descend`).
+- **Smoother Drone Pathing (`assets/scene.js`):** switched `rideP` and `rideT` in `buildRide()` to `centripetal` Catmull-Rom splines to eliminate corner overshoot; widened curvature/speed smoothing windows in `flightTabs()` (`16`/`14`) with gentler cinema bank (`±0.105`); softened `followCam` (`5.4`), `rideQ.slerp` (`4.0`), and scroll damping (`0.86`).
+- **Clickable Landmark Portals (`assets/scene.js`, `assets/scene.css`):** turned the 4 KL landmark HUD tags into interactive portal links with accent CTA pills — **Petronas Twin Towers** → `/portfolio/`, **Merdeka 118** → `/#projects` (smooth-scrolls when on Home), **Menara KL** → `/notes/`, and **The Exchange 106** → `/lab/` — clickable in both the drone flight and Free Fly (desktop & phone).
+- **24-Hour KL Time-Lapse, Audio-Reactive Skyline & Live KL Weather (`assets/scene.js`):** added a `Time-Lapse` toggle in Free Fly that orbits while smoothly sweeping `SceneTime` 0 → 2 → 0; added zero-allocation `audioReact()` modulating `railM2` and `gyroM` opacity from `SFX.analyser()` bass/treble; added silent Open-Meteo KL weather fetch (`3.1579, 101.7116`) populating `#cp-gps` (`KL LIVE · XX°C · CLEAR/RAIN`) and auto-enabling Monsoon Rain if raining in `Live KL` mode. Key `20261123f`.
+
 ## 2026-11-23 · Cosmic Warp Drive, Wide Outer KL Rails, Adaptive PERF Governor, Train-Cam, Transit Map, Monsoon Rain, Flight Log & Ctrl+K Palette
 
 - **Cosmic Warp Drive (`assets/home/gate.js`, `assets/home/home.css`, `index.html`):** removed `chess-grid.js` from the front page and replaced it with a Canvas2D cobalt/ice-white radial hyperspace warp tunnel that peaks at the Earth handoff and zooms the glassy `\7` logo (`.rv-gl.warp-zoom`) from deep space into place (`transform` + `opacity` only, reduced-motion safe).

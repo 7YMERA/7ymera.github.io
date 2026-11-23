@@ -194,50 +194,51 @@
     function padTo(t, vl, glide) { for (var v = 0; v < 4; v++) { var f = hz(vl[v]); padV[v][0].frequency.setTargetAtTime(f, t, glide); padV[v][1].frequency.setTargetAtTime(f, t, glide); } }
     function swTo(t, root, glide) { [0, 7, 16].forEach(function (iv, k) { var f = hz(root + 12 + iv); swO[k][0].frequency.setTargetAtTime(f, t, glide); swO[k][1].frequency.setTargetAtTime(f, t, glide); }); }
 
-    /* instruments (all take an explicit time) */
+    /* instruments (all take an explicit time) — tuned for a lush cosmic-cinematic Kuala Lumpur skyline vibe */
     function epiano(t, m, vel, pn, dur, b, soft) {
-      if (live > MAXLIVE) return; live++; var f = hz(m), cr = osc('sine', f), md = osc('sine', f), mg = g(0), tn = osc('sine', f * 2.01), tg = g(0), e = g(0), p = pan(pn);
-      var idx = f * (soft ? .7 : 1.5) * (.45 + .55 * (1 - env.T / 2.6)) * (.5 + vel);
-      mg.gain.setValueAtTime(idx, t); mg.gain.exponentialRampToValueAtTime(Math.max(1, idx * .08), t + .42);
-      tg.gain.setValueAtTime(.12 * vel, t); tg.gain.exponentialRampToValueAtTime(.0005, t + .25);
-      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .26, t + .005); e.gain.exponentialRampToValueAtTime(vel * .09, t + .5); e.gain.exponentialRampToValueAtTime(.0002, t + dur);
+      if (live > MAXLIVE) return; live++; var f = hz(m), cr = osc('triangle', f), md = osc('sine', f * 2), mg = g(0), tn = osc('sine', f * 3), tg = g(0), e = g(0), p = pan(pn);
+      var idx = f * (soft ? .45 : .95) * (.5 + .5 * (1 - env.T / 2.6)) * (.5 + vel);
+      mg.gain.setValueAtTime(idx, t); mg.gain.exponentialRampToValueAtTime(Math.max(1, idx * .05), t + .32);
+      tg.gain.setValueAtTime(.09 * vel, t); tg.gain.exponentialRampToValueAtTime(.0004, t + .22);
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .24, t + .004); e.gain.exponentialRampToValueAtTime(vel * .08, t + .42); e.gain.exponentialRampToValueAtTime(.0002, t + dur);
       md.connect(mg); mg.connect(cr.frequency); cr.connect(e); tn.connect(tg); tg.connect(e); e.connect(p); p.connect(b.in);
-      cr.onended = function () { live--; }; cr.start(t); md.start(t); tn.start(t); cr.stop(t + dur + .05); md.stop(t + dur + .05); tn.stop(t + .3);
+      cr.onended = function () { live--; }; cr.start(t); md.start(t); tn.start(t); cr.stop(t + dur + .05); md.stop(t + dur + .05); tn.stop(t + .28);
     }
-    var vib = osc('sine', 5.1), vibG = g(9); vib.connect(vibG); vib.start();
+    var vib = osc('sine', 4.6), vibG = g(7); vib.connect(vibG); vib.start();
     function lead(t, m, dur, vel, pn) {
-      if (live > MAXLIVE) return; live++; var f = hz(m), a = osc('triangle', f), b = osc('sawtooth', f), bg = g(.12), lp = flt('lowpass', 500, .6), e = g(0), p = pan(pn || 0);
-      a.detune.value = -5; b.detune.value = 6; var br = 900 + 2400 * (1 - env.T / 2.4);
-      lp.frequency.setValueAtTime(br * .45, t); lp.frequency.linearRampToValueAtTime(br, t + .18); lp.frequency.linearRampToValueAtTime(br * .6, t + dur);
-      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .2, t + .06); e.gain.setTargetAtTime(vel * .15, t + .08, .5); e.gain.setTargetAtTime(0, t + dur, .22);
+      if (live > MAXLIVE) return; live++; var f = hz(m), a = osc('sawtooth', f), b = osc('triangle', f * 2), bg = g(.16), lp = flt('lowpass', 620, .85), e = g(0), p = pan(pn || 0);
+      a.detune.value = -7; b.detune.value = 7; var br = 1200 + 2800 * (1 - env.T / 2.4);
+      lp.frequency.setValueAtTime(br * .38, t); lp.frequency.linearRampToValueAtTime(br, t + .22); lp.frequency.linearRampToValueAtTime(br * .55, t + dur);
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .21, t + .07); e.gain.setTargetAtTime(vel * .16, t + .09, .55); e.gain.setTargetAtTime(0, t + dur, .26);
       vibG.connect(a.detune); vibG.connect(b.detune); a.connect(lp); b.connect(bg); bg.connect(lp); lp.connect(e); e.connect(p); p.connect(bLead.in);
       a.onended = function () { live--; try { vibG.disconnect(a.detune); vibG.disconnect(b.detune); } catch (x) {} }; a.start(t); b.start(t); a.stop(t + dur + 1.4); b.stop(t + dur + 1.4);
     }
     function bell(t, m, vel, pn, dur, b) {
-      if (live > MAXLIVE) return; live++; var f = hz(m), e = g(0), p = pan(pn); dur = dur || 3;
-      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .16, t + .008); e.gain.exponentialRampToValueAtTime(.0002, t + dur);
-      [1, 2.76, 5.4].forEach(function (r, k) { var o = osc('sine', f * r), og = g([1, .32, .1][k]); o.connect(og); og.connect(e); if (k === 0) o.onended = function () { live--; }; o.start(t); o.stop(t + dur + .1); });
+      if (live > MAXLIVE) return; live++; var f = hz(m), e = g(0), p = pan(pn); dur = dur || 3.4;
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .18, t + .006); e.gain.exponentialRampToValueAtTime(.0002, t + dur);
+      [1, 2, 3.01].forEach(function (r, k) { var o = osc('sine', f * r), og = g([1, .35, .12][k]); o.connect(og); og.connect(e); if (k === 0) o.onended = function () { live--; }; o.start(t); o.stop(t + dur + .1); });
       e.connect(p); p.connect(b ? b.in : bKeys.in);
     }
     function bassNote(t, m, dur, vel) {
-      if (live > MAXLIVE) return; live++; var f = hz(m), a = osc('triangle', f), s = osc('sine', f), lp = flt('lowpass', 520 + 380 * (1 - env.T / 2), .5), e = g(0);
-      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .22, t + .012); e.gain.setTargetAtTime(vel * .13, t + .02, .12); e.gain.setTargetAtTime(0, t + dur, .06);
-      a.connect(lp); s.connect(lp); lp.connect(e); e.connect(bBass.in); a.onended = function () { live--; }; a.start(t); s.start(t); a.stop(t + dur + .4); s.stop(t + dur + .4);
+      if (live > MAXLIVE) return; live++; var f = hz(m), a = osc('sawtooth', f), s = osc('sine', f * .5), sg = g(.55), lp = flt('lowpass', 340 + 420 * (1 - env.T / 2), .7), e = g(0);
+      lp.frequency.setValueAtTime(680, t); lp.frequency.exponentialRampToValueAtTime(260 + 260 * (1 - env.T / 2), t + .28);
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .26, t + .01); e.gain.setTargetAtTime(vel * .16, t + .02, .14); e.gain.setTargetAtTime(0, t + dur, .07);
+      a.connect(lp); s.connect(sg); sg.connect(e); lp.connect(e); e.connect(bBass.in); a.onended = function () { live--; }; a.start(t); s.start(t); a.stop(t + dur + .45); s.stop(t + dur + .45);
     }
     function noiseHit(t, dur, dest, filt, vol, atk) {
       var s = ac.createBufferSource(); s.buffer = white; var e = g(0); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vol, t + (atk || .002)); e.gain.exponentialRampToValueAtTime(.0002, t + dur);
       s.connect(e); e.connect(filt || dest); if (filt) filt.connect(dest); s.start(t, Math.random() * 1.5); s.stop(t + dur + .02);
     }
-    var hatF = flt('highpass', 6800, .5), hatG = g(1), hatP = pan(.22); hatF.connect(hatG); hatG.connect(hatP); hatP.connect(bDr);
-    var hatB = flt('bandpass', 9500, .8); hatB.connect(hatF);
-    function hat(t, vel, open) { if (dlive > DMAX) return; dlive++; var s = ac.createBufferSource(); s.buffer = white; var e = g(0); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .22, t + .006); e.gain.exponentialRampToValueAtTime(.0002, t + (open ? .26 : .06)); s.connect(e); e.connect(hatB); s.onended = function () { dlive--; }; s.start(t, Math.random() * 1.5); s.stop(t + (open ? .3 : .1)); }
+    var hatF = flt('highpass', 7200, .5), hatG = g(1), hatP = pan(.22); hatF.connect(hatG); hatG.connect(hatP); hatP.connect(bDr);
+    var hatB = flt('bandpass', 10200, .85); hatB.connect(hatF);
+    function hat(t, vel, open) { if (dlive > DMAX) return; dlive++; var s = ac.createBufferSource(); s.buffer = white; var e = g(0); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .2, t + .005); e.gain.exponentialRampToValueAtTime(.0002, t + (open ? .24 : .05)); s.connect(e); e.connect(hatB); s.onended = function () { dlive--; }; s.start(t, Math.random() * 1.5); s.stop(t + (open ? .28 : .09)); }
     var clapF = flt('bandpass', 1500, .9), clapG = g(1); clapF.connect(clapG); clapG.connect(bDr); clapG.connect(drRev);
-    function clap(t, vel) { if (dlive > DMAX) return; dlive++; [0, .011, .022].forEach(function (o, k) { var s = ac.createBufferSource(); s.buffer = white; var e = g(0); e.gain.setValueAtTime(0, t + o); e.gain.linearRampToValueAtTime(vel * .26, t + o + .002); e.gain.exponentialRampToValueAtTime(.0002, t + o + (k === 2 ? .2 : .02)); s.connect(e); e.connect(clapF); if (k === 2) s.onended = function () { dlive--; }; s.start(t + o, Math.random() * 1.5); s.stop(t + o + .24); }); }
+    function clap(t, vel) { if (dlive > DMAX) return; dlive++; [0, .011, .022].forEach(function (o, k) { var s = ac.createBufferSource(); s.buffer = white; var e = g(0); e.gain.setValueAtTime(0, t + o); e.gain.linearRampToValueAtTime(vel * .24, t + o + .002); e.gain.exponentialRampToValueAtTime(.0002, t + o + (k === 2 ? .2 : .02)); s.connect(e); e.connect(clapF); if (k === 2) s.onended = function () { dlive--; }; s.start(t + o, Math.random() * 1.5); s.stop(t + o + .24); }); }
     function rim(t, vel) { if (dlive > DMAX) return; dlive++; var o = osc('triangle', 1750), e = g(0), bp = flt('bandpass', 2400, 2); o.frequency.setValueAtTime(1750, t); o.frequency.exponentialRampToValueAtTime(1180, t + .04); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .16, t + .001); e.gain.exponentialRampToValueAtTime(.0002, t + .07); o.connect(bp); bp.connect(e); e.connect(bDr); e.connect(drRev); o.onended = function () { dlive--; }; o.start(t); o.stop(t + .1); }
     function kick(t, vel) {
-      if (dlive > DMAX) return; dlive++; var o = osc('sine', 140), e = g(0); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(46, t + .11);
-      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .6, t + .003); e.gain.exponentialRampToValueAtTime(.0003, t + .42); o.connect(e); e.connect(bDr); o.onended = function () { dlive--; }; o.start(t); o.stop(t + .45);
-      var cf = flt('highpass', 1800); noiseHit(t, .012, bDr, cf, vel * .05); duckAt(t, .5 * vel);
+      if (dlive > DMAX) return; dlive++; var o = osc('sine', 155), e = g(0); o.frequency.setValueAtTime(155, t); o.frequency.exponentialRampToValueAtTime(42, t + .12);
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel * .66, t + .003); e.gain.exponentialRampToValueAtTime(.0003, t + .46); o.connect(e); e.connect(bDr); o.onended = function () { dlive--; }; o.start(t); o.stop(t + .49);
+      var cf = flt('highpass', 2200); noiseHit(t, .01, bDr, cf, vel * .05); duckAt(t, .56 * vel);
     }
     function riser(t, dur) {
       var s = ac.createBufferSource(); s.buffer = white; s.loop = true; var bp = flt('bandpass', 300, 1.2), e = g(0);

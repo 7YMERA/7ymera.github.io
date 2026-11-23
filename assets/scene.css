@@ -82,23 +82,27 @@ html.gl .enter{display:block;height:1320vh;position:relative} /* 1250vh of fligh
 .hud-ticks li.on i{background:var(--fx)}
 .hud-ticks li.on b{color:var(--ink)}
 .hud-sec{margin:0;max-width:170px;text-align:right;font:600 12px/1.25 var(--f-pix);letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
-.hud-tags{position:absolute;inset:0;overflow:hidden}
-.lm-tag{position:absolute;left:0;top:0;opacity:0;transition:opacity .4s;will-change:transform;pointer-events:none}
-.lm-tag.show{opacity:1}
+.hud-tags{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.lm-tag{position:absolute;left:0;top:0;opacity:0;transition:opacity .35s;will-change:transform;pointer-events:none;text-decoration:none;color:inherit;z-index:5}
+.lm-tag.show{opacity:1;pointer-events:auto;cursor:pointer}
 .lm-tag>*{position:absolute;white-space:nowrap}
-.lm-dot{left:-5px;top:-5px;width:10px;height:10px;border:2px solid var(--fx);background:var(--surface);transform:rotate(45deg)}
-.lm-tag b{left:16px;top:-46px;font:600 13px var(--f-pix);letter-spacing:.05em;color:var(--ink);background:var(--surface);border:2px solid var(--fx);padding:3px 8px}
-.lm-tag span{left:16px;top:-22px;font-size:11px;color:var(--muted);background:var(--surface);padding:1px 6px;border:1px solid var(--fx);border-top:0}
-.lm-tag::before{content:"";position:absolute;left:0;top:-46px;width:2px;height:46px;background:var(--fx)}
+.lm-dot{left:-5px;top:-5px;width:10px;height:10px;border:2px solid var(--fx);background:var(--surface);transform:rotate(45deg);transition:background-color .2s,border-color .2s}
+.lm-tag b{left:16px;top:-68px;font:600 13px var(--f-pix);letter-spacing:.05em;color:var(--ink);background:var(--surface);border:2px solid var(--fx);padding:3px 9px;box-shadow:3px 3px 0 var(--hard);transition:transform .18s ease}
+.lm-tag .lm-cta{left:16px;top:-40px;font-style:normal;font:700 11px/1.2 var(--f-mono,ui-monospace,monospace);letter-spacing:.03em;color:var(--accent-ink,#fff);background:var(--accent);border:1.5px solid var(--fx);padding:3px 9px;border-radius:4px;box-shadow:2px 2px 0 var(--hard);transition:transform .18s ease}
+.lm-tag span{left:16px;top:-15px;font-size:10.5px;color:var(--muted);background:var(--surface);padding:1px 6px;border:1px solid var(--fx);border-top:0}
+.lm-tag::before{content:"";position:absolute;left:0;top:-68px;width:2px;height:68px;background:var(--fx)}
+.lm-tag:hover .lm-dot,.lm-tag:focus-visible .lm-dot{background:var(--accent);border-color:var(--accent)}
+.lm-tag:hover b,.lm-tag:focus-visible b,.lm-tag:hover .lm-cta,.lm-tag:focus-visible .lm-cta{transform:translate3d(2px,-2px,0)}
+.lm-tag:focus-visible .lm-cta{outline:3px solid var(--accent);outline-offset:3px}
 @media (max-width:600px){
   .enter-sticky{padding:0 16px 32px}
   .ride-hint{right:16px;bottom:196px;top:auto}
   .fly-skip{left:14px;top:auto;bottom:196px;min-height:44px;padding:8px 14px;font-size:14px}
   .hud-side{right:14px}.hud-sec,.hud-ticks b{display:none}.hud-read{font-size:12px;padding:3px 8px}
   .hud-rail{height:30vh}
-  .lm-tag b{font-size:11px;padding:2px 6px;top:-40px}.lm-tag span{display:none}.lm-tag::before{height:40px;top:-40px}
+  .lm-tag b{font-size:11px;padding:2px 6px;top:-58px}.lm-tag .lm-cta{font-size:10px;padding:3px 7px;top:-33px}.lm-tag span{display:none}.lm-tag::before{height:58px;top:-58px}
 }
-@media (prefers-reduced-motion:reduce){.ride-cap,.hud,.lm-tag{transition:none}}
+@media (prefers-reduced-motion:reduce){.ride-cap,.hud,.lm-tag,.lm-tag b,.lm-tag .lm-cta{transition:none}}
 
 /* ---- Notes pages: the same blues, a still picture of the city behind the article ----
    (The notes pages only load site.css and this file; the 3D scene itself runs on the home page and /flight/.) */
@@ -414,7 +418,7 @@ html.home-ds.drone-ready .hud-tog{opacity:1;visibility:visible;transition:opacit
   .hud-tog{right:12px;top:72px;width:48px;min-height:48px;padding:0;justify-content:center;gap:0;border-radius:12px}
   .hud-tog b{display:none}
   .hud-tog svg{width:24px;height:24px}
-  .lm-tag b{font-size:11px;padding:2px 6px;top:-40px}.lm-tag span{display:none}.lm-tag::before{height:40px;top:-40px}
+  .lm-tag b{font-size:11px;padding:2px 6px;top:-58px}.lm-tag .lm-cta{font-size:10px;padding:3px 7px;top:-33px}.lm-tag span{display:none}.lm-tag::before{height:58px;top:-58px}
   .lm-tag.flip>*{left:auto;right:16px}
   /* bottom control row */
   .fly-skip{left:14px;top:auto;bottom:var(--rb);min-height:44px;padding:0 16px;font-size:14px}

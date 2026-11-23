@@ -226,10 +226,10 @@
   // and a radar ring that sweeps out from the Petronas Towers. Light mode uses normal blending, dark mode adds the light on.
   var KU=3.42; // metres per world unit (Petronas Towers 132 units = about 452 m)
   var LM=[
-    {name:'Petronas Twin Towers',real:452,top:new T.Vector3(crown('klcc')[0],134,crown('klcc')[1])},
-    {name:'Merdeka 118',real:679,top:new T.Vector3(crown('mer')[0],194,crown('mer')[1])},
-    {name:'Menara Kuala Lumpur',real:421,top:new T.Vector3(crown('kl')[0],DIST?127:130,crown('kl')[1])},
-    {name:'The Exchange 106',real:445,top:new T.Vector3(crown('ex')[0],DIST?132:136,crown('ex')[1])}]; // tops derived from LAY (crown axis, height as before)
+    {name:'Petronas Twin Towers',real:452,top:new T.Vector3(crown('klcc')[0],134,crown('klcc')[1]),cta:'Check out my Portfolio ↗',href:'/portfolio/'},
+    {name:'Merdeka 118',real:679,top:new T.Vector3(crown('mer')[0],194,crown('mer')[1]),cta:'Projects & Specs ↗',href:'/#projects'},
+    {name:'Menara Kuala Lumpur',real:421,top:new T.Vector3(crown('kl')[0],DIST?127:130,crown('kl')[1]),cta:'Notes & Write-ups ↗',href:'/notes/'},
+    {name:'The Exchange 106',real:445,top:new T.Vector3(crown('ex')[0],DIST?132:136,crown('ex')[1]),cta:'Open the Lab ↗',href:'/lab/'}]; // tops derived from LAY (crown axis, height as before)
   var fx=[],fxGroup=new T.Group();scene.add(fxGroup);
   function fade(){var c=document.createElement('canvas');c.width=4;c.height=64;var x=c.getContext('2d'),gr=x.createLinearGradient(0,64,0,0);
     gr.addColorStop(0,'#fff');gr.addColorStop(.35,'#9a9a9a');gr.addColorStop(1,'#000');x.fillStyle=gr;x.fillRect(0,0,4,64);return new T.CanvasTexture(c)}
@@ -638,10 +638,10 @@
     beaconK=nn('beacon');
     // rail, stations, trains, the light layer
     setAdd(add);
-    railM.color.copy(cmix('rail'));railM2.color.copy(CC.rail);railM2.opacity=nn('railO2');deckM.color.copy(cmix('deck'));portalM.color.copy(cmix('portal'));trailM.color.copy(cmix('trail'));trailM.opacity=nn('trailO');pillarM.color.copy(cmix('pillar'));stLampM.color.copy(CC.rail);stPlatM.color.copy(cmix('stPlat'));stPostM.color.copy(cmix('stPost'));
+    railM.color.copy(cmix('rail'));railM2.color.copy(CC.rail);baseRailO2=railM2.opacity=nn('railO2');deckM.color.copy(cmix('deck'));portalM.color.copy(cmix('portal'));trailM.color.copy(cmix('trail'));trailM.opacity=nn('trailO');pillarM.color.copy(cmix('pillar'));stLampM.color.copy(CC.rail);stPlatM.color.copy(cmix('stPlat'));stPostM.color.copy(cmix('stPost'));
     stCanM.color.copy(cmix('stCan'));stCanM.opacity=nn('stCanO');carBodyM.color.copy(cmix('carBody'));carWinM.color.copy(cmix('carWin'));carStripeM.color.copy(cmix('carStripe'));
     headGlowM.color.copy(cmix('headGlow'));headGlowM.opacity=nn('headO');tailGlowM.opacity=nn('tailO');
-    gyroM.color.copy(cmix('gyro'));gyroM.opacity=nn('gyroO');
+    gyroM.color.copy(cmix('gyro'));baseGyroO=gyroM.opacity=nn('gyroO');
     cmix('line');beamM.color.copy(CC.line);beamM.opacity=nn('beamO');haloM.color.copy(CC.line);haloM.opacity=nn('haloO');radarM.color.copy(CC.line);polyM.color.copy(CC.line);polyM.opacity=nn('polyO');linkM.color.copy(CC.line);linkM.opacity=nn('linkO');pulseM.color.copy(cmix('pulse'));
     if(cssOn)queueCss()}
   // SceneTime listener: remember that t changed, draw on the next frame; and (pages that do not run <html data-daycycle>) keep data-theme in step so the page's own dark rules follow: dark from t 1.5.
@@ -678,8 +678,21 @@
     set(st==='1',false);b.addEventListener('click',function(){set(!rt.classList.contains('hud-off'),true)});host.appendChild(b)})();
   var again=document.getElementById('fly-again'),DBGCR=/[?&]dbg/.test(location.search);
   var freeBtn=null,freeHint=null,freeTime=null,freeWp=null,flyMap=null,flyMapCv=null,flyMapOn=false,flyMapAt=0;
-  var freeOn=false,freeDrag=false,freeLx=0,freeLy=0,fKeys={},trainCamOn=false,trainCamIdx=0,trainBtn=null,rainBtn=null,mapBtn=null;
+  var freeOn=false,freeDrag=false,freeLx=0,freeLy=0,fKeys={},trainCamOn=false,trainCamIdx=0,trainBtn=null,rainBtn=null,mapBtn=null,lapseOn=false,lapseBtn=null,lapsePhase=0,klWx='';
+  // Silent live Kuala Lumpur weather telemetry (zero API key, graceful offline fallback)
+  (function(){if(!window.fetch)return;fetch('https://api.open-meteo.com/v1/forecast?latitude=3.1579&longitude=101.7116&current=temperature_2m,rain,weather_code').then(function(r){return r.ok?r.json():null}).then(function(d){
+    if(!d||!d.current)return;var temp=Math.round(d.current.temperature_2m),wet=(d.current.rain||0)>0||(d.current.weather_code>=51);
+    klWx='KL LIVE · '+temp+'°C · '+(wet?'RAIN':'CLEAR');
+    if(cp&&cp.gps)cp.gps.textContent=klWx;
+    if(wet&&freeOn&&!rainOn&&window.TimeOfDay&&TimeOfDay.current&&TimeOfDay.current()==='live')setRain(true);
+  }).catch(function(){})})();
   var freeState={a:48*Math.PI/180,ta:48*Math.PI/180,y:112,ty:112,r:280,tr:280,cx:0,tcx:0,cz:-40,tcz:-40,cy:72,tcy:72};
+  function setLapse(v){
+    lapseOn=!!v;
+    if(lapseBtn)lapseBtn.setAttribute('aria-pressed',lapseOn?'true':'false');
+    if(lapseOn)lapsePhase=ST.get()*.5;
+    need=true;
+  }
   function setTrainCam(v,cycle){
     if(cycle&&trainCamOn){trainCamIdx=(trainCamIdx+1)%Math.min(3,trains.length);if(trainBtn){var s2=trainBtn.querySelector('span');if(s2)s2.textContent=trains[trainCamIdx].name||'Ride Train'}return}
     trainCamOn=!!v;
@@ -734,7 +747,7 @@
     if(freeBtn){freeBtn.setAttribute('aria-pressed',v?'true':'false');var b=freeBtn.querySelector('b');if(b)b.textContent=v?'Resume scroll':'Take control · Free fly'}
     if(freeHint)freeHint.classList.toggle('on',v);if(freeTime)freeTime.classList.toggle('on',v);if(freeWp)freeWp.classList.toggle('on',v);
     if(flyMap)flyMap.classList.toggle('on',v&&flyMapOn);
-    if(!v){fKeys={};setTrainCam(false);setRain(false)}
+    if(!v){fKeys={};setTrainCam(false);setRain(false);setLapse(false)}
     if(v&&!ONLY&&scrollY>pinEnd()-2){var se=document.documentElement.style,sb=se.scrollBehavior;se.scrollBehavior='auto';scrollTo(0,pinEnd()-Math.round(.35*BUFV*innerHeight));se.scrollBehavior=sb} // back onto the pinned stage before the page locks
     if(v){
       if(window.FlightLog)window.FlightLog.unlock('freefly');
@@ -787,12 +800,12 @@
       freeHint.innerHTML='<span class="ffk"><kbd>W</kbd><span><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span></span><span class="ffl"><b>Move</b>forward, left, back, right</span><span class="ffk"><span><kbd>Q</kbd><kbd>E</kbd></span></span><span class="ffl"><b>Down / up</b>Shift to go faster</span><span class="ffk"><kbd class="wide">Drag</kbd></span><span class="ffl"><b>Look round</b>arrows turn too, wheel zooms</span><span class="ffk"><kbd class="wide">Esc</kbd></span><span class="ffl"><b>Back to the film</b></span>';
       parent.insertBefore(freeHint,freeBtn.nextSibling);
       freeTime=document.createElement('div');freeTime.className='fly-free-time';freeTime.setAttribute('role','group');freeTime.setAttribute('aria-label','Time of day');
-      [['day','Day'],['golden','Golden hour'],['night','Night'],['live','Live KL']].forEach(function(m){var b=document.createElement('button');b.type='button';b.dataset.m=m[0];b.innerHTML='<i class="fft-'+m[0]+'" aria-hidden="true"></i><span>'+m[1]+'</span>';b.addEventListener('click',function(){if(window.TimeOfDay)TimeOfDay.choose(m[0]);else ST.mode(m[0]==='live'?'day':m[0])});freeTime.appendChild(b)});
+      [['day','Day'],['golden','Golden hour'],['night','Night'],['live','Live KL']].forEach(function(m){var b=document.createElement('button');b.type='button';b.dataset.m=m[0];b.innerHTML='<i class="fft-'+m[0]+'" aria-hidden="true"></i><span>'+m[1]+'</span>';b.addEventListener('click',function(){setLapse(false);if(window.TimeOfDay)TimeOfDay.choose(m[0]);else ST.mode(m[0]==='live'?'day':m[0])});freeTime.appendChild(b)});
       function ftSync(){var n=ST.nearest(),bs=freeTime.querySelectorAll('button');for(var q=0;q<bs.length;q++)bs[q].setAttribute('aria-pressed',bs[q].dataset.m===n?'true':'false')}
       document.addEventListener('scenetime',ftSync);ftSync();
       parent.insertBefore(freeTime,freeHint.nextSibling);
-      // Waypoints, Train-Cam, Transit Map, Monsoon Rain & Postcard bar
-      freeWp=document.createElement('div');freeWp.className='fly-free-wp';freeWp.setAttribute('role','group');freeWp.setAttribute('aria-label','Camera waypoints, train cam, map, rain and postcard');
+      // Waypoints, Train-Cam, Transit Map, Monsoon Rain, Time-Lapse & Postcard bar
+      freeWp=document.createElement('div');freeWp.className='fly-free-wp';freeWp.setAttribute('role','group');freeWp.setAttribute('aria-label','Camera waypoints, train cam, map, rain, time-lapse and postcard');
       var WPS=[
         {id:'sky',n:'Skyline',cx:function(){return GC[0]},cz:function(){return GC[1]},cy:78,a:58,r:290,y:125},
         {id:'klcc',n:'Skybridge',cx:function(){return 0},cz:function(){return 0},cy:58,a:48,r:108,y:66},
@@ -822,6 +835,10 @@
       rainBtn.textContent='Monsoon';
       rainBtn.addEventListener('click',function(){setRain(!rainOn)});
       freeWp.appendChild(rainBtn);
+      lapseBtn=document.createElement('button');lapseBtn.type='button';lapseBtn.setAttribute('aria-pressed','false');
+      lapseBtn.textContent='Time-Lapse';
+      lapseBtn.addEventListener('click',function(){setLapse(!lapseOn)});
+      freeWp.appendChild(lapseBtn);
       var snapBtn=document.createElement('button');snapBtn.type='button';snapBtn.className='ff-snap';
       snapBtn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Postcard</span>';
       snapBtn.addEventListener('click',function(){capturePostcard(snapBtn)});
@@ -1084,8 +1101,8 @@
     root.classList.toggle('home-ds',PREL); // front page: the drone's chrome is held back until html.drone-ready (scene.css)
     buildKF();var n=KF.length,i,nP=0;
     if(PREL)for(i=0;i<n;i++)if(KF[i][0]==='start'){nP=i;break}
-    rideP=new T.CatmullRomCurve3(KF.map(function(k){return k[1]}),false,'catmullrom',.5);
-    rideT=new T.CatmullRomCurve3(KF.map(function(k){return k[2]}),false,'catmullrom',.5); // same knot spacing as the camera path, so the two stay in step
+    rideP=new T.CatmullRomCurve3(KF.map(function(k){return k[1]}),false,'centripetal');
+    rideT=new T.CatmullRomCurve3(KF.map(function(k){return k[2]}),false,'centripetal'); // centripetal spline avoids tight-corner overshoot and keeps camera & look target smoothly in step
     // Scroll share of each stretch = its length x its slow factor, so the speed is even and slow where we want to look.
     // With the overhead opening (nP > 0) the stretches before 'start' get their own fixed share of the scroll (they are laid on the page: a hold while the sky stage scrolls away, then the fall), and the flight keeps the length it always had.
     var share=[],tot=0,a,b,k,len,sp=[],preSpan=0,Sf;
@@ -1127,15 +1144,24 @@
       var cr2=(la>1e-4&&lb>1e-4)?(a.z*b.x-a.x*b.z)/(la*lb):0; // sin of the heading change; > 0 is a turn to the left
       kap.push(Math.asin(clamp(cr2,-1,1))/ds);spd.push(V.copy(P[i1]).sub(P[i0]).length()/((i1-i0)*HOLD0/NT))}
     function smooth(arr,w){var o=[];for(var i=0;i<arr.length;i++){var s=0,n=0;for(var j=-w;j<=w;j++){var k=i+j;if(k>=0&&k<arr.length){var wt=w+1-Math.abs(j);s+=arr[k]*wt;n+=wt}}o.push(s/n)}return o}
-    var iS=Math.min(NT-1,Math.ceil(CS0/HOLD0*NT-1e-6)),kS=smooth(kap,10),sS=smooth(spd,8),sorted=sS.slice(iS).sort(function(x,y){return x-y}),nS=sorted.length-1,lo=sorted[Math.floor(nS*.15)],hi=sorted[Math.floor(nS*.92)]; // iS: the first sample of the drone flight proper (the overhead fall before it has no bank and no lens stretch)
-    for(i=0;i<=NT;i++){var pre=iS===0?1:i<iS?0:clamp((i-iS)/6,0,1);bankTab[i]=clamp(kS[i]*9,-.13,.13)*pre; // 0.0125 per unit (a circle of radius 80) leans about 14 degrees; at most 18
+    var iS=Math.min(NT-1,Math.ceil(CS0/HOLD0*NT-1e-6)),kS=smooth(kap,16),sS=smooth(spd,14),sorted=sS.slice(iS).sort(function(x,y){return x-y}),nS=sorted.length-1,lo=sorted[Math.floor(nS*.15)],hi=sorted[Math.floor(nS*.92)]; // iS: the first sample of the drone flight proper (the overhead fall before it has no bank and no lens stretch)
+    for(i=0;i<=NT;i++){var pre=iS===0?1:i<iS?0:clamp((i-iS)/6,0,1);bankTab[i]=clamp(kS[i]*8,-.105,.105)*pre; // gentle cinema bank into turns, capped at ~12 deg
       var sp=clamp((sS[i]-lo)/Math.max(1e-6,hi-lo),0,1);fovTab[i]=i<iS?0:9*sp*sp*(3-2*sp)}
     bankTab[0]=0;bankTab[NT]=0;fovTab[NT]=0;for(i=iS;i<=iS+4&&i<=NT;i++)fovTab[i]=fovTab[i]*(i-iS)/4}
   function rollAt(u){return 0; /* no barrel roll: the owner tried it twice and turned it off twice. Do not turn it back on unless asked. The drone still banks into turns. */var n=rollK.length;if(n<2)return 0;var f=clamp(u,0,1)*(n-1),i=Math.min(n-2,Math.floor(f)),t=f-i;t=t*t*(3-2*t);return rollK[i]+(rollK[i+1]-rollK[i])*t}
   // ---- HUD (DOM) ----
   var hud=document.getElementById('hud'),hTags=[],hAlt=document.getElementById('h-alt'),hSec=document.getElementById('h-sec'),hFill=document.getElementById('h-fill'),hTicks=[],hLast=-1,hSecLast=-1;
-  if(hud){var tg=hud.querySelector('.hud-tags');LM.forEach(function(l){var e=document.createElement('div');e.className='lm-tag';
-    e.innerHTML='<i class="lm-dot"></i><b></b><span></span>';e.querySelector('b').textContent=l.name;tg.appendChild(e);hTags.push(e)})}
+  if(hud){var tg=hud.querySelector('.hud-tags');LM.forEach(function(l){var e=document.createElement('a');e.className='lm-tag';e.href=l.href||'/portfolio/';
+    e.setAttribute('aria-label',l.name+' — '+(l.cta||'Explore'));
+    e.innerHTML='<i class="lm-dot"></i><b></b><em class="lm-cta"></em><span></span>';
+    e.querySelector('b').textContent=l.name;
+    var cta=e.querySelector('.lm-cta');if(cta)cta.textContent=l.cta||'Explore ↗';
+    e.addEventListener('pointerenter',function(){if(window.SFX&&SFX.tick)SFX.tick()});
+    e.addEventListener('click',function(ev){
+      if(window.SFX&&SFX.tick)SFX.tick();
+      if(l.href==='\/#projects'){var pj=document.getElementById('projects');if(pj){ev.preventDefault();setFree(false);pj.scrollIntoView({behavior:reduce?'auto':'smooth'})}}
+    });
+    tg.appendChild(e);hTags.push(e)})}
   function hudBuild(){
     if(!hud)return;var rail=hud.querySelector('.hud-ticks');if(!rail)return;rail.textContent='';hTicks=[];
     for(var i=0;i<CAPS.length;i++){var e=document.createElement('li');e.style.top=(clamp((KI[CAPS[i][0]]-CS0)/(HOLD0-CS0),0,1)*100)+'%';e.innerHTML='<i></i><b>'+('0'+(i+1)).slice(-2)+'</b>';rail.appendChild(e);hTicks.push(e)}}
@@ -1158,7 +1184,7 @@
       '<div class="cp-id"><b>DRONE-01</b><span>FPV &middot; STAB ON</span><span id="cp-gps">GPS &#9679; 14 SAT</span></div>'+
       '<div class="cp-rec"><span class="cp-dot2"></span><b id="cp-rec">REC 00:00</b><span class="cp-batt"><i id="cp-batt"></i></span><small id="cp-bat">100%</small></div>';
     hud.appendChild(w);cp.track=w.querySelector('.cp-track');cp.hdg=w.querySelector('#cp-hdg');cp.spd=w.querySelector('#cp-spd');cp.vs=w.querySelector('#cp-vs');cp.hz=w.querySelector('#cp-hz');
-    cp.rec=w.querySelector('#cp-rec');cp.batt=w.querySelector('#cp-batt');cp.bat=w.querySelector('#cp-bat');cp.gps=w.querySelector('#cp-gps');cp.ready=true}
+    cp.rec=w.querySelector('#cp-rec');cp.batt=w.querySelector('#cp-batt');cp.bat=w.querySelector('#cp-bat');cp.gps=w.querySelector('#cp-gps');if(klWx&&cp.gps)cp.gps.textContent=klWx;cp.ready=true}
   var cpTick=0;
   function cockpitUpdate(c,time){
     if(!cp.ready)return;
@@ -1197,7 +1223,7 @@
       if(sv!==e.classList.contains('show'))e.classList.toggle('show',sv);
       if(sv){e.style.transform='translate3d('+((px_[k]*.5+.5)*W).toFixed(1)+'px,'+((-py_[k]*.5+.5)*Hh).toFixed(1)+'px,0)';
         var fl=ph&&px_[k]>0;if(fl!==e.classList.contains('flip'))e.classList.toggle('flip',fl); // near the right edge the label hangs to the left of its pin
-        if(tick%8===0)e.lastChild.textContent=Math.round(LM[k].real)+' m · '+Math.round(ds_[k]*KU/10)*10+' m away'}}}
+        if(tick%8===0){var sp=e.querySelector('span');if(sp)sp.textContent=Math.round(LM[k].real)+' m · '+Math.round(ds_[k]*KU/10)*10+' m away'}}}}
   var tick=0,droneReady=false;
   // the lead-in sections show their label while they are on screen
   if('IntersectionObserver' in window){var stObs=new IntersectionObserver(function(es){es.forEach(function(e){e.target.classList.toggle('on',e.isIntersecting&&e.intersectionRatio>.55)})},{threshold:[0,.55,1]});document.querySelectorAll('.stage').forEach(function(el){stObs.observe(el)})}
@@ -1207,10 +1233,23 @@
   // This follower is the only thing that actually moves it: position, rotation, lens and the sideways push all chase their target
   // with the same short lag and a top speed, so a change between the two systems (or anything else) can never show as a snap.
   var fInit=true,fP=new T.Vector3(),fQ=new T.Quaternion(),fF=42,fX=0,fY=0,fD=new T.Vector3();
+  var baseRailO2=.32,baseGyroO=.45,audBuf=null;
+  function audioReact(){
+    if(reduce||!window.SFX||!SFX.on||!SFX.analyser)return;
+    var an=SFX.analyser();if(!an)return;
+    if(!audBuf||audBuf.length!==an.frequencyBinCount)audBuf=new Uint8Array(an.frequencyBinCount);
+    an.getByteFrequencyData(audBuf);
+    var lo=0,hi=0,i;
+    for(i=0;i<8&&i<audBuf.length;i++)lo+=audBuf[i];
+    for(i=16;i<32&&i<audBuf.length;i++)hi+=audBuf[i];
+    var bass=lo/(8*255),treb=hi/(16*255);
+    railM2.opacity=clamp(baseRailO2+bass*.32,0,1);
+    gyroM.opacity=clamp(baseGyroO+treb*.35,0,1);
+  }
   function followCam(dt){
     var vo=cam.view,ox=vo&&vo.enabled?vo.offsetX:0,oy=vo&&vo.enabled?vo.offsetY:0;
     if(fInit||reduce){fP.copy(cam.position);fQ.copy(cam.quaternion);fF=cam.fov;fX=ox;fY=oy;fInit=false;return}
-    var k=1-Math.exp(-dt*7),L=fD.copy(cam.position).sub(fP).length();
+    var k=1-Math.exp(-dt*5.4),L=fD.copy(cam.position).sub(fP).length();
     if(L>1e-6)fP.addScaledVector(fD,Math.min(L*k,700*dt)/L);
     fQ.slerp(cam.quaternion,k);fF+=(cam.fov-fF)*k;fX+=(ox-fX)*k;fY+=(oy-fY)*k;
     cam.position.copy(fP);cam.quaternion.copy(fQ);
@@ -1221,6 +1260,11 @@
     var inRide=cr>.0004&&!!rideP;
     var fc=fr(cr),rMid=inRide&&!freeOn&&fc>.05&&fc<.9;if(rMid!==root.classList.contains('ride-mid'))root.classList.toggle('ride-mid',rMid); // the view picker steps aside mid-flight so the landmark labels at the top of the HUD stay readable (timeofday.css)
     if(freeOn){
+      if(lapseOn&&!reduce){
+        lapsePhase=(lapsePhase+dtF*.05)%2;
+        ST.set(lapsePhase<=1?lapsePhase*2:(2-lapsePhase)*2);
+        if(!freeDrag&&!trainCamOn)freeState.ta+=dtF*.16;
+      }
       if(trainCamOn&&trains[trainCamIdx]){
         // Train-Cam ("Ride the Sky-Rail"): perch just above the lead cab looking forward along the viaduct through the glowing portal arches
         var trR=trains[trainCamIdx];
@@ -1273,10 +1317,10 @@
       var ke=KI['sweep1']!=null?KI['sweep1']:(KI['pass']!=null?KI['pass']:.7),ke2=KI['end']||HOLD0,fs=clamp((cr-ke-.4*(ke2-ke))/(.6*(ke2-ke)),0,1);fs=fs*fs*(3-2*fs);
       var kk=Math.sin(Math.PI*clamp((cr-CS0)/.07,0,1)),fv=42+(mobile?30:10)*fs+26*kk*kk+(reduce?0:tabAt(fovTab,cr)*(1-fs)*(1-kk*kk)); /* speed feel: up to +9 degrees of lens in the fast beats, none at the start, in the finale or in reduced motion */ /* kk: a gentle push-in that starts and ends at the normal lens, so entering the flight never snaps */if(Math.abs(fv-cam.fov)>.01){cam.fov=fv;cam.updateProjectionMatrix()}
       if(scene.fog){scene.fog.near=fogN0+260*fs;scene.fog.far=fogF0+560*fs}
-      // Ease the rotation: the view turns towards where it should look with a short lag (time constant about 0.2 s), so a sharp
+      // Ease the rotation: the view turns towards where it should look with a short lag (time constant about 0.25 s), so a sharp
       // turn in the route can never show as a jolt. Reset when the flight starts, and when snapping.
-      if(!rideQ)rideQ=cam.quaternion.clone();else{rideQ.slerp(cam.quaternion,reduce?1:1-Math.exp(-dtF*5));cam.quaternion.copy(rideQ)}
-      // lean into turns like a drone: the bank follows the path's horizontal curvature (table made in buildRide, at most 18 degrees), eased; none in reduced motion
+      if(!rideQ)rideQ=cam.quaternion.clone();else{rideQ.slerp(cam.quaternion,reduce?1:1-Math.exp(-dtF*4.0));cam.quaternion.copy(rideQ)}
+      // lean into turns like a drone: the bank follows the path's horizontal curvature (table made in buildRide, at most 12 degrees), eased; none in reduced motion
       roll+=((reduce?0:tabAt(bankTab,cr))-roll)*(1-Math.exp(-dtF*3));cam.rotateZ(roll*(1-fs)+rollAt(u)); // drone bank into turns, the scripted barrel roll, and a level horizon for the finale
       hudUpdate(true,u,cr)
     }else{
@@ -1291,7 +1335,7 @@
     if(spin&&sH){var sy=scrollY-(sTop-innerHeight),sf=sy/Math.max(1,sH),sOn=sf>.18&&sf<.95;if(sOn!==spin.classList.contains('on'))spin.classList.toggle('on',sOn)} // the coordinates tag
     ringUpdate(time,inRide);
     orb.rotation.y=time*.0004;ring.rotation.z=time*.0006;orb.position.y=230+Math.sin(time*.0009)*3;
-    specks.rotation.y=time*.00003;fxUpdate(time,reduce);sciUpdate(time,reduce,inRide);rainUpdate(dtF);drawTransitMap(time)}
+    specks.rotation.y=time*.00003;fxUpdate(time,reduce);sciUpdate(time,reduce,inRide);rainUpdate(dtF);audioReact();drawTransitMap(time)}
   var raf=0,run=true,last=0,lastR=0;
   function snap(){fInit=true;rideQ=null;curPose=tgtPose.slice();cr=tr;px=tx;vr.v=vx.v=0;vPose.forEach(function(v){v.v=0})}
   var shown=false; // the canvas fades in once it has drawn (scene.css, html.gl-on)
@@ -1309,7 +1353,7 @@
   }
   function frame(time){
     var dt=clamp((time-last)/1000,.001,.05);last=time;dtF=dt;tick++;
-    if(reduce)snap();else{for(var j=0;j<8;j++)curPose[j]=damp(curPose[j],tgtPose[j],vPose[j],.55,dt);var cr0=cr;cr=clamp(damp(cr,tr,vr,.75,dt),0,1);if(flying){var cap=.085*dt;if(cr-cr0>cap){cr=cr0+cap;vr.v=Math.min(vr.v,cap/dt)}else if(cr0-cr>cap){cr=cr0-cap;vr.v=Math.max(vr.v,-cap/dt)}} /* speed limit: a fast flick can't whip the camera */px=damp(px,tx,vx,.6,dt)}
+    if(reduce)snap();else{for(var j=0;j<8;j++)curPose[j]=damp(curPose[j],tgtPose[j],vPose[j],.55,dt);var cr0=cr;cr=clamp(damp(cr,tr,vr,.86,dt),0,1);if(flying){var cap=.085*dt;if(cr-cr0>cap){cr=cr0+cap;vr.v=Math.min(vr.v,cap/dt)}else if(cr0-cr>cap){cr=cr0-cap;vr.v=Math.max(vr.v,-cap/dt)}} /* speed limit: a fast flick can't whip the camera */px=damp(px,tx,vx,.6,dt)}
     // Idle drift: in the drone flight, when the reader has stopped scrolling, the page creeps forward by itself so slow scrolling never shows as a stutter.
     if(flying&&!freeOn&&enter&&!reduce&&!document.hidden&&time-lastUser>900&&scrollY>=(GEO?GEO.rv:0)&&scrollY<eTop+eH-innerHeight-6){
       driftAcc+=(mobile?20:28)*clamp((time-lastUser-900)/1500,0,1)*dt;
