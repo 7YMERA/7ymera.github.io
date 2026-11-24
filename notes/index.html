@@ -25,13 +25,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=20261123r">
-<link rel="stylesheet" href="../assets/scene.css?v=20261123r">
-<link rel="stylesheet" href="/assets/fx.css?v=20261123r">
-<link rel="stylesheet" href="/assets/cursor.css?v=20261123r">
-<link rel="stylesheet" href="/assets/notes-index.css?v=20261123r">
-<link rel="stylesheet" href="/assets/palette.css?v=20261123r">
-<link rel="stylesheet" href="/assets/intro-gate.css?v=20261123r">
+<link rel="stylesheet" href="../assets/site.css?v=20261124e">
+<link rel="stylesheet" href="../assets/scene.css?v=20261124e">
+<link rel="stylesheet" href="/assets/fx.css?v=20261124e">
+<link rel="stylesheet" href="/assets/cursor.css?v=20261124e">
+<link rel="stylesheet" href="/assets/notes-index.css?v=20261124e">
+<link rel="stylesheet" href="/assets/liquid-water.css?v=20261124e">
+<link rel="stylesheet" href="/assets/palette.css?v=20261124e">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to the notes</a>
@@ -39,7 +39,7 @@
 
 <header class="top">
   <div class="wrap">
-    <a class="mark" href="/" aria-label="7YMERA, home"><span class="badge av"><img src="/assets/icons/favicon-192.png" alt="" width="32" height="32" decoding="async"></span>7YMERA</a>
+    <a class="mark" href="/" aria-label="7YMERA, home"><span class="badge av"><img src="/assets/icons/favicon-192.png" alt="" width="32" height="32" decoding="async"></span><span class="mark-t">7YMERA</span></a>
     <nav class="nav" aria-label="Site">
       <a href="/">Home</a>
       <a href="/portfolio/">Portfolio</a>
@@ -77,7 +77,20 @@
   </section>
 
   <section class="ni-sec ni-list" aria-labelledby="ni-every">
-    <div class="ni-sec-head"><h2 id="ni-every">Every note</h2><p>All thirteen, newest first.</p></div>
+    <div class="ni-sec-head">
+      <h2 id="ni-every">Every note</h2>
+      <p id="ni-count">All thirteen, newest first. Tap a topic to slide the liquid lens.</p>
+      <div class="ni-filter-wrap">
+        <div class="ni-filter" id="ni-filter" role="group" aria-label="Filter notes by category">
+          <button type="button" data-ncat="all" aria-pressed="true">All 13</button>
+          <button type="button" data-ncat="side project" aria-pressed="false">Side projects</button>
+          <button type="button" data-ncat="internship" aria-pressed="false">Internship</button>
+          <button type="button" data-ncat="coursework" aria-pressed="false">Coursework</button>
+          <button type="button" data-ncat="rebuild" aria-pressed="false">Rebuilds</button>
+          <button type="button" data-ncat="life" aria-pressed="false">Life</button>
+        </div>
+      </div>
+    </div>
 <div class="notes-index">
         <a class="note-card" href="portfolio-site.html">
           <img src="../assets/notes/site/v3-flight-golden.webp" alt="" width="96" height="96" loading="lazy">
@@ -147,14 +160,75 @@
   });
 })();
 </script>
-<script src="../assets/image-stream.js?v=20261123r" defer></script>
-<script src="/assets/folders.js?v=20261123r" defer></script>
-<script src="/assets/sfx.js?v=20261123r" defer></script>
-<script src="/assets/fx.js?v=20261123r" defer></script>
-<script src="/assets/cursor.js?v=20261123r" defer></script>
-<script src="../assets/reader.js?v=20261123r" defer></script>
-<script src="/assets/passport.js?v=20261123r" defer></script>
-<script src="/assets/palette.js?v=20261123r" defer></script>
-<script src="/assets/intro-gate.js?v=20261123r" defer></script>
+<script src="../assets/image-stream.js?v=20261124e" defer></script>
+<script src="/assets/folders.js?v=20261124e" defer></script>
+<script src="/assets/liquid-water.js?v=20261124e" defer></script>
+<script src="/assets/sfx.js?v=20261124e" defer></script>
+<script src="/assets/fx.js?v=20261124e" defer></script>
+<script src="/assets/cursor.js?v=20261124e" defer></script>
+<script src="../assets/reader.js?v=20261124e" defer></script>
+<script src="/assets/passport.js?v=20261124e" defer></script>
+<script src="/assets/palette.js?v=20261124e" defer></script>
+<script>
+window.addEventListener('DOMContentLoaded', function () {
+  var bar = document.getElementById('ni-filter');
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.ni-list .note-card'));
+  var countEl = document.getElementById('ni-count');
+  if (!bar || !cards.length) return;
+  var btns = Array.prototype.slice.call(bar.querySelectorAll('[data-ncat]'));
+  var root = document.documentElement;
+  var wl = null;
+  if (window.LiquidWater && window.LiquidWater.Waterline) {
+    bar.classList.add('wl-host');
+    wl = window.LiquidWater.Waterline(bar, {
+      tone: root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light',
+      panelRim: false,
+      cardRadius: 24,
+      zIndex: 2,
+      canvasClass: 'wl-water',
+      getTarget: function () {
+        var act = bar.querySelector('button[aria-pressed="true"]');
+        return wl ? wl.relOf(act, 'pill', 1) : null;
+      }
+    });
+    wl.snap();
+    bar.addEventListener('pointermove', function (e) {
+      if (e.pointerType !== 'mouse') return;
+      var r = bar.getBoundingClientRect();
+      wl.pointer(e.clientX - r.left + wl.PAD, e.clientY - r.top + wl.PAD, true);
+    });
+    bar.addEventListener('pointerleave', function () { wl.pointer(0, 0, false); });
+    if ('MutationObserver' in window) {
+      new MutationObserver(function () {
+        wl.setTone(root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+      }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    }
+  }
+  btns.forEach(function (b) {
+    b.addEventListener('click', function (e) {
+      var cat = b.dataset.ncat;
+      btns.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      var shown = 0;
+      cards.forEach(function (c) {
+        var meta = (c.querySelector('div > span') || {}).textContent || '';
+        var hit = cat === 'all' || meta.toLowerCase().indexOf(cat) >= 0;
+        c.hidden = !hit;
+        if (hit) shown++;
+      });
+      if (countEl) countEl.textContent = cat === 'all'
+        ? 'All ' + shown + ' notes, newest first. Tap a topic to slide the liquid lens.'
+        : 'Showing ' + shown + (shown === 1 ? ' note' : ' notes') + ' in ' + b.textContent + '.';
+      if (wl) {
+        requestAnimationFrame(function () {
+          wl.flow(80);
+          var r = bar.getBoundingClientRect();
+          wl.ripple(e.clientX - r.left + wl.PAD, e.clientY - r.top + wl.PAD, 0.8);
+        });
+      }
+      if (window.SFX && window.SFX.tick) { try { window.SFX.tick(); } catch (err) {} }
+    });
+  });
+});
+</script>
 </body>
 </html>

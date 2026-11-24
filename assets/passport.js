@@ -61,21 +61,22 @@
     },
     render: function (host) {
       if (!host) return;
+      if (host._flCard) { try { host._flCard.destroy(); } catch (e) {} host._flCard = null; }
       var o = load(), n = api.count(), compact = host.hasAttribute('data-fl-compact');
-      var html = '<div class="fl-head"><div><span class="fl-eye">Flight Log Passport</span>' +
+      var full = n >= STAMPS.length;
+      var stampsHtml = '<div class="fl-head"><div><span class="fl-eye">Flight Log Passport</span>' +
         (compact ? '' : '<h3>Your discoveries across 7YMERA</h3>') +
         '</div><span class="fl-badge"><b>' + n + '</b> / ' + STAMPS.length + '</span></div>' +
         '<div class="fl-grid">';
       STAMPS.forEach(function (s) {
         var got = !!o[s.id];
-        html += '<a class="fl-stamp' + (got ? ' got' : '') + '" href="' + s.href + '">' +
+        stampsHtml += '<a class="fl-stamp' + (got ? ' got' : '') + '" href="' + s.href + '">' +
           '<span class="fl-dot" aria-hidden="true">' + (got ? '&#10003;' : '&bull;') + '</span>' +
           '<span><b>' + s.title + '</b>' + (compact ? '' : '<small>' + s.desc + '</small>') + '</span></a>';
       });
-      html += '</div>';
+      stampsHtml += '</div>';
       if (!compact) {
-        var full = n >= STAMPS.length;
-        html += '<div class="fl-actions">' +
+        stampsHtml += '<div class="fl-actions">' +
           '<button type="button" class="fl-pass-btn' + (full ? ' full' : '') + '" data-fl-pass>' +
           (full ? 'Download Certified Pilot Boarding Pass (.PNG)' : 'Download Flight Log Boarding Pass (' + n + '/' + STAMPS.length + ' .PNG)') +
           '</button>' +
@@ -84,9 +85,68 @@
             : '<span class="fl-hint">Unlock all 8 stamps for the Certified Pilot seal &amp; Grand Finale Fireworks over KL.</span>') +
           '</div>';
       }
-      host.innerHTML = html;
+      if (!compact && window.LiquidWater && window.LiquidWater.WaterCard) {
+        host.innerHTML =
+          '<div class="fl-layout">' +
+            '<div class="fl-main">' + stampsHtml + '</div>' +
+            '<div class="fl-card-col" aria-label="Interactive 3D liquid pilot boarding pass">' +
+              '<div class="fl-wcard-host" data-fl-card data-cursor="Flip"></div>' +
+              '<div class="fl-card-ctrl" role="group" aria-label="Boarding pass controls">' +
+                '<button type="button" class="fl-card-btn" data-fl-flip>Flip pass</button>' +
+                '<button type="button" class="fl-card-btn" data-fl-splash>Splash</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        var playB = {}, arcB = {};
+        try { playB = JSON.parse(localStorage.getItem('play-best') || '{}'); } catch (e) {}
+        try { arcB = JSON.parse(localStorage.getItem('arc-best') || '{}'); } catch (e) {}
+        var dtStr = new Date().toLocaleDateString('en-MY', { year: 'numeric', month: 'short', day: '2-digit' }).toUpperCase();
+        var cardW = Math.min(340, Math.max(250, (window.innerWidth || 390) - 56));
+        var cardHost = host.querySelector('[data-fl-card]');
+        var passCard = window.LiquidWater.WaterCard(cardHost, {
+          mode: 'pilot',
+          theme: full ? 'gold' : (n >= 4 ? 'sky' : 'deep'),
+          kicker: '7YMERA',
+          badge: n + ' / ' + STAMPS.length + ' STAMPS',
+          title: full ? 'Certified KL Pilot' : 'KL Flight Log Pass',
+          subtitle: full ? 'Grand Fireworks Unlocked' : '3.139° N · 101.687° E · KLCC',
+          metaLeftLabel: 'Clearance',
+          metaLeftVal: full ? 'ALL CLEARED' : (Math.round((n / STAMPS.length) * 100) + '% FILLED'),
+          metaRightLabel: 'Issued',
+          metaRightVal: dtStr,
+          backHead: 'FLIGHT TELEMETRY · MYT',
+          backRows: [
+            ['Skyline Stack', (+playB.stack || 0) + ' FLR'],
+            ['Sky-Rail Dispatch', (+playB.dispatch || 0) + ' PTS'],
+            ['Last Train', (+arcB.train || 0) + ' PTS']
+          ],
+          backFine: '7YMERA.GITHUB.IO · CLICK TO FLIP',
+          seed: n + 3,
+          level: 0.18 + 0.70 * (n / STAMPS.length),
+          bubbles: full,
+          success: full,
+          width: cardW,
+          clickFlip: true
+        });
+        host._flCard = passCard;
+        var flipBtn = host.querySelector('[data-fl-flip]');
+        var splashBtn = host.querySelector('[data-fl-splash]');
+        if (flipBtn) flipBtn.addEventListener('click', function () {
+          passCard.flip();
+          if (window.SFX && window.SFX.tick) { try { window.SFX.tick(); } catch (e) {} }
+        });
+        if (splashBtn) splashBtn.addEventListener('click', function () {
+          passCard.splash(null, 1.3);
+          if (window.SFX && window.SFX.tick) { try { window.SFX.tick(); } catch (e) {} }
+        });
+      } else {
+        host.innerHTML = stampsHtml;
+      }
       var btn = host.querySelector('[data-fl-pass]');
-      if (btn) btn.addEventListener('click', function () { api.downloadBoardingPass(); });
+      if (btn) btn.addEventListener('click', function () {
+        if (host._flCard) host._flCard.splash(null, 1.5);
+        api.downloadBoardingPass();
+      });
     },
     downloadBoardingPass: function () {
       var o = load(), n = api.count(), full = n >= STAMPS.length;
@@ -189,12 +249,65 @@
     }
   };
 
+  function renderHeroPass() {
+    var hosts = d.querySelectorAll('[data-fl-hero-pass]');
+    if (!hosts.length || !window.LiquidWater || !window.LiquidWater.WaterCard) return;
+    var n = api.count(), full = n >= STAMPS.length;
+    var playB = {}, arcB = {};
+    try { playB = JSON.parse(localStorage.getItem('play-best') || '{}'); } catch (e) {}
+    try { arcB = JSON.parse(localStorage.getItem('arc-best') || '{}'); } catch (e) {}
+    var dtStr = new Date().toLocaleDateString('en-MY', { year: 'numeric', month: 'short', day: '2-digit' }).toUpperCase();
+    var w = window.innerWidth <= 980 ? Math.min(270, Math.max(230, window.innerWidth - 52)) : 286;
+    for (var i = 0; i < hosts.length; i++) {
+      var host = hosts[i];
+      if (host._heroCard) { try { host._heroCard.destroy(); } catch (e) {} host._heroCard = null; }
+      var card = window.LiquidWater.WaterCard(host, {
+        mode: 'pilot',
+        theme: full ? 'gold' : (n >= 4 ? 'sky' : 'deep'),
+        kicker: '7YMERA',
+        badge: n + ' / ' + STAMPS.length + ' STAMPS',
+        title: full ? 'Certified KL Pilot' : 'Arcade Pilot Pass',
+        subtitle: full ? 'Grand Fireworks Unlocked' : '6 Cabinets · Live Scores',
+        metaLeftLabel: 'Stack Best',
+        metaLeftVal: (+playB.stack || 0) + ' FLR',
+        metaRightLabel: 'Issued',
+        metaRightVal: dtStr,
+        backHead: 'ARCADE TELEMETRY · MYT',
+        backRows: [
+          ['Skyline Stack', (+playB.stack || 0) + ' FLR'],
+          ['Sky-Rail Dispatch', (+playB.dispatch || 0) + ' PTS'],
+          ['Last Train', (+arcB.train || 0) + ' PTS']
+        ],
+        backFine: 'CLICK TO FLIP · PLAY TO FILL WATER',
+        seed: n + 5,
+        level: 0.22 + 0.68 * (n / STAMPS.length),
+        bubbles: full,
+        success: full,
+        width: w,
+        clickFlip: true
+      });
+      host._heroCard = card;
+      var wrap = host.closest && host.closest('.hero-pass');
+      var fbtn = wrap && wrap.querySelector('[data-fl-hero-flip]');
+      if (fbtn && !fbtn._flBound) {
+        fbtn._flBound = true;
+        fbtn.addEventListener('click', function () {
+          var h2 = d.querySelector('[data-fl-hero-pass]');
+          if (h2 && h2._heroCard) h2._heroCard.flip();
+          if (window.SFX && window.SFX.tick) { try { window.SFX.tick(); } catch (e) {} }
+        });
+      }
+    }
+  }
+
   function renderAll() {
     var nodes = d.querySelectorAll('[data-flightlog]');
     for (var i = 0; i < nodes.length; i++) api.render(nodes[i]);
+    renderHeroPass();
   }
   window.FlightLog = api;
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', renderAll);
   else renderAll();
-  window.addEventListener('storage', function (e) { if (e.key === KEY) renderAll(); });
+  d.addEventListener('play-best', renderHeroPass);
+  window.addEventListener('storage', function (e) { if (e.key === KEY || e.key === 'play-best' || e.key === 'arc-best') renderAll(); });
 })();

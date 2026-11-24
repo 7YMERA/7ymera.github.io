@@ -117,7 +117,7 @@
     ['SMK Subang data dashboard', '#p-smk', 'project'], ['TaskMatch v2', '#p-taskmatch', 'project'], ['MyLokalEvent v2', '#p-mle', 'project'], ['IT Asset Disposal (SLB)', '#p-slb', 'project'], ['KakiLima', '#p-kakilima', 'project'], ['JumaatFinder', '#p-jumaat', 'project'], ['EagleSan Sandbox (Roblox)', '#p-roblox', 'project'],
     ['Download CV (PDF)', '/assets/Muhammad-Alif-Najmi-CV.pdf?v=cv20261119a', 'cv'], ['Email Alif', 'mailto:alifnajmx@gmail.com', 'contact'], ['LinkedIn', 'https://www.linkedin.com/in/muhammad-alif-najmi-md-hisamudin', 'link'], ['GitHub', 'https://github.com/7YMERA', 'link'], ['Credly badges', 'https://www.credly.com/users/muhammad-alif-najmi-md-hisamudin', 'link'], ['AWS badges', 'https://skillsprofile.skillbuilder.aws/user/najmi/certification-badges', 'link'], ['Kracked Devs', 'https://krackeddevs.com/profile/alifnajmx', 'link'], ['Résumé (read online)', '/resume.html', 'link'],
     ['Try TaskMatch demo', 'https://taskmatch-umber.vercel.app', 'live'], ['Visit MyLokalEvent', 'https://mylokalevent.vercel.app', 'live'], ['Visit KakiLima', 'https://kakilima-iota.vercel.app', 'live'], ['Click through the IT Asset Disposal app', '/notes/slb-screens.html', 'live'],
-    ['Home', '/', 'page'], ['Play (games and toys)', '/play/', 'page'], ['Lab (satellites, shaders, SQL, Score Lab)', '/lab/', 'page'], ['Fly the drone view', '/#enter', 'page'], ['All notes', '/notes/', 'note'],
+    ['Home', '/', 'page'], ['Play (games and toys)', '/play/', 'page'], ['Lab (satellites, shaders, SQL, Score Lab)', '/lab/', 'page'], ['Tidepool Liquid UI (WebGL water card & checkout)', '/lab/#tidepool', 'lab'], ['KL Ride · City Lens (Draggable KL map & live fleet)', '/lab/#goride', 'lab'], ['Fly the drone view', '/#enter', 'page'], ['All notes', '/notes/', 'note'],
     ['Note: Building this site (3D KL, zero frameworks)', '/notes/portfolio-site.html', 'note'], ['Note: Nine charts before one screen (SLB data model)', '/notes/slb-design.html', 'note'], ['Note: A dashboard 150 teachers actually open', '/notes/smk-dashboard.html', 'note'], ['Note: From coursework to something people could trust', '/notes/mylokalevent-v2.html', 'note'], ['Note: Accessible first, in four languages', '/notes/kakilima.html', 'note'], ['Note: Where can I solat Jumaat from here?', '/notes/jumaatfinder.html', 'note'], ['Note: One VPC, two departments, $56 (AWS coursework)', '/notes/aws-two-departments.html', 'note'], ['Note: A whole company in 49 tables (SQL playground)', '/notes/database.html', 'note'], ['Note: Jom Al-Quran, 56 tables (SQL playground)', '/notes/jom-al-quran.html', 'note'], ['Note: Rebuilding my FYP properly', '/notes/taskmatch-v2.html', 'note'], ['Note: From reply-all to Power Apps', '/notes/slb-power-apps.html', 'note'], ['Note: Four years, one walk across the stage', '/notes/convocation-2026.html', 'note'],
     ['Keyboard shortcuts', '#do-keys', 'action'], ['Sound on or off', '#do-sound', 'action'], ['Share this site', '#do-share', 'action']
   ];
@@ -256,6 +256,217 @@
         if (window.SFX && SFX.tick) SFX.tick();
       });
     });
+  }
+
+  // Live Rolling Telemetry Ticker (#pf-ticker, inspired by GoRide)
+  var tickEl = document.getElementById('pf-ticker');
+  var tickNum = document.getElementById('pf-tick-num');
+  var tickLbl = document.getElementById('pf-tick-lbl');
+  if (tickEl && tickNum && tickLbl && !calmMotion) {
+    var TICK_DATA = [
+      { n: 150, lbl: 'teachers on SMK Subang hub' },
+      { n: 565, lbl: 'geocoded masjids in JumaatFinder' },
+      { n: 41,  lbl: 'verified skills across 6 branches' },
+      { n: 56,  lbl: 'SQL tables in Jom Al-Quran' },
+      { n: 26,  lbl: 'Power Apps screens shipped for SLB' }
+    ];
+    var ti = 0, curVal = TICK_DATA[0].n, tickVisible = true, tickIv = 0, numRaf = 0;
+    function rollNum(to) {
+      cancelAnimationFrame(numRaf);
+      var from = curVal, t0 = performance.now();
+      function step(now) {
+        var p = Math.min(1, (now - t0) / 720);
+        var e = 1 - Math.pow(1 - p, 3);
+        curVal = from + (to - from) * e;
+        tickNum.textContent = String(Math.round(curVal));
+        if (p < 1) numRaf = requestAnimationFrame(step);
+        else { curVal = to; tickNum.textContent = String(to); numRaf = 0; }
+      }
+      numRaf = requestAnimationFrame(step);
+    }
+    function advanceTick() {
+      if (!tickVisible || document.hidden) return;
+      ti = (ti + 1) % TICK_DATA.length;
+      var item = TICK_DATA[ti];
+      rollNum(item.n);
+      tickLbl.classList.add('swap');
+      setTimeout(function () {
+        tickLbl.textContent = item.lbl;
+        tickLbl.classList.remove('swap');
+      }, 220);
+    }
+    tickIv = setInterval(advanceTick, 3200);
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) { tickVisible = !!es[0].isIntersecting; }).observe(tickEl);
+    }
+  }
+
+  // LiquidWater enhancements: 3D Contact Card + Waterline metaball drops on #ba-sim & #role-fit
+  if (window.LiquidWater) {
+    var LW = window.LiquidWater;
+    var themeNow = function () { return root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; };
+    var wlInstances = [];
+
+    function attachWaterBar(bar, activeSel) {
+      if (!bar) return null;
+      bar.classList.add('wl-host');
+      var wl = LW.Waterline(bar, {
+        tone: themeNow(),
+        panelRim: false,
+        cardRadius: 24,
+        zIndex: 2,
+        canvasClass: 'wl-water',
+        getTarget: function () {
+          var active = bar.querySelector(activeSel);
+          return wl ? wl.relOf(active, 'pill', 1) : null;
+        }
+      });
+      wl.snap();
+      bar.addEventListener('click', function (e) {
+        var btn = e.target.closest && e.target.closest('button');
+        if (!btn) return;
+        requestAnimationFrame(function () {
+          wl.flow(80);
+          var r = bar.getBoundingClientRect();
+          wl.ripple(e.clientX - r.left + wl.PAD, e.clientY - r.top + wl.PAD, 0.75);
+        });
+      });
+      bar.addEventListener('pointermove', function (e) {
+        if (e.pointerType !== 'mouse') return;
+        var r = bar.getBoundingClientRect();
+        wl.pointer(e.clientX - r.left + wl.PAD, e.clientY - r.top + wl.PAD, true);
+      });
+      bar.addEventListener('pointerleave', function () { wl.pointer(0, 0, false); });
+      wlInstances.push(wl);
+      return wl;
+    }
+
+    attachWaterBar(document.querySelector('#ba-sim .pf-sim-tabs'), 'button[aria-selected="true"]');
+    attachWaterBar(document.querySelector('#role-fit .pf-fit-bar'), 'button[aria-pressed="true"]');
+
+    if (wlInstances.length && 'MutationObserver' in window) {
+      new MutationObserver(function () {
+        var t = themeNow();
+        wlInstances.forEach(function (w) { w.setTone(t); });
+      }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    }
+
+    // Hero Portrait <-> 3D Liquid Card toggle
+    var heroFlipBtn = document.getElementById('pf-hero-flip');
+    var heroPortraitBox = document.getElementById('pf-portrait-box');
+    var heroImg = document.getElementById('pf-portrait-img');
+    var heroWcHost = document.getElementById('pf-hero-wcard');
+    var heroWc = null;
+    if (heroFlipBtn && heroImg && heroWcHost) {
+      heroFlipBtn.addEventListener('click', function () {
+        var showing = heroFlipBtn.getAttribute('aria-pressed') === 'true';
+        var next = !showing;
+        heroFlipBtn.setAttribute('aria-pressed', String(next));
+        heroFlipBtn.textContent = next ? 'Show Photo \u21bb' : '3D Liquid Card \u21bb';
+        if (heroPortraitBox) heroPortraitBox.classList.toggle('is-card', next);
+        heroImg.hidden = next;
+        heroWcHost.hidden = !next;
+        if (next) {
+          if (!heroWc) {
+            var hw = Math.min(310, Math.max(240, (heroWcHost.offsetWidth || 300) - 16));
+            heroWc = LW.WaterCard(heroWcHost, {
+              mode: 'contact',
+              theme: 'sky',
+              kicker: '7YMERA',
+              badge: 'PORTFOLIO PASS',
+              title: 'Muhammad Alif Najmi',
+              subtitle: 'Business Analyst · axrail.ai',
+              metaLeftLabel: 'Base',
+              metaLeftVal: 'Kuala Lumpur, MY',
+              metaRightLabel: 'Skills',
+              metaRightVal: '41 Verified',
+              backHead: '\\7YMERA · QUICK CARD',
+              backRows: [
+                ['Role', 'BA · Solution Architect'],
+                ['Grad', 'BSc CS (Hons) · UTP'],
+                ['Email', 'alifnajmx@gmail.com'],
+                ['Site', '7ymera.github.io']
+              ],
+              backFine: 'CLICK CARD TO FLIP · TILT TO SLOSH',
+              level: 0.48,
+              width: hw,
+              clickFlip: true,
+              onFlip: function () { if (window.SFX && SFX.tick) SFX.tick(); }
+            });
+          } else {
+            heroWc.splash(null, 1.2);
+          }
+        }
+        if (window.SFX && SFX.tick) SFX.tick();
+      });
+    }
+
+    // 3D \7ymera Liquid Contact Card in #contact
+    var cardHost = document.getElementById('pf-water-card');
+    if (cardHost) {
+      var contactWidth = function () { return Math.min(350, Math.max(255, (window.innerWidth || 390) - 52)); };
+      var contactCard = LW.WaterCard(cardHost, {
+        mode: 'contact',
+        theme: 'deep',
+        kicker: '7YMERA',
+        badge: 'KL · MYT',
+        title: 'Muhammad Alif Najmi',
+        subtitle: 'Business Analyst · axrail.ai',
+        metaLeftLabel: 'Base',
+        metaLeftVal: 'Kuala Lumpur, MY',
+        metaRightLabel: 'Focus',
+        metaRightVal: 'BA · Systems · AI',
+        backHead: '\\7YMERA · DIRECT CARD',
+        backRows: [
+          ['Email', 'alifnajmx@gmail.com'],
+          ['Web', '7ymera.github.io'],
+          ['Coords', '3.139° N · 101.687° E'],
+          ['Status', 'Open to great problems']
+        ],
+        backFine: 'CLICK CARD TO FLIP · TILT TO SLOSH',
+        level: 0.44,
+        width: contactWidth(),
+        clickFlip: true,
+        onFlip: function () { if (window.SFX && SFX.tick) SFX.tick(); }
+      });
+
+      var flipBtn = document.getElementById('pf-wc-flip');
+      if (flipBtn) flipBtn.addEventListener('click', function () { contactCard.flip(); });
+
+      var splashBtn = document.getElementById('pf-wc-splash');
+      if (splashBtn) splashBtn.addEventListener('click', function () {
+        contactCard.splash(null, 1.3);
+        if (window.SFX && SFX.tick) SFX.tick();
+      });
+
+      var themeBtns = document.querySelectorAll('[data-wc-theme]');
+      themeBtns.forEach(function (b) {
+        b.addEventListener('click', function () {
+          var th = b.dataset.wcTheme;
+          themeBtns.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+          contactCard.update({ theme: th });
+          contactCard.splash(null, 1.1);
+          if (window.SFX && SFX.tick) SFX.tick();
+        });
+      });
+
+      // Copying email triggers a confirmation splash on the 3D card
+      var okTimer = 0;
+      document.querySelectorAll('[data-copy]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          contactCard.splash(null, 1.4);
+          contactCard.update({ success: true });
+          clearTimeout(okTimer);
+          okTimer = setTimeout(function () { contactCard.update({ success: false }); }, 1800);
+        });
+      });
+
+      var resizeTimer = 0;
+      window.addEventListener('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () { contactCard.update({ width: contactWidth() }); }, 120);
+      });
+    }
   }
 })();
 /* Portfolio page: header height, the on-page nav, Highlights / Full story, and quiet reveals.

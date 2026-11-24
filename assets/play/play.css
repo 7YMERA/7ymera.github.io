@@ -4,22 +4,13 @@
 :root[data-theme="dark"] { --crt: #040b12; }
 html.play-lock, html.play-lock body { overflow: hidden; overscroll-behavior: none; }
 body.play { background: var(--bg); }
-body.play .top { z-index: 20; }
+body.play .top { z-index: 30; }
 .play [data-tone="teal"] { --tone: var(--accent); --tone-ink: var(--accent-ink); }
 .play [data-tone="gold"] { --tone: var(--gold); --tone-ink: #fff; }
 .play [data-tone="blue"] { --tone: #2c5fd0; --tone-ink: #fff; }
 .play [data-tone="ink"] { --tone: var(--ink); --tone-ink: var(--bg); }
 :root[data-theme="dark"] .play [data-tone="gold"] { --tone-ink: #1b1305; }
 :root[data-theme="dark"] .play [data-tone="blue"] { --tone: #6aa8ff; --tone-ink: #06132b; }
-
-/* header on phones: the nav stays, the word mark steps aside */
-@media (max-width: 760px) {
-  body.play .top .wrap { gap: 8px; }
-  body.play .nav { display: flex; gap: 0; margin-left: auto; }
-  body.play .nav a { padding: 6px 7px; font-size: .8125rem; }
-  body.play .mark-t { display: none; }
-}
-.nav a[aria-current="page"] { color: var(--ink); background: var(--accent-soft); }
 
 /* ---------- shared buttons ---------- */
 .pix-btn { position: relative; display: inline-grid; grid-template-columns: auto auto; align-items: center; column-gap: 12px; min-height: 64px; padding: 0 28px; border: 3px solid var(--ink); border-radius: 14px; background: var(--gold); color: #fff; font: 600 1.375rem var(--f-pix); letter-spacing: .02em; cursor: pointer; box-shadow: 0 6px 0 var(--ink); transform: translateY(0); transition: transform .12s, box-shadow .12s; text-transform: uppercase; }
@@ -240,6 +231,11 @@ body.play .top { z-index: 20; }
 .hero-play.hs-dark h1 .l2 { color: #ffc44d; }
 .hero-play.hs-dark .ghost-btn { background: rgba(255,255,255,.1); color: #fff; border-color: rgba(255,255,255,.5); }
 .hero-show { position: absolute; z-index: 2; right: clamp(16px, 5vw, 80px); top: clamp(86px, 16vh, 160px); display: grid; justify-items: end; gap: 12px; }
+.hero-pass { margin-top: 8px; padding-top: 4px; display: grid; justify-items: center; gap: 20px; }
+.hero-pass-card { cursor: pointer; }
+.hero-pass-bar { display: flex; gap: 6px; }
+.hero-pass-btn { appearance: none; display: inline-flex; align-items: center; min-height: 34px; padding: 5px 12px; border-radius: 999px; border: 1.5px solid rgba(160, 196, 255, .42); background: rgba(6, 16, 36, .78); color: #eef5ff; font: 600 .7rem var(--f-mono); letter-spacing: .06em; text-transform: uppercase; text-decoration: none; cursor: pointer; }
+.hero-pass-btn:hover { border-color: #ffd27a; color: #ffd27a; }
 .hs-now { display: inline-flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 10px 8px 16px; border: 2.5px solid var(--ink); border-radius: 16px; background: var(--surface); color: var(--ink); box-shadow: 4px 4px 0 var(--ink); cursor: pointer; text-align: left; }
 .hero-play.hs-dark .hs-now { border-color: #eef6f8; box-shadow: 4px 4px 0 rgba(0,0,0,.6); }
 .hs-now > i { width: 10px; height: 10px; border-radius: 50%; background: #e14b3b; animation: led 1.2s ease-in-out infinite; }
@@ -282,15 +278,34 @@ body.play .top { z-index: 20; }
 @media (max-width: 640px) { .lab-door { grid-template-columns: minmax(0, 1fr); box-shadow: 5px 5px 0 #2c5fd0; } .lab-door-go { grid-column: 1; grid-row: auto; justify-self: stretch; justify-content: center; margin-top: 12px; } .lab-door-games { box-shadow: 5px 5px 0 var(--gold); } }
 @media (prefers-reduced-motion: reduce) { .lab-door { transition: none; } }
 
-/* ---------- /lab/: the first screen is the satellite inspector (satellite.js, [data-sat-hero]) ---------- */
-.lab-hero { position: relative; height: max(640px, calc(100svh - 62px)); min-height: 640px; border-bottom: 2px solid var(--ink); background: #02040c; overflow: hidden; }
-.lab-hero .sat-stage { position: absolute; inset: 0; }
-.lab-scroll { position: absolute; z-index: 5; right: clamp(16px, 3vw, 40px); top: 18px; display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 20px; border: 1px solid rgba(159, 208, 255, .5); border-radius: 12px; background: rgba(4, 10, 26, .78); color: #fff; font: 600 .85rem var(--f-mono); letter-spacing: .14em; text-transform: uppercase; text-decoration: none; }
-.lab-scroll:hover, .lab-scroll:focus-visible { border-color: #fff; background: rgba(159, 208, 255, .22); }
+/* ---------- /lab/: flagship hero stage (Orbital Dispatch: NASA Satellite x KL Ride City Lens) ---------- */
+.lab-hero { position: relative; display: flex; flex-direction: column; height: max(740px, calc(100svh - 62px)); min-height: 740px; border-bottom: 2px solid var(--ink); background: #02040c; overflow: hidden; }
+.lab-hero-bar { flex: none; z-index: 20; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; padding: 10px clamp(14px, 2.6vw, 32px); background: #050b1a; border-bottom: 1px solid rgba(159, 208, 255, .2); }
+.lab-hero-body { position: relative; flex: 1; min-height: 660px; }
+.lab-hero .lab-gr-stage, .lab-hero > .lab-hero-body > .sat-stage { position: absolute; inset: 0; }
+.orb-beam-svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 16; pointer-events: none; overflow: visible; }
+.orb-beam-svg[hidden] { display: none !important; }
+.lab-hero-tabs { display: inline-flex; gap: 6px; padding: 4px; border-radius: 999px; border: 1px solid rgba(159, 208, 255, .32); background: rgba(10, 20, 44, .9); }
+.lab-htab { appearance: none; border: 0; min-height: 36px; padding: 6px 14px; border-radius: 999px; background: transparent; color: #c7daf7; font: 600 .75rem var(--f-mono); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background-color .18s, color .18s; }
+.lab-htab b { opacity: .65; }
+.lab-htab:hover { color: #fff; }
+.lab-htab.on { background: #ffd27a; color: #050a18; }
+.lab-htab.on b { opacity: .9; }
+.lab-htab:focus-visible { outline: 2px solid #ffd27a; outline-offset: 2px; }
+.lab-scroll { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid rgba(159, 208, 255, .42); border-radius: 999px; background: rgba(12, 26, 58, .72); color: #fff; font: 600 .74rem var(--f-mono); letter-spacing: .1em; text-transform: uppercase; text-decoration: none; }
+.lab-scroll:hover, .lab-scroll:focus-visible { border-color: #fff; background: rgba(24, 56, 124, .9); }
 .lab-scroll:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
-.lab-scroll svg { width: 18px; height: 18px; }
+.lab-scroll svg { width: 16px; height: 16px; }
 .lab-more { padding-top: clamp(40px, 6vw, 72px); }
-@media (max-width: 700px) { .lab-hero { height: max(700px, calc(100svh - 62px)); min-height: 700px; } .lab-scroll { top: auto; bottom: 12px; right: 16px; left: 16px; justify-content: center; min-height: 46px; } }
+@media (max-width: 820px) {
+  .lab-hero { height: auto; min-height: 0; }
+  .lab-hero-body { min-height: 680px; }
+  .lab-hero .lab-gr-stage { position: relative; inset: auto; }
+  .lab-hero > .lab-hero-body > .sat-stage { min-height: 680px; }
+  .lab-hero-tabs { width: 100%; justify-content: space-between; }
+  .lab-htab { flex: 1; justify-content: center; padding: 6px 6px; font-size: .64rem; gap: 4px; }
+  .lab-scroll { width: 100%; justify-content: center; }
+}
 
 /* ---------- immersive lab views (Orbit, Particle lab, Skyline anatomy, Glass lab, Liquid glass lab) ----------
    The experiment is the background of the whole view: it fills everything under a dark header bar, and the controls float

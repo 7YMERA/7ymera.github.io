@@ -259,6 +259,7 @@
     this.ready = false; this.failed = false; this.loading = false; this.raf = 0; this.last = 0; this.t = 0; this.swap = 1;
     this.e = 0; this.eT = 0; this.zoom = .7; this.zoomT = .7; this.auto = false; // starts fully zoomed out (owner); + zooms in
     this.yaw = 0; this.pitch = 0; this.vyaw = 0; this.vpitch = 0; this.drag = null;
+    this.slewY = 0; this.slewP = 0; this.slewYT = 0; this.slewPT = 0; this.pulseUntil = 0; this.pip = false;
     this.mx = 0; this.my = 0; this.pmx = 0; this.pmy = 0; this.inside = false; this.W = 0; this.H = 0;
     this.act = 0; this.energy = 0; this.hx = .5; this.hy = .5; this.tx = .5; this.ty = .5; this.lastMove = -9; this.lastSample = 0; this.samples = []; this.lastCue = -9; this.prevInt = 0;
     this.sceneRoot = null;
@@ -375,14 +376,51 @@
     if (touch && !this.moved) this.hx = x, this.hy = 1 - y;
     this.tx = x; this.ty = 1 - y; this.lastMove = this.t; this.moved = true; this.kick();
   };
+  Sat.prototype.emitState = function () {
+    try {
+      this.stage.dispatchEvent(new CustomEvent('sat-state', {
+        bubbles: true,
+        detail: { key: this.curKey, model: MODELS[this.curKey], auto: !!this.auto, explode: this.eT > .5, pip: !!this.pip }
+      }));
+    } catch (e) { /* ok */ }
+  };
+  Sat.prototype.syncVisibility = function () {
+    if (!this.cab) return;
+    var vis = !this.stage.hidden && this.stage.offsetWidth > 4 && this.stage.offsetHeight > 4 && !this.covered;
+    this.vis = vis;
+    if (vis) this.open(); else this.close();
+  };
+  Sat.prototype.setPip = function (on) {
+    this.pip = !!on;
+    this.stage.classList.toggle('sat-pip', this.pip);
+    this.zoomT = this.pip ? 1.04 : .7;
+    if (this.pip && this.eT > .5) this.setExplode(0);
+    this.size(); this.kick(); this.emitState();
+  };
+  Sat.prototype.slewTarget = function (nx, ny) {
+    // nx, ny in [-1, 1]: gently aim the satellite toward the scanned Kuala Lumpur district
+    this.slewYT = clamp(nx, -1, 1) * .52;
+    this.slewPT = clamp(ny, -1, 1) * .28;
+    this.kick();
+  };
+  Sat.prototype.pulseXray = function (ms) {
+    this.pulseUntil = this.t + Math.max(.4, (ms || 2000) / 1000);
+    this.cueX(true);
+    this.kick();
+  };
+  Sat.prototype.getAnchor = function () {
+    var r = this.stage.getBoundingClientRect();
+    var s = this.scr || { x: r.width * .5, y: r.height * .5, r: Math.min(r.width, r.height) * .3 };
+    return { x: r.left + s.x, y: r.top + s.y, r: s.r, visible: r.width > 8 && r.height > 8 && !this.stage.hidden };
+  };
   Sat.prototype.setAuto = function (on) {
     this.auto = on; this.xrBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); this.xrBtn.querySelector('b').textContent = on ? 'X-ray on' : 'X-ray';
-    if (on) { this.cueX(true); this.hint.classList.add('gone'); } this.kick();
+    if (on) { this.cueX(true); this.hint.classList.add('gone'); } this.kick(); this.emitState();
   };
   Sat.prototype.cueX = function (force) { if (force || this.t - this.lastCue > 2.2) { this.lastCue = this.t; cue('sat-xray'); } };
   Sat.prototype.setExplode = function (v) {
     var was = this.eT; this.eT = v; this.exBtn.setAttribute('aria-pressed', v > .5 ? 'true' : 'false'); this.exBtn.querySelector('b').textContent = v > .5 ? 'Assemble' : 'Explode';
-    if (v > .5 && was <= .5) cue('sat-explode'); else if (v <= .5 && was > .5) cue('sat-assemble'); this.kick();
+    if (v > .5 && was <= .5) cue('sat-explode'); else if (v <= .5 && was > .5) cue('sat-assemble'); this.kick(); this.emitState();
   };
   Sat.prototype.readScroll = function () {
     if (this.cab) return; // the cabinet is always fully in: arr 1, x 0, alpha 1
@@ -556,6 +594,7 @@
   Sat.prototype.switchTo = function (key) {
     if (key === this.curKey && this.cur) return; var me = this;
     this.stage.classList.add('sat-loading'); this.curKey = key; this.setText(); if (this.eT > 0) this.setExplode(0);
+    this.emitState();
     this.boot2(key).then(function (m) { me.stage.classList.remove('sat-loading'); if (m) { me.useModel(key, m); } me.kick(); });
   };
   Sat.prototype.boot2 = function (key) { var me = this; return loadLibs().then(function () { me.THREE = window.THREE; return me.fetchModel(key); }).catch(function () { return null; }); };
@@ -573,22 +612,22 @@
   Sat.prototype.scan = function (dt) {
     var T = this.THREE, U = this.U, W = this.W, H = this.H, i;
     var gate = 1 - sstep(.35, .8, this.x), tr = U.uTrail.value;
-    var px, py;
-    if (this.auto) { // the X-ray button: a big circle sweeps the satellite on its own
-      var s = this.scr, tt = this.t * (reduce ? .35 : .8);
+    var px, py, pulsing = this.pulseUntil > this.t, autoScan = this.auto || pulsing;
+    if (autoScan) { // X-ray button or orbital dispatch uplink sweep
+      var s = this.scr, tt = this.t * (pulsing ? 1.55 : (reduce ? .35 : .8));
       px = clamp(s.x / W + Math.sin(tt) * .3 * (this.mob ? .8 : 1), .05, .95); py = clamp(1 - (s.y / H) + Math.sin(tt * 1.7 + 1) * .2, .05, .95);
       this.tx = px; this.ty = py; this.lastMove = this.t; this.moved = true;
     }
     var k = reduce ? 1 : 1 - Math.exp(-dt / .055);
     var ox = this.hx, oy = this.hy; this.hx += (this.tx - this.hx) * k; this.hy += (this.ty - this.hy) * k;
     var spd = Math.hypot((this.hx - ox), (this.hy - oy) * H / W) / Math.max(dt, .001); // screen widths per second
-    var sp = this.auto ? .5 : clamp(spd / 1.2, 0, 1), moving = this.t - this.lastMove < .12 && this.inside || this.auto || this.touchHold;
+    var sp = autoScan ? (pulsing ? .75 : .5) : clamp(spd / 1.2, 0, 1), moving = this.t - this.lastMove < .12 && this.inside || autoScan || this.touchHold;
     if (!reduce) {
       var tau = sp > this.energy ? .35 : 1.1; this.energy += (sp - this.energy) * (1 - Math.exp(-dt / tau));
     } else this.energy = 0;
     this.act += moving ? Math.min(1, dt / .12) : -dt / 1.0; this.act = clamp(this.act, 0, 1);
     var strength = this.act * this.act * (3 - 2 * this.act) * gate;
-    var base = (this.mob ? .13 : .11) * (this.auto ? 1.35 : 1), rad = base * (1 + (reduce ? 0 : .9) * this.energy) * (.5 + .5 * this.act);
+    var base = (this.mob ? .13 : .11) * (autoScan ? 1.35 : 1), rad = base * (1 + (reduce ? 0 : .9) * this.energy) * (.5 + .5 * this.act);
     if (strength > .5 && this.prevInt <= .5) this.cueX(false); this.prevInt = strength;
     // samples: a comet tail of past heads, fading over about 0.7 s
     if (!reduce && this.t - this.lastSample > .045 && strength > .02) { this.lastSample = this.t; this.samples.unshift({ x: this.hx, y: this.hy, s: strength, r: rad, t: this.t }); }
@@ -626,10 +665,12 @@
     this.zoom += (this.zoomT - this.zoom) * kz;
     if (this.swap < 1) this.swap = Math.min(1, this.swap + dt * 2.6);
     var km = reduce ? 1 : 1 - Math.exp(-dt * 3); this.mx += (this.pmx - this.mx) * km; this.my += (this.pmy - this.my) * km;
-    // pose: a slow sway, mouse parallax, drag with inertia
+    // pose: a slow sway, mouse parallax, orbital slew toward KL target, drag with inertia
     if (!this.drag) { this.vyaw *= Math.exp(-dt * 2.4); this.vpitch *= Math.exp(-dt * 2.4); this.yaw += this.vyaw * dt; this.pitch = clamp(this.pitch + this.vpitch * dt, -1.2, 1.2); this.pitch *= Math.exp(-dt * .25); }
+    var ks = reduce ? 1 : 1 - Math.exp(-dt * 4.2);
+    this.slewY += (this.slewYT - this.slewY) * ks; this.slewP += (this.slewPT - this.slewP) * ks;
     var sw = reduce ? 0 : this.t, ex = this.x;
-    this.eul.set(.22 + this.pitch + Math.sin(sw * .21) * .07 + this.my * .09 + ex * .5, -.62 + Math.PI + this.yaw + Math.sin(sw * .16) * .45 + this.mx * .18 - ex * .9, .42 + Math.sin(sw * .13) * .05, 'YXZ');
+    this.eul.set(.22 + this.pitch + this.slewP + Math.sin(sw * .21) * .07 + this.my * .09 + ex * .5, -.62 + Math.PI + this.yaw + this.slewY + Math.sin(sw * .16) * .45 + this.mx * .18 - ex * .9, .42 + Math.sin(sw * .13) * .05, 'YXZ');
     this.pivot.quaternion.setFromEuler(this.eul);
     this.cam.position.x = -this.mx * .16; this.cam.position.y = this.my * .1; this.cam.lookAt(0, 0, 0);
     this.cam.updateMatrixWorld(true);
@@ -648,10 +689,11 @@
 
   // where the model sits: big, a little right of centre on desktop; flying past the camera on the way out
   Sat.prototype.layout = function () {
-    var W = this.W, H = this.H, mob = this.mob, cam = this.cam, hh = Math.tan(cam.fov * Math.PI / 360) * cam.position.z, hw = hh * cam.aspect;
-    var rr0 = mob ? Math.min(W * .9, H * .46) : Math.min(W * .47, H * .86);
+    var W = this.W, H = this.H, mob = this.mob, pip = this.pip, cam = this.cam, hh = Math.tan(cam.fov * Math.PI / 360) * cam.position.z, hw = hh * cam.aspect;
+    var rr0 = pip ? Math.min(W * .42, H * .56) : (mob ? Math.min(W * .9, H * .46) : Math.min(W * .47, H * .86));
     var ar = sstep(.12, 1, this.arr), x = this.x;
-    var nx = (mob ? 0 : .17) + (-1.5 * x * x) - (1 - ar) * .35, ny = (mob ? .36 : .12) + .75 * x * x - (1 - ar) * .55;
+    var nx = pip ? 0 : ((mob ? 0 : .17) + (-1.5 * x * x) - (1 - ar) * .35);
+    var ny = pip ? .08 : ((mob ? .36 : .12) + .75 * x * x - (1 - ar) * .55);
     var bob = reduce ? 0 : Math.sin(this.t * .55) * .012, ez = 1 / (1 + .42 * this.e), z = this.zoom;
     var rr = rr0 * (.72 + .28 * ar) * (1 + 2.1 * x * x) * z * ez * (.55 + .45 * this.swap);
     var sc = rr / (H / 2) * hh;
@@ -676,7 +718,17 @@
     var hs = Math.max(W, H) / 1000;
     put(0, s.x, s.y + s.r * .1, Math.max(.6, s.r / 420)); put(1, gx, gy, hs * 1.0); put(2, gx, gy, hs * 1.0);
     put(3, gx + vx * .7, gy + vy * .7, hs * .9); put(4, gx + vx * 1.25, gy + vy * 1.25, hs * 1.4); put(5, gx + vx * 1.85, gy + vy * 1.85, hs * .7);
-    // tag
+    // tag (hidden in compact orbital PiP viewport so the 3D satellite stays clean)
+    if (this.pip) {
+      this.tag.style.opacity = '0';
+      this.pathAmb.setAttribute('d', '');
+      this.pathAmb.style.opacity = '0';
+      this.dot.style.opacity = '0';
+      this.labs.style.opacity = '0';
+      var plabs = this.lab || [];
+      for (i = 0; i < plabs.length; i++) plabs[i].p.setAttribute('d', '');
+      return;
+    }
     var tw = mob ? 150 : 250, tx = mob ? 20 : clamp(s.x + s.r * .34, 40, W - tw - 28), ty = mob ? H * .06 + 96 : clamp(s.y - s.r * .5, 118, H * .3);
     this.tag.style.transform = 'translate3d(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px,0)';
     var tag = 1 - e; this.tag.style.opacity = tag.toFixed(3);

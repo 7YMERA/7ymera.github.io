@@ -42,7 +42,11 @@
   var MARK = 'M12 8H40L81 108H53Z M94 8H154V29L122 108H96L127 31H94Z';
   var GLY = '#%&/\\<>=+*7YMERA01';
   var DUR = 2000;                   // the counter's eased run, ms
-  var BOOT = ['> acquiring orbit', '> locking on Kuala Lumpur', '> score armed'];
+  var BOOT = [
+    '> mount: plain HTML/CSS/JS · 0 frameworks · 0 npm',
+    '> shaders: WebGL2 glass + Three.js KL terrain + GLSL',
+    '> lock: Kuala Lumpur 3.14°N 101.69°E · score armed'
+  ];
 
   function el(tag, cls, html) { var n = d.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; }
   function clamp(x, a, b) { return x < a ? a : x > b ? b : x; }
@@ -75,10 +79,20 @@
               '<div class="gate-bar"><i></i></div>' +
             '</div>' +
             '<div class="gate-cta" hidden>' +
+              '<div class="gate-arch" aria-label="Site code architecture">' +
+                '<div class="gate-arch-bar"><span class="gate-arch-path">7ymera.github.io/</span><span class="gate-arch-pill">0 FRAMEWORKS · 0 BUILD · VANILLA JS</span></div>' +
+                '<div class="gate-arch-tree">' +
+                  '<div class="gate-arch-row" style="--r:0"><span class="ga-tr">├─</span><b class="ga-dir">index.html</b><span class="ga-mod">assets/home/glass-reveal.js + scene.js</span><em class="ga-tag">WebGL2 \\7 Glass · 3D KL</em></div>' +
+                  '<div class="gate-arch-row" style="--r:1"><span class="ga-tr">├─</span><b class="ga-dir">portfolio/</b><span class="ga-mod">liquid-water.js + daycycle.js + folders.js</span><em class="ga-tag">3D Card · Waterline</em></div>' +
+                  '<div class="gate-arch-row" style="--r:2"><span class="ga-tr">├─</span><b class="ga-dir">lab/</b><span class="ga-mod">goride.js + tidepool.html + satellite.js</span><em class="ga-tag">KL City Lens · Shaders</em></div>' +
+                  '<div class="gate-arch-row" style="--r:3"><span class="ga-tr">├─</span><b class="ga-dir">play/</b><span class="ga-mod">arcade.js + stack.js + dispatch.js + passport.js</span><em class="ga-tag">6 Cabinets · Pilot Pass</em></div>' +
+                  '<div class="gate-arch-row" style="--r:4"><span class="ga-tr">└─</span><b class="ga-dir">notes/</b><span class="ga-mod">image-stream.js + db-playground.js (sql.js)</span><em class="ga-tag">13 Notes · 105 Tables</em></div>' +
+                '</div>' +
+              '</div>' +
               '<div class="gate-btn-wrap">' +
-                '<button class="gate-btn" type="button" aria-label="Enter">' +
+                '<button class="gate-btn" type="button" aria-label="Enter Experience">' +
                   '<span class="gate-btn-fill" aria-hidden="true"></span><span class="gate-btn-glint" aria-hidden="true"></span>' +
-                  '<span class="gate-btn-txt" aria-hidden="true"><span class="gate-btn-label">Enter</span></span>' +
+                  '<span class="gate-btn-txt" aria-hidden="true"><span class="gate-btn-label">Enter Experience</span></span>' +
                   '<span class="gate-btn-arr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>' +
                 '</button>' +
               '</div>' +
@@ -87,7 +101,7 @@
         '</div>' +
         '<p class="gate-credit" aria-hidden="true">Earth: NASA 3D Resources · NASA Blue Marble</p>' +
       '</div>' +
-      '<p class="gate-sr" id="gate-desc">Entry screen. Press Enter to launch the experience.</p>';
+      '<p class="gate-sr" id="gate-desc">Entry screen. Press Enter Experience to launch.</p>';
 
     var rootEl = el('div', 'gate' + (reduce ? ' reduce' : ''), tpl);
     rootEl.id = 'gate'; rootEl.setAttribute('role', 'dialog'); rootEl.setAttribute('aria-modal', 'true');
@@ -282,8 +296,8 @@
         if (k < n) requestAnimationFrame(step); else node.textContent = text;
       })();
     }
-    btn.addEventListener('pointerenter', function () { scramble(label, 'Enter', 360); });
-    btn.addEventListener('focus', function () { scramble(label, 'Enter', 360); });
+    btn.addEventListener('pointerenter', function () { scramble(label, 'Enter Experience', 380); });
+    btn.addEventListener('focus', function () { scramble(label, 'Enter Experience', 380); });
     btn.addEventListener('click', function () { enter(); });
     w.addEventListener('pointermove', onMove, { passive: true });
     function onMove(e) { mx = e.clientX; my = e.clientY; tpx = (e.clientX / Math.max(1, W)) * 2 - 1; tpy = (e.clientY / Math.max(1, H)) * 2 - 1; }

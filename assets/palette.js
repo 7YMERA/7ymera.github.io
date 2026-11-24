@@ -19,6 +19,8 @@
     { g: 'Lab & Games', t: 'Score Lab — Live Web Audio Stem Mixer', k: 'Lab', href: '/lab/#scorelab' },
     { g: 'Lab & Games', t: 'Skyline Anatomy — Exploded KL Landmarks', k: 'Lab', href: '/lab/#anatomy' },
     { g: 'Lab & Games', t: 'Liquid Glass Lab — WebGL2 Optical Shader', k: 'Lab', href: '/lab/#lglass' },
+    { g: 'Lab & Games', t: 'Tidepool Liquid UI — Water Card & Metaball Checkout', k: 'Lab', href: '/lab/#tidepool' },
+    { g: 'Lab & Games', t: 'KL Ride · City Lens — Draggable Phone Map & Live Fleet', k: 'Lab', href: '/lab/#goride' },
     { g: 'Lab & Games', t: 'Orbit Globe & Particle Lab (Halcyon)', k: 'Lab', href: '/lab/#orbit' },
     { g: 'Lab & Games', t: 'Company SQL (49 tables) & Join Atlas', k: 'SQL', href: '/lab/#sql-company' },
     { g: 'Lab & Games', t: 'Jom Al-Quran SQL (56 tables)', k: 'SQL', href: '/lab/#sql-jom' },

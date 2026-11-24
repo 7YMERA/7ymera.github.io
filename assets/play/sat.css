@@ -66,3 +66,74 @@
 }
 @media (max-height: 560px) and (min-width: 701px) { .sat-title h2 { font-size: clamp(2.4rem, 12svh, 5rem); } .sat-hint { display: none; } }
 
+/* ---------- Compact Orbital PiP Deck inside /lab/ Orbital Dispatch ---------- */
+.sat-stage.sat-pip {
+  border-radius: 18px;
+  border: 1.5px solid rgba(127, 224, 255, .36);
+  background: radial-gradient(ellipse at 52% 40%, #0d2148 0%, #050c1e 62%, #02050f 100%);
+  box-shadow: 0 22px 48px -22px rgba(2, 6, 18, .92), inset 0 0 0 1px rgba(255, 210, 122, .12);
+}
+.sat-stage.sat-pip .sat-title,
+.sat-stage.sat-pip .sat-tag,
+.sat-stage.sat-pip .sat-credit,
+.sat-stage.sat-pip .sat-hint,
+.sat-stage.sat-pip .sat-zm,
+.sat-stage.sat-pip .sat-labs {
+  display: none !important;
+}
+.sat-stage.sat-pip .sat-sw {
+  left: 10px;
+  right: auto;
+  bottom: 10px;
+  gap: 5px;
+}
+.sat-stage.sat-pip .sat-sw button {
+  min-width: 0;
+  min-height: 34px;
+  padding: 5px 10px;
+  border-radius: 9px;
+  gap: 0;
+  justify-items: center;
+}
+.sat-stage.sat-pip .sat-sw b {
+  font-size: .72rem;
+  letter-spacing: .12em;
+}
+.sat-stage.sat-pip .sat-sw small {
+  display: none;
+}
+.sat-stage.sat-pip .sat-act {
+  right: 10px;
+  left: auto;
+  bottom: 10px;
+  gap: 5px;
+}
+.sat-stage.sat-pip .sat-ex,
+.sat-stage.sat-pip .sat-xr {
+  min-height: 34px;
+  padding: 0 11px;
+  border-radius: 9px;
+  font-size: .68rem;
+  letter-spacing: .1em;
+  gap: 6px;
+}
+.sat-stage.sat-pip .sat-ex-i,
+.sat-stage.sat-pip .sat-xr-i {
+  width: 14px;
+  height: 14px;
+}
+.sat-stage.sat-pip .sat-ex-i::after { inset: 4px; }
+.sat-stage.sat-pip .sat-xr-i::after { inset: 3px; }
+.sat-stage.sat-pip.sat-scan {
+  border-color: rgba(127, 224, 255, .82);
+  box-shadow: 0 22px 48px -22px rgba(2, 6, 18, .92), 0 0 24px -6px rgba(127, 224, 255, .38);
+}
+@media (max-width: 440px) {
+  .sat-stage.sat-pip .sat-sw { left: 8px; bottom: 8px; gap: 4px; }
+  .sat-stage.sat-pip .sat-sw button { padding: 4px 7px; }
+  .sat-stage.sat-pip .sat-act { right: 8px; bottom: 8px; gap: 4px; }
+  .sat-stage.sat-pip .sat-ex, .sat-stage.sat-pip .sat-xr { padding: 0 8px; font-size: .64rem; letter-spacing: .06em; }
+  .sat-stage.sat-pip .sat-ex-i, .sat-stage.sat-pip .sat-xr-i { display: none; }
+}
+
+

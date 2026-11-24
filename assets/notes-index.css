@@ -16,6 +16,12 @@
 .ni-sec-head { display: grid; justify-items: center; text-align: center; gap: 8px; margin-bottom: 26px; padding: 18px 22px 20px; background: color-mix(in srgb, var(--bg) 92%, transparent); border: 2px solid var(--fx); border-radius: 14px; box-shadow: 5px 5px 0 var(--hard); }
 .ni-sec-head h2 { margin: 0; font: 800 clamp(1.8rem, 3.6vw, 2.6rem)/1 var(--f-display); letter-spacing: -.02em; color: var(--ink); }
 .ni-sec-head p { margin: 0; color: var(--muted); max-width: 40em; }
+.ni-filter-wrap { margin-top: 8px; max-width: 100%; overflow: hidden; padding: 10px 6px; }
+.ni-filter { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 4px; border-radius: 24px; }
+.ni-filter button { appearance: none; min-height: 40px; padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); font: 600 .84rem var(--f-body); cursor: pointer; }
+.ni-filter button:hover { border-color: var(--accent); }
+.ni-filter button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink, #fff); }
+.ni-list .note-card[hidden] { display: none !important; }
 .ni-pin { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--accent); color: var(--accent-ink, #fff); }
 .ni-pin svg { width: 22px; height: 22px; }
 /* folders: wrap and centre, so a short last row sits on the middle line too */

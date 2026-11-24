@@ -28,12 +28,12 @@ toonHaze:`#ifdef USE_FOG
       #endif`,
 
 /* Uniforms and the hash and noise helpers of the facade shader. Goes before main() (facade() in scene.js). */
-facadeHead:`uniform sampler2D uDay;uniform sampler2D uNightTex;uniform float uNight,uGlass,uTime,uRain,uGoldF;uniform vec4 uCut[4];uniform float uLo[4];
+facadeHead:`uniform sampler2D uDay;uniform sampler2D uNightTex;uniform sampler2D uTerrCol;uniform sampler2D uTerrAO;uniform float uNight,uGlass,uTime,uRain,uGoldF;uniform vec4 uCut[4];uniform float uLo[4];
         float h21(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
         float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(h21(i),h21(i+vec2(1.0,0.0)),f.x),mix(h21(i+vec2(0.0,1.0)),h21(i+vec2(1.0,1.0)),f.x),f.y);}
         void main() {`,
 
-/* The facade itself: the day grid, natural KL ground flooring (Klang River, KLCC Park, Bukit Nanas greenspace, landmark plazas, Klang Valley foothills & wet rain sheen), the night windows, each landmark's own lighting (li 0 Petronas, 1 Merdeka 118, 2 The Exchange 106, 3 Menara KL), street glow and day shade. Replaces <emissivemap_fragment>. */
+/* The facade itself: the day grid, real stitched PBR terrain flooring (Sahne 20-tile forest/rock atlas + Mixed AO across Klang Valley foothills, 3D Bukit Nanas Forest Eco Park hill, KLCC Park, Klang River & Lake Symphony basin), night windows, each landmark's own lighting (li 0 Petronas, 1 Merdeka 118, 2 The Exchange 106, 3 Menara KL), street glow and day shade. Replaces <emissivemap_fragment>. */
 facadeBody:`#include <emissivemap_fragment>
         vec3 fn=normalize(cross(dFdx(vWP),dFdy(vWP)));
         float wall=1.0-smoothstep(0.45,0.75,abs(fn.y));
@@ -42,52 +42,62 @@ facadeBody:`#include <emissivemap_fragment>
         float hq=onX?vWP.x:vWP.z;
         float dl=dot(texture2D(uDay,fuv).rgb,vec3(0.333));
         float gd=distance(vWP,cameraPosition);float gk=mix(0.3*(1.0-smoothstep(70.0,420.0,gd)),0.75*(1.0-0.6*smoothstep(500.0,1200.0,gd)),uNight)*(1.0-uGlass); /* day: faint grid that clears with distance, so far blocks are clean tones; night keeps its grid. (The glass parts of the landmarks have no day grid.) */
+        float bktDist=distance(vWP.xz,uCut[3].xy);
+        float bktHill=smoothstep(50.0,42.0,bktDist)*smoothstep(6.0,10.5,bktDist)*(1.0-step(24.5,vWP.y))*smoothstep(0.18,0.45,abs(fn.y));
+        float bktTop=smoothstep(12.0,8.0,bktDist)*smoothstep(20.0,22.2,vWP.y)*(1.0-step(24.5,vWP.y))*(1.0-wall);
+        float hillG=smoothstep(385.0,460.0,length(vWP.xz))*smoothstep(0.18,0.45,abs(fn.y));
+        float terrMask=clamp(max(max((1.0-wall)*(1.0-step(2.5,vWP.y)),hillG),max(bktHill,bktTop)),0.0,1.0);
+        wall*=(1.0-clamp(bktHill+hillG,0.0,1.0));
         diffuseColor.rgb*=mix(1.0,clamp(dl*1.9,0.0,1.3),wall*gk);
         float low=1.0-smoothstep(0.5,11.0,max(vWP.y,0.0));
         float gnd=(1.0-wall)*(1.0-step(2.5,vWP.y));
         float rad=1.0-smoothstep(120.0,820.0,length(vWP.xz+vec2(60.0,60.0)));
         float pool=smoothstep(0.3,0.9,vn(vWP.xz/16.0))*0.7+0.3*vn(vWP.xz/5.0);
         float pg=mix(pool,0.45,smoothstep(120.0,500.0,gd));
-        /* ---- natural KL ground flooring: Klang River, KLCC Park & Bukit Nanas greenery, landmark plazas, soft Klang Valley terrain ---- */
-        float hillG=(1.0-wall)*smoothstep(2.0,18.0,vWP.y)*smoothstep(410.0,520.0,length(vWP.xz));
-        if(gnd>0.01||hillG>0.01){
-          float gMask=max(gnd,hillG);
+        /* ---- natural KL terrain flooring using baked 20-tile PBR Sahne atlas (uTerrCol + uTerrAO) ---- */
+        if(terrMask>0.01){
           float macroN=vn(vWP.xz/110.0)*0.6+vn(vWP.xz/36.0)*0.4;
-          float microN=vn(vWP.xz/11.0);
-          /* organic Klang Valley soil/park variation (no sterile flat plane) */
-          vec3 parkDay=vec3(0.46,0.68,0.66),parkGold=vec3(0.58,0.56,0.48),parkNight=vec3(0.05,0.11,0.16);
-          vec3 parkCol=mix(mix(parkDay,parkGold,uGoldF),parkNight,uNight);
-          /* KLCC Park (beside Petronas) & Bukit Nanas Forest Eco Park (around Menara KL) + valley foothills */
-          float dKlccP=length((vWP.xz-vec2(26.0,34.0))/vec2(46.0,34.0))+macroN*0.28-0.14;
-          float dBktN=length((vWP.xz-uCut[3].xy)/vec2(52.0,44.0))+macroN*0.32-0.16;
-          float parkK=clamp(max(1.0-smoothstep(0.65,1.18,dKlccP),1.0-smoothstep(0.62,1.22,dBktN))+hillG*0.85,0.0,1.0);
-          /* subtle urban block grain on the valley floor */
-          vec3 floorTint=diffuseColor.rgb*(0.92+0.14*macroN+(microN-0.5)*0.05*(1.0-smoothstep(120.0,480.0,gd)));
-          floorTint=mix(floorTint,parkCol*(0.88+0.22*macroN),parkK*0.72);
-          /* subtle stone plaza aprons around the 4 landmark footprints */
+          vec2 tuvMacro=clamp((vWP.xz+vec2(1350.0))/2700.0,0.002,0.998);
+          vec2 tuvHi=fract(vWP.xz/260.0+vec2(0.37,0.19));
+          vec3 tcMacro=texture2D(uTerrCol,tuvMacro).rgb;
+          vec3 tcHi=texture2D(uTerrCol,tuvHi).rgb;
+          float tao=mix(texture2D(uTerrAO,tuvMacro).r,texture2D(uTerrAO,tuvHi).r,0.45);
+          vec3 rawTerr=mix(tcMacro,tcHi,0.42*(1.0-smoothstep(140.0,520.0,gd)))*(0.68+0.48*tao);
+          /* harmonize real forest/rock PBR texture with Day, Golden Hour & Night palettes (zero pink) */
+          vec3 terrDay=mix(rawTerr*1.55+vec3(0.08,0.14,0.14),vec3(0.36,0.56,0.50),0.22);
+          vec3 terrGold=rawTerr*vec3(1.55,1.25,0.95)+vec3(0.10,0.07,0.04);
+          vec3 terrNight=rawTerr*vec3(0.24,0.34,0.48)+vec3(0.02,0.04,0.09);
+          vec3 terrCol=mix(mix(terrDay,terrGold,uGoldF),terrNight,uNight);
+          /* KLCC Park (open plaza around (72,62)) + 3D Bukit Nanas hill + Titiwangsa mountain rim get full rich PBR forest/rock */
+          float dKlccP=length((vWP.xz-vec2(68.0,60.0))/vec2(48.0,38.0))+macroN*0.24-0.12;
+          float parkK=clamp(max(1.0-smoothstep(0.62,1.18,dKlccP),max(bktHill+bktTop,hillG)),0.0,1.0);
+          /* subtle urban valley ground grain blended softly with macro terrain texture */
+          vec3 urbBase=mix(diffuseColor.rgb*(0.90+0.16*tao),terrCol,0.34);
+          vec3 floorTint=mix(urbBase,terrCol,parkK*0.92);
+          /* subtle stone plaza aprons around Petronas, Merdeka & Exchange 106 (leaving Bukit Nanas forested) */
           float plz=0.0;
-          for(int pi=0;pi<4;pi++){float dp=distance(vWP.xz,uCut[pi].xy);plz=max(plz,1.0-smoothstep(uCut[pi].z*0.75,uCut[pi].z*1.28,dp));}
+          for(int pi=0;pi<3;pi++){float dp=distance(vWP.xz,uCut[pi].xy);plz=max(plz,1.0-smoothstep(uCut[pi].z*0.78,uCut[pi].z*1.32,dp));}
           vec3 plazaCol=mix(mix(vec3(0.76,0.85,0.95),vec3(0.76,0.69,0.78),uGoldF),vec3(0.09,0.14,0.28),uNight);
-          floorTint=mix(floorTint,plazaCol,plz*0.42*(1.0-hillG));
+          floorTint=mix(floorTint,plazaCol,plz*0.45*(1.0-hillG));
           /* Klang River meandering naturally across the west side of the city */
           float rCenter=-78.0+26.0*sin(vWP.z*0.0085)+11.0*cos(vWP.z*0.021);
           float rDist=abs(vWP.x-rCenter);
-          float rBank=1.0-smoothstep(12.0,19.0,rDist);
-          float rWater=(1.0-smoothstep(7.5,12.5,rDist))*(1.0-hillG);
+          float rBank=1.0-smoothstep(12.0,20.0,rDist);
+          float rWater=(1.0-smoothstep(7.5,12.5,rDist))*(1.0-hillG)*(1.0-bktHill);
           float rip=vn(vec2(vWP.x*0.35,vWP.z*0.18-uTime*0.65))*0.5+vn(vec2(vWP.x*0.7+uTime*0.3,vWP.z*0.4))*0.5;
-          vec3 watDay=vec3(0.36,0.64,0.88),watGold=vec3(0.82,0.58,0.42),watNight=vec3(0.04,0.11,0.24);
+          vec3 watDay=vec3(0.32,0.60,0.86),watGold=vec3(0.82,0.58,0.42),watNight=vec3(0.04,0.11,0.24);
           vec3 watCol=mix(mix(watDay,watGold,uGoldF),watNight,uNight)+(0.08+0.12*uGoldF)*smoothstep(0.55,0.92,rip)*(1.0-uNight*0.5);
-          floorTint=mix(floorTint,parkCol*0.86,rBank*0.45*(1.0-rWater));
+          floorTint=mix(floorTint,terrCol*0.86,rBank*0.55*(1.0-rWater)*(1.0-bktHill));
           floorTint=mix(floorTint,watCol,rWater);
-          /* KLCC Symphony Lake basin right beside Petronas */
-          float lakeD=length((vWP.xz-vec2(18.0,32.0))/vec2(16.0,11.0));
-          float lakeK=(1.0-smoothstep(0.85,1.08,lakeD))*(1.0-hillG);
+          /* KLCC Symphony Lake basin in the open park plaza at (72, 62) */
+          float lakeD=length((vWP.xz-vec2(72.0,62.0))/vec2(15.5,13.5));
+          float lakeK=(1.0-smoothstep(0.86,1.06,lakeD))*(1.0-hillG);
           floorTint=mix(floorTint,watCol*1.08,lakeK);
           /* wet monsoon rain darkening & shimmer on the ground */
           float wetRip=uRain*(0.06+0.12*smoothstep(0.52,0.88,vn(vWP.xz*0.28+vec2(uTime*0.4,-uTime*0.25))));
-          floorTint*=mix(1.0,0.82,uRain*gMask);
-          diffuseColor.rgb=mix(diffuseColor.rgb,floorTint,gMask);
-          totalEmissiveRadiance+=(rWater+lakeK)*uNight*vec3(0.18,0.34,0.58)*(0.22+0.35*rip)+wetRip*gMask*mix(vec3(0.35,0.55,0.85),vec3(0.95,0.68,0.36),uNight*0.65)*rad;
+          floorTint*=mix(1.0,0.82,uRain*terrMask);
+          diffuseColor.rgb=mix(diffuseColor.rgb,floorTint,terrMask);
+          totalEmissiveRadiance+=(rWater+lakeK)*uNight*vec3(0.18,0.34,0.58)*(0.22+0.35*rip)+wetRip*terrMask*mix(vec3(0.35,0.55,0.85),vec3(0.95,0.68,0.36),uNight*0.65)*rad;
         }
         diffuseColor.rgb*=1.0-(1.0-uNight)*(wall*low*0.2+gnd*rad*0.13*pg); /* by day the same shapes are shade, not light: darker feet on every building and soft cloud shadows drifting over the ground */
         /* ---- night: lit windows, per window cell, per building, stable in world space (skipped entirely in full daylight) ---- */

@@ -59,6 +59,8 @@
     glass: { view: 'glass', title: 'Glass lab', sub: 'The lab · one WebGL shader', src: '/lab/glass.html' },
     anatomy: { view: 'anatomy', title: 'Skyline anatomy', sub: 'The lab · exploded KL meshes' },
     lglass: { view: 'glass', title: 'Liquid glass lab', sub: 'The lab · WebGL2 optical shader', src: '/lab/liquid-glass.html' },
+    tidepool: { view: 'glass', title: 'Tidepool liquid UI', sub: 'The lab · WebGL1 water card & metaball drop', src: '/lab/tidepool.html' },
+    goride: { view: 'glass', title: 'KL Ride · City Lens', sub: 'The lab · draggable phone lens & live fleet', src: '/lab/goride.html' },
     scorelab: { view: 'scorelab', title: 'Score lab', sub: 'The lab · Web Audio stem mixer & visualizer' },
     'sql-company': { view: 'sql', title: 'Company SQL', sub: 'Data toys · SQLite in your browser', sql: 'company' },
     'sql-jom': { view: 'sql', title: 'Jom Al-Quran SQL', sub: 'Data toys · SQLite in your browser', sql: 'jom' },
@@ -66,7 +68,7 @@
     egg: { view: 'egg', title: 'Back room', sub: 'Out of order' }
   };
   // which page each cabinet lives on: the rest are dropped, so a stray #id from the other page opens nothing
-  var LAB_IDS = { orbit: 1, lab: 1, glass: 1, anatomy: 1, lglass: 1, scorelab: 1, 'sql-company': 1, 'sql-jom': 1, atlas: 1 };
+  var LAB_IDS = { orbit: 1, lab: 1, glass: 1, anatomy: 1, lglass: 1, tidepool: 1, goride: 1, scorelab: 1, 'sql-company': 1, 'sql-jom': 1, atlas: 1 };
   Object.keys(CAB).forEach(function (id) { if ((LAB_IDS[id] ? 'lab' : 'play') !== PAGE) delete CAB[id]; });
   var cur = null, curId = '', opener = null, pushed = false, views = $$('.view', stage);
   var previewsOn = true;
@@ -207,7 +209,7 @@
       ['data-db', 'data-drift'].forEach(function (a) { var v = node.getAttribute(a); if (v) node.setAttribute(a, v.replace(/^\.\.\//, '/')); });
       host.textContent = ''; host.appendChild(node);
       // the scripts bind to the element's id when they run, so run a fresh copy each time
-      var s = d.createElement('script'); s.src = c.js + '?v=' + (VER || '20261123r') + '&m=' + seq; s.async = false; host.appendChild(s);
+      var s = d.createElement('script'); s.src = c.js + '?v=' + (VER || '20261124e') + '&m=' + seq; s.async = false; host.appendChild(s);
     }).catch(function () {
       if (seq !== sqlSeq) return; sqlNow = '';
       host.innerHTML = '<p class="sql-wait">Could not load the playground. <a href="' + c.note + '">Open it in the note instead</a>.</p>';
@@ -454,6 +456,94 @@
       g.fillStyle = C.ink; px(g, 42); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('\\7', cx, cy + 2);
       g.restore(); g.textBaseline = 'alphabetic';
       mono(g, 9); g.textAlign = 'left'; g.fillStyle = C.mute; g.fillText('WEBGL2 · DISPERSION · CUSTOM SVG', 12, 190);
+    },
+    tidepool: function (g, t) {
+      backdrop(g);
+      // 3D tilting water-filled card on left + flowing metaball drop panel on right
+      var cx = 98, cy = 94, cw = 132, ch = 84, tilt = Math.sin(t * 1.1) * 0.08;
+      g.save();
+      g.translate(cx, cy);
+      g.rotate(tilt);
+      rr(g, -cw / 2, -ch / 2, cw, ch, 12);
+      g.save(); g.clip();
+      var cg = g.createLinearGradient(-cw / 2, -ch / 2, cw / 2, ch / 2);
+      cg.addColorStop(0, '#1e5be6'); cg.addColorStop(1, '#08236e');
+      g.fillStyle = cg; g.fillRect(-cw / 2, -ch / 2, cw, ch);
+      // sloshing water surface
+      g.beginPath();
+      var wl = 4 + Math.sin(t * .9) * 6;
+      g.moveTo(-cw / 2, ch / 2);
+      for (var x = -cw / 2; x <= cw / 2; x += 6) {
+        var wy = wl - tilt * x * 1.6 + Math.sin(x * .08 + t * 3.1) * 3.2;
+        g.lineTo(x, wy);
+      }
+      g.lineTo(cw / 2, ch / 2); g.closePath();
+      g.fillStyle = 'rgba(110,180,255,.55)'; g.fill();
+      g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 1.4; g.stroke();
+      // chip + digits
+      g.fillStyle = '#e8cf86'; rr(g, -cw / 2 + 12, -ch / 2 + 18, 18, 13, 3); g.fill();
+      mono(g, 8); g.fillStyle = 'rgba(255,255,255,.9)'; g.textAlign = 'left';
+      g.fillText('4242  ••••  4242', -cw / 2 + 12, ch / 2 - 14);
+      g.restore();
+      g.strokeStyle = 'rgba(255,255,255,.42)'; g.lineWidth = 1.4; rr(g, -cw / 2, -ch / 2, cw, ch, 12); g.stroke();
+      g.restore();
+      // right-side glass panel with animated metaball droplet stepping down 3 rows
+      var px0 = 184, py0 = 36, pw0 = 118, ph0 = 122;
+      rr(g, px0, py0, pw0, ph0, 14);
+      g.fillStyle = 'rgba(18,40,80,.72)'; g.fill();
+      g.strokeStyle = 'rgba(120,180,255,.35)'; g.lineWidth = 1.2; g.stroke();
+      var step = Math.floor(t * 0.85) % 3, frac = (t * 0.85) % 1;
+      var dy = py0 + 18 + (step + ease(Math.min(1, frac * 2.2))) % 3 * 30;
+      for (var r = 0; r < 3; r++) {
+        rr(g, px0 + 12, py0 + 18 + r * 30, pw0 - 24, 20, 7);
+        g.fillStyle = 'rgba(255,255,255,.06)'; g.fill();
+      }
+      rr(g, px0 + 10, dy - 2, pw0 - 20, 24, 9);
+      g.fillStyle = 'rgba(106,168,255,.42)'; g.fill();
+      g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = 1.2; g.stroke();
+      mono(g, 9); g.textAlign = 'left'; g.fillStyle = C.mute; g.fillText('WEBGL1 · WATER CARD · METABALL DROP', 12, 190);
+    },
+    goride: function (g, t) {
+      backdrop(g);
+      // rotated KL city street grid + winding Klang River
+      g.save();
+      g.translate(160, 100);
+      g.rotate(-0.21);
+      g.strokeStyle = 'rgba(106,168,255,.16)';
+      g.lineWidth = 1;
+      for (var k = -8; k <= 8; k++) {
+        g.beginPath(); g.moveTo(k * 24, -140); g.lineTo(k * 24, 140); g.stroke();
+        g.beginPath(); g.moveTo(-200, k * 24); g.lineTo(200, k * 24); g.stroke();
+      }
+      // Klang river ribbon
+      g.strokeStyle = 'rgba(79,194,200,.24)'; g.lineWidth = 12; g.lineCap = 'round';
+      g.beginPath(); g.moveTo(-140, 96); g.bezierCurveTo(-40, 20, 40, 10, 150, -86); g.stroke();
+      // golden dispatched route + moving car
+      var u = (t * 0.45) % 1;
+      glowLine(g, C.gold, 2.2, function () {
+        g.beginPath(); g.moveTo(-72, 24); g.lineTo(24, 24); g.lineTo(24, -48); g.lineTo(72, -48);
+      });
+      var cx, cy, ang = 0;
+      if (u < 0.45) { cx = -72 + (u / 0.45) * 96; cy = 24; ang = 0; }
+      else if (u < 0.8) { cx = 24; cy = 24 - ((u - 0.45) / 0.35) * 72; ang = -Math.PI / 2; }
+      else { cx = 24 + ((u - 0.8) / 0.2) * 48; cy = -48; ang = 0; }
+      g.save(); g.translate(cx, cy); g.rotate(ang);
+      g.fillStyle = '#fff'; rr(g, -7, -4, 14, 8, 3); g.fill();
+      g.fillStyle = C.gold; g.fillRect(5, -3, 2, 6);
+      g.restore();
+      g.restore();
+      // magnifying phone lens floating over the right side
+      var px0 = 204 + Math.sin(t * 0.8) * 14, py0 = 32;
+      g.save();
+      rr(g, px0, py0, 74, 134, 14);
+      g.fillStyle = '#0c1a34'; g.fill();
+      g.strokeStyle = C.gold; g.lineWidth = 2; g.stroke();
+      // pin inside phone
+      g.fillStyle = C.gold; g.beginPath(); g.arc(px0 + 37, py0 + 54, 5, 0, 7); g.fill();
+      g.fillStyle = C.ink; rr(g, px0 + 8, py0 + 86, 58, 38, 8); g.fill();
+      g.fillStyle = C.gold; rr(g, px0 + 13, py0 + 109, 48, 10, 4); g.fill();
+      g.restore();
+      mono(g, 9); g.textAlign = 'left'; g.fillStyle = C.mute; g.fillText('CITY LENS · KLCC · 12 LIVE VEHICLES', 12, 190);
     },
     scorelab: function (g, t) {
       backdrop(g);

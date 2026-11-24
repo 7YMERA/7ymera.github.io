@@ -30,17 +30,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Albert+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@500;600&display=swap">
-<link rel="stylesheet" href="/assets/site.css?v=20261123r">
-<link rel="stylesheet" href="/assets/fx.css?v=20261123r">
-<link rel="stylesheet" href="/assets/cursor.css?v=20261123r">
-<link rel="stylesheet" href="/assets/arcade.css?v=20261123r">
-<link rel="stylesheet" href="/assets/halcyon.css?v=20261123r">
-<link rel="stylesheet" href="/assets/join-atlas.css?v=20261123r">
-<link rel="stylesheet" href="/assets/play/play.css?v=20261123r">
-<link rel="stylesheet" href="/assets/play/anatomy.css?v=20261123r">
-<link rel="stylesheet" href="/assets/play/sat.css?v=20261123r">
-<link rel="stylesheet" href="/assets/palette.css?v=20261123r">
-<link rel="stylesheet" href="/assets/intro-gate.css?v=20261123r">
+<link rel="stylesheet" href="/assets/site.css?v=20261124e">
+<link rel="stylesheet" href="/assets/fx.css?v=20261124e">
+<link rel="stylesheet" href="/assets/cursor.css?v=20261124e">
+<link rel="stylesheet" href="/assets/arcade.css?v=20261124e">
+<link rel="stylesheet" href="/assets/halcyon.css?v=20261124e">
+<link rel="stylesheet" href="/assets/join-atlas.css?v=20261124e">
+<link rel="stylesheet" href="/assets/play/play.css?v=20261124e">
+<link rel="stylesheet" href="/assets/play/anatomy.css?v=20261124e">
+<link rel="stylesheet" href="/assets/play/sat.css?v=20261124e">
+<link rel="stylesheet" href="/assets/goride.css?v=20261124e">
+<link rel="stylesheet" href="/assets/palette.css?v=20261124e">
 <script>/* #sat is the hero itself */if(location.hash==="#sat")location.replace("#satellite");</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Lab","url":"https://7ymera.github.io/lab/","description":"Experiments by Alif Najmi: a NASA satellite inspector, a globe, particles, exploded landmarks and glass shaders.","isPartOf":{"@type":"WebSite","name":"Alif Najmi","url":"https://7ymera.github.io/"}}</script>
 </head>
@@ -66,10 +66,40 @@
 </header>
 
 <main id="top">
-  <section class="lab-hero" id="satellite" aria-labelledby="lab-h1">
-    <h1 class="sr-only" id="lab-h1">The lab: satellite inspector</h1>
-    <div class="sat-stage" id="sat-hero" data-sat-hero data-cursor="Scan"></div>
-    <a class="lab-scroll" href="#experiments">More in the lab <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14m-6-6 6 6 6-6"/></svg></a>
+  <section class="lab-hero" id="satellite" data-hero-mode="orbital" aria-labelledby="lab-h1">
+    <h1 class="sr-only" id="lab-h1">The lab: Orbital Dispatch — NASA Satellite X-Ray fused with KL Ride City Lens</h1>
+    <div class="lab-hero-bar">
+      <div class="lab-hero-tabs" role="tablist" aria-label="Choose flagship lab stage">
+        <button type="button" class="lab-htab on" role="tab" aria-selected="true" data-lhero="orbital"><b>01</b> Orbital Dispatch</button>
+        <button type="button" class="lab-htab" role="tab" aria-selected="false" data-lhero="sat"><b>02</b> Full Satellite</button>
+        <button type="button" class="lab-htab" role="tab" aria-selected="false" data-lhero="goride"><b>03</b> City Lens</button>
+      </div>
+      <a class="lab-scroll" href="#experiments">More in the lab <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14m-6-6 6 6 6-6"/></svg></a>
+    </div>
+    <div class="lab-hero-body" id="lab-hero-body">
+      <div class="lab-gr-stage" id="goride-hero"></div>
+      <div class="sat-stage" id="sat-hero" data-sat-hero data-cursor="Scan"></div>
+      <svg class="orb-beam-svg" id="orb-beam-svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="orb-cone-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#7fe0ff" stop-opacity="0.28"/>
+            <stop offset="100%" stop-color="#ffd27a" stop-opacity="0.06"/>
+          </linearGradient>
+          <linearGradient id="orb-cone-xr" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#7fe0ff" stop-opacity="0.34"/>
+            <stop offset="100%" stop-color="#7fe0ff" stop-opacity="0.08"/>
+          </linearGradient>
+        </defs>
+        <polygon id="orb-cone" fill="url(#orb-cone-grad)"/>
+        <line id="orb-tether" stroke="#7fe0ff" stroke-opacity="0.48" stroke-width="1.5" stroke-dasharray="4 6"/>
+        <line id="orb-beam" stroke="#ffd27a" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="8 6"/>
+        <circle id="orb-src" r="5" fill="#7fe0ff" stroke="#02050f" stroke-width="1.5"/>
+        <g id="orb-reticle">
+          <circle r="15" fill="none" stroke="#ffd27a" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <circle r="3.5" fill="#ffd27a"/>
+        </g>
+      </svg>
+    </div>
   </section>
 
   <div class="wrap bays" id="experiments">
@@ -100,6 +130,16 @@
           <span class="cab-sign"><b>Liquid glass lab</b><i class="tag">WebGL2</i></span>
           <span class="cab-screen"><canvas class="pv" data-pv="lglass" width="640" height="400" aria-hidden="true"></canvas></span>
           <span class="cab-deck"><span class="cab-desc">Tune the front page’s WebGL2 optical shader live: dispersion, corner shape, rim light, or paste any custom SVG.</span><span class="cab-keys"><kbd>Move</kbd><kbd>Sliders</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" id="tidepool" href="#tidepool" data-open="tidepool" data-tone="blue">
+          <span class="cab-sign"><b>Tidepool liquid UI</b><i class="tag">WebGL</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="tidepool" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">3D tilting water-filled card and metaball liquid drop checkout in WebGL1. Tilt, flip for CVC, or stack like Wallet.</span><span class="cab-keys"><kbd>Tilt</kbd><kbd>Flip</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
+        </a>
+        <a class="cab" id="goride" href="#goride" data-open="goride" data-tone="gold">
+          <span class="cab-sign"><b>KL Ride · City Lens</b><i class="tag">New</i></span>
+          <span class="cab-screen"><canvas class="pv" data-pv="goride" width="640" height="400" aria-hidden="true"></canvas></span>
+          <span class="cab-deck"><span class="cab-desc">Drag a magnifying phone lens across a live Kuala Lumpur street grid, tap to drop a pin, and hold to dispatch a real vehicle.</span><span class="cab-keys"><kbd>Drag</kbd><kbd>Hold</kbd></span><span class="cab-go">Open<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></span></span>
         </a>
         <a class="cab" id="scorelab-cab" href="#scorelab" data-open="scorelab" data-tone="gold">
           <span class="cab-sign"><b>Score lab</b><i class="tag">New</i></span>
@@ -286,19 +326,226 @@
   paint();
 })();
 </script>
-<script src="/assets/sfx.js?v=20261123r" defer></script>
-<script src="/assets/fx.js?v=20261123r" defer></script>
-<script src="/assets/cursor.js?v=20261123r" defer></script>
-<script src="/assets/halcyon.js?v=20261123r" defer></script>
-<script src="/assets/play/anatomy.js?v=20261123r" defer></script>
-<script src="/assets/play/scorelab.js?v=20261123r" defer></script>
+<script src="/assets/sfx.js?v=20261124e" defer></script>
+<script src="/assets/fx.js?v=20261124e" defer></script>
+<script src="/assets/cursor.js?v=20261124e" defer></script>
+<script src="/assets/halcyon.js?v=20261124e" defer></script>
+<script src="/assets/play/anatomy.js?v=20261124e" defer></script>
+<script src="/assets/play/scorelab.js?v=20261124e" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous" defer></script>
-<script src="/assets/home/sat/satellite.js?v=20261123r" defer></script>
-<script src="/assets/play/pad.js?v=20261123r" defer></script>
-<script src="/assets/play/play.js?v=20261123r" defer></script>
-<script src="/assets/passport.js?v=20261123r" defer></script>
-<script src="/assets/palette.js?v=20261123r" defer></script>
-<script src="/assets/intro-gate.js?v=20261123r" defer></script>
-<script>(function(){var h=document.getElementById('sat-hero');if(h)h.addEventListener('pointerdown',function(){if(window.FlightLog)window.FlightLog.unlock('satellite')},{once:true,passive:true})})();</script>
+<script src="/assets/home/sat/satellite.js?v=20261124e" defer></script>
+<script src="/assets/goride.js?v=20261124e" defer></script>
+<script src="/assets/play/pad.js?v=20261124e" defer></script>
+<script src="/assets/play/play.js?v=20261124e" defer></script>
+<script src="/assets/passport.js?v=20261124e" defer></script>
+<script src="/assets/palette.js?v=20261124e" defer></script>
+<script>
+(function () {
+  var h = document.getElementById('sat-hero');
+  if (h) h.addEventListener('pointerdown', function () { if (window.FlightLog) window.FlightLog.unlock('satellite'); }, { once: true, passive: true });
+
+  var SAT_META = {
+    gpm: { name: 'GPM-CORE', alt: '407 KM' },
+    trmm: { name: 'TRMM', alt: '350 KM' },
+    aim: { name: 'AIM', alt: '600 KM' }
+  };
+
+  window.addEventListener('DOMContentLoaded', function () {
+    var root = document.documentElement;
+    var heroSec = document.getElementById('satellite');
+    var heroBody = document.getElementById('lab-hero-body');
+    var grHost = document.getElementById('goride-hero');
+    var satHost = document.getElementById('sat-hero');
+    var beamSvg = document.getElementById('orb-beam-svg');
+    var orbCone = document.getElementById('orb-cone');
+    var orbBeam = document.getElementById('orb-beam');
+    var orbTether = document.getElementById('orb-tether');
+    var orbSrc = document.getElementById('orb-src');
+    var orbReticle = document.getElementById('orb-reticle');
+    var tabs = document.querySelectorAll('[data-lhero]');
+    var reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    var grInst = null;
+    var mode = 'orbital';
+
+    function curTheme() { return root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
+    function getSat() { return window.SatelliteStage || null; }
+
+    function clearBeam() {
+      if (!beamSvg) return;
+      orbCone.setAttribute('points', '');
+      orbBeam.setAttribute('x1', '0'); orbBeam.setAttribute('y1', '0');
+      orbBeam.setAttribute('x2', '0'); orbBeam.setAttribute('y2', '0');
+      orbTether.setAttribute('x1', '0'); orbTether.setAttribute('y1', '0');
+      orbTether.setAttribute('x2', '0'); orbTether.setAttribute('y2', '0');
+      orbSrc.setAttribute('opacity', '0');
+      orbReticle.setAttribute('opacity', '0');
+    }
+
+    function paintBeam(info) {
+      if (mode !== 'orbital' || !beamSvg || !heroBody) { clearBeam(); return; }
+      var sat = getSat();
+      if (!sat || !sat.getAnchor) { clearBeam(); return; }
+      var anc = sat.getAnchor();
+      if (!anc.visible) { clearBeam(); return; }
+      var hr = heroBody.getBoundingClientRect();
+      if (hr.width < 10 || hr.height < 10) { clearBeam(); return; }
+
+      var sx = anc.x - hr.left;
+      var sy = anc.y - hr.top;
+      var ox = info.stageRect.left - hr.left;
+      var oy = info.stageRect.top - hr.top;
+
+      var trackingCar = (info.status === 'coming' || info.status === 'arrived' || info.status === 'trip') && info.carWorld;
+      var target = trackingCar ? info.carWorld : info.focusWorld;
+      var tx = ox + target.x;
+      var ty = oy + target.y;
+
+      var dx = tx - sx, dy = ty - sy;
+      var len = Math.hypot(dx, dy) || 1;
+      var px = -dy / len, py = dx / len;
+      var spread = info.xray ? 32 : (trackingCar ? 24 : 18);
+
+      orbCone.setAttribute('points',
+        sx.toFixed(1) + ',' + sy.toFixed(1) + ' ' +
+        (tx + px * spread).toFixed(1) + ',' + (ty + py * spread).toFixed(1) + ' ' +
+        (tx - px * spread).toFixed(1) + ',' + (ty - py * spread).toFixed(1)
+      );
+      orbCone.setAttribute('fill', info.xray ? 'url(#orb-cone-xr)' : 'url(#orb-cone-grad)');
+
+      var beamCol = info.xray ? '#7fe0ff' : '#ffd27a';
+      orbBeam.setAttribute('x1', sx.toFixed(1)); orbBeam.setAttribute('y1', sy.toFixed(1));
+      orbBeam.setAttribute('x2', tx.toFixed(1)); orbBeam.setAttribute('y2', ty.toFixed(1));
+      orbBeam.setAttribute('stroke', beamCol);
+      if (!reduceMotion) orbBeam.setAttribute('stroke-dashoffset', (-((performance.now() * 0.032) % 28)).toFixed(1));
+
+      // Secondary tether: link satellite to dropoff flag (or pickup pin while tracking car)
+      var secPt = trackingCar ? (info.dropoffWorld || info.focusWorld) : info.dropoffWorld;
+      if (secPt) {
+        orbTether.setAttribute('x1', sx.toFixed(1)); orbTether.setAttribute('y1', sy.toFixed(1));
+        orbTether.setAttribute('x2', (ox + secPt.x).toFixed(1)); orbTether.setAttribute('y2', (oy + secPt.y).toFixed(1));
+        orbTether.setAttribute('opacity', '0.52');
+      } else {
+        orbTether.setAttribute('opacity', '0');
+      }
+
+      orbSrc.setAttribute('cx', sx.toFixed(1)); orbSrc.setAttribute('cy', sy.toFixed(1));
+      orbSrc.setAttribute('opacity', '1');
+      orbReticle.setAttribute('transform', 'translate(' + tx.toFixed(1) + ',' + ty.toFixed(1) + ')');
+      orbReticle.setAttribute('opacity', '1');
+      orbReticle.querySelector('circle').setAttribute('stroke', beamCol);
+
+      // Slew 3D NASA Satellite toward the active KL target
+      var tNormX = (target.x / Math.max(1, info.stageRect.width)) * 2 - 1;
+      var tNormY = (target.y / Math.max(1, info.stageRect.height)) * 2 - 1;
+      if (sat.slewTarget) sat.slewTarget(tNormX, tNormY);
+    }
+
+    function mountGoRide() {
+      if (grInst || !grHost || !window.GoRide) return;
+      grInst = window.GoRide.mount(grHost, {
+        preset: 'kl',
+        theme: 'dark', // Midnight orbital radar fuses seamlessly with NASA space deck
+        sound: true,
+        embedded: true,
+        orbital: true,
+        onFrame: paintBeam,
+        onStatus: function (status) {
+          var sat = getSat();
+          if (status === 'finding' || status === 'coming') {
+            if (sat && sat.pulseXray) sat.pulseXray(2200);
+            if (window.FlightLog) window.FlightLog.unlock('satellite');
+          }
+        },
+        onXrayToggle: function (on) {
+          var sat = getSat();
+          if (sat && sat.setAuto && sat.auto !== on) sat.setAuto(on);
+        }
+      });
+    }
+
+    if (satHost) {
+      satHost.addEventListener('sat-state', function (e) {
+        var det = e.detail || {};
+        if (!grInst) return;
+        var meta = SAT_META[det.key] || SAT_META.gpm;
+        grInst.setSatTelemetry(meta);
+        if (typeof det.auto === 'boolean') grInst.setXray(det.auto, true);
+      });
+    }
+
+    function selectHero(which) {
+      mode = (which === 'sat' || which === 'goride') ? which : 'orbital';
+      if (heroSec) heroSec.setAttribute('data-hero-mode', mode);
+      tabs.forEach(function (b) {
+        var on = b.dataset.lhero === mode;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-selected', String(on));
+      });
+
+      var sat = getSat();
+      if (mode === 'orbital') {
+        mountGoRide();
+        if (grHost) grHost.hidden = false;
+        if (grInst) {
+          grInst.setOrbitalMode(true);
+          grInst.setTheme('dark');
+        }
+        if (satHost && grInst) {
+          var slot = grInst.getSatSlot();
+          if (slot && satHost.parentNode !== slot) slot.appendChild(satHost);
+          satHost.hidden = false;
+        }
+        if (beamSvg) beamSvg.hidden = false;
+        if (sat) {
+          if (sat.setPip) sat.setPip(true);
+          if (sat.syncVisibility) sat.syncVisibility();
+          var meta = SAT_META[sat.curKey] || SAT_META.gpm;
+          if (grInst) grInst.setSatTelemetry(meta);
+        }
+      } else if (mode === 'sat') {
+        if (grHost) grHost.hidden = true;
+        if (beamSvg) beamSvg.hidden = true;
+        clearBeam();
+        if (satHost && heroBody && satHost.parentNode !== heroBody) heroBody.appendChild(satHost);
+        if (satHost) satHost.hidden = false;
+        if (sat) {
+          if (sat.setPip) sat.setPip(false);
+          if (sat.syncVisibility) sat.syncVisibility();
+        }
+        setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 40);
+      } else {
+        // Pure City Lens mode
+        mountGoRide();
+        if (grHost) grHost.hidden = false;
+        if (grInst) {
+          grInst.setOrbitalMode(false);
+          grInst.setTheme(curTheme());
+        }
+        if (beamSvg) beamSvg.hidden = true;
+        clearBeam();
+        if (satHost) {
+          satHost.hidden = true;
+          if (heroBody && satHost.parentNode !== heroBody) heroBody.appendChild(satHost);
+        }
+        if (sat && sat.syncVisibility) sat.syncVisibility();
+      }
+    }
+
+    tabs.forEach(function (b) {
+      b.addEventListener('click', function () { selectHero(b.dataset.lhero); });
+    });
+
+    if ('MutationObserver' in window) {
+      new MutationObserver(function () {
+        if (grInst && mode === 'goride') grInst.setTheme(curTheme());
+      }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    }
+
+    // Boot into merged Orbital Dispatch by default (or #sat-only if explicitly requested)
+    var initMode = location.hash === '#goride-only' ? 'goride' : 'orbital';
+    selectHero(initMode);
+  });
+})();
+</script>
 </body>
 </html>

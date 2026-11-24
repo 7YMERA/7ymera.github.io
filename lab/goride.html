@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>KL Ride · City Lens Lab · 7YMERA</title>
+<meta name="description" content="Interactive Kuala Lumpur city-lens ride dispatch simulator: drag the magnifying phone lens over KL districts, tap to set a drop-off flag, and hold to dispatch a live vehicle.">
+<link rel="icon" href="/assets/icons/favicon.ico" sizes="32x32">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Albert+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/assets/goride.css?v=20261124e">
+<style>
+:root {
+  --f-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --f-body: "Albert Sans", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+html, body { margin: 0; padding: 0; }
+</style>
+</head>
+<body>
+<main id="goride-host"></main>
+<script src="/assets/goride.js?v=20261124e"></script>
+<script>
+(function () {
+  'use strict';
+  var q = new URLSearchParams(location.search);
+  var theme = q.get('theme') === 'dark' ? 'dark' : 'light';
+  var preset = q.get('preset') === 'classic' ? 'classic' : 'kl';
+  document.documentElement.setAttribute('data-theme', theme);
+  window.GoRide.mount(document.getElementById('goride-host'), {
+    preset: preset,
+    theme: theme,
+    sound: true
+  });
+})();
+</script>
+</body>
+</html>

@@ -113,13 +113,13 @@
   function startLater(){if(laterOn)return;var ric=window.requestIdleCallback||function(f){return setTimeout(f,60)};
     function step(){var f=LATER.shift();if(!f){laterOn=true;return}f();ric(step,{timeout:1500})}
     ric(step,{timeout:1500})}
-  function loadModel(url,x,z,ry,bm,fallback,done){
+  function loadModel(url,x,z,ry,bm,fallback,done,y0){
     fetch(url).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
       var pos=b64(d.positions,Float32Array),out=new T.Group();
       [['body',bm],['glass',glassModelM]].forEach(function(p){
         var geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));geo.setIndex(new T.BufferAttribute(b64(d[p[0]],Uint16Array),1));
         geo.computeVertexNormals();out.add(new T.Mesh(geo,p[1]))});
-      out.scale.setScalar(SC);out.position.set(x,0,z);out.rotation.y=ry;g.add(out);if(done)done(out);recolor();need=true;if(HOMEDS&&shown&&!raf)warmFrame();
+      out.scale.setScalar(SC);out.position.set(x,y0||0,z);out.rotation.y=ry;g.add(out);if(done)done(out);recolor();need=true;if(HOMEDS&&shown&&!raf)warmFrame();
     }).catch(function(){if(fallback)fallback();recolor();need=true});
   }
   if(!DIST){
@@ -144,33 +144,105 @@
     return function(out){var ms=[];out.traverse(function(m){if(m.isMesh)ms.push(m)});ms.forEach(function(m){edgeJobs.push([build,m,out])});if(edgesWanted)pumpEdges()}}
   function warmEdges(){edgesWanted=true;pumpEdges()}
   var merEdges=edgesFor(0xd4e9ff,24,.4),klccEdges=edgesFor(0xffe7b0,14,.55),exEdges=edgesFor(0xa8ecff,16,.7);
+  // Bukit Nanas Forest Eco Park real 3D hill elevation beneath Menara KL (DIST mode)
+  var KL_Y=DIST?22:0;
   // In the district all four landmarks are the hand-made models (the district's own baked Menara KL is cleared out below, see CLEAR/BAKED).
-  if(DIST){later(function(){loadModel(BASE+'city/klcc.json',LAY.klcc[0],LAY.klcc[1],LAY.klcc[2],bodyM,null,klccEdges)});later(function(){loadModel(BASE+'city/menara_kl.json',LAY.kl[0],LAY.kl[1],LAY.kl[2],bodyM,null,null)});
+  if(DIST){later(function(){loadModel(BASE+'city/klcc.json',LAY.klcc[0],LAY.klcc[1],LAY.klcc[2],bodyM,null,klccEdges)});later(function(){loadModel(BASE+'city/menara_kl.json',LAY.kl[0],LAY.kl[1],LAY.kl[2],bodyM,null,null,KL_Y)});
     later(function(){loadModel(BASE+'city/merdeka118.json',LAY.mer[0],LAY.mer[1],LAY.mer[2],bodyM,null,merEdges)});later(function(){loadModel(BASE+'city/exchange106.json',LAY.ex[0],LAY.ex[1],LAY.ex[2],bodyM,null,exEdges)})}
-  // Natural Klang Valley basin floor: dead-flat urban core (r <= 420) so every building & pier sits flush, rising organically into rolling Titiwangsa Range foothills beyond r = 420
-  var gr=(function(){
-    var R=1400,segA=72,segR=26,pos=[0,0,0],idx=[],ri,ai;
-    for(ri=1;ri<=segR;ri++){
-      var f=ri/segR,rad=R*Math.pow(f,1.35);
-      for(ai=0;ai<segA;ai++){
-        var ang=ai/segA*6.2831853,x=Math.cos(ang)*rad,z=Math.sin(ang)*rad,y=0;
-        if(rad>420){
-          var hK=Math.min(1,(rad-420)/540);hK=hK*hK*(3-2*hK);
-          var ridge=Math.sin(ang*3.0+.6)*16+Math.cos(ang*5.0-1.1)*11+Math.sin(x*.008+z*.006)*14+Math.cos(z*.011-x*.005)*9;
-          y=Math.max(0,(24+ridge)*hK);
+  // Natural Klang Valley terrain grid (96x96 non-uniform world mesh):
+  // - Flat urban core so every building & pier sits flush
+  // - Real 3D Bukit Nanas hill rising organically to y = 22.8 under Menara KL
+  // - Surrounding Titiwangsa mountain rim sculpted from real Sahne.obj heightfield (assets/city/terrain_h.json)
+  function bukitH(x,z,ridgeN){
+    if(!DIST)return 0;
+    var dx=(x-LAY.kl[0])/44,dz=(z-LAY.kl[1])/38,d=Math.hypot(dx,dz);
+    if(d>=1.08)return 0;
+    if(d<=.22)return KL_Y+.8;
+    var t=(d-.22)/.86;t=t*t*(3-2*t);
+    var crag=1+.14*Math.sin(Math.atan2(dz,dx)*4+.8)+.1*Math.cos(x*.09-z*.08)+(ridgeN||0)*.22;
+    return Math.max(0,(KL_Y+.8)*(1-t)*Math.min(1.12,crag));
+  }
+  var grN=96,grR=1350,grGeo=null,gr=(function(){
+    var pos=[],idx=[],ix,iz;
+    function mapC(u){var s=u<0?-1:1;return s*grR*Math.pow(Math.abs(u),1.22)}
+    for(iz=0;iz<=grN;iz++){
+      var vz=mapC((iz/grN)*2-1);
+      for(ix=0;ix<=grN;ix++){
+        var vx=mapC((ix/grN)*2-1),rad=Math.hypot(vx,vz),y=bukitH(vx,vz,0);
+        if(rad>395){
+          var hK=Math.min(1,(rad-395)/520);hK=hK*hK*(3-2*hK);
+          var ang=Math.atan2(vz,vx),ridge=Math.sin(ang*3+.6)*16+Math.cos(ang*5-1.1)*11+Math.sin(vx*.008+vz*.006)*14;
+          y=Math.max(y,(26+ridge)*hK);
         }
-        pos.push(x,y,z);
+        pos.push(vx,y,vz);
       }
     }
-    for(ai=0;ai<segA;ai++)idx.push(0,1+ai,1+((ai+1)%segA));
-    for(ri=1;ri<segR;ri++){
-      var r0=1+(ri-1)*segA,r1=1+ri*segA;
-      for(ai=0;ai<segA;ai++){var an=(ai+1)%segA;idx.push(r0+ai,r1+ai,r1+an,r0+ai,r1+an,r0+an)}
+    for(iz=0;iz<grN;iz++)for(ix=0;ix<grN;ix++){
+      var a=iz*(grN+1)+ix,b=a+1,c=a+(grN+1),d0=c+1;
+      idx.push(a,c,b,b,c,d0);
     }
-    var bg=new T.BufferGeometry();bg.setAttribute('position',new T.Float32BufferAttribute(pos,3));bg.setIndex(idx);bg.computeVertexNormals();
-    var m=new T.Mesh(bg,ground);m.position.y=-.2;return m;
+    grGeo=new T.BufferGeometry();grGeo.setAttribute('position',new T.Float32BufferAttribute(pos,3));grGeo.setIndex(idx);grGeo.computeVertexNormals();
+    var m=new T.Mesh(grGeo,ground);m.position.y=-.2;return m;
   })();
   g.add(gr);
+  // Stylized tropical forest canopy trees across Bukit Nanas hill slopes & open KLCC Park perimeter
+  var treeM=mat(null,{}),treeInst=(function(){
+    if(!DIST)return null;
+    var pts=[],seed=41;function tr(){seed=(seed*9301+49297)%233280;return seed/233280}
+    // 115 canopy clusters organically carpeting Bukit Nanas Forest Eco Park hillside
+    for(var ti=0;ti<115;ti++){
+      var ang=tr()*6.2832,rad=11+Math.sqrt(tr())*30,tx=LAY.kl[0]+Math.cos(ang)*rad*1.04,tz=LAY.kl[1]+Math.sin(ang)*rad*.9;
+      var ty=bukitH(tx,tz,0);if(ty<1.5)continue;
+      pts.push([tx,ty,tz,2.2+tr()*2.6,3.2+tr()*3.8,tr()*6.28]);
+    }
+    // 45 canopy clusters framing open KLCC Park around Lake Symphony (72, 62), clear of pool & Suria KLCC
+    for(var ki=0;ki<45;ki++){
+      var ka=tr()*6.2832,kr=18+tr()*22,kx=72+Math.cos(ka)*kr,kz=62+Math.sin(ka)*kr*.88;
+      if(kx<55&&kz<54)continue; // stay outside Suria KLCC podium
+      pts.push([kx,0,kz,1.8+tr()*2.0,2.8+tr()*2.8,tr()*6.28]);
+    }
+    var geo=new T.ConeGeometry(1,1.65,6);geo.translate(0,.78,0);
+    var inst=new T.InstancedMesh(geo,treeM,pts.length),dm=new T.Object3D();
+    for(var j=0;j<pts.length;j++){
+      var p=pts[j];dm.position.set(p[0],p[1]-.4,p[2]);dm.rotation.set(0,p[5],0);dm.scale.set(p[3],p[4],p[3]);dm.updateMatrix();
+      inst.setMatrixAt(j,dm.matrix);
+    }
+    inst.instanceMatrix.needsUpdate=true;g.add(inst);return {inst:inst,pts:pts};
+  })();
+  // Upgrade outer Titiwangsa Range & Bukit Nanas micro-ridges from baked Sahne.obj heightfield (6.7 KB)
+  later(function(){
+    fetch(BASE+'city/terrain_h.json').then(function(r){return r.ok?r.json():null}).then(function(hd){
+      if(!hd||!hd.data||!grGeo)return;
+      var raw=b64(hd.data,Uint8Array),w=hd.w,h=hd.h;
+      function sampleH(x,z){
+        var u=clamp((x+grR)/(grR*2),0,.999)*(w-1),v=clamp((z+grR)/(grR*2),0,.999)*(h-1);
+        var x0=u|0,y0=v|0,x1=Math.min(w-1,x0+1),y1=Math.min(h-1,y0+1),fx=u-x0,fy=v-y0;
+        var a=raw[y0*w+x0],b=raw[y0*w+x1],c=raw[y1*w+x0],d0=raw[y1*w+x1];
+        return ((a+(b-a)*fx)*(1-fy)+(c+(d0-c)*fx)*fy)/255;
+      }
+      var pa=grGeo.attributes.position.array;
+      for(var i=0;i<pa.length;i+=3){
+        var vx=pa[i],vz=pa[i+2],rad=Math.hypot(vx,vz),hs=sampleH(vx,vz);
+        var y=bukitH(vx,vz,(hs-.45));
+        if(rad>395){
+          var hK=Math.min(1,(rad-395)/460);hK=hK*hK*(3-2*hK);
+          y=Math.max(y,(12+hs*86)*hK);
+        }
+        pa[i+1]=y;
+      }
+      grGeo.attributes.position.needsUpdate=true;grGeo.computeVertexNormals();
+      if(treeInst){
+        var dm=new T.Object3D();
+        for(var j=0;j<treeInst.pts.length;j++){
+          var p=treeInst.pts[j],ty=p[1]>0?bukitH(p[0],p[2],sampleH(p[0],p[2])-.45):0;
+          dm.position.set(p[0],ty-.4,p[2]);dm.rotation.set(0,p[5],0);dm.scale.set(p[3],p[4],p[3]);dm.updateMatrix();
+          treeInst.inst.setMatrixAt(j,dm.matrix);
+        }
+        treeInst.inst.instanceMatrix.needsUpdate=true;
+      }
+      need=true;if(HOMEDS&&shown&&!raf)warmFrame();
+    }).catch(function(){});
+  });
   // city ring
   var s=11;function rnd(){s=(s*9301+49297)%233280;return s/233280}
   var i;
@@ -178,28 +250,24 @@
   // Windows come from two facade textures laid on the walls in the shader: a glass grid by day, lit offices at night.
   var loader=new T.TextureLoader();
   function wrapTex(t){t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=4;return t}
+  function clampTex(t){t.wrapS=t.wrapT=T.ClampToEdgeWrapping;t.anisotropy=4;return t}
   // Where a building has a spire or a bare shaft, no rooms light up above (or below) these heights: [x, z, radius, light up to y] and the lowest lit y. Landmarks: Petronas, Merdeka 118, The Exchange 106, Menara KL.
-  var LCUT=(function(){var P=crown('klcc'),Mr=crown('mer'),Ex=crown('ex'),Kl=crown('kl');return [[P[0],P[1],34,106],[Mr[0],Mr[1],24,154],[Ex[0],Ex[1],28,122],[Kl[0],Kl[1],9,99]]})(); // derived from LAY: [crown x, z, radius, light up to y]
-  var cityU={uCut:{value:LCUT.map(function(c){return new T.Vector4(c[0],c[1],c[2],c[3])})},uLo:{value:[-1,-1,-1,78]},uNight:{value:0},uTime:{value:0},uRain:{value:0},uGoldF:{value:0},uDay:{value:wrapTex(loader.load(BASE+'city/facade_glass.jpg'))},uNightTex:{value:wrapTex(loader.load(BASE+'city/facade_night.jpg'))}};
+  var LCUT=(function(){var P=crown('klcc'),Mr=crown('mer'),Ex=crown('ex'),Kl=crown('kl');return [[P[0],P[1],34,106],[Mr[0],Mr[1],24,154],[Ex[0],Ex[1],28,122],[Kl[0],Kl[1],9,99+KL_Y]]})(); // derived from LAY: [crown x, z, radius, light up to y]
+  var cityU={uCut:{value:LCUT.map(function(c){return new T.Vector4(c[0],c[1],c[2],c[3])})},uLo:{value:[-1,-1,-1,78+KL_Y]},uNight:{value:0},uTime:{value:0},uRain:{value:0},uGoldF:{value:0},uDay:{value:wrapTex(loader.load(BASE+'city/facade_glass.jpg'))},uNightTex:{value:wrapTex(loader.load(BASE+'city/facade_night.jpg'))},uTerrCol:{value:clampTex(loader.load(BASE+'city/terrain_color.jpg'))},uTerrAO:{value:clampTex(loader.load(BASE+'city/terrain_ao.jpg'))}};
   // Facade shader: windows on the walls, in world space, so every building (the OSM city and the landmark models alike) shows its floors.
   function facade(m,glass){
     m.onBeforeCompile=function(sh){
-      sh.uniforms.uNight=cityU.uNight;sh.uniforms.uCut=cityU.uCut;sh.uniforms.uLo=cityU.uLo;sh.uniforms.uDay=cityU.uDay;sh.uniforms.uNightTex=cityU.uNightTex;sh.uniforms.uGlass={value:glass?1:0};sh.uniforms.uTime=cityU.uTime;sh.uniforms.uRain=cityU.uRain;sh.uniforms.uGoldF=cityU.uGoldF;
+      sh.uniforms.uNight=cityU.uNight;sh.uniforms.uCut=cityU.uCut;sh.uniforms.uLo=cityU.uLo;sh.uniforms.uDay=cityU.uDay;sh.uniforms.uNightTex=cityU.uNightTex;sh.uniforms.uTerrCol=cityU.uTerrCol;sh.uniforms.uTerrAO=cityU.uTerrAO;sh.uniforms.uGlass={value:glass?1:0};sh.uniforms.uTime=cityU.uTime;sh.uniforms.uRain=cityU.uRain;sh.uniforms.uGoldF=cityU.uGoldF;
       toon(sh);
       sh.fragmentShader=sh.fragmentShader.replace('void main() {',GLSL.facadeHead)
         .replace('#include <emissivemap_fragment>',GLSL.facadeBody)};
     return m}
-  // The ground stays one plain colour. (Roads and dark patches were tried and removed: owner didn't like them.)
   var cityM=facade(mat('mid',DIST?{side:T.DoubleSide}:{}));
   facade(bodyM); // all four landmarks share one material and the facade shader, so none is bluer than the rest
-  facade(glassModelM,1); // their glass parts too (they were a flat cyan at night); the ground takes the shader for its street glow
+  facade(glassModelM,1); // their glass parts too (they were a flat cyan at night); the ground takes the shader for its real PBR terrain & street glow
   facade(ground);
   // ---- CLEARING THE PLOTS (district only) ----
-  // The district is one merged mesh, so a plot is cleared by dropping triangles before the geometry is built (deterministic, one pass over the index buffer):
-  //   CLEAR: each landmark's footprint as a circle [model-local centre x, z, radius] (the model's enclosing circle plus a margin), placed through LAY, so it follows the layout.
-  //   BAKED: where the district's own coarse versions stand (world x, z, radius): Merdeka 118 and The Exchange 106 (welded coarsely, with holes) and Menara KL. They are cut out, the hand-made models stand elsewhere.
-  // A small block (under 300 m across) touched by a circle is dropped whole, so no half buildings are left; the three big merged slabs only lose the triangles inside.
-  var CLEAR=[['klcc',12.5,12.7,45],['kl',0,0,14],['mer',-2.3,1.9,59],['ex',-.1,-1.7,33]],BAKED=[[-217.4,303.3,59],[157.4,304.7,37],[-221.3,181.6,12]];
+  var CLEAR=[['klcc',12.5,12.7,45],['kl',0,0,44],['mer',-2.3,1.9,59],['ex',-.1,-1.7,33]],BAKED=[[-217.4,303.3,59],[157.4,304.7,37],[-221.3,181.6,12]];
   function clearPlots(pos,ix){ // pos in metres (the mesh is scaled by SC afterwards)
     var circ=CLEAR.map(function(c){var p=lp(c[0],c[1],c[2]);return [p[0]/SC,p[1]/SC,c[3]/SC]}).concat(BAKED.map(function(c){return [c[0]/SC,c[1]/SC,c[2]/SC]})),
       nV=pos.length/3,nT=ix.length/3,par=new Int32Array(nV),t,k,c;
@@ -254,7 +322,7 @@
   var LM=[
     {name:'Petronas Twin Towers',real:452,top:new T.Vector3(crown('klcc')[0],134,crown('klcc')[1]),cta:'Check out my Portfolio ↗',href:'/portfolio/'},
     {name:'Merdeka 118',real:679,top:new T.Vector3(crown('mer')[0],194,crown('mer')[1]),cta:'Projects & Specs ↗',href:'/#projects'},
-    {name:'Menara Kuala Lumpur',real:421,top:new T.Vector3(crown('kl')[0],DIST?127:130,crown('kl')[1]),cta:'Notes & Write-ups ↗',href:'/notes/'},
+    {name:'Menara Kuala Lumpur',real:421,top:new T.Vector3(crown('kl')[0],(DIST?127:130)+KL_Y,crown('kl')[1]),cta:'Notes & Write-ups ↗',href:'/notes/'},
     {name:'The Exchange 106',real:445,top:new T.Vector3(crown('ex')[0],DIST?132:136,crown('ex')[1]),cta:'Open the Lab ↗',href:'/lab/'}]; // tops derived from LAY (crown axis, height as before)
   var fx=[],fxGroup=new T.Group();scene.add(fxGroup);
   function fade(){var w=4,h=64,d=new Uint8Array(w*h*4),y,x,p;
@@ -612,27 +680,38 @@
       if(boltLife<=0){boltLine.visible=false;boltFlash=0}
     }
   }
-  // KLCC LAKE SYMPHONY AUDIO-REACTIVE FOUNTAIN: concentric water jets beside Petronas Twin Towers (cobalt, ice-white, gold)
-  var FTN_N=PERF.tier==='low'?20:36,ftnM=new T.MeshBasicMaterial({color:0xbce4ff,transparent:true,opacity:.68,depthWrite:false,fog:true});
-  var ftnInst=new T.InstancedMesh(new T.CylinderGeometry(.16,.44,1,5),ftnM,FTN_N),ftnMeta=[],ftnD=new T.Object3D();
-  var ftnX=18,ftnZ=32;
+  // KLCC LAKE SYMPHONY FOUNTAIN (open KLCC Park plaza at (72, 62), clear of Suria KLCC & viaduct):
+  // Sculpted stone reflecting basin + 180 real ballistic parabolic water-spray droplets reacting gently to audio
+  var ftnX=72,ftnZ=62,ftnGrp=new T.Group();ftnGrp.position.set(ftnX,0,ftnZ);scene.add(ftnGrp);
+  var ftnRimM=new T.MeshBasicMaterial({color:0x1b2d4a,fog:true});
+  var ftnRim=new T.Mesh(new T.RingGeometry(13.2,14.8,48),ftnRimM);ftnRim.rotation.x=-Math.PI/2;ftnRim.position.y=.26;ftnGrp.add(ftnRim);
+  var ftnPoolM=new T.MeshBasicMaterial({color:0x1a4475,transparent:true,opacity:.86,fog:true});
+  var ftnPool=new T.Mesh(new T.CircleGeometry(13.2,48),ftnPoolM);ftnPool.rotation.x=-Math.PI/2;ftnPool.position.y=.22;ftnGrp.add(ftnPool);
+  var ftnRingM=new T.MeshBasicMaterial({color:0xffd27a,transparent:true,opacity:.55,depthWrite:false,fog:true});
+  [3.4,7.8].forEach(function(rr){var rg=new T.Mesh(new T.RingGeometry(rr-.22,rr+.22,40),ftnRingM);rg.rotation.x=-Math.PI/2;rg.position.y=.30;ftnGrp.add(rg)});
+  var FTN_N=PERF.tier==='low'?100:180,ftnPos=new Float32Array(FTN_N*3),ftnCol=new Float32Array(FTN_N*3),ftnMeta=[];
   for(var fi=0;fi<FTN_N;fi++){
-    var ring0=fi<10?0:(fi<24?1:2),cnt=ring0===0?10:(ring0===1?14:Math.max(1,FTN_N-24)),idx0=ring0===0?fi:(ring0===1?fi-10:fi-24);
-    var fa=idx0/cnt*6.2832,fr0=ring0===0?3.2:(ring0===1?7.2:11.4);
-    ftnMeta.push({x:ftnX+Math.cos(fa)*fr0,z:ftnZ+Math.sin(fa)*fr0*.72,r:ring0,ph:fa*2+ring0*1.4,base:ring0===0?11:(ring0===1?7.5:4.5)});
+    var tier=fi<48?0:(fi<114?1:2),ang=(fi*2.39996)%6.2832;
+    var r0=tier===0?.8:(tier===1?3.4:7.8);
+    var vOut=tier===0?(1.2+(fi%5)*.4):(tier===1?(3.6+(fi%4)*.5):(2.8+(fi%4)*.45));
+    var vUp=tier===0?(10.5+(fi%6)*.65):(tier===1?(8.2+(fi%5)*.45):(6.2+(fi%4)*.4));
+    ftnMeta.push({r0:r0,ang:ang,vOut:vOut,vUp:vUp,tier:tier,ph:(fi%20)/20});
+    var goldish=tier===1;
+    ftnCol[fi*3]=goldish?1.0:.74;ftnCol[fi*3+1]=goldish?.86:.92;ftnCol[fi*3+2]=goldish?.56:1.0;
   }
-  ftnInst.frustumCulled=false;scene.add(ftnInst);
+  var ftnGeo=new T.BufferGeometry();ftnGeo.setAttribute('position',new T.BufferAttribute(ftnPos,3));ftnGeo.setAttribute('color',new T.BufferAttribute(ftnCol,3));
+  var ftnM=new T.PointsMaterial({size:PERF.tier==='low'?2.2:2.7,map:gTex,vertexColors:true,transparent:true,opacity:.78,depthWrite:false,fog:true});
+  var ftnPts=new T.Points(ftnGeo,ftnM);ftnPts.frustumCulled=false;ftnGrp.add(ftnPts);
   var ftnBass=0,ftnTreb=0;
   function fountainUpdate(time,still){
-    var t=still?0:time*.0024,kNight=cityU.uNight.value;
-    ftnM.opacity=.36+.44*kNight;
+    var t=still?0.45:time*.00058,kNight=cityU.uNight.value,G=18.0;
+    ftnM.opacity=.46+.44*kNight;ftnRingM.opacity=.22+.48*kNight;
     for(var i=0;i<FTN_N;i++){
-      var fm=ftnMeta[i],wave=.55+.45*Math.sin(t*2.1+fm.ph),boost=fm.r===0?ftnBass*16:(fm.r===1?ftnTreb*11:ftnBass*6);
-      var h=Math.max(1.2,fm.base*wave+boost);
-      ftnD.position.set(fm.x,h*.5,fm.z);ftnD.rotation.set(0,0,0);ftnD.scale.set(1,h,1);ftnD.updateMatrix();
-      ftnInst.setMatrixAt(i,ftnD.matrix);
+      var fm=ftnMeta[i],u=(t+fm.ph)%1,boost=fm.tier===0?1+ftnBass*.42:(fm.tier===1?1+ftnTreb*.32:1+ftnBass*.22);
+      var vu=fm.vUp*boost,tf=u*(2*vu/G),r=fm.r0+fm.vOut*tf*.62,y=Math.max(.32,vu*tf-.5*G*tf*tf);
+      ftnPos[i*3]=Math.cos(fm.ang)*r;ftnPos[i*3+1]=y;ftnPos[i*3+2]=Math.sin(fm.ang)*r;
     }
-    ftnInst.instanceMatrix.needsUpdate=true;
+    ftnGeo.attributes.position.needsUpdate=true;
   }
   // SKYLINE FIREWORKS (Free-Fly celebration + 8/8 Flight Log Passport Grand Finale boost — cobalt, ice-white & champagne gold, zero pink)
   var fwOn=false,FW_N=PERF.tier==='low'?120:180,fwPos=new Float32Array(FW_N*3),fwCol=new Float32Array(FW_N*3),fwVel=[],fwLife=new Float32Array(FW_N),fwTimer=0;
@@ -696,7 +775,7 @@
       if(trailInst&&trailInst.visible){var tStep=5.8/tr.len;for(var q=0;q<TRAIL_N;q++){var tx2=(((xt-(q+1)*tStep)%1)+1)%1,tu=dir>0?tx2:(1-tx2)%1;tr.c.getPointAt(tu,trP);tr.c.getTangentAt(tu,trT);if(dir<0)trT.negate();setTrail(tr.t0+q,trP,trT,Math.max(.12,1-q/TRAIL_N))}}}
     carMid.instanceMatrix.needsUpdate=true;carCab.instanceMatrix.needsUpdate=true;carWin.instanceMatrix.needsUpdate=true;carStripe.instanceMatrix.needsUpdate=true;if(trailInst&&trailInst.visible)trailInst.instanceMatrix.needsUpdate=true}
   // Aircraft warning lights: a red double flash on the tip of every landmark (and on both Petronas spires), instead of lit rooms up there.
-  var BEAC=(function(){var a=lp('klcc',11,-10),b=lp('klcc',-11,10),m=crown('mer'),e=crown('ex'),k=crown('kl');return [[a[0],134,a[1]],[b[0],134,b[1]],[m[0],193,m[1]],[e[0],136,e[1]],[k[0],130,k[1]]]})(); // both Petronas spires, then the tips of Merdeka 118, The Exchange 106 and Menara KL
+  var BEAC=(function(){var a=lp('klcc',11,-10),b=lp('klcc',-11,10),m=crown('mer'),e=crown('ex'),k=crown('kl');return [[a[0],134,a[1]],[b[0],134,b[1]],[m[0],193,m[1]],[e[0],136,e[1]],[k[0],130+KL_Y,k[1]]]})(); // both Petronas spires, then the tips of Merdeka 118, The Exchange 106 and Menara KL atop Bukit Nanas
   var beacons=BEAC.map(function(b,i){var m=new T.SpriteMaterial({map:gTex,transparent:true,depthWrite:false,color:0xff3a2a,fog:false,opacity:0}),sp=new T.Sprite(m);sp.scale.set(i===2?22:14,i===2?22:14,1);sp.position.set(b[0],b[1],b[2]);sp.renderOrder=6;g.add(sp);return{m:m,ph:i*.37}});
   function beaconUpdate(time){var t=time/1000;beacons.forEach(function(b){var p=((t/1.7+b.ph)%1+1)%1,a=(p<.09||(p>.2&&p<.29))?1:.08;b.m.opacity=a*beaconK;b.m.blending=beaconAdd?T.AdditiveBlending:T.NormalBlending})}
   moonG.position.set(-265,326,-831); // locked behind the skyline as the page opens, high enough to clear the tops
@@ -769,7 +848,8 @@
     vmix('light',TU.uLight.value).normalize();vmix('litMul',TU.uLitMul.value);vmix('midMul',TU.uMidMul.value);vmix('shadeMul',TU.uShadeMul.value);
     TU.uLitMix.value=nn('litMix');TU.uHazeK.value=nn('hazeK');TU.uSunAmt.value=nn('sunAmt');TU.uGold.value=nn('gold');TU.uWrap.value=nn('wrap');TU.uGlint.value=nn('glint');
     cmix('litC',TU.uLitC.value);cmix('sunC',sun.color);cityU.uNight.value=nn('nightU');cityU.uGoldF.value=nn('gold');
-    ftnM.color.copy(cmix('headGlow'));ftnM.blending=add?T.AdditiveBlending:T.NormalBlending;
+    ftnM.blending=add?T.AdditiveBlending:T.NormalBlending;ftnPoolM.color.setHex(night?0x081a38:(t>.5?0x5c4844:0x2d7ab8));ftnRimM.color.setHex(night?0x111e38:(t>.5?0x5c4c58:0x6a84a4));
+    treeM.color.setHex(night?0x0b1f24:(t>.5?0x3a4d3c:0x2d6e5c));
     tower.emissive.copy(cmix('glass'));tower.emissiveIntensity=nn('towEm');glassM.emissive.copy(CC.ring);glassM.emissiveIntensity=nn('glassEm');
     glassModelM.emissive.copy(CC.ring);glassModelM.emissiveIntensity=nn('gmEm');ringM.color.copy(CC.ring);specks.material.color.copy(CC.ring);baseAmb=amb.intensity=nn('amb');
     // sci-fi layer: stars (white and additive from golden hour on; faint blue dots by day), moon, sun, night creases, beacons
@@ -998,11 +1078,11 @@
       freeWp=document.createElement('div');freeWp.className='fly-free-wp';freeWp.setAttribute('role','group');freeWp.setAttribute('aria-label','Camera waypoints, train cam, map, rain, time-lapse and postcard');
       var WPS=[
         {id:'sky',n:'Skyline',cx:function(){return GC[0]},cz:function(){return GC[1]},cy:78,a:58,r:290,y:125},
-        {id:'park',n:'KLCC Park',cx:function(){return 18},cz:function(){return 32},cy:34,a:52,r:68,y:26},
+        {id:'park',n:'KLCC Park',cx:function(){return 72},cz:function(){return 62},cy:20,a:44,r:56,y:24},
         {id:'klcc',n:'Skybridge',cx:function(){return 0},cz:function(){return 0},cy:58,a:48,r:108,y:66},
         {id:'river',n:'Klang River',cx:function(){return -86},cz:function(){return -34},cy:26,a:135,r:82,y:42},
         {id:'mer',n:'Merdeka 118',cx:function(){return LAY.mer[0]},cz:function(){return LAY.mer[1]},cy:125,a:185,r:165,y:148},
-        {id:'kl',n:'Menara KL',cx:function(){return LAY.kl[0]},cz:function(){return LAY.kl[1]},cy:92,a:210,r:128,y:102},
+        {id:'kl',n:'Bukit Nanas',cx:function(){return LAY.kl[0]},cz:function(){return LAY.kl[1]},cy:82+KL_Y,a:210,r:132,y:96+KL_Y},
         {id:'ex',n:'Exchange 106',cx:function(){return LAY.ex[0]},cz:function(){return LAY.ex[1]},cy:76,a:300,r:132,y:96}
       ];
       WPS.forEach(function(wp){
@@ -1216,26 +1296,26 @@
       if(PREL){ // Overhead descent handoff (front page): tilts seamlessly from straight-down over the skyline into 'start'
         [[65,4,1250,0],[65,4,1250,0],[62,30,900,10],[54,110,480,40],[49,175,250,70]].forEach(function(q,j){var c=poseCam(P(-15,-11,q[0],q[1],q[2],q[3],0,0,q[1]));KF.push(['ov'+j,c.pos,c.tgt,1,0])})}
       KF.push(['start',o.pos,o.tgt,.85,0]);
-      // Act 1: Grand Klang Valley sweep down into KLCC Park & Lake Symphony Fountain (low-angle dramatic look-up at Petronas)
-      rowW('val1',124,68,128,14,56,22,.85);
-      rowW('val2',82,36,86,16,44,28,.95);
-      rowW('lake1',48,21,52,14,34,24,1.35);
-      rowW('lake2',42,18,32,2,68,6,1.85);   // right beside KLCC Lake Symphony water jets (18,32), tilting steep up the Twin Towers
+      // Act 1: Grand Klang Valley sweep down into open KLCC Park & Lake Symphony Fountain (72, 62) looking across the water arcs up Petronas
+      rowW('val1',132,68,128,64,34,54,.85);
+      rowW('val2',98,38,90,68,20,58,.95);
+      rowW('lake1',78,22,68,26,38,24,1.35);
+      rowW('lake2',56,22,42,2,68,6,1.85);   // gliding past the open Lake Symphony reflecting basin, tilting steep up the Twin Towers
       // Act 2: Petronas helical crane-rise (inside cleared plot while low, widening cleanly above rooftops) -> Skybridge needle-thread
       var PR=[[-30,44,26,72],[-72,46,40,76],[-118,54,56,80],[-168,68,72,82],[-220,82,82,80],[-275,92,76,72],[-325,90,64,62]];
       for(i=0;i<PR.length;i++){var rk=1+(mobile?.26:0)*clamp((-PR[i][0]-120)/180,0,1),pp=pt(P0,PR[i][0],PR[i][1]*rk);row('pr'+i,pp,PR[i][2],P0,PR[i][3],1.85)}
       row('q1',{u:86,w:12},58,P0,56,1.65);
       row('bridge',{u:66,w:-4},55,P0,52,1.85);
       row('over',{u:28,w:0},65,{u:-26,w:0},66,1.75);
-      row('gap',P0,74,lerpUW(P0,K,.45),86,1.45);
-      row('exit',{u:-36,w:8},88,lerpUW(XIT,K,.72),98,1.25);
-      // Act 3: Bukit Nanas Forest Eco Park ridge sweep & Menara KL Sky-Pod Halo (enters on SE Bukit Nanas tangent, orbits 258 deg cleanly)
-      var hr=58*(mobile?1.18:1),hz=dist(K,XIT),hTh0=dg(K,XIT)+Math.acos(Math.min(.98,hr/hz))/RAD,
-          hTh1=dg(K,UW(-74,-28))-35,hSw=wrap(hTh1-hTh0),hAim=function(){return 96};
+      row('gap',P0,74,lerpUW(P0,K,.45),86+KL_Y*.4,1.45);
+      row('exit',{u:-36,w:8},92,lerpUW(XIT,K,.72),96+KL_Y*.7,1.25);
+      // Act 3: Bukit Nanas 3D forested hill sweep & Menara KL Sky-Pod Halo (lifted by KL_Y atop Bukit Nanas)
+      var hr=62*(mobile?1.18:1),hz=dist(K,XIT),hTh0=dg(K,XIT)+Math.acos(Math.min(.98,hr/hz))/RAD,
+          hTh1=dg(K,UW(-74,-28))-35,hSw=wrap(hTh1-hTh0),hAim=function(){return 94+KL_Y};
       var hS=pt(K,hTh0,hr);
-      row('bn1',{u:-54,w:36},94,K,98,1.3);
-      row('bn2',lerpUW({u:-54,w:36},hS,.52),97,K,98,1.35);
-      spiral('h',K,hr,hr,102,94,hTh0,hTh0+hSw,12,hAim,1.55);
+      row('bn1',{u:-54,w:36},98+KL_Y*.5,K,92+KL_Y*.8,1.3);
+      row('bn2',lerpUW({u:-54,w:36},hS,.52),102+KL_Y*.85,K,94+KL_Y,1.35);
+      spiral('h',K,hr,hr,102+KL_Y,94+KL_Y,hTh0,hTh0+hSw,12,hAim,1.55);
       // Blend last halo knots smoothly toward the Klang River bend below
       var rivLook=new T.Vector3(-76,22,-42);
       for(i=KF.length-4;i<KF.length;i++)mixAim(i,rivLook,(i-(KF.length-5))/4);
