@@ -27,6 +27,12 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-25 · Borderless Boot-Code Opening Highlight Retained Behind Home Gate & Reveal
+
+- **Removed Boxed Repo Tree (`assets/home/gate.js`, `assets/home/gate.css`):** removed `.gate-arch` (no card box or file tree above `Enter Experience`).
+- **Expanded 6-Line Boot Telemetry Highlight (`assets/home/gate.js`, `assets/home/gate.css`):** lengthened `BOOT` to 6 glowing borderless `>` lines (`mount`, `shaders`, `optics`, `orbital`, `audio`, `lock`) as the opening highlight during boot; once `ready`, `.gate-lines` stays centered in the back of the gate behind `7YMERA` and `Enter Experience` (`z-index: 1`, `opacity: .28`, zero box background).
+- **Retained Behind `#reveal` (`index.html`, `assets/home/home.css`):** mirrored the same 6 borderless `>` lines in `.rv-code` subtly behind the WebGL2 liquid-glass `\7` opening (`z-index: 1`, `pointer-events: none`). Key `20261125a` on Home.
+
 ## 2026-11-24 · Orbital Dispatch — NASA Satellite X-Ray × KL Ride City Lens Fusion (`/lab/`)
 
 - **Merged Flagship Lab Hero (`lab/index.html`, `assets/play/play.css`):** fused the live Three.js NASA Satellite X-Ray Inspector (`GPM` / `TRMM` / `AIM`) directly into the KL Ride · City Lens street-dispatch map as **`01 · Orbital Dispatch`** (default), alongside 1-click **`02 · Full Satellite`** and **`03 · City Lens`** view modes in `.lab-hero-bar`.

@@ -47,7 +47,7 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
 
 /* centre */
 .gate-core { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(22px, 5vh, 46px); padding: 56px 20px calc(clamp(64px, 12vh, 120px)); text-align: center; }
-.gate-brand { position: relative; display: grid; justify-items: center; gap: 12px; }
+.gate-brand { position: relative; z-index: 6; display: grid; justify-items: center; gap: 12px; }
 .gate-glow { position: absolute; left: 50%; top: 4%; width: 520px; max-width: 120vw; aspect-ratio: 1; margin-left: -260px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 210, 122, .17), rgba(110, 170, 255, .08) 55%, transparent); animation: gate-breathe-glow 5s ease-in-out infinite; will-change: transform, opacity; pointer-events: none; }
 @keyframes gate-breathe-glow { 50% { transform: scale(1.12); opacity: .7; } }
 .gate-mark { position: relative; width: clamp(60px, 9vw, 84px); height: auto; overflow: visible; }
@@ -61,11 +61,11 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
 @keyframes gate-up { to { transform: translate3d(0, 0, 0); } }
 .gate-tag { margin: 0; font: 500 .75rem/1.5 var(--f-mono, ui-monospace, Menlo, Consolas, monospace); letter-spacing: .2em; text-transform: uppercase; color: var(--g-dim); opacity: 0; animation: gate-fade 1s ease 1.1s forwards; }
 
-.gate-stage { display: grid; width: min(700px, 100%); min-height: 240px; justify-items: center; align-items: center; }
+.gate-stage { display: grid; width: min(720px, 100%); min-height: 220px; justify-items: center; align-items: center; }
 .gate-stage > * { grid-area: 1 / 1; }
-.gate-boot { display: grid; justify-items: center; gap: 14px; width: 100%; transition: opacity .5s ease, transform .5s ease; }
-.gate-lines { display: grid; gap: 4px; justify-items: start; width: min(390px, 100%); }
-.gate-lines p { margin: 0; min-height: 1.3em; font: 500 .72rem/1.35 var(--f-mono, ui-monospace, Menlo, Consolas, monospace); letter-spacing: .06em; color: rgba(255, 210, 122, .9); }
+.gate-boot { display: grid; justify-items: center; gap: 16px; width: 100%; transition: opacity .5s ease, transform .5s ease; }
+.gate-lines { display: grid; gap: 6px; justify-items: start; width: min(600px, 92vw); transition: opacity .9s var(--g-ease), transform .9s var(--g-ease); }
+.gate-lines p { margin: 0; min-height: 1.38em; font: 500 clamp(.72rem, 1.3vw, .84rem)/1.45 var(--f-mono, ui-monospace, Menlo, Consolas, monospace); letter-spacing: .06em; color: rgba(255, 210, 122, .94); text-shadow: 0 0 18px rgba(255, 210, 122, .22); text-align: left; }
 .gate-lines p:last-child:not(:empty)::after { content: "_"; margin-left: 2px; animation: gate-caret .8s steps(1) infinite; }
 @keyframes gate-caret { 50% { opacity: 0; } }
 .gate-count { display: flex; align-items: baseline; justify-content: center; gap: 6px; font-variant-numeric: tabular-nums; }
@@ -74,66 +74,17 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
 .gate-bar { width: min(320px, 76vw); height: 1px; background: rgba(255, 255, 255, .16); overflow: hidden; }
 .gate-bar i { display: block; width: 100%; height: 100%; background: var(--g-gold); transform: scaleX(0); transform-origin: 0 50%; }
 .gate.ready .gate-boot { display: contents; }
-/* ready: the loading sequence stays on screen, docked at the bottom. Lines bottom-left above the clock, the 100 counter bottom-right above
-   ENTRY 001, the progress line along the very bottom edge (gate.js flips them there from the centre) */
-.gate.ready .gate-lines { position: absolute; left: max(18px, env(safe-area-inset-left)); bottom: 68px; width: auto; z-index: 5; }
+/* ready: boot code retains itself cleanly in the back of the opening (borderless, floating in space behind the mark & CTA);
+   counter docks bottom-right above ENTRY 001, progress line along bottom edge */
+.gate.ready .gate-lines { position: absolute; left: 50%; top: 50%; transform: translate3d(-50%, -50%, 0) scale(1.06); width: min(740px, 92vw); z-index: 1; opacity: .28; pointer-events: none; gap: 10px; }
+.gate.ready .gate-lines p { font-size: clamp(.76rem, 1.45vw, .96rem); color: rgba(215, 232, 255, .92); text-shadow: none; }
 .gate.ready .gate-count { position: absolute; right: max(18px, env(safe-area-inset-right)); bottom: 78px; z-index: 5; gap: 4px; }
 .gate.ready .gate-num { font-size: clamp(2.2rem, 3.4vw, 3rem); }
 .gate.ready .gate-pct { font-size: .7rem; }
 .gate.ready .gate-bar { position: absolute; left: 0; right: 0; bottom: 0; width: auto; height: 2px; z-index: 7; background: rgba(255, 255, 255, .12); }
 
-/* coding structure blueprint card above Enter Experience */
-.gate-arch {
-  width: min(680px, 92vw);
-  border-radius: 16px;
-  border: 1px solid rgba(155, 200, 255, .26);
-  background: rgba(4, 11, 28, .78);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 22px 54px -26px rgba(0, 0, 0, .85);
-  overflow: hidden;
-  text-align: left;
-  font-family: var(--f-mono, ui-monospace, Menlo, Consolas, monospace);
-}
-.gate-arch-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 9px 14px;
-  border-bottom: 1px solid rgba(155, 200, 255, .16);
-  background: rgba(12, 26, 58, .55);
-}
-.gate-arch-path { font-size: .74rem; font-weight: 700; letter-spacing: .08em; color: var(--g-gold); }
-.gate-arch-pill {
-  padding: 3px 8px;
-  border-radius: 999px;
-  border: 1px solid rgba(127, 211, 255, .36);
-  background: rgba(106, 168, 255, .12);
-  color: #bfe0ff;
-  font-size: .62rem;
-  font-weight: 600;
-  letter-spacing: .1em;
-}
-.gate-arch-tree { display: grid; gap: 5px; padding: 11px 14px 12px; }
-.gate-arch-row {
-  display: grid;
-  grid-template-columns: auto 84px minmax(0, 1fr) auto;
-  align-items: baseline;
-  gap: 8px;
-  font-size: .7rem;
-  line-height: 1.45;
-  opacity: 0;
-  transform: translate3d(0, 8px, 0);
-  animation: gate-row-in .48s var(--g-ease) calc(var(--r) * 75ms + 80ms) forwards;
-}
-@keyframes gate-row-in { to { opacity: 1; transform: none; } }
-.ga-tr { color: rgba(155, 200, 255, .42); }
-.ga-dir { color: #eef5ff; font-weight: 700; }
-.ga-mod { color: rgba(168, 204, 248, .78); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ga-tag { font-style: normal; color: var(--g-gold); font-size: .66rem; letter-spacing: .04em; white-space: nowrap; }
-
 /* the button */
-.gate-cta { display: grid; justify-items: center; gap: 18px; width: 100%; animation: gate-rise .9s var(--g-ease) both; }
+.gate-cta { position: relative; z-index: 6; display: grid; justify-items: center; gap: 18px; width: 100%; animation: gate-rise .9s var(--g-ease) both; }
 .gate-cta[hidden] { display: none !important; }
 @keyframes gate-rise { from { opacity: 0; transform: translate3d(0, 22px, 0); } to { opacity: 1; transform: none; } }
 .gate-btn-wrap { position: relative; width: min(360px, 90vw); }
@@ -178,7 +129,6 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
 .gate.reduce .gate-btn-wrap::before, .gate.reduce .gate-btn-wrap::after, .gate.reduce .gate-glow, .gate.reduce .gate-grain { display: none; }
 .gate.reduce.fade { opacity: 0; transition: opacity .4s ease !important; }
 .gate.reduce .gate-kl.lock { opacity: 1; } .gate.reduce .gate-kl-ring { transform: none; opacity: 1; } .gate.reduce .gate-kl span { opacity: .95; transform: none; }
-.gate.reduce .gate-arch-row { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) {
   .gate *, .gate *::before, .gate *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }
@@ -189,25 +139,22 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
   .gate-hud.br { display: none; }
   .gate-hud.bl { top: max(18px, env(safe-area-inset-top)); bottom: auto; left: 50%; transform: translateX(-50%); }
   .gate-hud.bl i { display: none; }
-  .gate.ready .gate-lines { left: 14px; bottom: 56px; max-width: calc(100% - 116px); }
+  .gate-lines p { font-size: .64rem; }
+  .gate.ready .gate-lines { width: calc(100% - 28px); opacity: .22; gap: 7px; }
   .gate.ready .gate-lines p { font-size: .62rem; }
   .gate.ready .gate-count { right: 14px; bottom: 56px; }
   .gate.ready .gate-num { font-size: 2rem; }
   .gate-tag { font-size: .66rem; letter-spacing: .12em; }
   .gate-kl span { font-size: .5625rem; left: 20px; top: -26px; }
-  .gate-arch { width: 100%; }
-  .gate-arch-row { grid-template-columns: auto 76px minmax(0, 1fr); font-size: .64rem; }
-  .ga-mod { display: none; }
-  .ga-tag { text-align: right; }
   .gate-btn { min-height: 68px; gap: 10px; padding: 0 20px; }
   .gate-btn-ico { width: 44px; height: 44px; }
-  .gate-stage { min-height: 200px; }
+  .gate-stage { min-height: 180px; }
 }
 @media (max-height: 600px) and (orientation: landscape) {
   .gate-core { flex-direction: row; gap: 28px; padding: 20px 24px 20px; }
   .gate-mark { width: 44px; } .gate-word { font-size: 2.4rem; }
-  .gate-hp, .gate-hud.br, .gate-arch { display: none; }
-  .gate.ready .gate-lines { bottom: 52px; } .gate.ready .gate-count { bottom: 56px; }
+  .gate-hp, .gate-hud.br { display: none; }
+  .gate.ready .gate-count { bottom: 56px; }
 }
 .gate-credit { position: absolute; z-index: 6; right: max(18px, env(safe-area-inset-right)); bottom: max(18px, env(safe-area-inset-bottom)); margin: 0; font: 500 .5625rem/1 var(--f-mono, ui-monospace, Menlo, Consolas, monospace); letter-spacing: .12em; text-transform: uppercase; color: rgba(200, 220, 255, .38); pointer-events: none; }
 @media (max-width: 639px) { .gate-credit { right: 0; left: 0; text-align: center; bottom: 6px; } }

@@ -41,11 +41,14 @@
 
   var MARK = 'M12 8H40L81 108H53Z M94 8H154V29L122 108H96L127 31H94Z';
   var GLY = '#%&/\\<>=+*7YMERA01';
-  var DUR = 2000;                   // the counter's eased run, ms
+  var DUR = 2400;                   // the counter's eased run, ms
   var BOOT = [
-    '> mount: plain HTML/CSS/JS · 0 frameworks · 0 npm',
-    '> shaders: WebGL2 glass + Three.js KL terrain + GLSL',
-    '> lock: Kuala Lumpur 3.14°N 101.69°E · score armed'
+    '> mount: plain HTML/CSS/JS · 0 frameworks · 0 npm · 0 build step',
+    '> shaders: WebGL2 glass + Three.js KL terrain + GLSL water',
+    '> optics: refractive \\7 monogram · PBR Bukit Nanas · 4 KL towers',
+    '> orbital: NASA GPM · TRMM · AIM telemetry -> KL street grid',
+    '> audio: 6-stem Web Audio score · 72-bar adaptive harmony',
+    '> lock: Kuala Lumpur 3.14°N 101.69°E · score armed · ready'
   ];
 
   function el(tag, cls, html) { var n = d.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; }
@@ -74,21 +77,11 @@
           '</div>' +
           '<div class="gate-stage">' +
             '<div class="gate-boot" aria-hidden="true">' +
-              '<div class="gate-lines"><p></p><p></p><p></p></div>' +
+              '<div class="gate-lines">' + BOOT.map(function () { return '<p></p>'; }).join('') + '</div>' +
               '<div class="gate-count"><span class="gate-num">000</span><span class="gate-pct">%</span></div>' +
               '<div class="gate-bar"><i></i></div>' +
             '</div>' +
             '<div class="gate-cta" hidden>' +
-              '<div class="gate-arch" aria-label="Site code architecture">' +
-                '<div class="gate-arch-bar"><span class="gate-arch-path">7ymera.github.io/</span><span class="gate-arch-pill">0 FRAMEWORKS · 0 BUILD · VANILLA JS</span></div>' +
-                '<div class="gate-arch-tree">' +
-                  '<div class="gate-arch-row" style="--r:0"><span class="ga-tr">├─</span><b class="ga-dir">index.html</b><span class="ga-mod">assets/home/glass-reveal.js + scene.js</span><em class="ga-tag">WebGL2 \\7 Glass · 3D KL</em></div>' +
-                  '<div class="gate-arch-row" style="--r:1"><span class="ga-tr">├─</span><b class="ga-dir">portfolio/</b><span class="ga-mod">liquid-water.js + daycycle.js + folders.js</span><em class="ga-tag">3D Card · Waterline</em></div>' +
-                  '<div class="gate-arch-row" style="--r:2"><span class="ga-tr">├─</span><b class="ga-dir">lab/</b><span class="ga-mod">goride.js + tidepool.html + satellite.js</span><em class="ga-tag">KL City Lens · Shaders</em></div>' +
-                  '<div class="gate-arch-row" style="--r:3"><span class="ga-tr">├─</span><b class="ga-dir">play/</b><span class="ga-mod">arcade.js + stack.js + dispatch.js + passport.js</span><em class="ga-tag">6 Cabinets · Pilot Pass</em></div>' +
-                  '<div class="gate-arch-row" style="--r:4"><span class="ga-tr">└─</span><b class="ga-dir">notes/</b><span class="ga-mod">image-stream.js + db-playground.js (sql.js)</span><em class="ga-tag">13 Notes · 105 Tables</em></div>' +
-                '</div>' +
-              '</div>' +
               '<div class="gate-btn-wrap">' +
                 '<button class="gate-btn" type="button" aria-label="Enter Experience">' +
                   '<span class="gate-btn-fill" aria-hidden="true"></span><span class="gate-btn-glint" aria-hidden="true"></span>' +
@@ -251,23 +244,23 @@
     }
     function type(p, text, done) {
       var i = 0; p.textContent = '';
-      (function step() { if (dead) return; if (state !== 'boot') { p.textContent = text; return; } i++; p.textContent = text.slice(0, i); if (i < text.length) later(step, 22); else if (done) done(); })();
+      (function step() { if (dead) return; if (state !== 'boot') { p.textContent = text; return; } i++; p.textContent = text.slice(0, i); if (i < text.length) later(step, 14); else if (done) done(); })();
     }
     function startBoot() {
       status.textContent = 'ACQUIRING';
-      BOOT.forEach(function (s, i) { later(function () { type(lines[i], s); if (i === 1) kl.classList.add('lock'); if (i === 2) status.textContent = 'ARMED'; }, 160 + i * 620); });
+      BOOT.forEach(function (s, i) { later(function () { type(lines[i], s); if (i === 2) kl.classList.add('lock'); if (i === BOOT.length - 1) status.textContent = 'ARMED'; }, 120 + i * 280); });
       var tick = function () { try { clock.textContent = new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kuala_Lumpur', hour12: false }); } catch (e) { clock.textContent = '--:--:--'; } };
       tick(); var ci = setInterval(function () { if (dead) clearInterval(ci); else tick(); }, 1000); timers.push(ci);
     }
     function ready() {
       if (state !== 'boot') return;
       state = 'ready'; status.textContent = 'READY';
-      lines.forEach(function (p, i) { p.textContent = BOOT[i]; });   // typing can lag behind the counter on a slow machine: the log is complete when it docks
+      lines.forEach(function (p, i) { p.textContent = BOOT[i]; });   // typing can lag behind the counter on a slow machine: the log is complete when it settles
       kl.classList.add('lock');
-      var fl = reduce ? [] : [lines[0].parentNode, $('.gate-count'), $('.gate-bar')].map(function (n) { return { n: n, a: n.getBoundingClientRect() }; });
+      var fl = reduce ? [] : [$('.gate-count'), $('.gate-bar')].map(function (n) { return { n: n, a: n.getBoundingClientRect() }; });
       rootEl.classList.add('ready');
       cta.hidden = false; rect = null;
-      fl.forEach(function (f) {   // the loading sequence stays: it glides from the centre to its dock (FLIP, transform only)
+      fl.forEach(function (f) {   // counter and progress bar glide to their dock (FLIP, transform only); boot code retains itself in the back of the opening
         var b = f.n.getBoundingClientRect(); if (!f.a.width || !b.width || !f.n.animate) return;
         f.n.style.transformOrigin = '0 0';
         f.n.animate([{ transform: 'translate3d(' + (f.a.left - b.left) + 'px,' + (f.a.top - b.top) + 'px,0) scale(' + (f.a.width / b.width) + ',' + (f.a.height / b.height) + ')' }, { transform: 'none' }], { duration: 900, easing: 'cubic-bezier(.76,0,.24,1)' });
