@@ -27,6 +27,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-26 · Fix Home Gate Boot-Code Overlap & Pill Button Focus Radius
+
+- **No-Overlap Ready Layout (`assets/home/gate.css`):** kept `.gate.ready .gate-lines` in flex flow inside `.gate.ready .gate-stage` cleanly between `[ Alif Najmi · Business Analyst ]` and `Enter Experience` instead of absolutely centering it behind both at `top: 50%`.
+- **Preserved Pill Button Shape on Focus (`assets/home/gate.css`, `index.html`):** explicitly set `border-radius: 999px` on `.gate-btn:focus-visible` so `site.css`'s `button:focus-visible { border-radius: 6px }` no longer flattens the pill CTA into a rectangle when auto-focused on ready, and deepened `.gate-btn` backing for crisp legibility. Key `20261126a` on `gate.css`.
+
 ## 2026-11-25 · Borderless Boot-Code Opening Highlight Retained Behind Home Gate & Reveal
 
 - **Removed Boxed Repo Tree (`assets/home/gate.js`, `assets/home/gate.css`):** removed `.gate-arch` (no card box or file tree above `Enter Experience`).

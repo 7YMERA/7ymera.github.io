@@ -46,7 +46,7 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
 @keyframes gate-fade { to { opacity: 1; } }
 
 /* centre */
-.gate-core { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(22px, 5vh, 46px); padding: 56px 20px calc(clamp(64px, 12vh, 120px)); text-align: center; }
+.gate-core { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(18px, 3.6vh, 34px); padding: 48px 20px clamp(56px, 11vh, 110px); text-align: center; }
 .gate-brand { position: relative; z-index: 6; display: grid; justify-items: center; gap: 12px; }
 .gate-glow { position: absolute; left: 50%; top: 4%; width: 520px; max-width: 120vw; aspect-ratio: 1; margin-left: -260px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 210, 122, .17), rgba(110, 170, 255, .08) 55%, transparent); animation: gate-breathe-glow 5s ease-in-out infinite; will-change: transform, opacity; pointer-events: none; }
 @keyframes gate-breathe-glow { 50% { transform: scale(1.12); opacity: .7; } }
@@ -63,6 +63,7 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
 
 .gate-stage { display: grid; width: min(720px, 100%); min-height: 220px; justify-items: center; align-items: center; }
 .gate-stage > * { grid-area: 1 / 1; }
+.gate.ready .gate-stage { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(18px, 3vh, 28px); min-height: 0; }
 .gate-boot { display: grid; justify-items: center; gap: 16px; width: 100%; transition: opacity .5s ease, transform .5s ease; }
 .gate-lines { display: grid; gap: 6px; justify-items: start; width: min(600px, 92vw); transition: opacity .9s var(--g-ease), transform .9s var(--g-ease); }
 .gate-lines p { margin: 0; min-height: 1.38em; font: 500 clamp(.72rem, 1.3vw, .84rem)/1.45 var(--f-mono, ui-monospace, Menlo, Consolas, monospace); letter-spacing: .06em; color: rgba(255, 210, 122, .94); text-shadow: 0 0 18px rgba(255, 210, 122, .22); text-align: left; }
@@ -74,10 +75,10 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
 .gate-bar { width: min(320px, 76vw); height: 1px; background: rgba(255, 255, 255, .16); overflow: hidden; }
 .gate-bar i { display: block; width: 100%; height: 100%; background: var(--g-gold); transform: scaleX(0); transform-origin: 0 50%; }
 .gate.ready .gate-boot { display: contents; }
-/* ready: boot code retains itself cleanly in the back of the opening (borderless, floating in space behind the mark & CTA);
+/* ready: boot code stays cleanly in flow between the brand tagline and CTA (no overlap);
    counter docks bottom-right above ENTRY 001, progress line along bottom edge */
-.gate.ready .gate-lines { position: absolute; left: 50%; top: 50%; transform: translate3d(-50%, -50%, 0) scale(1.06); width: min(740px, 92vw); z-index: 1; opacity: .28; pointer-events: none; gap: 10px; }
-.gate.ready .gate-lines p { font-size: clamp(.76rem, 1.45vw, .96rem); color: rgba(215, 232, 255, .92); text-shadow: none; }
+.gate.ready .gate-lines { position: relative; z-index: 4; width: min(600px, 92vw); opacity: .76; pointer-events: none; gap: 5px; }
+.gate.ready .gate-lines p { font-size: clamp(.68rem, 1.15vw, .8rem); color: rgba(215, 232, 255, .86); text-shadow: none; }
 .gate.ready .gate-count { position: absolute; right: max(18px, env(safe-area-inset-right)); bottom: 78px; z-index: 5; gap: 4px; }
 .gate.ready .gate-num { font-size: clamp(2.2rem, 3.4vw, 3rem); }
 .gate.ready .gate-pct { font-size: .7rem; }
@@ -91,8 +92,8 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
 .gate-btn-wrap::before, .gate-btn-wrap::after { content: ""; position: absolute; inset: 0; border-radius: 999px; border: 1.5px solid rgba(255, 210, 122, .8); opacity: 0; pointer-events: none; animation: gate-ring 3.4s ease-out infinite; will-change: transform, opacity; }
 .gate-btn-wrap::after { animation-delay: 1.7s; }
 @keyframes gate-ring { 0% { transform: scale(1, 1); opacity: .6; } 100% { transform: scale(1.16, 1.55); opacity: 0; } }
-.gate-btn { position: relative; display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 70px; padding: 0 28px; border-radius: 999px; color: #fff; isolation: isolate; overflow: hidden; will-change: transform;
-  background: linear-gradient(180deg, rgba(255, 255, 255, .13), rgba(255, 255, 255, .035)); box-shadow: inset 0 0 0 1.5px rgba(255, 210, 122, .75), inset 0 1px 0 rgba(255, 255, 255, .28), 0 14px 60px rgba(255, 190, 90, .22), 0 0 0 1px rgba(0, 0, 0, .3); }
+.gate-btn { position: relative; display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 66px; padding: 0 28px; border-radius: 999px; color: #fff; isolation: isolate; overflow: hidden; will-change: transform;
+  background: linear-gradient(180deg, rgba(20, 32, 58, .72), rgba(7, 13, 28, .84)); box-shadow: inset 0 0 0 1.5px rgba(255, 210, 122, .75), inset 0 1px 0 rgba(255, 255, 255, .28), 0 14px 60px rgba(255, 190, 90, .22), 0 0 0 1px rgba(0, 0, 0, .3); }
 .gate-btn-fill { position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: linear-gradient(100deg, rgba(255, 210, 122, .42), rgba(255, 170, 90, .22)); opacity: 0; transition: opacity .35s ease; }
 .gate-btn:hover .gate-btn-fill, .gate-btn:focus-visible .gate-btn-fill { opacity: 1; }
 .gate-btn-glint { position: absolute; top: -20%; bottom: -20%; left: 0; width: 38%; z-index: -1; background: linear-gradient(100deg, transparent, rgba(255, 245, 220, .42), transparent); transform: translate3d(-130%, 0, 0) skewX(-18deg); animation: gate-glint 3.8s ease-in-out 1s infinite; will-change: transform; }
@@ -102,7 +103,7 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
 .gate-btn-arr { flex: none; display: grid; place-items: center; width: 24px; height: 24px; transition: transform .35s var(--g-ease); }
 .gate-btn-arr svg { width: 24px; height: 24px; }
 .gate-btn:hover .gate-btn-arr, .gate-btn:focus-visible .gate-btn-arr { transform: translate3d(6px, 0, 0); }
-.gate-btn:focus-visible { outline: 3px solid var(--g-gold); outline-offset: 5px; }
+.gate-btn:focus-visible { outline: 2px solid var(--g-gold); outline-offset: 5px; border-radius: 999px; }
 .gate-btn:active { filter: brightness(1.15); }
 
 /* leaving: flash, rings, glitch, then warp drive */
@@ -140,7 +141,8 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
   .gate-hud.bl { top: max(18px, env(safe-area-inset-top)); bottom: auto; left: 50%; transform: translateX(-50%); }
   .gate-hud.bl i { display: none; }
   .gate-lines p { font-size: .64rem; }
-  .gate.ready .gate-lines { width: calc(100% - 28px); opacity: .22; gap: 7px; }
+  .gate.ready .gate-stage { gap: 16px; }
+  .gate.ready .gate-lines { width: calc(100% - 16px); opacity: .74; gap: 4px; }
   .gate.ready .gate-lines p { font-size: .62rem; }
   .gate.ready .gate-count { right: 14px; bottom: 56px; }
   .gate.ready .gate-num { font-size: 2rem; }
