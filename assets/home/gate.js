@@ -41,15 +41,8 @@
 
   var MARK = 'M12 8H40L81 108H53Z M94 8H154V29L122 108H96L127 31H94Z';
   var GLY = '#%&/\\<>=+*7YMERA01';
-  var DUR = 2400;                   // the counter's eased run, ms
-  var BOOT = [
-    '> mount: plain HTML/CSS/JS · 0 frameworks · 0 npm · 0 build step',
-    '> shaders: WebGL2 glass + Three.js KL terrain + GLSL water',
-    '> optics: refractive \\7 monogram · PBR Bukit Nanas · 4 KL towers',
-    '> orbital: NASA GPM · TRMM · AIM telemetry -> KL street grid',
-    '> audio: 6-stem Web Audio score · 72-bar adaptive harmony',
-    '> lock: Kuala Lumpur 3.14°N 101.69°E · score armed · ready'
-  ];
+  var DUR = 2000;                   // the counter's eased run, ms
+  var BOOT = ['> acquiring orbit', '> locking on Kuala Lumpur', '> score armed'];
 
   function el(tag, cls, html) { var n = d.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; }
   function clamp(x, a, b) { return x < a ? a : x > b ? b : x; }
@@ -77,15 +70,15 @@
           '</div>' +
           '<div class="gate-stage">' +
             '<div class="gate-boot" aria-hidden="true">' +
-              '<div class="gate-lines">' + BOOT.map(function () { return '<p></p>'; }).join('') + '</div>' +
+              '<div class="gate-lines"><p></p><p></p><p></p></div>' +
               '<div class="gate-count"><span class="gate-num">000</span><span class="gate-pct">%</span></div>' +
               '<div class="gate-bar"><i></i></div>' +
             '</div>' +
             '<div class="gate-cta" hidden>' +
               '<div class="gate-btn-wrap">' +
-                '<button class="gate-btn" type="button" aria-label="Enter Experience">' +
+                '<button class="gate-btn" type="button" aria-label="Enter">' +
                   '<span class="gate-btn-fill" aria-hidden="true"></span><span class="gate-btn-glint" aria-hidden="true"></span>' +
-                  '<span class="gate-btn-txt" aria-hidden="true"><span class="gate-btn-label">Enter Experience</span></span>' +
+                  '<span class="gate-btn-txt" aria-hidden="true"><span class="gate-btn-label">Enter</span></span>' +
                   '<span class="gate-btn-arr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>' +
                 '</button>' +
               '</div>' +
@@ -94,7 +87,7 @@
         '</div>' +
         '<p class="gate-credit" aria-hidden="true">Earth: NASA 3D Resources · NASA Blue Marble</p>' +
       '</div>' +
-      '<p class="gate-sr" id="gate-desc">Entry screen. Press Enter Experience to launch.</p>';
+      '<p class="gate-sr" id="gate-desc">Entry screen. Press Enter to launch the experience.</p>';
 
     var rootEl = el('div', 'gate' + (reduce ? ' reduce' : ''), tpl);
     rootEl.id = 'gate'; rootEl.setAttribute('role', 'dialog'); rootEl.setAttribute('aria-modal', 'true');
@@ -244,23 +237,23 @@
     }
     function type(p, text, done) {
       var i = 0; p.textContent = '';
-      (function step() { if (dead) return; if (state !== 'boot') { p.textContent = text; return; } i++; p.textContent = text.slice(0, i); if (i < text.length) later(step, 14); else if (done) done(); })();
+      (function step() { if (dead) return; if (state !== 'boot') { p.textContent = text; return; } i++; p.textContent = text.slice(0, i); if (i < text.length) later(step, 22); else if (done) done(); })();
     }
     function startBoot() {
       status.textContent = 'ACQUIRING';
-      BOOT.forEach(function (s, i) { later(function () { type(lines[i], s); if (i === 2) kl.classList.add('lock'); if (i === BOOT.length - 1) status.textContent = 'ARMED'; }, 120 + i * 280); });
+      BOOT.forEach(function (s, i) { later(function () { type(lines[i], s); if (i === 1) kl.classList.add('lock'); if (i === 2) status.textContent = 'ARMED'; }, 160 + i * 620); });
       var tick = function () { try { clock.textContent = new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kuala_Lumpur', hour12: false }); } catch (e) { clock.textContent = '--:--:--'; } };
       tick(); var ci = setInterval(function () { if (dead) clearInterval(ci); else tick(); }, 1000); timers.push(ci);
     }
     function ready() {
       if (state !== 'boot') return;
       state = 'ready'; status.textContent = 'READY';
-      lines.forEach(function (p, i) { p.textContent = BOOT[i]; });   // typing can lag behind the counter on a slow machine: the log is complete when it settles
+      lines.forEach(function (p, i) { p.textContent = BOOT[i]; });   // typing can lag behind the counter on a slow machine: the log is complete when it docks
       kl.classList.add('lock');
-      var fl = reduce ? [] : [$('.gate-count'), $('.gate-bar')].map(function (n) { return { n: n, a: n.getBoundingClientRect() }; });
+      var fl = reduce ? [] : [lines[0].parentNode, $('.gate-count'), $('.gate-bar')].map(function (n) { return { n: n, a: n.getBoundingClientRect() }; });
       rootEl.classList.add('ready');
       cta.hidden = false; rect = null;
-      fl.forEach(function (f) {   // counter and progress bar glide to their dock (FLIP, transform only); boot code retains itself in the back of the opening
+      fl.forEach(function (f) {   // the loading sequence stays: it glides from the centre to its dock (FLIP, transform only)
         var b = f.n.getBoundingClientRect(); if (!f.a.width || !b.width || !f.n.animate) return;
         f.n.style.transformOrigin = '0 0';
         f.n.animate([{ transform: 'translate3d(' + (f.a.left - b.left) + 'px,' + (f.a.top - b.top) + 'px,0) scale(' + (f.a.width / b.width) + ',' + (f.a.height / b.height) + ')' }, { transform: 'none' }], { duration: 900, easing: 'cubic-bezier(.76,0,.24,1)' });
@@ -289,8 +282,8 @@
         if (k < n) requestAnimationFrame(step); else node.textContent = text;
       })();
     }
-    btn.addEventListener('pointerenter', function () { scramble(label, 'Enter Experience', 380); });
-    btn.addEventListener('focus', function () { scramble(label, 'Enter Experience', 380); });
+    btn.addEventListener('pointerenter', function () { scramble(label, 'Enter', 360); });
+    btn.addEventListener('focus', function () { scramble(label, 'Enter', 360); });
     btn.addEventListener('click', function () { enter(); });
     w.addEventListener('pointermove', onMove, { passive: true });
     function onMove(e) { mx = e.clientX; my = e.clientY; tpx = (e.clientX / Math.max(1, W)) * 2 - 1; tpy = (e.clientY / Math.max(1, H)) * 2 - 1; }

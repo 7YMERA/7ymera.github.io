@@ -27,6 +27,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-27 · Restore Clean Home Gate & Reveal (from `8aae746`)
+
+- **Restored Clean Gate (`assets/home/gate.css`, `assets/home/gate.js`):** reverted the Home gate to the clean `8aae746` design (3-line boot log docking bottom-left above the clock, `100%` bottom-right, clean centered `Enter →` pill button with `border-radius: 999px` preserved on `:focus-visible`).
+- **Removed `.rv-code` Backdrop (`index.html`, `assets/home/home.css`):** removed the 6-line code overlay behind `#reveal`. Key `20261127a` on Home gate & reveal assets.
+
 ## 2026-11-26 · Fix Home Gate Boot-Code Overlap & Pill Button Focus Radius
 
 - **No-Overlap Ready Layout (`assets/home/gate.css`):** kept `.gate.ready .gate-lines` in flex flow inside `.gate.ready .gate-stage` cleanly between `[ Alif Najmi · Business Analyst ]` and `Enter Experience` instead of absolutely centering it behind both at `top: 50%`.

@@ -46,8 +46,8 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
 @keyframes gate-fade { to { opacity: 1; } }
 
 /* centre */
-.gate-core { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(18px, 3.6vh, 34px); padding: 48px 20px clamp(56px, 11vh, 110px); text-align: center; }
-.gate-brand { position: relative; z-index: 6; display: grid; justify-items: center; gap: 12px; }
+.gate-core { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(22px, 5vh, 46px); padding: 56px 20px calc(clamp(64px, 12vh, 120px)); text-align: center; }
+.gate-brand { position: relative; display: grid; justify-items: center; gap: 12px; }
 .gate-glow { position: absolute; left: 50%; top: 4%; width: 520px; max-width: 120vw; aspect-ratio: 1; margin-left: -260px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 210, 122, .17), rgba(110, 170, 255, .08) 55%, transparent); animation: gate-breathe-glow 5s ease-in-out infinite; will-change: transform, opacity; pointer-events: none; }
 @keyframes gate-breathe-glow { 50% { transform: scale(1.12); opacity: .7; } }
 .gate-mark { position: relative; width: clamp(60px, 9vw, 84px); height: auto; overflow: visible; }
@@ -61,12 +61,11 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
 @keyframes gate-up { to { transform: translate3d(0, 0, 0); } }
 .gate-tag { margin: 0; font: 500 .75rem/1.5 var(--f-mono, ui-monospace, Menlo, Consolas, monospace); letter-spacing: .2em; text-transform: uppercase; color: var(--g-dim); opacity: 0; animation: gate-fade 1s ease 1.1s forwards; }
 
-.gate-stage { display: grid; width: min(720px, 100%); min-height: 220px; justify-items: center; align-items: center; }
+.gate-stage { display: grid; width: min(440px, 100%); min-height: 214px; justify-items: center; align-items: center; }
 .gate-stage > * { grid-area: 1 / 1; }
-.gate.ready .gate-stage { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(18px, 3vh, 28px); min-height: 0; }
-.gate-boot { display: grid; justify-items: center; gap: 16px; width: 100%; transition: opacity .5s ease, transform .5s ease; }
-.gate-lines { display: grid; gap: 6px; justify-items: start; width: min(600px, 92vw); transition: opacity .9s var(--g-ease), transform .9s var(--g-ease); }
-.gate-lines p { margin: 0; min-height: 1.38em; font: 500 clamp(.72rem, 1.3vw, .84rem)/1.45 var(--f-mono, ui-monospace, Menlo, Consolas, monospace); letter-spacing: .06em; color: rgba(255, 210, 122, .94); text-shadow: 0 0 18px rgba(255, 210, 122, .22); text-align: left; }
+.gate-boot { display: grid; justify-items: center; gap: 14px; width: 100%; transition: opacity .5s ease, transform .5s ease; }
+.gate-lines { display: grid; gap: 4px; justify-items: start; width: min(300px, 100%); }
+.gate-lines p { margin: 0; min-height: 1.3em; font: 500 .75rem/1.3 var(--f-mono, ui-monospace, Menlo, Consolas, monospace); letter-spacing: .08em; color: rgba(255, 210, 122, .9); }
 .gate-lines p:last-child:not(:empty)::after { content: "_"; margin-left: 2px; animation: gate-caret .8s steps(1) infinite; }
 @keyframes gate-caret { 50% { opacity: 0; } }
 .gate-count { display: flex; align-items: baseline; justify-content: center; gap: 6px; font-variant-numeric: tabular-nums; }
@@ -75,35 +74,34 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
 .gate-bar { width: min(320px, 76vw); height: 1px; background: rgba(255, 255, 255, .16); overflow: hidden; }
 .gate-bar i { display: block; width: 100%; height: 100%; background: var(--g-gold); transform: scaleX(0); transform-origin: 0 50%; }
 .gate.ready .gate-boot { display: contents; }
-/* ready: boot code stays cleanly in flow between the brand tagline and CTA (no overlap);
-   counter docks bottom-right above ENTRY 001, progress line along bottom edge */
-.gate.ready .gate-lines { position: relative; z-index: 4; width: min(600px, 92vw); opacity: .76; pointer-events: none; gap: 5px; }
-.gate.ready .gate-lines p { font-size: clamp(.68rem, 1.15vw, .8rem); color: rgba(215, 232, 255, .86); text-shadow: none; }
+/* ready: the loading sequence stays on screen, docked at the bottom. Lines bottom-left above the clock, the 100 counter bottom-right above
+   ENTRY 001, the progress line along the very bottom edge (gate.js flips them there from the centre) */
+.gate.ready .gate-lines { position: absolute; left: max(18px, env(safe-area-inset-left)); bottom: 68px; width: auto; z-index: 5; }
 .gate.ready .gate-count { position: absolute; right: max(18px, env(safe-area-inset-right)); bottom: 78px; z-index: 5; gap: 4px; }
 .gate.ready .gate-num { font-size: clamp(2.2rem, 3.4vw, 3rem); }
 .gate.ready .gate-pct { font-size: .7rem; }
 .gate.ready .gate-bar { position: absolute; left: 0; right: 0; bottom: 0; width: auto; height: 2px; z-index: 7; background: rgba(255, 255, 255, .12); }
 
 /* the button */
-.gate-cta { position: relative; z-index: 6; display: grid; justify-items: center; gap: 18px; width: 100%; animation: gate-rise .9s var(--g-ease) both; }
+.gate-cta { display: grid; justify-items: center; gap: 14px; width: 100%; animation: gate-rise .9s var(--g-ease) both; }
 .gate-cta[hidden] { display: none !important; }
 @keyframes gate-rise { from { opacity: 0; transform: translate3d(0, 22px, 0); } to { opacity: 1; transform: none; } }
-.gate-btn-wrap { position: relative; width: min(360px, 90vw); }
+.gate-btn-wrap { position: relative; width: min(290px, 86vw); }
 .gate-btn-wrap::before, .gate-btn-wrap::after { content: ""; position: absolute; inset: 0; border-radius: 999px; border: 1.5px solid rgba(255, 210, 122, .8); opacity: 0; pointer-events: none; animation: gate-ring 3.4s ease-out infinite; will-change: transform, opacity; }
 .gate-btn-wrap::after { animation-delay: 1.7s; }
 @keyframes gate-ring { 0% { transform: scale(1, 1); opacity: .6; } 100% { transform: scale(1.16, 1.55); opacity: 0; } }
-.gate-btn { position: relative; display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 66px; padding: 0 28px; border-radius: 999px; color: #fff; isolation: isolate; overflow: hidden; will-change: transform;
-  background: linear-gradient(180deg, rgba(20, 32, 58, .72), rgba(7, 13, 28, .84)); box-shadow: inset 0 0 0 1.5px rgba(255, 210, 122, .75), inset 0 1px 0 rgba(255, 255, 255, .28), 0 14px 60px rgba(255, 190, 90, .22), 0 0 0 1px rgba(0, 0, 0, .3); }
+.gate-btn { position: relative; display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; min-height: 76px; padding: 0 32px; border-radius: 999px; color: #fff; isolation: isolate; overflow: hidden; will-change: transform;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .13), rgba(255, 255, 255, .035)); box-shadow: inset 0 0 0 1.5px rgba(255, 210, 122, .75), inset 0 1px 0 rgba(255, 255, 255, .28), 0 14px 60px rgba(255, 190, 90, .22), 0 0 0 1px rgba(0, 0, 0, .3); }
 .gate-btn-fill { position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: linear-gradient(100deg, rgba(255, 210, 122, .42), rgba(255, 170, 90, .22)); opacity: 0; transition: opacity .35s ease; }
 .gate-btn:hover .gate-btn-fill, .gate-btn:focus-visible .gate-btn-fill { opacity: 1; }
 .gate-btn-glint { position: absolute; top: -20%; bottom: -20%; left: 0; width: 38%; z-index: -1; background: linear-gradient(100deg, transparent, rgba(255, 245, 220, .42), transparent); transform: translate3d(-130%, 0, 0) skewX(-18deg); animation: gate-glint 3.8s ease-in-out 1s infinite; will-change: transform; }
 @keyframes gate-glint { 0% { transform: translate3d(-130%, 0, 0) skewX(-18deg); } 38%, 100% { transform: translate3d(330%, 0, 0) skewX(-18deg); } }
 .gate-btn-txt { display: grid; text-align: center; will-change: transform; }
-.gate-btn-label { font-size: clamp(1rem, 3.6vw, 1.28rem); font-weight: 650; letter-spacing: .13em; text-transform: uppercase; line-height: 1.05; white-space: nowrap; min-height: 1.05em; }
+.gate-btn-label { font-size: clamp(1.35rem, 5vw, 1.65rem); font-weight: 650; letter-spacing: .16em; text-transform: uppercase; line-height: 1.05; white-space: nowrap; min-height: 1.05em; }
 .gate-btn-arr { flex: none; display: grid; place-items: center; width: 24px; height: 24px; transition: transform .35s var(--g-ease); }
 .gate-btn-arr svg { width: 24px; height: 24px; }
 .gate-btn:hover .gate-btn-arr, .gate-btn:focus-visible .gate-btn-arr { transform: translate3d(6px, 0, 0); }
-.gate-btn:focus-visible { outline: 2px solid var(--g-gold); outline-offset: 5px; border-radius: 999px; }
+.gate-btn:focus-visible { outline: 3px solid var(--g-gold); outline-offset: 5px; border-radius: 999px; }
 .gate-btn:active { filter: brightness(1.15); }
 
 /* leaving: flash, rings, glitch, then warp drive */
@@ -135,28 +133,25 @@ html.gate-lock, html.gate-lock body { overflow: hidden; overscroll-behavior: non
 }
 
 @media (max-width: 639px) {
-  .gate-core { padding: 48px 14px 118px; gap: 16px; }
+  .gate-core { padding: 56px 16px 118px; gap: 20px; }
   .gate-hud { font-size: .625rem; letter-spacing: .12em; }
   .gate-hud.br { display: none; }
   .gate-hud.bl { top: max(18px, env(safe-area-inset-top)); bottom: auto; left: 50%; transform: translateX(-50%); }
   .gate-hud.bl i { display: none; }
-  .gate-lines p { font-size: .64rem; }
-  .gate.ready .gate-stage { gap: 16px; }
-  .gate.ready .gate-lines { width: calc(100% - 16px); opacity: .74; gap: 4px; }
-  .gate.ready .gate-lines p { font-size: .62rem; }
-  .gate.ready .gate-count { right: 14px; bottom: 56px; }
-  .gate.ready .gate-num { font-size: 2rem; }
-  .gate-tag { font-size: .66rem; letter-spacing: .12em; }
+  .gate.ready .gate-lines { left: 16px; bottom: 82px; max-width: calc(100% - 128px); }
+  .gate.ready .gate-count { right: 16px; bottom: 80px; }
+  .gate.ready .gate-num { font-size: 2.3rem; }
+  .gate-tag { font-size: .6875rem; letter-spacing: .14em; }
   .gate-kl span { font-size: .5625rem; left: 20px; top: -26px; }
-  .gate-btn { min-height: 68px; gap: 10px; padding: 0 20px; }
+  .gate-btn { min-height: 84px; gap: 12px; padding: 0 20px 0 16px; }
   .gate-btn-ico { width: 44px; height: 44px; }
-  .gate-stage { min-height: 180px; }
+  .gate-stage { min-height: 200px; }
 }
-@media (max-height: 600px) and (orientation: landscape) {
-  .gate-core { flex-direction: row; gap: 28px; padding: 20px 24px 20px; }
+@media (max-height: 560px) and (orientation: landscape) {
+  .gate-core { flex-direction: row; gap: 32px; padding: 20px 24px 20px; }
   .gate-mark { width: 44px; } .gate-word { font-size: 2.4rem; }
   .gate-hp, .gate-hud.br { display: none; }
-  .gate.ready .gate-count { bottom: 56px; }
+  .gate.ready .gate-lines { bottom: 52px; } .gate.ready .gate-count { bottom: 56px; }
 }
 .gate-credit { position: absolute; z-index: 6; right: max(18px, env(safe-area-inset-right)); bottom: max(18px, env(safe-area-inset-bottom)); margin: 0; font: 500 .5625rem/1 var(--f-mono, ui-monospace, Menlo, Consolas, monospace); letter-spacing: .12em; text-transform: uppercase; color: rgba(200, 220, 255, .38); pointer-events: none; }
 @media (max-width: 639px) { .gate-credit { right: 0; left: 0; text-align: center; bottom: 6px; } }

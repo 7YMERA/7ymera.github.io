@@ -54,11 +54,6 @@ html.flying .rail { opacity: 0; pointer-events: none; }
 /* ---------- 00 reveal ---------- */
 .reveal { position: relative; height: 100vh; height: 100svh; min-height: 560px; overflow: hidden; background: var(--hg); }
 .rv-gl { position: absolute; inset: 0; z-index: 0; }
-.rv-code { position: absolute; left: 50%; top: 50%; transform: translate3d(-50%, -50%, 0); width: min(760px, 90vw); z-index: 1; display: grid; gap: 10px; pointer-events: none; user-select: none; opacity: .16; }
-.rv-code p { margin: 0; font: 500 clamp(.72rem, 1.35vw, .92rem)/1.45 var(--f-mono); letter-spacing: .06em; color: var(--capc); text-align: left; }
-html.home.h-dark .rv-code, :root[data-theme="dark"] .rv-code { opacity: .22; }
-html.home.h-dark .rv-code p, :root[data-theme="dark"] .rv-code p { color: rgba(215, 232, 255, .9); }
-@media (max-width: 639px) { .rv-code { width: calc(100% - 28px); gap: 7px; opacity: .14; } .rv-code p { font-size: .62rem; } }
 .gr-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .gr-mask { position: absolute; left: 50%; top: 40%; width: min(46vw, 520px); aspect-ratio: 156 / 112; transform: translate(-50%, -50%); background: linear-gradient(135deg, var(--accent), var(--ink)); opacity: 0; animation: grIn 1s .1s forwards; }
 .gr-mask.go { animation: none; opacity: 0; animation: grIn 1s forwards; }
