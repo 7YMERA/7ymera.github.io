@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1E3148"/>
+      <stop offset="50%" stop-color="#0B1320"/>
+      <stop offset="100%" stop-color="#192A40"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="8" y1="4" x2="48" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.42"/>
+      <stop offset="45%" stop-color="#CFE6FF" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="chrome" x1="12" y1="12" x2="52" y2="54" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="32%" stop-color="#CFE0F2"/>
+      <stop offset="52%" stop-color="#7B96B2"/>
+      <stop offset="72%" stop-color="#F2F7FC"/>
+      <stop offset="100%" stop-color="#A8C1DA"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.65"/>
+      <stop offset="50%" stop-color="#7FA8D4" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.45"/>
+    </linearGradient>
+  </defs>
+  <!-- Glossy mirror obsidian tile -->
+  <rect x="1.5" y="1.5" width="61" height="61" rx="14.5" fill="url(#bg)" stroke="url(#rim)" stroke-width="2"/>
+  <!-- Diagonal glass specular highlight -->
+  <path d="M15 2 H49 C56 2 62 8 62 15 V26 C44 21 24 27 2 38 V15 C2 8 8 2 15 2 Z" fill="url(#sheen)"/>
+  <!-- Glossy chrome \7 monogram -->
+  <path d="M14 17 L24 47" stroke="url(#chrome)" stroke-width="5.6" stroke-linecap="round"/>
+  <path d="M27 17 H50 L36 47" stroke="url(#chrome)" stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Fine mirror glint -->
+  <path d="M28 15.8 H49" stroke="#FFFFFF" stroke-width="1.2" stroke-opacity="0.85" stroke-linecap="round"/>
+</svg>

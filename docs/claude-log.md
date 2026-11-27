@@ -7,6 +7,12 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 27 Nov 2026 · Header logo swapped to `portfolio-logo.svg`
+
+- Copied `assets/icons/portfolio-logo.svg` from `7YMERA/alif-manifesto` and replaced `/assets/icons/7ymera-glass-logo-256.png` with `/assets/icons/portfolio-logo.svg` across all 21 HTML pages (header mark + skill-tree root badge on `/portfolio/`).
+
+---
+
 ## 27 Nov 2026 · Mirage study note
 
 - New note `notes/mirage-study.html` on strukto-ai/mirage (Apache-2.0): what a virtual terminal is, profiles, mounts and the README example. Written from the public README only; the note says it has not been run yet.
