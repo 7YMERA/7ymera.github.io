@@ -46,6 +46,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 2026-11-28 · Cross-Repo Note: `alif-manifesto` Blender Real-KL OSM Map & Hero Assets (`2d5a756`, `d3573b0`)
+
+- **Real-World KL OSM Map (`7YMERA/alif-manifesto` @ `2d5a756`):** Added `assets/city/kl_real_roads.json`, `assets/models/kl_city_map.glb` (`440m × 8.23m × 570m`, 13 batched Golden Hour PBR meshes), `assets/models/road_paths.json` (`bus_routes`, `car_lanes`, `plaza_anchors`, `viaduct_anchors`), and `blender/kl_city_map.blend` — all `+Y`-up and aligned to `klcc` `(18,0,-295)`, `menara_kl` `(-62,10,-262)`, `merdeka118` `(-66,0,-186)`, and `exchange106` `(72,0,-198)`.
+- **11 Sculpted Blender 5.3 Hero `.glb` Assets (`d3573b0`):** `rapidkl_750_bus.glb`, `lrt_train.glb`, `kl_sedan.glb`, `kl_bus_shelter.glb`, `kl_shoplot_row.glb`, `kl_covered_walkway.glb`, `kl_jejantas_bridge.glb`, `green_viaduct_module.glb`, `roadside_flower_planter.glb`, `shared_space_plaza.glb`, `tropical_tree_cluster.glb` (source `blender/alif_mirage_assets.blend`, full schema in `assets/models/CATALOG.md`).
+
 ## 2026-11-27 · Restore Clean Home Gate & Reveal (from `8aae746`)
 
 - **Restored Clean Gate (`assets/home/gate.css`, `assets/home/gate.js`):** reverted the Home gate to the clean `8aae746` design (3-line boot log docking bottom-left above the clock, `100%` bottom-right, clean centered `Enter →` pill button with `border-radius: 999px` preserved on `:focus-visible`).
