@@ -7,6 +7,11 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 27 Nov 2026 · Glass `\7` becomes the main logo
+
+- **Header mark (all 20 pages with the site header):** the favicon badge is now the glossy glass `\7` square (`assets/icons/7ymera-glass-logo-256.png`, made from `alif-manifesto/assets/icons/7ymera-logo-1024.png`). The `7YMERA` text beside it is unchanged. Favicons are unchanged.
+- Open: the owner's call on whether the favicon, the `og:image` share card and the landing sign should use the glass mark too. The browser check (`node tools/check.js`) was not run here because Playwright is not installed in this environment.
+
 ## 16 Nov 2026 (logo)
 
 - Home page header logo text is now `\7ymera` (backslash, as the owner asked), and so is the landing sign (`.op-id`). Other pages, titles, share previews, manifest and feed keep Alif Najmi.
