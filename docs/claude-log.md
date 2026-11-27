@@ -7,6 +7,14 @@ where the last chat stopped without re-reading everything.
 
 ---
 
+## 27 Nov 2026 · Mirage study note
+
+- New note `notes/mirage-study.html` on strukto-ai/mirage (Apache-2.0): what a virtual terminal is, profiles, mounts and the README example. Written from the public README only; the note says it has not been run yet.
+- Wired in: card at the top of `notes/index.html` (count now 14), `sitemap.xml`, and `feed.xml`.
+- Open: the note has no cover image of its own (it uses `og-skyline-3.jpg`). Add one if wanted. Not added to the "Every project" folders in the index.
+
+---
+
 ## 27 Nov 2026 · Glass `\7` becomes the main logo
 
 - **Header mark (all 20 pages with the site header):** the favicon badge is now the glossy glass `\7` square (`assets/icons/7ymera-glass-logo-256.png`, made from `alif-manifesto/assets/icons/7ymera-logo-1024.png`). The `7YMERA` text beside it is unchanged. Favicons are unchanged.

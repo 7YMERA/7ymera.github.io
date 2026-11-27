@@ -7,6 +7,13 @@
     <language>en</language>
     <atom:link href="https://7ymera.github.io/feed.xml" rel="self" type="application/rss+xml"/>
     <item>
+      <title>Mirage: a virtual terminal for AI agents</title>
+      <link>https://7ymera.github.io/notes/mirage-study.html</link>
+      <guid isPermaLink="true">https://7ymera.github.io/notes/mirage-study.html</guid>
+      <pubDate>Fri, 27 Nov 2026 00:00:00 +0800</pubDate>
+      <description>A study note on Mirage from strukto-ai: profiles, mounts and a shell that cannot do the wrong thing.</description>
+    </item>
+    <item>
       <title>Building this site</title>
       <link>https://7ymera.github.io/notes/portfolio-site.html</link>
       <guid isPermaLink="true">https://7ymera.github.io/notes/portfolio-site.html</guid>
